@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useTransition } from 'react'
-import type { Podcast, SearchFilters } from '../types/podcast'
-import { searchPodcasts } from '../utils/search'
+import type { Podcast, Episode, SearchFilters } from '../types/podcast'
+import { searchAll, type EpisodeWithPodcast } from '../utils/search'
 
 const initialFilters: SearchFilters = {
   query: '',
@@ -12,13 +12,19 @@ const initialFilters: SearchFilters = {
   explicit: null
 }
 
-export function useSearch(podcasts: Podcast[]) {
+export interface SearchResultsState {
+  podcasts: Podcast[]
+  episodes: EpisodeWithPodcast[]
+}
+
+export function useSearch(podcasts: Podcast[], episodes: Episode[]) {
   const [filters, setFilters] = useState<SearchFilters>(initialFilters)
   const [isPending, startTransition] = useTransition()
+  const [activeTab, setActiveTab] = useState<'podcasts' | 'episodes'>('podcasts')
 
   const results = useMemo(() => {
-    return searchPodcasts(podcasts, filters)
-  }, [podcasts, filters])
+    return searchAll(podcasts, episodes, filters)
+  }, [podcasts, episodes, filters])
 
   const setQuery = useCallback((query: string) => {
     startTransition(() => {
@@ -85,6 +91,8 @@ export function useSearch(podcasts: Podcast[]) {
     filters,
     results,
     isPending,
+    activeTab,
+    setActiveTab,
     setQuery,
     toggleCategory,
     toggleLanguage,
