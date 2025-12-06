@@ -1,0 +1,40 @@
+.header {
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: var(--primary-color);
+}
+
+.logoText {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-color);
+  letter-spacing: -0.5px;
+}
+
+.tagline {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .header {
+    padding: 24px 16px;
+  }
+
+  .logoText {
+    font-size: 1.5rem;
+  }
+
+  .tagline {
+    font-size: 0.95rem;
+  }
+}

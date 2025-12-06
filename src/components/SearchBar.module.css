@@ -1,0 +1,107 @@
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  padding: 16px 50px 16px 48px;
+  font-size: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  background: var(--surface-color);
+  color: var(--text-color);
+  transition: all 0.2s ease;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px var(--primary-alpha);
+}
+
+.spinner {
+  position: absolute;
+  right: 50px;
+  display: flex;
+  align-items: center;
+  color: var(--primary-color);
+}
+
+.spinnerIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.clearButton {
+  position: absolute;
+  right: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.clearButton:hover {
+  color: var(--text-color);
+  background: var(--hover-color);
+}
+
+.shortcut {
+  position: absolute;
+  right: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.shortcut kbd {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-family: inherit;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .shortcut {
+    display: none;
+  }
+
+  .clearButton,
+  .spinner {
+    right: 16px;
+  }
+}
