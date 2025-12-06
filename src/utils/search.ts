@@ -62,16 +62,6 @@ export function calculateRelevanceScore(podcast: Podcast, query: string): number
     score += Math.min(descriptionMatches * 5, 30)
   }
 
-  // Boost for rating
-  score += podcast.rating * 2
-
-  // Boost for recent updates
-  const daysSinceUpdate = Math.floor(
-    (Date.now() - new Date(podcast.lastUpdated).getTime()) / (1000 * 60 * 60 * 24)
-  )
-  if (daysSinceUpdate < 7) score += 10
-  else if (daysSinceUpdate < 30) score += 5
-
   return score
 }
 
