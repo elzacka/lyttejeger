@@ -5,6 +5,21 @@ import type { Podcast, Episode } from '../types/podcast'
 import type { PodcastIndexFeed, PodcastIndexEpisode } from './podcastIndex'
 
 /**
+ * Safely convert unix timestamp to ISO string
+ */
+function safeTimestampToISO(timestamp: number | undefined | null): string {
+  if (!timestamp || timestamp <= 0) {
+    return new Date().toISOString() // Default to now
+  }
+  const date = new Date(timestamp * 1000)
+  // Check if date is valid
+  if (isNaN(date.getTime())) {
+    return new Date().toISOString()
+  }
+  return date.toISOString()
+}
+
+/**
  * Transform API feed to Podcast type
  */
 export function transformFeed(feed: PodcastIndexFeed): Podcast {
@@ -18,7 +33,7 @@ export function transformFeed(feed: PodcastIndexFeed): Podcast {
     categories: Object.values(feed.categories || {}),
     language: normalizeLanguage(feed.language),
     episodeCount: feed.episodeCount || 0,
-    lastUpdated: new Date(feed.lastUpdateTime * 1000).toISOString(),
+    lastUpdated: safeTimestampToISO(feed.lastUpdateTime),
     rating: calculateRating(feed),
     explicit: feed.explicit || false
   }
@@ -35,7 +50,7 @@ export function transformEpisode(episode: PodcastIndexEpisode): Episode {
     description: stripHtml(episode.description || ''),
     audioUrl: episode.enclosureUrl,
     duration: episode.duration || 0,
-    publishedAt: new Date(episode.datePublished * 1000).toISOString(),
+    publishedAt: safeTimestampToISO(episode.datePublished),
     imageUrl: episode.image || episode.feedImage || undefined
   }
 }
