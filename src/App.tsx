@@ -14,6 +14,7 @@ function App() {
     filters,
     results,
     isPending,
+    error,
     activeTab,
     setActiveTab,
     setQuery,
@@ -23,8 +24,13 @@ function App() {
     setSortBy,
     setExplicit,
     clearFilters,
-    activeFilterCount
-  } = useSearch(mockPodcasts, mockEpisodes)
+    activeFilterCount,
+    isApiConfigured
+  } = useSearch(mockPodcasts, mockEpisodes, {
+    useApi: true,
+    fallbackPodcasts: mockPodcasts,
+    fallbackEpisodes: mockEpisodes
+  })
 
   return (
     <div className="app">
@@ -41,10 +47,46 @@ function App() {
             isPending={isPending}
           />
           <p className="search-help">
+            {isApiConfigured ? (
+              <>
+                <span className="api-status api-status--connected" title="Podcast Index API tilkoblet">
+                  ● Live
+                </span>
+                {' '}
+              </>
+            ) : (
+              <>
+                <span className="api-status api-status--offline" title="Bruker demo-data">
+                  ○ Demo
+                </span>
+                {' '}
+              </>
+            )}
             Tips: Bruk <code>"eksakt frase"</code>, <code>ord1 ord2</code> (AND),
             <code>ord1 OR ord2</code>, eller <code>-ekskluder</code>
           </p>
         </section>
+
+        {error && (
+          <div className="error-banner" role="alert">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span>{error}</span>
+          </div>
+        )}
 
         <section className="filter-section">
           <FilterPanel
@@ -85,7 +127,12 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>Lyttejeger - Podcast Discovery App</p>
+        <p>
+          Lyttejeger - Podcast Discovery App
+          {isApiConfigured && (
+            <span className="footer-api"> • Powered by Podcast Index</span>
+          )}
+        </p>
       </footer>
     </div>
   )
