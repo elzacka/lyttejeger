@@ -3,15 +3,15 @@
 }
 
 .resultCount {
-  margin: 0 0 16px 0;
-  font-size: 0.9rem;
+  margin: 0 0 var(--space-md) 0;
+  font-size: var(--font-sm);
   color: var(--text-muted);
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-sm);
 }
 
 .loading {
@@ -19,7 +19,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px;
+  padding: var(--space-2xl);
   color: var(--text-muted);
 }
 
@@ -28,7 +28,7 @@
   height: 40px;
   border: 3px solid var(--border-color);
   border-top-color: var(--primary-color);
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   animation: spin 1s linear infinite;
 }
 
@@ -43,23 +43,98 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 64px 24px;
+  padding: var(--space-2xl) var(--space-lg);
   text-align: center;
   color: var(--text-muted);
 }
 
 .empty svg {
-  margin-bottom: 16px;
+  margin-bottom: var(--space-md);
   opacity: 0.5;
 }
 
 .empty h3 {
-  margin: 0 0 8px 0;
-  font-size: 1.25rem;
+  margin: 0 0 var(--space-sm) 0;
+  font-size: var(--font-xl);
   color: var(--text-color);
 }
 
 .empty p {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--font-base);
+}
+
+/* Skeleton loading */
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.skeletonCard {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.skeletonImage {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-sm);
+}
+
+.skeletonContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.skeletonPodcast {
+  height: 12px;
+  width: 30%;
+  border-radius: var(--radius-sm);
+}
+
+.skeletonTitle {
+  height: 20px;
+  width: 70%;
+  border-radius: var(--radius-sm);
+}
+
+.skeletonText {
+  height: 14px;
+  width: 90%;
+  border-radius: var(--radius-sm);
+}
+
+.skeletonMeta {
+  height: 12px;
+  width: 25%;
+  border-radius: var(--radius-sm);
+  margin-top: auto;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .skeletonCard {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .skeletonImage {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+  }
+
+  .skeletonPodcast,
+  .skeletonTitle,
+  .skeletonText,
+  .skeletonMeta {
+    margin: 0 auto;
+  }
 }

@@ -9,7 +9,7 @@
 
 .searchIcon {
   position: absolute;
-  left: 16px;
+  left: var(--space-md);
   color: var(--text-muted);
   pointer-events: none;
   display: flex;
@@ -18,13 +18,16 @@
 
 .input {
   width: 100%;
-  padding: 16px 50px 16px 48px;
-  font-size: 1rem;
+  min-height: var(--touch-target);
+  padding: var(--space-md) 50px var(--space-md) 48px;
+  font-size: var(--font-base);
   border: 2px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--surface-color);
   color: var(--text-color);
-  transition: all 0.2s ease;
+  transition: border-color var(--transition-base),
+              box-shadow var(--transition-base);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .input::placeholder {
@@ -64,13 +67,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  width: 32px;
+  height: 32px;
+  padding: var(--space-xs);
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: 50%;
-  transition: all 0.2s ease;
+  border-radius: var(--radius-full);
+  transition: color var(--transition-fast),
+              background var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .clearButton:hover {
@@ -78,23 +85,35 @@
   background: var(--hover-color);
 }
 
+.clearButton:active {
+  transform: scale(0.9);
+}
+
 .shortcut {
   position: absolute;
-  right: 16px;
+  right: var(--space-md);
   display: flex;
   align-items: center;
 }
 
 .shortcut kbd {
-  padding: 4px 8px;
-  font-size: 0.75rem;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-xs);
   font-family: inherit;
   background: var(--surface-elevated);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   color: var(--text-muted);
 }
 
+/* Tablet and smaller */
+@media (max-width: 768px) {
+  .container {
+    max-width: 100%;
+  }
+}
+
+/* Mobile */
 @media (max-width: 640px) {
   .shortcut {
     display: none;
@@ -102,6 +121,10 @@
 
   .clearButton,
   .spinner {
-    right: 16px;
+    right: var(--space-md);
+  }
+
+  .input {
+    padding-right: var(--space-2xl);
   }
 }

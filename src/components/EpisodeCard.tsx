@@ -28,7 +28,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
   const imageUrl = episode.imageUrl || episode.podcast?.imageUrl
 
   return (
-    <article className={styles.card}>
+    <article className={styles.card} role="listitem">
       <div className={styles.imageContainer}>
         {imageUrl && (
           <img

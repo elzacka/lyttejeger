@@ -1,34 +1,41 @@
 .container {
   width: 100%;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-lg);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-md);
   flex-wrap: wrap;
 }
 
 .toggleButton {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: var(--space-sm);
+  min-height: var(--touch-target);
+  padding: var(--space-sm) var(--space-md);
   background: var(--surface-color);
   border: 2px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   color: var(--text-color);
-  font-size: 0.95rem;
+  font-size: var(--font-base);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color var(--transition-base),
+              background var(--transition-base);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .toggleButton:hover {
   border-color: var(--primary-color);
   background: var(--hover-color);
+}
+
+.toggleButton:active {
+  transform: scale(0.98);
 }
 
 .badge {
@@ -37,38 +44,40 @@
   justify-content: center;
   min-width: 22px;
   height: 22px;
-  padding: 0 6px;
+  padding: 0 var(--space-xs);
   background: var(--primary-color);
   color: white;
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   font-weight: 600;
-  border-radius: 11px;
+  border-radius: var(--radius-full);
 }
 
 .sortContainer {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
 }
 
 .sortLabel {
-  font-size: 0.9rem;
+  font-size: var(--font-sm);
   color: var(--text-muted);
 }
 
 .sortSelect {
-  padding: 10px 32px 10px 12px;
+  min-height: var(--touch-target);
+  padding: var(--space-sm) var(--space-xl) var(--space-sm) var(--space-md);
   background: var(--surface-color);
   border: 2px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   color: var(--text-color);
-  font-size: 0.95rem;
+  font-size: var(--font-base);
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 10px center;
-  transition: all 0.2s ease;
+  background-position: right var(--space-sm) center;
+  transition: border-color var(--transition-base);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .sortSelect:hover,
@@ -78,12 +87,12 @@
 }
 
 .panel {
-  margin-top: 16px;
-  padding: 20px;
+  margin-top: var(--space-md);
+  padding: var(--space-lg);
   background: var(--surface-color);
   border: 2px solid var(--border-color);
-  border-radius: 16px;
-  animation: slideDown 0.2s ease;
+  border-radius: var(--radius-lg);
+  animation: slideDown var(--transition-base);
 }
 
 @keyframes slideDown {
@@ -98,7 +107,7 @@
 }
 
 .section {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-lg);
 }
 
 .section:last-of-type {
@@ -106,8 +115,8 @@
 }
 
 .sectionTitle {
-  margin: 0 0 12px 0;
-  font-size: 0.85rem;
+  margin: 0 0 var(--space-sm) 0;
+  font-size: var(--font-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -117,23 +126,31 @@
 .chipGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-sm);
 }
 
 .chip {
-  padding: 8px 14px;
+  min-height: var(--touch-target);
+  padding: var(--space-sm) var(--space-md);
   background: var(--surface-elevated);
   border: 1px solid var(--border-color);
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   color: var(--text-color);
-  font-size: 0.9rem;
+  font-size: var(--font-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
 }
 
 .chip:hover {
   border-color: var(--primary-color);
   background: var(--hover-color);
+}
+
+.chip:active {
+  transform: scale(0.95);
 }
 
 .chipActive {
@@ -151,22 +168,31 @@
 .explicitContainer {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-sm);
 }
 
 .ratingButton {
-  padding: 8px 16px;
+  min-height: var(--touch-target);
+  padding: var(--space-sm) var(--space-md);
   background: var(--surface-elevated);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   color: var(--text-color);
-  font-size: 0.9rem;
+  font-size: var(--font-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
 .ratingButton:hover {
   border-color: var(--primary-color);
+}
+
+.ratingButton:active {
+  transform: scale(0.95);
 }
 
 .ratingActive {
@@ -178,15 +204,17 @@
 .clearButton {
   display: block;
   width: 100%;
-  margin-top: 20px;
-  padding: 12px;
+  min-height: var(--touch-target);
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
   background: transparent;
   border: 2px dashed var(--border-color);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: var(--font-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .clearButton:hover {
@@ -194,6 +222,18 @@
   color: var(--error-color);
 }
 
+.clearButton:active {
+  transform: scale(0.98);
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .panel {
+    padding: var(--space-md);
+  }
+}
+
+/* Mobile */
 @media (max-width: 640px) {
   .header {
     flex-direction: column;
@@ -206,5 +246,30 @@
 
   .sortSelect {
     flex: 1;
+  }
+
+  .chipGrid {
+    gap: var(--space-xs);
+  }
+
+  .chip {
+    font-size: var(--font-xs);
+    padding: var(--space-xs) var(--space-sm);
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .container {
+    margin-bottom: var(--space-md);
+  }
+
+  .section {
+    margin-bottom: var(--space-md);
+  }
+
+  .panel {
+    padding: var(--space-sm);
+    border-radius: var(--radius-md);
   }
 }

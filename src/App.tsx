@@ -28,9 +28,12 @@ function App() {
 
   return (
     <div className="app">
+      <a href="#main-content" className="skip-link">
+        Hopp til hovedinnhold
+      </a>
       <Header />
 
-      <main className="main">
+      <main className="main" id="main-content">
         <section className="search-section">
           <SearchBar
             value={filters.query}

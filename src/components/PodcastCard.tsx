@@ -41,7 +41,7 @@ export function PodcastCard({ podcast, searchQuery }: PodcastCardProps) {
   }
 
   return (
-    <article className={styles.card}>
+    <article className={styles.card} role="listitem">
       <div className={styles.imageContainer}>
         <img
           src={podcast.imageUrl}

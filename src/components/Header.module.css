@@ -1,19 +1,19 @@
 .header {
   text-align: center;
-  padding: 32px 16px;
+  padding: var(--space-xl) var(--space-md);
 }
 
 .logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
   color: var(--primary-color);
 }
 
 .logoText {
-  font-size: 2rem;
+  font-size: var(--font-2xl);
   font-weight: 700;
   color: var(--text-color);
   letter-spacing: -0.5px;
@@ -21,20 +21,40 @@
 
 .tagline {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   color: var(--text-muted);
 }
 
+/* Tablet */
+@media (max-width: 768px) {
+  .header {
+    padding: var(--space-lg) var(--space-md);
+  }
+}
+
+/* Mobile */
 @media (max-width: 640px) {
   .header {
-    padding: 24px 16px;
+    padding: var(--space-md);
   }
 
   .logoText {
-    font-size: 1.5rem;
+    font-size: var(--font-xl);
   }
 
   .tagline {
-    font-size: 0.95rem;
+    font-size: var(--font-base);
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .logo {
+    gap: var(--space-xs);
+  }
+
+  .logo svg {
+    width: 28px;
+    height: 28px;
   }
 }
