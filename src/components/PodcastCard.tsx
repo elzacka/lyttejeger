@@ -4,9 +4,10 @@ import styles from './PodcastCard.module.css'
 interface PodcastCardProps {
   podcast: Podcast
   searchQuery?: string
+  onSelect?: (podcast: Podcast) => void
 }
 
-export function PodcastCard({ podcast, searchQuery }: PodcastCardProps) {
+export function PodcastCard({ podcast, searchQuery, onSelect }: PodcastCardProps) {
   const highlightText = (text: string, query: string) => {
     if (!query.trim()) return text
 
@@ -40,14 +41,43 @@ export function PodcastCard({ podcast, searchQuery }: PodcastCardProps) {
     })
   }
 
+  const handleCardClick = () => {
+    if (onSelect) {
+      onSelect(podcast)
+    }
+  }
+
+  const handlePlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent card click
+    // Open feed in new tab (many podcast apps can subscribe from RSS URL)
+    window.open(podcast.feedUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleCardClick()
+    }
+  }
+
   return (
-    <article className={styles.card} role="listitem">
+    <article
+      className={styles.card}
+      role="listitem"
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      aria-label={`${podcast.title} av ${podcast.author}`}
+    >
       <div className={styles.imageContainer}>
         <img
           src={podcast.imageUrl}
           alt={`${podcast.title} cover`}
           className={styles.image}
           loading="lazy"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/favicon.svg'
+          }}
         />
         {podcast.explicit && <span className={styles.explicitBadge}>E</span>}
       </div>
@@ -65,6 +95,7 @@ export function PodcastCard({ podcast, searchQuery }: PodcastCardProps) {
               viewBox="0 0 24 24"
               fill="currentColor"
               className={styles.starIcon}
+              aria-hidden="true"
             >
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
@@ -102,6 +133,7 @@ export function PodcastCard({ podcast, searchQuery }: PodcastCardProps) {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                aria-hidden="true"
               >
                 <path d="M12 20v-6M6 20V10M18 20V4" />
               </svg>
@@ -118,6 +150,7 @@ export function PodcastCard({ podcast, searchQuery }: PodcastCardProps) {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                aria-hidden="true"
               >
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
@@ -129,17 +162,22 @@ export function PodcastCard({ podcast, searchQuery }: PodcastCardProps) {
 
         <div className={styles.footer}>
           <span className={styles.language}>{podcast.language}</span>
-          <button className={styles.playButton}>
+          <button
+            className={styles.playButton}
+            onClick={handlePlayClick}
+            aria-label={`Åpne ${podcast.title} RSS-feed`}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="18"
               height="18"
               viewBox="0 0 24 24"
               fill="currentColor"
+              aria-hidden="true"
             >
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
-            Spill av
+            Abonner
           </button>
         </div>
       </div>

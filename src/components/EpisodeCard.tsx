@@ -4,9 +4,10 @@ import styles from './EpisodeCard.module.css'
 
 interface EpisodeCardProps {
   episode: EpisodeWithPodcast
+  onPlay?: (episode: EpisodeWithPodcast) => void
 }
 
-export function EpisodeCard({ episode }: EpisodeCardProps) {
+export function EpisodeCard({ episode, onPlay }: EpisodeCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const now = new Date()
@@ -27,8 +28,36 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
 
   const imageUrl = episode.imageUrl || episode.podcast?.imageUrl
 
+  const handlePlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (onPlay) {
+      onPlay(episode)
+    } else if (episode.audioUrl) {
+      // Open audio URL directly in new tab
+      window.open(episode.audioUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  const handleCardClick = () => {
+    handlePlayClick({ stopPropagation: () => {} } as React.MouseEvent)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleCardClick()
+    }
+  }
+
   return (
-    <article className={styles.card} role="listitem">
+    <article
+      className={styles.card}
+      role="listitem"
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      aria-label={`${episode.title}${episode.podcast ? ` fra ${episode.podcast.title}` : ''}`}
+    >
       <div className={styles.imageContainer}>
         {imageUrl && (
           <img
@@ -36,15 +65,23 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
             alt={`${episode.title} cover`}
             className={styles.image}
             loading="lazy"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/favicon.svg'
+            }}
           />
         )}
-        <button className={styles.playOverlay} aria-label="Spill av episode">
+        <button
+          className={styles.playOverlay}
+          aria-label={`Spill av ${episode.title}`}
+          onClick={handlePlayClick}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
             viewBox="0 0 24 24"
             fill="currentColor"
+            aria-hidden="true"
           >
             <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
