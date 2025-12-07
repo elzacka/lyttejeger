@@ -1,6 +1,6 @@
-# Lyttejeger - Podcast Discovery App
+# Lyttejeger - Podcast App
 
-En moderne PWA (Progressive Web App) for å oppdage og søke etter podcaster. Bygget med React 19.2 og Vite.
+En moderne PWA (Progressive Web App) for å oppdagem søke etter og lytte til podcaster. Bygget med React 19.2 og Vite.
 
 ## Funksjoner
 
