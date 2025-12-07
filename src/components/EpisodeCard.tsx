@@ -1,5 +1,5 @@
 import type { EpisodeWithPodcast } from '../utils/search'
-import { formatDuration } from '../utils/search'
+import { formatDuration, formatDate } from '../utils/search'
 import styles from './EpisodeCard.module.css'
 
 interface EpisodeCardProps {
@@ -8,23 +8,6 @@ interface EpisodeCardProps {
 }
 
 export function EpisodeCard({ episode, onPlay }: EpisodeCardProps) {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffDays = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-    )
-
-    if (diffDays === 0) return 'I dag'
-    if (diffDays === 1) return 'I går'
-    if (diffDays < 7) return `${diffDays} dager siden`
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} uker siden`
-    return date.toLocaleDateString('nb-NO', {
-      day: 'numeric',
-      month: 'short',
-      year: diffDays > 365 ? 'numeric' : undefined
-    })
-  }
 
   const imageUrl = episode.imageUrl || episode.podcast?.imageUrl
 

@@ -441,7 +441,7 @@ export function debounce<T extends (...args: unknown[]) => void>(
 
 export function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) {
-    return '' // Return empty string for unknown duration
+    return ''
   }
 
   const hours = Math.floor(seconds / 3600)
@@ -451,4 +451,47 @@ export function formatDuration(seconds: number): string {
     return `${hours}t ${minutes}m`
   }
   return `${minutes} min`
+}
+
+/**
+ * Format date for display - relative or absolute depending on age
+ */
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffDays = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+  )
+
+  if (diffDays === 0) return 'I dag'
+  if (diffDays === 1) return 'I går'
+  if (diffDays < 7) return `${diffDays} dager siden`
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} uker siden`
+  return date.toLocaleDateString('nb-NO', {
+    day: 'numeric',
+    month: 'short',
+    year: diffDays > 365 ? 'numeric' : undefined
+  })
+}
+
+/**
+ * Format date with full month name (for modals)
+ */
+export function formatDateLong(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('nb-NO', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+}
+
+/**
+ * Format date with short month name (for lists)
+ */
+export function formatDateShort(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('nb-NO', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  })
 }

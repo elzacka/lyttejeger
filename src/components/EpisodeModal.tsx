@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { EpisodeWithPodcast } from '../utils/search'
 import type { PlayingEpisode } from './AudioPlayer'
-import { formatDuration } from '../utils/search'
+import { formatDuration, formatDateLong } from '../utils/search'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import styles from './EpisodeModal.module.css'
 
@@ -32,14 +32,6 @@ export function EpisodeModal({ episode, onClose, onPlayEpisode }: EpisodeModalPr
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) onClose()
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('nb-NO', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    })
   }
 
   const handlePlay = () => {
@@ -98,7 +90,7 @@ export function EpisodeModal({ episode, onClose, onPlayEpisode }: EpisodeModalPr
           <div className={styles.meta}>
             <div className={styles.metaItem}>
               <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>calendar_today</span>
-              <span>{formatDate(episode.publishedAt)}</span>
+              <span>{formatDateLong(episode.publishedAt)}</span>
             </div>
             {formatDuration(episode.duration) && (
               <div className={styles.metaItem}>

@@ -3,7 +3,7 @@ import type { Podcast, Episode } from '../types/podcast'
 import type { PlayingEpisode } from './AudioPlayer'
 import { getEpisodesByFeedId } from '../services/podcastIndex'
 import { transformEpisodes } from '../services/podcastTransform'
-import { formatDuration } from '../utils/search'
+import { formatDuration, formatDateShort } from '../utils/search'
 import { translateCategory } from '../utils/categoryTranslations'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import styles from './PodcastModal.module.css'
@@ -64,14 +64,6 @@ export function PodcastModal({ podcast, onClose, onPlayEpisode }: PodcastModalPr
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) onClose()
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('nb-NO', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    })
   }
 
   const handleSubscribe = () => {
@@ -136,7 +128,7 @@ export function PodcastModal({ podcast, onClose, onPlayEpisode }: PodcastModalPr
             </div>
             <div className={styles.metaItem}>
               <span className={styles.metaLabel}>Sist oppdatert</span>
-              <span className={styles.metaValue}>{formatDate(podcast.lastUpdated)}</span>
+              <span className={styles.metaValue}>{formatDateShort(podcast.lastUpdated)}</span>
             </div>
             <div className={styles.metaItem}>
               <span className={styles.metaLabel}>Språk</span>
@@ -185,7 +177,7 @@ export function PodcastModal({ podcast, onClose, onPlayEpisode }: PodcastModalPr
                     <div className={styles.episodeInfo}>
                       <p className={styles.episodeTitle}>{episode.title}</p>
                       <div className={styles.episodeMeta}>
-                        <span>{formatDate(episode.publishedAt)}</span>
+                        <span>{formatDateShort(episode.publishedAt)}</span>
                         {formatDuration(episode.duration) && <span>{formatDuration(episode.duration)}</span>}
                       </div>
                     </div>
