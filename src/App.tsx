@@ -7,8 +7,7 @@ import { EpisodeList } from './components/EpisodeList'
 import { HelpModal } from './components/HelpModal'
 import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer'
 import { useSearch } from './hooks/useSearch'
-import { mockPodcasts, allLanguages } from './data/mockPodcasts'
-import { mockEpisodes } from './data/mockEpisodes'
+import { allLanguages } from './data/mockPodcasts'
 import { getCategories, isConfigured } from './services/podcastIndex'
 import { translateCategory } from './utils/categoryTranslations'
 import type { FilterOption } from './types/podcast'
@@ -67,9 +66,7 @@ function App() {
     setSortBy,
     clearFilters,
     activeFilterCount
-  } = useSearch(mockPodcasts, mockEpisodes, {
-    useApi: true
-  })
+  } = useSearch()
 
   const handlePlayEpisode = useCallback((episode: PlayingEpisode) => {
     setPlayingEpisode(episode)

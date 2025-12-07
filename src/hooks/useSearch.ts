@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useTransition, useEffect, useRef } from 'react'
 import type { Podcast, Episode, SearchFilters } from '../types/podcast'
-import { searchAll, type EpisodeWithPodcast } from '../utils/search'
+import { type EpisodeWithPodcast } from '../utils/search'
 import {
   searchPodcasts as apiSearchPodcasts,
   searchEpisodesByPerson,
@@ -26,16 +26,7 @@ export interface SearchResultsState {
   episodes: EpisodeWithPodcast[]
 }
 
-interface UseSearchOptions {
-  useApi?: boolean
-}
-
-export function useSearch(
-  initialPodcasts: Podcast[],
-  initialEpisodes: Episode[],
-  options: UseSearchOptions = {}
-) {
-  const { useApi = true } = options
+export function useSearch() {
 
   const [filters, setFilters] = useState<SearchFilters>(initialFilters)
   const [isPending, startTransition] = useTransition()
@@ -47,8 +38,8 @@ export function useSearch(
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Determine which data source to use
-  const shouldUseApi = useApi && isConfigured()
+  // Always use API
+  const shouldUseApi = isConfigured()
 
   // Track current search to prevent race conditions
   const currentSearchRef = useRef<string>('')
@@ -314,9 +305,9 @@ export function useSearch(
     }
   }, [filters.languages, filters.categories, filters.query, activeTab, shouldUseApi])
 
-  // Choose data source
-  const podcasts = shouldUseApi ? apiPodcasts : initialPodcasts
-  const episodes = shouldUseApi ? apiEpisodes : initialEpisodes
+  // Use API results
+  const podcasts = apiPodcasts
+  const episodes = apiEpisodes
 
   // Apply local filters and search
   const results = useMemo(() => {
@@ -365,8 +356,11 @@ export function useSearch(
       }
     }
 
-    // Otherwise use local search
-    return searchAll(podcasts, episodes, filters)
+    // No query or API not configured - return empty results
+    return {
+      podcasts: [],
+      episodes: []
+    }
   }, [podcasts, episodes, filters, shouldUseApi])
 
   const setQuery = useCallback((query: string) => {
