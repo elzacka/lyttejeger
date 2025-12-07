@@ -31,6 +31,8 @@
 /* Results section */
 .results-section {
   margin-top: var(--space-xl);
+  /* Add space at bottom for audio player when visible */
+  padding-bottom: 140px;
 }
 
 /* Footer - minimal with help button */

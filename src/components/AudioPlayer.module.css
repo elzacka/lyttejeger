@@ -212,14 +212,14 @@
 /* Mobile layout */
 @media (max-width: 768px) {
   .player {
-    padding: var(--space-xs) var(--space-sm);
-    padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom, 0px));
+    padding: var(--space-sm);
+    padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
   }
 
   .container {
-    grid-template-columns: 1fr auto auto;
-    grid-template-rows: auto auto;
-    gap: var(--space-xs) var(--space-sm);
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
+    gap: var(--space-sm);
   }
 
   .info {
@@ -227,28 +227,45 @@
     grid-row: 1;
   }
 
-  .controls {
+  .closeButton {
     grid-column: 2;
     grid-row: 1;
+    align-self: start;
   }
 
-  .closeButton {
-    grid-column: 3;
-    grid-row: 1;
+  .controls {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: center;
+    gap: var(--space-md);
   }
 
   .progress {
     grid-column: 1 / -1;
-    grid-row: 2;
+    grid-row: 3;
     min-width: 0;
   }
 
   .image {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
   }
 
   .skipButton {
-    display: none;
+    width: 44px;
+    height: 44px;
+  }
+
+  .skipButton .material-symbols-outlined {
+    font-size: 28px;
+  }
+
+  .playButton {
+    width: 56px;
+    height: 56px;
+  }
+
+  .playButton .material-symbols-outlined {
+    font-size: 28px;
   }
 }

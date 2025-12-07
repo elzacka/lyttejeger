@@ -265,29 +265,39 @@
 
   .typeSelector {
     order: 1;
+    flex: 1;
+  }
+
+  .typeButton {
+    flex: 1;
+    padding: var(--space-sm) var(--space-sm);
+    font-size: var(--font-xs);
   }
 
   .toggleButton {
     order: 2;
+    padding: var(--space-sm) var(--space-sm);
+    font-size: var(--font-xs);
   }
 
   .sortContainer {
     order: 3;
+    flex: 1;
     margin-left: 0;
   }
 
-  .typeButton {
-    padding: var(--space-xs) var(--space-sm);
-    font-size: var(--font-xs);
-  }
-
-  .toggleButton {
-    padding: var(--space-xs) var(--space-sm);
-    font-size: var(--font-xs);
-  }
-
   .sortSelect {
-    padding: var(--space-xs) var(--space-xl) var(--space-xs) var(--space-sm);
+    width: 100%;
+    padding: var(--space-sm) var(--space-xl) var(--space-sm) var(--space-sm);
     font-size: var(--font-xs);
+  }
+
+  .chip {
+    min-height: 36px;
+    padding: var(--space-sm) var(--space-sm);
+  }
+
+  .chipGrid {
+    gap: var(--space-sm);
   }
 }

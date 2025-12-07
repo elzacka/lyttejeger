@@ -38,6 +38,81 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     }
   }, [episode?.id])
 
+  // Media Session API - for lock screen controls and artwork
+  useEffect(() => {
+    if (!episode || !('mediaSession' in navigator)) return
+
+    const imageUrl = episode.imageUrl || episode.podcastImage
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: episode.title,
+      artist: episode.podcastTitle || '',
+      album: episode.podcastTitle || 'Lyttejeger',
+      artwork: imageUrl ? [
+        { src: imageUrl, sizes: '96x96', type: 'image/jpeg' },
+        { src: imageUrl, sizes: '128x128', type: 'image/jpeg' },
+        { src: imageUrl, sizes: '192x192', type: 'image/jpeg' },
+        { src: imageUrl, sizes: '256x256', type: 'image/jpeg' },
+        { src: imageUrl, sizes: '384x384', type: 'image/jpeg' },
+        { src: imageUrl, sizes: '512x512', type: 'image/jpeg' }
+      ] : []
+    })
+
+    // Set up action handlers
+    navigator.mediaSession.setActionHandler('play', () => {
+      audioRef.current?.play()
+    })
+    navigator.mediaSession.setActionHandler('pause', () => {
+      audioRef.current?.pause()
+    })
+    navigator.mediaSession.setActionHandler('seekbackward', () => {
+      if (audioRef.current) {
+        audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 15)
+      }
+    })
+    navigator.mediaSession.setActionHandler('seekforward', () => {
+      if (audioRef.current) {
+        audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + 30)
+      }
+    })
+    navigator.mediaSession.setActionHandler('seekto', (details) => {
+      if (audioRef.current && details.seekTime !== undefined) {
+        audioRef.current.currentTime = details.seekTime
+      }
+    })
+
+    return () => {
+      // Clean up action handlers
+      navigator.mediaSession.setActionHandler('play', null)
+      navigator.mediaSession.setActionHandler('pause', null)
+      navigator.mediaSession.setActionHandler('seekbackward', null)
+      navigator.mediaSession.setActionHandler('seekforward', null)
+      navigator.mediaSession.setActionHandler('seekto', null)
+    }
+  }, [episode?.id, episode?.title, episode?.imageUrl, episode?.podcastImage, episode?.podcastTitle, duration])
+
+  // Update Media Session playback state and position
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return
+
+    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused'
+  }, [isPlaying])
+
+  // Update position state for lock screen progress bar
+  useEffect(() => {
+    if (!('mediaSession' in navigator) || !duration) return
+
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: duration,
+        playbackRate: 1,
+        position: currentTime
+      })
+    } catch {
+      // setPositionState may not be supported
+    }
+  }, [currentTime, duration])
+
   const handleLoadedMetadata = useCallback(() => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration)
