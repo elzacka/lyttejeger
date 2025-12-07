@@ -3,52 +3,67 @@
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
 }
 
-.searchIcon {
-  position: absolute;
-  left: var(--space-md);
-  color: var(--text-muted);
-  pointer-events: none;
+.inputWrapper {
+  position: relative;
   display: flex;
   align-items: center;
+  flex: 1;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast),
+              background var(--transition-fast);
+}
+
+.inputWrapper:focus-within {
+  border-color: var(--accent);
+  background: var(--bg-primary);
+}
+
+.prefix {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  user-select: none;
+  margin-right: var(--space-xs);
 }
 
 .input {
-  width: 100%;
-  min-height: var(--touch-target);
-  padding: var(--space-md) 50px var(--space-md) 48px;
-  font-size: var(--font-base);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  background: var(--surface-color);
-  color: var(--text-color);
-  transition: border-color var(--transition-base),
-              box-shadow var(--transition-base);
-  -webkit-tap-highlight-color: transparent;
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-sm) 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  outline: none;
 }
 
 .input::placeholder {
   color: var(--text-muted);
 }
 
-.input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px var(--primary-alpha);
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-left: var(--space-sm);
 }
 
 .spinner {
-  position: absolute;
-  right: 50px;
   display: flex;
   align-items: center;
-  color: var(--primary-color);
+  color: var(--accent);
 }
 
 .spinnerIcon {
+  font-size: 18px;
   animation: spin 1s linear infinite;
 }
 
@@ -62,69 +77,48 @@
 }
 
 .clearButton {
-  position: absolute;
-  right: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: var(--space-xs);
+  width: 24px;
+  height: 24px;
+  padding: 0;
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   transition: color var(--transition-fast),
               background var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
+}
+
+.clearButton .material-symbols-outlined {
+  font-size: 16px;
 }
 
 .clearButton:hover {
-  color: var(--text-color);
-  background: var(--hover-color);
-}
-
-.clearButton:active {
-  transform: scale(0.9);
+  color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .shortcut {
-  position: absolute;
-  right: var(--space-md);
   display: flex;
   align-items: center;
 }
 
 .shortcut kbd {
-  padding: var(--space-xs) var(--space-sm);
+  padding: 2px 6px;
+  font-family: var(--font-mono);
   font-size: var(--font-xs);
-  font-family: inherit;
-  background: var(--surface-elevated);
-  border: 1px solid var(--border-color);
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-muted);
 }
 
-/* Tablet and smaller */
-@media (max-width: 768px) {
-  .container {
-    max-width: 100%;
-  }
-}
-
-/* Mobile */
+/* Hide keyboard hints on mobile */
 @media (max-width: 640px) {
   .shortcut {
     display: none;
-  }
-
-  .clearButton,
-  .spinner {
-    right: var(--space-md);
-  }
-
-  .input {
-    padding-right: var(--space-2xl);
   }
 }

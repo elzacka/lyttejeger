@@ -1,15 +1,57 @@
+import { useState, useEffect, useCallback } from 'react'
 import { Header } from './components/Header'
 import { SearchBar } from './components/SearchBar'
 import { FilterPanel } from './components/FilterPanel'
-import { TabBar } from './components/TabBar'
 import { PodcastList } from './components/PodcastList'
 import { EpisodeList } from './components/EpisodeList'
+import { HelpModal } from './components/HelpModal'
+import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer'
 import { useSearch } from './hooks/useSearch'
-import { mockPodcasts, allCategories, allLanguages } from './data/mockPodcasts'
+import { mockPodcasts, allLanguages } from './data/mockPodcasts'
 import { mockEpisodes } from './data/mockEpisodes'
+import { getCategories, isConfigured } from './services/podcastIndex'
+import type { FilterOption } from './types/podcast'
 import './App.css'
 
+// Fallback categories if API fails
+const fallbackCategories: FilterOption[] = [
+  { value: 'Society & Culture', label: 'Samfunn og kultur' },
+  { value: 'News', label: 'Nyheter' },
+  { value: 'Comedy', label: 'Humor' },
+  { value: 'True Crime', label: 'Krim' },
+  { value: 'Sports', label: 'Sport' },
+  { value: 'Technology', label: 'Teknologi' },
+  { value: 'Business', label: 'Næringsliv' },
+  { value: 'Health & Fitness', label: 'Helse og trening' },
+  { value: 'Education', label: 'Utdanning' },
+  { value: 'Arts', label: 'Kunst' }
+]
+
 function App() {
+  const [categories, setCategories] = useState<FilterOption[]>(fallbackCategories)
+  const [isHelpOpen, setIsHelpOpen] = useState(false)
+  const [playingEpisode, setPlayingEpisode] = useState<PlayingEpisode | null>(null)
+
+  // Fetch categories from API on mount
+  useEffect(() => {
+    if (isConfigured()) {
+      getCategories()
+        .then(res => {
+          const apiCategories = res.feeds.map(cat => ({
+            value: cat.name,
+            label: cat.name
+          }))
+          // Sort alphabetically and limit to most common
+          apiCategories.sort((a, b) => a.label.localeCompare(b.label))
+          setCategories(apiCategories)
+        })
+        .catch(err => {
+          console.error('Failed to load categories:', err)
+          // Keep fallback categories
+        })
+    }
+  }, [])
+
   const {
     filters,
     results,
@@ -22,15 +64,19 @@ function App() {
     toggleLanguage,
     setMinRating,
     setSortBy,
-    setExplicit,
     clearFilters,
-    activeFilterCount,
-    isApiConfigured
+    activeFilterCount
   } = useSearch(mockPodcasts, mockEpisodes, {
-    useApi: true,
-    fallbackPodcasts: mockPodcasts,
-    fallbackEpisodes: mockEpisodes
+    useApi: true
   })
+
+  const handlePlayEpisode = useCallback((episode: PlayingEpisode) => {
+    setPlayingEpisode(episode)
+  }, [])
+
+  const handleClosePlayer = useCallback(() => {
+    setPlayingEpisode(null)
+  }, [])
 
   return (
     <div className="app">
@@ -46,44 +92,11 @@ function App() {
             onChange={setQuery}
             isPending={isPending}
           />
-          <p className="search-help">
-            {isApiConfigured ? (
-              <>
-                <span className="api-status api-status--connected" title="Podcast Index API tilkoblet">
-                  ● Live
-                </span>
-                {' '}
-              </>
-            ) : (
-              <>
-                <span className="api-status api-status--offline" title="Bruker demo-data">
-                  ○ Demo
-                </span>
-                {' '}
-              </>
-            )}
-            Tips: Bruk <code>"eksakt frase"</code>, <code>ord1 ord2</code> (AND),
-            <code>ord1 OR ord2</code>, eller <code>-ekskluder</code>
-          </p>
         </section>
 
         {error && (
           <div className="error-banner" role="alert">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
+            <span className="material-symbols-outlined" aria-hidden="true">error</span>
             <span>{error}</span>
           </div>
         )}
@@ -91,49 +104,60 @@ function App() {
         <section className="filter-section">
           <FilterPanel
             filters={filters}
-            categories={allCategories}
+            categories={categories}
             languages={allLanguages}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
             onToggleCategory={toggleCategory}
             onToggleLanguage={toggleLanguage}
             onSetMinRating={setMinRating}
             onSetSortBy={setSortBy}
-            onSetExplicit={setExplicit}
             onClearFilters={clearFilters}
             activeFilterCount={activeFilterCount}
           />
         </section>
 
         <section className="results-section">
-          <TabBar
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            podcastCount={results.podcasts.length}
-            episodeCount={results.episodes.length}
-          />
-
           {activeTab === 'podcasts' ? (
             <PodcastList
               podcasts={results.podcasts}
               searchQuery={filters.query}
               isLoading={isPending}
+              onPlayEpisode={handlePlayEpisode}
             />
           ) : (
             <EpisodeList
               episodes={results.episodes}
               isLoading={isPending}
+              onPlayEpisode={handlePlayEpisode}
             />
           )}
         </section>
       </main>
 
       <footer className="footer">
-        <p>
-          Lyttejeger - Podcast Discovery App
-          {isApiConfigured && (
-            <span className="footer-api"> • Powered by Podcast Index</span>
-          )}
+        <p className="footer-attribution">
+          Data fra{' '}
+          <a
+            href="https://podcastindex.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Podcast Index
+          </a>
         </p>
+        <button
+          className="help-button"
+          onClick={() => setIsHelpOpen(true)}
+          aria-label="Søketips"
+          title="Søketips"
+        >
+          <span className="material-symbols-outlined help-icon" aria-hidden="true">text_ad</span>
+        </button>
       </footer>
+
+      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+      <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
     </div>
   )
 }

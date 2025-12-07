@@ -10,38 +10,34 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.svg'],
       manifest: {
         name: 'Lyttejeger - Podcast App',
         short_name: 'Lyttejeger',
         description: 'Finn og filtrer podcaster med verdens beste søkefunksjon',
-        theme_color: '#1a1a2e',
-        background_color: '#1a1a2e',
+        theme_color: '#F4F1EA',
+        background_color: '#F4F1EA',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
         start_url: '/',
         icons: [
           {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
+            src: 'favicon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml'
           },
           {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
+            src: 'apple-touch-icon.svg',
+            sizes: '180x180',
+            type: 'image/svg+xml',
             purpose: 'maskable'
           }
         ]
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB to support large font files
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.podcasters\..*\/.*/i,

@@ -62,7 +62,7 @@ export function EpisodeCard({ episode, onPlay }: EpisodeCardProps) {
         {imageUrl && (
           <img
             src={imageUrl}
-            alt={`${episode.title} cover`}
+            alt=""
             className={styles.image}
             loading="lazy"
             onError={(e) => {
@@ -70,22 +70,12 @@ export function EpisodeCard({ episode, onPlay }: EpisodeCardProps) {
             }}
           />
         )}
-        <button
+        <div
           className={styles.playOverlay}
-          aria-label={`Spill av ${episode.title}`}
-          onClick={handlePlayClick}
+          aria-hidden="true"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <polygon points="5 3 19 12 5 21 5 3" />
-          </svg>
-        </button>
+          <span className="material-symbols-outlined">play_arrow</span>
+        </div>
       </div>
 
       <div className={styles.content}>
@@ -105,8 +95,12 @@ export function EpisodeCard({ episode, onPlay }: EpisodeCardProps) {
 
         <div className={styles.meta}>
           <span className={styles.date}>{formatDate(episode.publishedAt)}</span>
-          <span className={styles.separator}>•</span>
-          <span className={styles.duration}>{formatDuration(episode.duration)}</span>
+          {formatDuration(episode.duration) && (
+            <>
+              <span className={styles.separator}>•</span>
+              <span className={styles.duration}>{formatDuration(episode.duration)}</span>
+            </>
+          )}
         </div>
       </div>
     </article>

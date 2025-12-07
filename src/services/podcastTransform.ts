@@ -27,7 +27,7 @@ export function transformFeed(feed: PodcastIndexFeed): Podcast {
     id: feed.id.toString(),
     title: feed.title || 'Untitled',
     author: feed.author || feed.ownerName || 'Unknown',
-    description: feed.description || '',
+    description: stripHtml(feed.description || ''),
     imageUrl: feed.artwork || feed.image || '/placeholder-podcast.svg',
     feedUrl: feed.url || feed.originalUrl,
     categories: Object.values(feed.categories || {}),

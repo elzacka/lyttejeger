@@ -1,10 +1,14 @@
+import { useState } from 'react'
 import type { EpisodeWithPodcast } from '../utils/search'
+import type { PlayingEpisode } from './AudioPlayer'
 import { EpisodeCard } from './EpisodeCard'
+import { EpisodeModal } from './EpisodeModal'
 import styles from './EpisodeList.module.css'
 
 interface EpisodeListProps {
   episodes: EpisodeWithPodcast[]
   isLoading?: boolean
+  onPlayEpisode: (episode: PlayingEpisode) => void
 }
 
 function SkeletonCard() {
@@ -21,12 +25,13 @@ function SkeletonCard() {
   )
 }
 
-export function EpisodeList({ episodes, isLoading }: EpisodeListProps) {
+export function EpisodeList({ episodes, isLoading, onPlayEpisode }: EpisodeListProps) {
+  const [selectedEpisode, setSelectedEpisode] = useState<EpisodeWithPodcast | null>(null)
+
   if (isLoading) {
     return (
       <div className={styles.container}>
-        <p className={styles.resultCount} aria-live="polite">Søker...</p>
-        <div className={styles.skeletonList} role="status" aria-label="Laster episoder">
+        <div className={styles.skeletonList} role="status" aria-label="Laster inn episoder">
           <SkeletonCard />
           <SkeletonCard />
           <SkeletonCard />
@@ -38,40 +43,30 @@ export function EpisodeList({ episodes, isLoading }: EpisodeListProps) {
   }
 
   if (episodes.length === 0) {
-    return (
-      <div className={styles.empty} role="status" aria-live="polite">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="64"
-          height="64"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.3-4.3" />
-          <path d="M8 8h6" />
-        </svg>
-        <h3>Ingen episoder funnet</h3>
-        <p>Prøv å justere søket ditt</p>
-      </div>
-    )
+    return null
   }
 
   return (
     <div className={styles.container}>
       <p className={styles.resultCount} aria-live="polite">
-        {episodes.length} {episodes.length === 1 ? 'episode' : 'episoder'} funnet
+        {episodes.length} {episodes.length === 1 ? 'episode' : 'episoder'}
       </p>
-      <div className={styles.list} role="list" aria-label="Episode-resultater">
+      <div className={styles.list} role="list" aria-label="Søkeresultater for episoder">
         {episodes.map((episode) => (
-          <EpisodeCard key={episode.id} episode={episode} />
+          <EpisodeCard
+            key={episode.id}
+            episode={episode}
+            onPlay={setSelectedEpisode}
+          />
         ))}
       </div>
+      {selectedEpisode && (
+        <EpisodeModal
+          episode={selectedEpisode}
+          onClose={() => setSelectedEpisode(null)}
+          onPlayEpisode={onPlayEpisode}
+        />
+      )}
     </div>
   )
 }

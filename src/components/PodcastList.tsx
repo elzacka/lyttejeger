@@ -1,11 +1,15 @@
+import { useState } from 'react'
 import type { Podcast } from '../types/podcast'
+import type { PlayingEpisode } from './AudioPlayer'
 import { PodcastCard } from './PodcastCard'
+import { PodcastModal } from './PodcastModal'
 import styles from './PodcastList.module.css'
 
 interface PodcastListProps {
   podcasts: Podcast[]
   searchQuery?: string
   isLoading?: boolean
+  onPlayEpisode: (episode: PlayingEpisode) => void
 }
 
 function SkeletonCard() {
@@ -21,12 +25,13 @@ function SkeletonCard() {
   )
 }
 
-export function PodcastList({ podcasts, searchQuery, isLoading }: PodcastListProps) {
+export function PodcastList({ podcasts, searchQuery, isLoading, onPlayEpisode }: PodcastListProps) {
+  const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null)
+
   if (isLoading) {
     return (
       <div className={styles.container}>
-        <p className={styles.resultCount} aria-live="polite">Søker...</p>
-        <div className={styles.skeletonGrid} role="status" aria-label="Laster podcaster">
+        <div className={styles.skeletonGrid} role="status" aria-label="Laster inn podcaster">
           <SkeletonCard />
           <SkeletonCard />
           <SkeletonCard />
@@ -39,44 +44,31 @@ export function PodcastList({ podcasts, searchQuery, isLoading }: PodcastListPro
   }
 
   if (podcasts.length === 0) {
-    return (
-      <div className={styles.empty} role="status" aria-live="polite">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="64"
-          height="64"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.3-4.3" />
-          <path d="M8 8h6" />
-        </svg>
-        <h3>Ingen podcaster funnet</h3>
-        <p>Prøv å justere søket eller filtrene dine</p>
-      </div>
-    )
+    return null
   }
 
   return (
     <div className={styles.container}>
       <p className={styles.resultCount} aria-live="polite">
-        {podcasts.length} {podcasts.length === 1 ? 'podcast' : 'podcaster'} funnet
+        {podcasts.length} {podcasts.length === 1 ? 'podcast' : 'podcaster'}
       </p>
-      <div className={styles.grid} role="list" aria-label="Podcast-resultater">
+      <div className={styles.grid} role="list" aria-label="Søkeresultater for podcaster">
         {podcasts.map((podcast) => (
           <PodcastCard
             key={podcast.id}
             podcast={podcast}
             searchQuery={searchQuery}
+            onSelect={setSelectedPodcast}
           />
         ))}
       </div>
+      {selectedPodcast && (
+        <PodcastModal
+          podcast={selectedPodcast}
+          onClose={() => setSelectedPodcast(null)}
+          onPlayEpisode={onPlayEpisode}
+        />
+      )}
     </div>
   )
 }

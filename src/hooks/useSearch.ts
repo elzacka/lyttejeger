@@ -1,13 +1,15 @@
-import { useState, useMemo, useCallback, useTransition, useEffect } from 'react'
+import { useState, useMemo, useCallback, useTransition, useEffect, useRef } from 'react'
 import type { Podcast, Episode, SearchFilters } from '../types/podcast'
 import { searchAll, type EpisodeWithPodcast } from '../utils/search'
 import {
   searchPodcasts as apiSearchPodcasts,
-  getTrendingPodcasts,
-  getRecentEpisodes,
-  isConfigured
+  searchEpisodesByPerson,
+  getEpisodesByFeedId,
+  isConfigured,
+  type SearchOptions
 } from '../services/podcastIndex'
 import { transformFeeds, transformEpisodes } from '../services/podcastTransform'
+import { parseSearchQuery } from '../utils/search'
 
 const initialFilters: SearchFilters = {
   query: '',
@@ -26,8 +28,6 @@ export interface SearchResultsState {
 
 interface UseSearchOptions {
   useApi?: boolean
-  fallbackPodcasts?: Podcast[]
-  fallbackEpisodes?: Episode[]
 }
 
 export function useSearch(
@@ -35,7 +35,7 @@ export function useSearch(
   initialEpisodes: Episode[],
   options: UseSearchOptions = {}
 ) {
-  const { useApi = true, fallbackPodcasts, fallbackEpisodes } = options
+  const { useApi = true } = options
 
   const [filters, setFilters] = useState<SearchFilters>(initialFilters)
   const [isPending, startTransition] = useTransition()
@@ -46,81 +46,273 @@ export function useSearch(
   const [apiEpisodes, setApiEpisodes] = useState<Episode[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [hasSearched, setHasSearched] = useState(false)
 
   // Determine which data source to use
   const shouldUseApi = useApi && isConfigured()
 
-  // Fetch trending on mount if API is configured
-  useEffect(() => {
-    if (shouldUseApi && !hasSearched) {
-      loadTrending()
-    }
-  }, [shouldUseApi])
+  // Track current search to prevent race conditions
+  const currentSearchRef = useRef<string>('')
 
-  // Load trending podcasts
-  const loadTrending = async () => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const [trendingRes, recentRes] = await Promise.all([
-        getTrendingPodcasts(20, 'no,en'),
-        getRecentEpisodes(20, 'no')
-      ])
-      setApiPodcasts(transformFeeds(trendingRes.feeds))
-      setApiEpisodes(transformEpisodes(recentRes.items))
-    } catch (err) {
-      console.error('Failed to load trending:', err)
-      setError('Kunne ikke laste populære podcaster')
-      // Fall back to mock data
-      setApiPodcasts(fallbackPodcasts || initialPodcasts)
-      setApiEpisodes(fallbackEpisodes || initialEpisodes)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Store last successful search results for incremental filtering
+  const lastSearchQueryRef = useRef<string>('')
+  const lastSearchResultsRef = useRef<Podcast[]>([])
 
-  // Search via API
-  const searchViaApi = async (query: string) => {
+  // Clear results when query is empty
+  const clearResults = useCallback(() => {
+    setApiPodcasts([])
+    setApiEpisodes([])
+    lastSearchQueryRef.current = ''
+    lastSearchResultsRef.current = []
+  }, [])
+
+  // Allowed language codes (Norwegian, Danish, Swedish, English)
+  const ALLOWED_LANGUAGES = ['no', 'nb', 'nn', 'da', 'sv', 'en']
+
+  // Search via API with enhanced options
+  const searchViaApi = async (query: string, searchType: 'podcasts' | 'episodes') => {
     if (!query.trim()) {
-      loadTrending()
+      clearResults()
       return
     }
 
+    // Track this search to prevent race conditions
+    currentSearchRef.current = query
+
     setIsLoading(true)
     setError(null)
-    setHasSearched(true)
 
     try {
-      const searchRes = await apiSearchPodcasts(query, 30)
-      const podcasts = transformFeeds(searchRes.feeds)
+      // Build search options based on current filters
+      const searchOptions: SearchOptions = {
+        max: 100,         // Fetch more to compensate for local filtering
+        similar: true,    // Include similar matches for better results
+        fulltext: true,   // Get full descriptions
+        clean: filters.explicit === false ? true : undefined  // Only filter explicit if user chose "family-friendly"
+      }
+
+      // Add category filter if selected
+      if (filters.categories.length > 0) {
+        searchOptions.cat = filters.categories.join(',')
+      }
+
+      const searchRes = await apiSearchPodcasts(query, searchOptions)
+
+      // Only update if this is still the current search
+      if (currentSearchRef.current !== query) {
+        return
+      }
+
+      // Transform and filter by allowed languages locally
+      // (API language filter doesn't work reliably)
+      let podcasts = transformFeeds(searchRes.feeds)
+      podcasts = podcasts.filter(p => {
+        if (!p.language) return true // Keep if no language specified
+        const langCode = p.language.toLowerCase().slice(0, 2)
+        return ALLOWED_LANGUAGES.includes(langCode)
+      })
+
+      // Store for incremental filtering
+      lastSearchQueryRef.current = query
+      lastSearchResultsRef.current = podcasts
+
       setApiPodcasts(podcasts)
 
-      // For episodes, we would need to search each podcast's episodes
-      // For now, keep using local search for episodes
-      setApiEpisodes([])
+      // For episode search, use byperson API which searches episode content
+      if (searchType === 'episodes') {
+        try {
+          // Use search/byperson which searches: Person tags, Episode title,
+          // Episode description, Feed owner, Feed author
+          const episodesRes = await searchEpisodesByPerson(query, { max: 50, fulltext: true })
+
+          // Only update if this is still the current search
+          if (currentSearchRef.current !== query) {
+            return
+          }
+
+          let episodes = transformEpisodes(episodesRes.items || [])
+
+          // Add podcast info from the API response
+          episodes = episodes.map((ep, idx) => {
+            const apiEp = episodesRes.items?.[idx]
+            return {
+              ...ep,
+              podcastTitle: apiEp?.feedTitle || '',
+              podcastAuthor: apiEp?.feedAuthor || '',
+              podcastImage: apiEp?.feedImage || ''
+            }
+          })
+
+          // Apply language filter locally if set (API doesn't support it for byperson)
+          if (filters.languages.length > 0) {
+            episodes = episodes.filter(ep => {
+              const apiEp = episodesRes.items?.find(item => item.id.toString() === ep.id)
+              if (!apiEp?.feedLanguage) return true
+              return filters.languages.some(lang =>
+                apiEp.feedLanguage.toLowerCase().includes(lang.toLowerCase().slice(0, 2))
+              )
+            })
+          }
+
+          // Apply local text filtering for advanced query syntax (OR, exact phrases, exclusions)
+          const parsed = parseSearchQuery(query)
+          if (parsed.exactPhrases.length > 0 || parsed.mustExclude.length > 0 || parsed.shouldInclude.length > 0) {
+            episodes = episodes.filter(ep => {
+              const fullText = `${ep.title} ${ep.description}`.toLowerCase()
+
+              // Must contain exact phrases
+              for (const phrase of parsed.exactPhrases) {
+                if (!fullText.includes(phrase)) return false
+              }
+
+              // Must not contain excluded terms
+              for (const term of parsed.mustExclude) {
+                if (fullText.includes(term)) return false
+              }
+
+              return true
+            })
+          }
+
+          setApiEpisodes(episodes)
+        } catch (err) {
+          console.error('Episode search failed:', err)
+          // Fallback: fetch from matching podcasts
+          if (podcasts.length > 0) {
+            const topPodcasts = podcasts.slice(0, 5)
+            const episodePromises = topPodcasts.map(async (podcast) => {
+              try {
+                const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), 10)
+                const episodes = transformEpisodes(episodesRes.items || [])
+                return episodes.map(ep => ({
+                  ...ep,
+                  podcastTitle: podcast.title,
+                  podcastAuthor: podcast.author,
+                  podcastImage: podcast.imageUrl
+                }))
+              } catch {
+                return []
+              }
+            })
+            const episodeResults = await Promise.all(episodePromises)
+            setApiEpisodes(episodeResults.flat())
+          } else {
+            setApiEpisodes([])
+          }
+        }
+      } else {
+        setApiEpisodes([])
+      }
     } catch (err) {
-      console.error('API search failed:', err)
-      setError('Søket feilet. Prøv igjen.')
+      // Only show error if this is still the current search
+      if (currentSearchRef.current === query) {
+        console.error('API search failed:', err)
+        setError('Søket feilet. Prøv igjen.')
+      }
     } finally {
-      setIsLoading(false)
+      // Only stop loading if this is still the current search
+      if (currentSearchRef.current === query) {
+        setIsLoading(false)
+      }
     }
   }
+
+  // Extract complete words from query (words followed by space or at end after space)
+  // "hele hi" -> "hele" (only complete words for API)
+  // "hele historien" -> "hele historien" (both complete)
+  const getCompleteWords = (query: string): string => {
+    const trimmed = query.trim()
+    if (!trimmed) return ''
+
+    // If query ends with space, all words are complete
+    if (query.endsWith(' ')) {
+      return trimmed
+    }
+
+    // Otherwise, only words before the last space are complete
+    const lastSpaceIndex = trimmed.lastIndexOf(' ')
+    if (lastSpaceIndex === -1) {
+      // Single word being typed - use it for API (user might be done)
+      return trimmed
+    }
+
+    // Return only complete words (everything before and including last complete word)
+    return trimmed.substring(0, lastSpaceIndex).trim()
+  }
+
+  // Check if we should call API or filter locally
+  const shouldCallApi = useCallback((newQuery: string): boolean => {
+    const completeWords = getCompleteWords(newQuery)
+    const lastCompleteWords = getCompleteWords(lastSearchQueryRef.current)
+
+    // If no complete words yet, don't call API
+    if (!completeWords) return false
+
+    // If complete words changed, call API
+    if (completeWords !== lastCompleteWords) return true
+
+    // If we have no cached results, call API
+    if (lastSearchResultsRef.current.length === 0) return true
+
+    return false
+  }, [])
+
+  // Track filters for re-triggering API search
+  const filtersRef = useRef({ languages: filters.languages, categories: filters.categories })
 
   // Debounced API search
   useEffect(() => {
     if (!shouldUseApi) return
 
-    const timer = setTimeout(() => {
-      if (filters.query.length >= 2) {
-        searchViaApi(filters.query)
-      } else if (filters.query.length === 0) {
-        loadTrending()
-      }
-    }, 300) // Debounce 300ms
+    const query = filters.query
 
-    return () => clearTimeout(timer)
-  }, [filters.query, shouldUseApi])
+    // If query is empty, clear results
+    if (query.length === 0) {
+      clearResults()
+      return
+    }
+
+    // If query is too short, do nothing
+    if (query.length < 2) return
+
+    // Only call API when complete words change
+    if (shouldCallApi(query)) {
+      // Use complete words for API search
+      const completeWords = getCompleteWords(query)
+      if (completeWords.length >= 2) {
+        const timer = setTimeout(() => {
+          searchViaApi(completeWords, activeTab)
+        }, 300)
+        return () => clearTimeout(timer)
+      }
+    }
+    // Local filtering happens in useMemo below
+  }, [filters.query, shouldUseApi, shouldCallApi, clearResults, activeTab])
+
+  // Re-search when tab changes (if we have a query)
+  useEffect(() => {
+    if (!shouldUseApi || filters.query.length < 2) return
+
+    // Trigger new search with current query for the new tab
+    searchViaApi(filters.query, activeTab)
+  }, [activeTab])
+
+  // Re-search when language or category filters change (API supports these)
+  useEffect(() => {
+    if (!shouldUseApi || filters.query.length < 2) return
+
+    const filtersChanged =
+      JSON.stringify(filtersRef.current.languages) !== JSON.stringify(filters.languages) ||
+      JSON.stringify(filtersRef.current.categories) !== JSON.stringify(filters.categories)
+
+    if (filtersChanged) {
+      filtersRef.current = { languages: filters.languages, categories: filters.categories }
+      // Re-trigger API search with updated filters
+      const timer = setTimeout(() => {
+        searchViaApi(filters.query, activeTab)
+      }, 200)
+      return () => clearTimeout(timer)
+    }
+  }, [filters.languages, filters.categories, filters.query, activeTab, shouldUseApi])
 
   // Choose data source
   const podcasts = shouldUseApi ? apiPodcasts : initialPodcasts
@@ -128,13 +320,48 @@ export function useSearch(
 
   // Apply local filters and search
   const results = useMemo(() => {
-    // If using API, podcasts are already searched, just apply filters
+    // If using API and we have a query
     if (shouldUseApi && filters.query.length >= 2) {
-      const filteredPodcasts = applyLocalFilters(podcasts, filters)
-      const episodeResults = searchAll([], episodes, filters)
+      // Use cached results if available, otherwise current API results
+      const baseResults = lastSearchResultsRef.current.length > 0
+        ? lastSearchResultsRef.current
+        : podcasts
+
+      // Filter by current query (including partial words)
+      const textFiltered = filterByQueryText(baseResults, filters.query)
+
+      // Apply other local filters
+      const filteredPodcasts = applyLocalFilters(textFiltered, filters)
+
+      // Convert API episodes to EpisodeWithPodcast format
+      const episodesWithPodcast: EpisodeWithPodcast[] = episodes.map(ep => {
+        const extendedEp = ep as Episode & {
+          podcastTitle?: string
+          podcastAuthor?: string
+          podcastImage?: string
+        }
+        return {
+          ...ep,
+          podcast: extendedEp.podcastTitle ? {
+            id: ep.podcastId,
+            title: extendedEp.podcastTitle,
+            author: extendedEp.podcastAuthor || '',
+            description: '',
+            imageUrl: extendedEp.podcastImage || '',
+            feedUrl: '',
+            categories: [],
+            language: '',
+            episodeCount: 0,
+            lastUpdated: '',
+            rating: 0,
+            explicit: false
+          } : undefined
+        }
+      })
+
       return {
         podcasts: filteredPodcasts,
-        episodes: episodeResults.episodes
+        episodes: episodesWithPodcast
       }
     }
 
@@ -192,10 +419,8 @@ export function useSearch(
     startTransition(() => {
       setFilters(initialFilters)
     })
-    if (shouldUseApi) {
-      loadTrending()
-    }
-  }, [shouldUseApi])
+    clearResults()
+  }, [clearResults])
 
   const activeFilterCount = useMemo(() => {
     let count = 0
@@ -224,6 +449,38 @@ export function useSearch(
     activeFilterCount,
     isApiConfigured: shouldUseApi
   }
+}
+
+/**
+ * Normalize text for search comparison (handles æøå)
+ */
+function normalizeText(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
+/**
+ * Filter podcasts by query text - matches if ALL words are found as prefixes
+ * "hele hi" matches "Hele historien" because "hele" matches "hele" and "hi" matches "historien"
+ */
+function filterByQueryText(podcasts: Podcast[], query: string): Podcast[] {
+  if (!query.trim()) return podcasts
+
+  const words = query.toLowerCase().trim().split(/\s+/).filter(w => w.length > 0)
+  if (words.length === 0) return podcasts
+
+  return podcasts.filter(podcast => {
+    const searchText = normalizeText(`${podcast.title} ${podcast.author} ${podcast.description}`)
+    const searchWords = searchText.split(/\s+/)
+
+    // Each query word must match as prefix of some word in text
+    return words.every(queryWord => {
+      const normalizedQuery = normalizeText(queryWord)
+      return searchWords.some(textWord => textWord.startsWith(normalizedQuery))
+    })
+  })
 }
 
 /**

@@ -3,11 +3,14 @@ import type { Podcast, Episode, SearchFilters } from '../types/podcast'
 
 // ============================================================================
 // SEARCH QUERY PARSER
-// Supports: AND (default), OR, "exact phrase", -exclude
+// Supports: AND (default), OR, "exact phrase", -exclude, prefix*, *suffix, *contains*
 // Examples:
 //   "true crime" norge     -> must contain exact "true crime" AND "norge"
 //   fotball OR håndball    -> must contain "fotball" OR "håndball"
 //   teknologi -krypto      -> must contain "teknologi" but NOT "krypto"
+//   pod*                   -> matches "podcast", "podcaster", "podkast"
+//   *cast                  -> matches "podcast", "broadcast"
+//   *od*                   -> matches "podcast", "episode", "moderator"
 // ============================================================================
 
 export interface ParsedQuery {
@@ -15,6 +18,53 @@ export interface ParsedQuery {
   exactPhrases: string[]     // "quoted phrases"
   shouldInclude: string[]    // OR terms
   mustExclude: string[]      // -excluded terms
+  wildcards: WildcardTerm[]  // terms with * wildcards
+}
+
+export interface WildcardTerm {
+  pattern: string
+  type: 'prefix' | 'suffix' | 'contains' | 'exact'
+  term: string
+}
+
+/**
+ * Parse a wildcard term and return its type
+ */
+function parseWildcard(term: string): WildcardTerm | null {
+  if (!term.includes('*')) return null
+
+  const startsWithWildcard = term.startsWith('*')
+  const endsWithWildcard = term.endsWith('*')
+  const cleanTerm = term.replace(/\*/g, '').toLowerCase()
+
+  if (startsWithWildcard && endsWithWildcard) {
+    return { pattern: term, type: 'contains', term: cleanTerm }
+  } else if (startsWithWildcard) {
+    return { pattern: term, type: 'suffix', term: cleanTerm }
+  } else if (endsWithWildcard) {
+    return { pattern: term, type: 'prefix', term: cleanTerm }
+  }
+
+  return null
+}
+
+/**
+ * Check if text matches a wildcard pattern
+ */
+export function matchesWildcard(text: string, wildcard: WildcardTerm): boolean {
+  const normalizedText = normalizeText(text)
+  const words = normalizedText.split(/\s+/)
+
+  switch (wildcard.type) {
+    case 'prefix':
+      return words.some(w => w.startsWith(wildcard.term))
+    case 'suffix':
+      return words.some(w => w.endsWith(wildcard.term))
+    case 'contains':
+      return normalizedText.includes(wildcard.term)
+    default:
+      return normalizedText.includes(wildcard.term)
+  }
 }
 
 export function parseSearchQuery(query: string): ParsedQuery {
@@ -22,7 +72,8 @@ export function parseSearchQuery(query: string): ParsedQuery {
     mustInclude: [],
     exactPhrases: [],
     shouldInclude: [],
-    mustExclude: []
+    mustExclude: [],
+    wildcards: []
   }
 
   if (!query.trim()) return result
@@ -40,28 +91,40 @@ export function parseSearchQuery(query: string): ParsedQuery {
   // Split by OR operator
   const orParts = remaining.split(/\s+OR\s+/i)
 
+  const processTerms = (terms: string[], isOr: boolean) => {
+    for (const term of terms) {
+      if (term.startsWith('-') && term.length > 1) {
+        const cleanTerm = term.slice(1)
+        const wildcard = parseWildcard(cleanTerm)
+        if (wildcard) {
+          // Exclude wildcard - we'll handle this specially
+          result.mustExclude.push(cleanTerm.toLowerCase())
+        } else {
+          result.mustExclude.push(cleanTerm.toLowerCase())
+        }
+      } else {
+        const wildcard = parseWildcard(term)
+        if (wildcard) {
+          result.wildcards.push(wildcard)
+        } else if (isOr) {
+          result.shouldInclude.push(term.toLowerCase())
+        } else if (term.toUpperCase() !== 'AND') {
+          result.mustInclude.push(term.toLowerCase())
+        }
+      }
+    }
+  }
+
   if (orParts.length > 1) {
     // If OR is used, all terms become shouldInclude
     for (const part of orParts) {
       const terms = part.trim().split(/\s+/).filter(t => t.length > 0)
-      for (const term of terms) {
-        if (term.startsWith('-') && term.length > 1) {
-          result.mustExclude.push(term.slice(1).toLowerCase())
-        } else {
-          result.shouldInclude.push(term.toLowerCase())
-        }
-      }
+      processTerms(terms, true)
     }
   } else {
     // Default AND behavior
     const terms = remaining.trim().split(/\s+/).filter(t => t.length > 0)
-    for (const term of terms) {
-      if (term.startsWith('-') && term.length > 1) {
-        result.mustExclude.push(term.slice(1).toLowerCase())
-      } else if (term.toUpperCase() !== 'AND') {
-        result.mustInclude.push(term.toLowerCase())
-      }
-    }
+    processTerms(terms, false)
   }
 
   return result
@@ -180,7 +243,7 @@ export function searchPodcasts(podcasts: Podcast[], filters: SearchFilters): Pod
 
   const parsed = parseSearchQuery(filters.query)
 
-  // First, apply exact phrase and exclusion filters
+  // First, apply exact phrase, exclusion, and wildcard filters
   results = results.filter(podcast => {
     const fullText = `${podcast.title} ${podcast.author} ${podcast.description} ${podcast.categories.join(' ')}`
 
@@ -192,6 +255,13 @@ export function searchPodcasts(podcasts: Podcast[], filters: SearchFilters): Pod
     // Must not contain excluded terms
     if (!textContainsNone(fullText, parsed.mustExclude)) {
       return false
+    }
+
+    // Must match all wildcards
+    for (const wildcard of parsed.wildcards) {
+      if (!matchesWildcard(fullText, wildcard)) {
+        return false
+      }
     }
 
     return true
@@ -265,7 +335,7 @@ export function searchEpisodes(
 
   const parsed = parseSearchQuery(query)
 
-  // Filter by exact phrases and exclusions first
+  // Filter by exact phrases, exclusions, and wildcards first
   let results = episodes.filter(episode => {
     const fullText = `${episode.title} ${episode.description}`
 
@@ -275,6 +345,13 @@ export function searchEpisodes(
 
     if (!textContainsNone(fullText, parsed.mustExclude)) {
       return false
+    }
+
+    // Must match all wildcards
+    for (const wildcard of parsed.wildcards) {
+      if (!matchesWildcard(fullText, wildcard)) {
+        return false
+      }
     }
 
     return true
@@ -363,6 +440,10 @@ export function debounce<T extends (...args: unknown[]) => void>(
 }
 
 export function formatDuration(seconds: number): string {
+  if (!seconds || seconds <= 0) {
+    return '' // Return empty string for unknown duration
+  }
+
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
 

@@ -1,11 +1,11 @@
 .container {
   display: flex;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   padding: var(--space-xs);
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md);
 }
 
 .tab {
@@ -14,36 +14,32 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  min-height: var(--touch-target);
-  padding: var(--space-sm) var(--space-md);
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-sm);
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
-  font-size: var(--font-base);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
   font-weight: 500;
   cursor: pointer;
   transition: color var(--transition-fast),
               background var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
 }
 
 .tab:hover {
-  color: var(--text-color);
-  background: var(--hover-color);
-}
-
-.tab:active {
-  transform: scale(0.98);
+  color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .tab.active {
-  background: var(--primary-color);
+  background: var(--accent);
   color: white;
 }
 
 .tab.active:hover {
-  background: var(--primary-hover);
+  background: var(--accent-hover);
 }
 
 .tab.active .count {
@@ -52,38 +48,20 @@
 }
 
 .count {
-  padding: 2px var(--space-sm);
-  background: var(--surface-elevated);
-  border-radius: var(--radius-full);
+  padding: 2px var(--space-xs);
+  background: var(--bg-hover);
+  border-radius: var(--radius-sm);
   font-size: var(--font-xs);
   font-weight: 600;
 }
 
-/* Tablet */
-@media (max-width: 768px) {
-  .container {
-    margin-bottom: var(--space-md);
-  }
-
-  .tab {
-    gap: var(--space-xs);
-    padding: var(--space-sm);
-  }
+.tab .material-symbols-outlined {
+  font-size: 20px;
 }
 
-/* Mobile */
-@media (max-width: 480px) {
-  .tab span:not(.count) {
+/* Mobile - icons only */
+@media (max-width: 640px) {
+  .tab span:not(.count):not(.material-symbols-outlined) {
     display: none;
-  }
-
-  .tab {
-    padding: var(--space-sm);
-    gap: var(--space-xs);
-  }
-
-  .tab svg {
-    width: 20px;
-    height: 20px;
   }
 }

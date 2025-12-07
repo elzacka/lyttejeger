@@ -1,51 +1,94 @@
 .container {
   width: 100%;
-  margin-bottom: var(--space-lg);
 }
 
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: var(--space-md);
-  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* Type selector - segmented control */
+.typeSelector {
+  display: flex;
+}
+
+.typeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast),
+              color var(--transition-fast),
+              border-color var(--transition-fast);
+}
+
+.typeButton:first-child {
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  border-right: none;
+}
+
+.typeButton:last-child {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.typeButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.typeButtonActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.typeButtonActive:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: white;
 }
 
 .toggleButton {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  justify-content: center;
+  gap: var(--space-xs);
   min-height: var(--touch-target);
   padding: var(--space-sm) var(--space-md);
-  background: var(--surface-color);
-  border: 2px solid var(--border-color);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  color: var(--text-color);
-  font-size: var(--font-base);
-  font-weight: 500;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
   cursor: pointer;
-  transition: border-color var(--transition-base),
-              background var(--transition-base);
-  -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--transition-fast),
+              color var(--transition-fast),
+              background var(--transition-fast);
 }
 
 .toggleButton:hover {
-  border-color: var(--primary-color);
-  background: var(--hover-color);
-}
-
-.toggleButton:active {
-  transform: scale(0.98);
+  border-color: var(--accent);
+  color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .badge {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 22px;
+  min-width: 18px;
+  height: 18px;
   padding: 0 var(--space-xs);
-  background: var(--primary-color);
+  background: var(--accent);
   color: white;
   font-size: var(--font-xs);
   font-weight: 600;
@@ -55,59 +98,56 @@
 .sortContainer {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-}
-
-.sortLabel {
-  font-size: var(--font-sm);
-  color: var(--text-muted);
+  margin-left: auto;
 }
 
 .sortSelect {
   min-height: var(--touch-target);
   padding: var(--space-sm) var(--space-xl) var(--space-sm) var(--space-md);
-  background: var(--surface-color);
-  border: 2px solid var(--border-color);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  color: var(--text-color);
-  font-size: var(--font-base);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23767676' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right var(--space-sm) center;
-  transition: border-color var(--transition-base);
-  -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--transition-fast),
+              color var(--transition-fast),
+              background var(--transition-fast);
 }
 
 .sortSelect:hover,
 .sortSelect:focus {
-  border-color: var(--primary-color);
+  border-color: var(--accent);
+  color: var(--text-primary);
+  background: var(--bg-hover);
   outline: none;
 }
 
 .panel {
   margin-top: var(--space-md);
-  padding: var(--space-lg);
-  background: var(--surface-color);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  animation: slideDown var(--transition-base);
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  animation: fadeIn 0.15s ease;
 }
 
-@keyframes slideDown {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
 .section {
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md);
 }
 
 .section:last-of-type {
@@ -116,6 +156,7 @@
 
 .sectionTitle {
   margin: 0 0 var(--space-sm) 0;
+  font-family: var(--font-mono);
   font-size: var(--font-xs);
   font-weight: 600;
   text-transform: uppercase;
@@ -126,95 +167,88 @@
 .chipGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
 }
 
 .chip {
-  min-height: var(--touch-target);
-  padding: var(--space-sm) var(--space-md);
-  background: var(--surface-elevated);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-full);
-  color: var(--text-color);
-  font-size: var(--font-sm);
+  min-height: 32px;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
   cursor: pointer;
-  transition: all var(--transition-base);
-  -webkit-tap-highlight-color: transparent;
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
 }
 
 .chip:hover {
-  border-color: var(--primary-color);
-  background: var(--hover-color);
-}
-
-.chip:active {
-  transform: scale(0.95);
+  border-color: var(--accent);
+  color: var(--text-primary);
 }
 
 .chipActive {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
+  background: var(--accent);
+  border-color: var(--accent);
   color: white;
 }
 
 .chipActive:hover {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 .ratingContainer,
 .explicitContainer {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
 }
 
 .ratingButton {
-  min-height: var(--touch-target);
-  padding: var(--space-sm) var(--space-md);
-  background: var(--surface-elevated);
-  border: 1px solid var(--border-color);
+  min-height: 32px;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  color: var(--text-color);
-  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
   cursor: pointer;
-  transition: all var(--transition-base);
-  -webkit-tap-highlight-color: transparent;
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
   gap: var(--space-xs);
 }
 
 .ratingButton:hover {
-  border-color: var(--primary-color);
-}
-
-.ratingButton:active {
-  transform: scale(0.95);
+  border-color: var(--accent);
+  color: var(--text-primary);
 }
 
 .ratingActive {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
+  background: var(--accent);
+  border-color: var(--accent);
   color: white;
 }
 
 .clearButton {
   display: block;
   width: 100%;
-  min-height: var(--touch-target);
-  margin-top: var(--space-lg);
-  padding: var(--space-md);
+  min-height: 36px;
+  margin-top: var(--space-md);
+  padding: var(--space-sm);
   background: transparent;
-  border: 2px dashed var(--border-color);
+  border: 1px dashed var(--border);
   border-radius: var(--radius-md);
   color: var(--text-muted);
-  font-size: var(--font-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
   cursor: pointer;
-  transition: all var(--transition-base);
-  -webkit-tap-highlight-color: transparent;
+  transition: all var(--transition-fast);
 }
 
 .clearButton:hover {
@@ -222,54 +256,38 @@
   color: var(--error-color);
 }
 
-.clearButton:active {
-  transform: scale(0.98);
-}
-
-/* Tablet */
-@media (max-width: 768px) {
-  .panel {
-    padding: var(--space-md);
-  }
-}
-
 /* Mobile */
 @media (max-width: 640px) {
   .header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .sortContainer {
-    justify-content: space-between;
-  }
-
-  .sortSelect {
-    flex: 1;
-  }
-
-  .chipGrid {
+    flex-wrap: wrap;
     gap: var(--space-xs);
   }
 
-  .chip {
-    font-size: var(--font-xs);
+  .typeSelector {
+    order: 1;
+  }
+
+  .toggleButton {
+    order: 2;
+  }
+
+  .sortContainer {
+    order: 3;
+    margin-left: 0;
+  }
+
+  .typeButton {
     padding: var(--space-xs) var(--space-sm);
-  }
-}
-
-/* Small mobile */
-@media (max-width: 480px) {
-  .container {
-    margin-bottom: var(--space-md);
+    font-size: var(--font-xs);
   }
 
-  .section {
-    margin-bottom: var(--space-md);
+  .toggleButton {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-xs);
   }
 
-  .panel {
-    padding: var(--space-sm);
-    border-radius: var(--radius-md);
+  .sortSelect {
+    padding: var(--space-xs) var(--space-xl) var(--space-xs) var(--space-sm);
+    font-size: var(--font-xs);
   }
 }

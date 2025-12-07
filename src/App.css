@@ -1,3 +1,4 @@
+/* Main app container */
 .app {
   min-height: 100vh;
   min-height: 100dvh;
@@ -5,73 +6,83 @@
   flex-direction: column;
 }
 
+/* Main content - narrow width, aligned to top */
 .main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  max-width: 1200px;
+  max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 var(--space-lg) var(--space-2xl);
+  padding: var(--space-xl) var(--space-lg) var(--space-lg);
 }
 
+/* Search section */
 .search-section {
-  margin-bottom: var(--space-lg);
+  display: flex;
+  flex-direction: column;
 }
 
-.search-help {
-  margin: var(--space-sm) 0 0 0;
-  text-align: center;
-  font-size: var(--font-xs);
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
-.search-help code {
-  padding: 2px var(--space-xs);
-  background: var(--surface-elevated);
-  border-radius: var(--radius-sm);
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
-  font-size: var(--font-xs);
-  color: var(--primary-color);
-  white-space: nowrap;
-}
-
+/* Filter section */
 .filter-section {
-  margin-bottom: var(--space-lg);
+  margin-top: var(--space-md);
 }
 
+/* Results section */
 .results-section {
-  min-height: 300px;
+  margin-top: var(--space-xl);
 }
 
+/* Footer - minimal with help button */
 .footer {
-  padding: var(--space-lg);
-  text-align: center;
-  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-lg);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
   color: var(--text-muted);
-  font-size: var(--font-sm);
-  margin-top: auto;
+  border-top: 1px solid var(--border);
 }
 
-.footer p {
+.footer-attribution {
   margin: 0;
-}
-
-.footer-api {
-  opacity: 0.7;
-}
-
-/* API Status Indicator */
-.api-status {
-  font-weight: 600;
   font-size: var(--font-xs);
 }
 
-.api-status--connected {
-  color: #22c55e;
+.footer-attribution a {
+  color: var(--accent);
 }
 
-.api-status--offline {
+.footer-attribution a:hover {
+  text-decoration: underline;
+}
+
+/* Help button in footer */
+.help-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color var(--transition-fast),
+              color var(--transition-fast),
+              background var(--transition-fast);
+}
+
+.help-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--bg-secondary);
+}
+
+.help-button .help-icon {
+  font-size: 20px;
 }
 
 /* Error Banner */
@@ -79,65 +90,28 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-md);
-  margin-bottom: var(--space-lg);
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  padding: var(--space-sm) var(--space-md);
+  margin-top: var(--space-md);
+  background: rgba(155, 41, 21, 0.08);
+  border: 1px solid rgba(155, 41, 21, 0.2);
   border-radius: var(--radius-md);
-  color: #dc2626;
+  color: var(--error-color);
+  font-family: var(--font-mono);
   font-size: var(--font-sm);
 }
 
-.error-banner svg {
+.error-banner .material-symbols-outlined {
+  font-size: 18px;
   flex-shrink: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  .error-banner {
-    background: rgba(220, 38, 38, 0.1);
-    border-color: rgba(220, 38, 38, 0.3);
-  }
-}
-
-/* Tablet */
-@media (max-width: 768px) {
-  .main {
-    padding: 0 var(--space-md) var(--space-xl);
-  }
-
-  .search-section,
-  .filter-section {
-    margin-bottom: var(--space-md);
-  }
-}
-
-/* Mobile */
+/* Responsive adjustments */
 @media (max-width: 640px) {
   .main {
-    padding: 0 var(--space-md) var(--space-lg);
-  }
-
-  .search-help {
-    font-size: calc(var(--font-xs) - 1px);
-  }
-
-  .search-help code {
-    display: inline-block;
-    margin: 2px 0;
+    padding: var(--space-md);
   }
 
   .footer {
-    padding: var(--space-md);
-  }
-}
-
-/* Small mobile */
-@media (max-width: 480px) {
-  .main {
-    padding: 0 var(--space-sm) var(--space-md);
-  }
-
-  .results-section {
-    min-height: 200px;
+    padding: var(--space-sm) var(--space-md);
   }
 }
