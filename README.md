@@ -47,7 +47,6 @@ src/
 ├── hooks/          # Custom React hooks (useSearch)
 ├── types/          # TypeScript-typer
 ├── utils/          # Søkemotor og hjelpefunksjoner
-├── data/           # Mock-data for podcaster og episoder
 ├── App.tsx         # Hovedkomponent
 └── main.tsx        # Entry point
 ```
