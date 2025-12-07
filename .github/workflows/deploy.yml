@@ -27,6 +27,9 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_PODCASTINDEX_API_KEY: ${{ secrets.VITE_PODCASTINDEX_API_KEY }}
+          VITE_PODCASTINDEX_API_SECRET: ${{ secrets.VITE_PODCASTINDEX_API_SECRET }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
