@@ -34,7 +34,7 @@ export function parseSearchQuery(query: string): ParsedQuery {
   }
 
   // Remove quoted phrases from query for further processing
-  let remaining = query.replace(/"[^"]+"/g, ' ')
+  const remaining = query.replace(/"[^"]+"/g, ' ')
 
   // Split by OR operator
   const orParts = remaining.split(/\s+OR\s+/i)

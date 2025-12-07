@@ -14,29 +14,32 @@ interface AudioPlayerProps {
 
 export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
+  const prevEpisodeIdRef = useRef<string | undefined>(undefined)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Reset state when episode changes
-  useEffect(() => {
+  // Reset and auto-play when episode changes
+  const episodeId = episode?.id
+  if (episodeId !== prevEpisodeIdRef.current) {
+    prevEpisodeIdRef.current = episodeId
     if (episode) {
-      setCurrentTime(0)
-      setIsPlaying(false)
-      setIsLoading(true)
+      // These will be set before render completes
+      if (currentTime !== 0) setCurrentTime(0)
+      if (isPlaying !== false) setIsPlaying(false)
+      if (isLoading !== true) setIsLoading(true)
     }
-  }, [episode?.id])
+  }
 
   // Auto-play when episode loads
   useEffect(() => {
     if (episode && audioRef.current) {
       audioRef.current.play().catch(() => {
-        // Auto-play blocked, user needs to click
         setIsPlaying(false)
       })
     }
-  }, [episode?.id])
+  }, [episode])
 
   // Media Session API - for lock screen controls and artwork
   useEffect(() => {
@@ -89,7 +92,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       navigator.mediaSession.setActionHandler('seekforward', null)
       navigator.mediaSession.setActionHandler('seekto', null)
     }
-  }, [episode?.id, episode?.title, episode?.imageUrl, episode?.podcastImage, episode?.podcastTitle, duration])
+  }, [episode, duration])
 
   // Update Media Session playback state and position
   useEffect(() => {

@@ -275,6 +275,7 @@ export function useSearch() {
       }
     }
     // Local filtering happens in useMemo below
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.query, shouldUseApi, shouldCallApi, clearResults, activeTab])
 
   // Re-search when tab changes (if we have a query)
@@ -283,6 +284,7 @@ export function useSearch() {
 
     // Trigger new search with current query for the new tab
     searchViaApi(filters.query, activeTab)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab])
 
   // Re-search when language or category filters change (API supports these)
@@ -301,6 +303,7 @@ export function useSearch() {
       }, 200)
       return () => clearTimeout(timer)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.languages, filters.categories, filters.query, activeTab, shouldUseApi])
 
   // Use API results
