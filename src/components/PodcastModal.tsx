@@ -4,6 +4,7 @@ import type { PlayingEpisode } from './AudioPlayer'
 import { getEpisodesByFeedId } from '../services/podcastIndex'
 import { transformEpisodes } from '../services/podcastTransform'
 import { formatDuration } from '../utils/search'
+import { translateCategory } from '../utils/categoryTranslations'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import styles from './PodcastModal.module.css'
 
@@ -146,7 +147,7 @@ export function PodcastModal({ podcast, onClose, onPlayEpisode }: PodcastModalPr
           <div className={styles.categories}>
             {podcast.categories.map((category) => (
               <span key={category} className={styles.category}>
-                {category}
+                {translateCategory(category)}
               </span>
             ))}
           </div>

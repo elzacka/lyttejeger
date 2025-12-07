@@ -10,6 +10,7 @@ import { useSearch } from './hooks/useSearch'
 import { mockPodcasts, allLanguages } from './data/mockPodcasts'
 import { mockEpisodes } from './data/mockEpisodes'
 import { getCategories, isConfigured } from './services/podcastIndex'
+import { translateCategory } from './utils/categoryTranslations'
 import type { FilterOption } from './types/podcast'
 import './App.css'
 
@@ -39,10 +40,10 @@ function App() {
         .then(res => {
           const apiCategories = res.feeds.map(cat => ({
             value: cat.name,
-            label: cat.name
+            label: translateCategory(cat.name)
           }))
-          // Sort alphabetically and limit to most common
-          apiCategories.sort((a, b) => a.label.localeCompare(b.label))
+          // Sort alphabetically by Norwegian label
+          apiCategories.sort((a, b) => a.label.localeCompare(b.label, 'nb'))
           setCategories(apiCategories)
         })
         .catch(err => {
