@@ -45,9 +45,8 @@ function App() {
           apiCategories.sort((a, b) => a.label.localeCompare(b.label, 'nb'))
           setCategories(apiCategories)
         })
-        .catch(err => {
-          console.error('Failed to load categories:', err)
-          // Keep fallback categories
+        .catch(() => {
+          // Keep fallback categories on error
         })
     }
   }, [])

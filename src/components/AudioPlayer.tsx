@@ -138,7 +138,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     if (isPlaying) {
       audioRef.current.pause()
     } else {
-      audioRef.current.play().catch(console.error)
+      audioRef.current.play().catch(() => {})
     }
   }, [isPlaying])
 

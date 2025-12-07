@@ -51,8 +51,7 @@ export function PodcastModal({ podcast, onClose, onPlayEpisode }: PodcastModalPr
         const res = await getEpisodesByFeedId(feedId, 20)
         const transformedEpisodes = transformEpisodes(res.items || [])
         setEpisodes(transformedEpisodes)
-      } catch (err) {
-        console.error('Failed to load episodes:', err)
+      } catch {
         setEpisodesError('Kunne ikke hente episodene. Prøv igjen.')
       } finally {
         setIsLoadingEpisodes(false)

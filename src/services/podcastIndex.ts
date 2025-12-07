@@ -87,11 +87,10 @@ async function apiRequest<T>(endpoint: string, params: Record<string, string> = 
 
   const response = await fetch(url, { headers })
 
-  // Handle rate limit exceeded (429)
+  // Handle rate limit exceeded (429) - retry after delay
   if (response.status === 429) {
-    console.warn('Podcast Index API rate limit exceeded, waiting before retry...')
     await new Promise(resolve => setTimeout(resolve, 2000))
-    return apiRequest<T>(endpoint, params) // Retry once
+    return apiRequest<T>(endpoint, params)
   }
 
   if (!response.ok) {

@@ -165,8 +165,7 @@ export function useSearch() {
           }
 
           setApiEpisodes(episodes)
-        } catch (err) {
-          console.error('Episode search failed:', err)
+        } catch {
           // Fallback: fetch from matching podcasts
           if (podcasts.length > 0) {
             const topPodcasts = podcasts.slice(0, 5)
@@ -193,10 +192,9 @@ export function useSearch() {
       } else {
         setApiEpisodes([])
       }
-    } catch (err) {
+    } catch {
       // Only show error if this is still the current search
       if (currentSearchRef.current === query) {
-        console.error('API search failed:', err)
         setError('Søket feilet. Prøv igjen.')
       }
     } finally {
