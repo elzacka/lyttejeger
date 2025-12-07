@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: '/lyttejeger/',
   server: {
     port: 5175
   },
@@ -19,8 +20,8 @@ export default defineConfig({
         background_color: '#F4F1EA',
         display: 'standalone',
         orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
+        scope: '/lyttejeger/',
+        start_url: '/lyttejeger/',
         icons: [
           {
             src: 'favicon.svg',
