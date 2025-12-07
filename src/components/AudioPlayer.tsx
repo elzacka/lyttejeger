@@ -67,7 +67,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     })
     navigator.mediaSession.setActionHandler('seekbackward', () => {
       if (audioRef.current) {
-        audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 15)
+        audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10)
       }
     })
     navigator.mediaSession.setActionHandler('seekforward', () => {
@@ -152,7 +152,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
 
   const skipBackward = useCallback(() => {
     if (audioRef.current) {
-      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 15)
+      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10)
     }
   }, [])
 
@@ -219,10 +219,10 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
           <button
             className={styles.skipButton}
             onClick={skipBackward}
-            aria-label="Spol tilbake 15 sekunder"
-            title="Spol tilbake 15 sekunder"
+            aria-label="Spol tilbake 10 sekunder"
+            title="Spol tilbake 10 sekunder"
           >
-            <span className="material-symbols-outlined">replay_15</span>
+            <span className="material-symbols-outlined">replay_10</span>
           </button>
 
           <button
