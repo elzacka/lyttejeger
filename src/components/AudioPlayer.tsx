@@ -147,8 +147,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
             aria-label="Spol tilbake 15 sekunder"
             title="Spol tilbake 15 sekunder"
           >
-            <span className="material-symbols-outlined">replay</span>
-            <span className={styles.skipLabel}>15</span>
+            <span className="material-symbols-outlined">replay_15</span>
           </button>
 
           <button
