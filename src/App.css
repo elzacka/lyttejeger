@@ -60,27 +60,6 @@
   text-decoration: underline;
 }
 
-.footer-left {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.footer-links {
-  margin: 0;
-  font-size: var(--font-xs);
-}
-
-.footer-links a {
-  color: var(--text-muted);
-  text-decoration: none;
-}
-
-.footer-links a:hover {
-  color: var(--accent);
-  text-decoration: underline;
-}
-
 /* Help button in footer */
 .help-button {
   display: flex;

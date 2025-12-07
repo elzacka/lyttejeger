@@ -134,27 +134,24 @@ function App() {
       </main>
 
       <footer className="footer">
-        <div className="footer-left">
-          <p className="footer-attribution">
-            Data fra{' '}
-            <a
-              href="https://podcastindex.org/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Podcast Index
-            </a>
-          </p>
-          <p className="footer-links">
-            <a href="https://github.com/elzacka/lyttejeger" target="_blank" rel="noopener noreferrer">
-              Kildekode
-            </a>
-            {' · '}
-            <a href="https://github.com/elzacka/lyttejeger/blob/main/PRIVACY.md" target="_blank" rel="noopener noreferrer">
-              Personvern
-            </a>
-          </p>
-        </div>
+        <p className="footer-attribution">
+          Data fra{' '}
+          <a
+            href="https://podcastindex.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Podcast Index
+          </a>
+          {' | '}
+          <a
+            href="https://github.com/elzacka/lyttejeger/blob/main/PRIVACY.md"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Personvern
+          </a>
+        </p>
         <button
           className="help-button"
           onClick={() => setIsHelpOpen(true)}
