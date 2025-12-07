@@ -11,24 +11,23 @@ export function EpisodeCard({ episode, onPlay }: EpisodeCardProps) {
 
   const imageUrl = episode.imageUrl || episode.podcast?.imageUrl
 
-  const handlePlayClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const playEpisode = () => {
     if (onPlay) {
       onPlay(episode)
     } else if (episode.audioUrl) {
-      // Open audio URL directly in new tab
       window.open(episode.audioUrl, '_blank', 'noopener,noreferrer')
     }
   }
 
-  const handleCardClick = () => {
-    handlePlayClick({ stopPropagation: () => {} } as React.MouseEvent)
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    playEpisode()
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
-      handleCardClick()
+      playEpisode()
     }
   }
 

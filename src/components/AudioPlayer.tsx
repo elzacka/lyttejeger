@@ -202,7 +202,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
           {imageUrl && (
             <img
               src={imageUrl}
-              alt=""
+              alt={episode.podcastTitle || episode.title}
               className={styles.image}
               onError={(e) => {
                 (e.target as HTMLImageElement).src = '/favicon.svg'

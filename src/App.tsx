@@ -125,6 +125,7 @@ function App() {
           ) : (
             <EpisodeList
               episodes={results.episodes}
+              searchQuery={filters.query}
               isLoading={isPending}
               onPlayEpisode={handlePlayEpisode}
             />

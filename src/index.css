@@ -103,7 +103,7 @@
   --z-toast: 400;
 
   /* Typography base */
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   line-height: var(--line-height);
   font-weight: 400;
   font-synthesis: none;

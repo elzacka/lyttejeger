@@ -7,6 +7,7 @@ import styles from './EpisodeList.module.css'
 
 interface EpisodeListProps {
   episodes: EpisodeWithPodcast[]
+  searchQuery?: string
   isLoading?: boolean
   onPlayEpisode: (episode: PlayingEpisode) => void
 }
@@ -25,7 +26,7 @@ function SkeletonCard() {
   )
 }
 
-export function EpisodeList({ episodes, isLoading, onPlayEpisode }: EpisodeListProps) {
+export function EpisodeList({ episodes, searchQuery, isLoading, onPlayEpisode }: EpisodeListProps) {
   const [selectedEpisode, setSelectedEpisode] = useState<EpisodeWithPodcast | null>(null)
 
   if (isLoading) {
@@ -43,7 +44,14 @@ export function EpisodeList({ episodes, isLoading, onPlayEpisode }: EpisodeListP
   }
 
   if (episodes.length === 0) {
-    return null
+    if (!searchQuery) return null
+    return (
+      <div className={styles.container}>
+        <p className={styles.emptyState}>
+          Ingen episoder funnet for "{searchQuery}"
+        </p>
+      </div>
+    )
   }
 
   return (

@@ -76,6 +76,12 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .spinnerIcon {
+    animation: none;
+  }
+}
+
 .clearButton {
   display: flex;
   align-items: center;

@@ -44,7 +44,14 @@ export function PodcastList({ podcasts, searchQuery, isLoading, onPlayEpisode }:
   }
 
   if (podcasts.length === 0) {
-    return null
+    if (!searchQuery) return null
+    return (
+      <div className={styles.container}>
+        <p className={styles.emptyState}>
+          Ingen podcaster funnet for "{searchQuery}"
+        </p>
+      </div>
+    )
   }
 
   return (
