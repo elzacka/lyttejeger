@@ -17,13 +17,24 @@ export function SearchBar({
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Blur input to dismiss keyboard on submit
+    inputRef.current?.blur()
+  }
+
   return (
-    <div className={styles.container}>
+    <form
+      className={styles.container}
+      onSubmit={handleSubmit}
+      action=""
+      role="search"
+    >
       <div className={styles.inputWrapper}>
         <input
           ref={inputRef}
           type="search"
-          name="podcast-search"
+          name="q"
           className={styles.input}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -46,6 +57,7 @@ export function SearchBar({
           )}
           {value && !isPending && (
             <button
+              type="button"
               className={styles.clearButton}
               onClick={() => onChange('')}
               aria-label="Tøm søkefeltet"
@@ -56,6 +68,6 @@ export function SearchBar({
           <SearchHelp />
         </div>
       </div>
-    </div>
+    </form>
   )
 }
