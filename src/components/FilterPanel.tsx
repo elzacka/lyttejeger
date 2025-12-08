@@ -90,6 +90,7 @@ export function FilterPanel({
             value={filters.sortBy}
             onChange={(e) => onSetSortBy(e.target.value as SearchFilters['sortBy'])}
             aria-label="Velg sorteringsrekkefølge"
+            tabIndex={-1}
           >
             <option value="relevance">Relevans</option>
             <option value="newest">Nyeste</option>
@@ -194,6 +195,7 @@ export function FilterPanel({
                 value={filters.dateFrom ?? ''}
                 onChange={(e) => onSetDateFrom(e.target.value ? parseInt(e.target.value) : null)}
                 aria-label="Fra år"
+                tabIndex={-1}
               >
                 <option value="">Fra</option>
                 {years.map((year) => (
@@ -206,6 +208,7 @@ export function FilterPanel({
                 value={filters.dateTo ?? ''}
                 onChange={(e) => onSetDateTo(e.target.value ? parseInt(e.target.value) : null)}
                 aria-label="Til år"
+                tabIndex={-1}
               >
                 <option value="">Til</option>
                 {years.map((year) => (

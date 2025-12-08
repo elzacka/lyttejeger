@@ -359,6 +359,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
             onChange={handleSeek}
             className={styles.slider}
             aria-label="Avspillingsposisjon"
+            tabIndex={-1}
             style={{
               background: `linear-gradient(to right, var(--accent) ${progress}%, var(--border) ${progress}%)`
             }}

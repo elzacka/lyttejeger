@@ -29,24 +29,28 @@ export function SearchBar({
       onSubmit={handleSubmit}
       action=""
       role="search"
+      autoComplete="off"
     >
       <div className={styles.inputWrapper}>
         <input
           ref={inputRef}
           type="search"
-          name="q"
+          id="podcast-search-input"
+          name="podcast-search-query"
           className={styles.input}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           aria-label="Søkefelt for podcaster og episoder"
-          autoComplete="off"
+          autoComplete="nope"
           autoCorrect="off"
           autoCapitalize="off"
           spellCheck={false}
           enterKeyHint="search"
+          inputMode="search"
           data-form-type="other"
           data-lpignore="true"
+          data-1p-ignore="true"
           lang="no"
         />
         <div className={styles.actions}>
