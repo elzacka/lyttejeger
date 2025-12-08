@@ -6,7 +6,8 @@
   flex-direction: column;
   overflow-x: hidden;
   width: 100%;
-  max-width: 100vw;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Main content - narrow width, aligned to top */
@@ -19,17 +20,24 @@
   margin: 0 auto;
   padding: var(--space-xl) var(--space-lg) var(--space-lg);
   overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Search section */
 .search-section {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Filter section */
 .filter-section {
   margin-top: var(--space-md);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Results section */
@@ -38,6 +46,9 @@
   /* Add space at bottom for audio player when visible */
   padding-bottom: 140px;
   overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Footer */

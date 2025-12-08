@@ -2,6 +2,7 @@
   width: 100%;
   max-width: 100%;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .header {
@@ -9,6 +10,9 @@
   align-items: center;
   gap: var(--space-sm);
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Type selector - segmented control */

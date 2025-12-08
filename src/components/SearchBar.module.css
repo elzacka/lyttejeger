@@ -3,6 +3,8 @@
   display: flex;
   align-items: center;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .inputWrapper {
@@ -10,11 +12,13 @@
   display: flex;
   align-items: center;
   flex: 1;
+  min-width: 0;
   min-height: var(--touch-target);
   padding: 0 var(--space-md);
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
+  box-sizing: border-box;
   transition: border-color var(--transition-fast),
               background var(--transition-fast);
 }
