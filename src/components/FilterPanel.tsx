@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { SearchFilters, FilterOption } from '../types/podcast'
 import styles from './FilterPanel.module.css'
 
@@ -10,7 +10,8 @@ interface FilterPanelProps {
   onTabChange: (tab: 'podcasts' | 'episodes') => void
   onToggleCategory: (category: string) => void
   onToggleLanguage: (language: string) => void
-  onSetMinRating: (rating: number) => void
+  onSetDateFrom: (year: number | null) => void
+  onSetDateTo: (year: number | null) => void
   onSetSortBy: (sortBy: SearchFilters['sortBy']) => void
   onClearFilters: () => void
   activeFilterCount: number
@@ -24,12 +25,30 @@ export function FilterPanel({
   onTabChange,
   onToggleCategory,
   onToggleLanguage,
-  onSetMinRating,
+  onSetDateFrom,
+  onSetDateTo,
   onSetSortBy,
   onClearFilters,
   activeFilterCount
 }: FilterPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false)
+  const categoryDropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target as Node)) {
+        setCategoryDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Generate year options (from 2004 when podcasting started to current year)
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: currentYear - 2004 + 1 }, (_, i) => currentYear - i)
 
   return (
     <div className={styles.container}>
@@ -73,8 +92,8 @@ export function FilterPanel({
             aria-label="Velg sorteringsrekkefølge"
           >
             <option value="relevance">Relevans</option>
-            <option value="rating">Vurdering</option>
             <option value="newest">Nyeste</option>
+            <option value="oldest">Eldste</option>
             <option value="popular">Populære</option>
           </select>
         </div>
@@ -82,23 +101,7 @@ export function FilterPanel({
 
       {isExpanded && (
         <div className={styles.panel}>
-          <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Kategori</h3>
-            <div className={styles.chipGrid}>
-              {categories.map((category) => (
-                <button
-                  key={category.value}
-                  className={`${styles.chip} ${
-                    filters.categories.includes(category.value) ? styles.chipActive : ''
-                  }`}
-                  onClick={() => onToggleCategory(category.value)}
-                >
-                  {category.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
+          {/* Språk - first */}
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>Språk</h3>
             <div className={styles.chipGrid}>
@@ -116,20 +119,99 @@ export function FilterPanel({
             </div>
           </div>
 
+          {/* Kategorier - dropdown with multiselect */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Minste vurdering</h3>
-            <div className={styles.ratingContainer}>
-              {[0, 3, 3.5, 4, 4.5].map((rating) => (
-                <button
-                  key={rating}
-                  className={`${styles.ratingButton} ${
-                    filters.minRating === rating ? styles.ratingActive : ''
-                  }`}
-                  onClick={() => onSetMinRating(rating)}
-                >
-                  {rating === 0 ? 'Alle' : `${rating}+`}
-                </button>
-              ))}
+            <h3 className={styles.sectionTitle}>Kategorier</h3>
+            <div className={styles.dropdownContainer} ref={categoryDropdownRef}>
+              <button
+                className={styles.dropdownButton}
+                onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                aria-expanded={categoryDropdownOpen}
+                aria-haspopup="listbox"
+              >
+                <span className={styles.dropdownText}>
+                  {filters.categories.length === 0
+                    ? 'Velg kategorier'
+                    : `${filters.categories.length} valgt`}
+                </span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  {categoryDropdownOpen ? 'expand_less' : 'expand_more'}
+                </span>
+              </button>
+
+              {categoryDropdownOpen && (
+                <div className={styles.dropdownMenu} role="listbox" aria-multiselectable="true">
+                  {categories.map((category) => {
+                    const isSelected = filters.categories.includes(category.value)
+                    return (
+                      <button
+                        key={category.value}
+                        className={`${styles.dropdownItem} ${isSelected ? styles.dropdownItemSelected : ''}`}
+                        onClick={() => onToggleCategory(category.value)}
+                        role="option"
+                        aria-selected={isSelected}
+                      >
+                        <span className={styles.checkbox}>
+                          {isSelected && (
+                            <span className="material-symbols-outlined" aria-hidden="true">check</span>
+                          )}
+                        </span>
+                        {category.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* Show selected categories as chips below dropdown */}
+              {filters.categories.length > 0 && (
+                <div className={styles.selectedChips}>
+                  {filters.categories.map((catValue) => {
+                    const category = categories.find(c => c.value === catValue)
+                    return (
+                      <button
+                        key={catValue}
+                        className={styles.selectedChip}
+                        onClick={() => onToggleCategory(catValue)}
+                        aria-label={`Fjern ${category?.label || catValue}`}
+                      >
+                        {category?.label || catValue}
+                        <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Date range filter */}
+          <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>Periode</h3>
+            <div className={styles.dateRangeContainer}>
+              <select
+                className={styles.yearSelect}
+                value={filters.dateFrom ?? ''}
+                onChange={(e) => onSetDateFrom(e.target.value ? parseInt(e.target.value) : null)}
+                aria-label="Fra år"
+              >
+                <option value="">Fra</option>
+                {years.map((year) => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+              <span className={styles.dateRangeSeparator}>–</span>
+              <select
+                className={styles.yearSelect}
+                value={filters.dateTo ?? ''}
+                onChange={(e) => onSetDateTo(e.target.value ? parseInt(e.target.value) : null)}
+                aria-label="Til år"
+              >
+                <option value="">Til</option>
+                {years.map((year) => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
             </div>
           </div>
 

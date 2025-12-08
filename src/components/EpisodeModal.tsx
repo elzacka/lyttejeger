@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { EpisodeWithPodcast } from '../utils/search'
 import type { PlayingEpisode } from './AudioPlayer'
 import { formatDuration, formatDateLong } from '../utils/search'
 import { useFocusTrap } from '../hooks/useFocusTrap'
+import { TranscriptViewer } from './TranscriptViewer'
 import styles from './EpisodeModal.module.css'
 
 interface EpisodeModalProps {
@@ -14,6 +15,7 @@ interface EpisodeModalProps {
 export function EpisodeModal({ episode, onClose, onPlayEpisode }: EpisodeModalProps) {
   const focusTrapRef = useFocusTrap<HTMLDivElement>()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const [showTranscript, setShowTranscript] = useState(false)
 
   useEffect(() => {
     closeButtonRef.current?.focus()
@@ -98,9 +100,34 @@ export function EpisodeModal({ episode, onClose, onPlayEpisode }: EpisodeModalPr
                 <span>{formatDuration(episode.duration)}</span>
               </div>
             )}
+            {episode.transcriptUrl && (
+              <div className={styles.metaItem}>
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>subtitles</span>
+                <span>Transkripsjon</span>
+              </div>
+            )}
           </div>
 
           <p className={styles.description}>{episode.description}</p>
+
+          {episode.transcriptUrl && (
+            <div className={styles.transcriptSection}>
+              <button
+                className={styles.transcriptToggle}
+                onClick={() => setShowTranscript(!showTranscript)}
+                aria-expanded={showTranscript}
+              >
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  {showTranscript ? 'expand_less' : 'expand_more'}
+                </span>
+                {showTranscript ? 'Skjul transkripsjon' : 'Vis transkripsjon'}
+              </button>
+
+              {showTranscript && (
+                <TranscriptViewer transcriptUrl={episode.transcriptUrl} />
+              )}
+            </div>
+          )}
         </div>
 
         <div className={styles.footer}>

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import type { Episode } from '../types/podcast'
+import { savePlaybackPosition, getPlaybackPosition } from '../services/db'
 import styles from './AudioPlayer.module.css'
 
 export interface PlayingEpisode extends Episode {
@@ -20,6 +21,10 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const [duration, setDuration] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Track last save time to debounce saves
+  const lastSaveRef = useRef<number>(0)
+  const saveIntervalRef = useRef<number | null>(null)
+
   // Reset and auto-play when episode changes
   const episodeId = episode?.id
   if (episodeId !== prevEpisodeIdRef.current) {
@@ -32,14 +37,73 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     }
   }
 
-  // Auto-play when episode loads
+  // Load saved position and auto-play when episode loads
   useEffect(() => {
-    if (episode && audioRef.current) {
-      audioRef.current.play().catch(() => {
+    if (!episode || !audioRef.current) return
+
+    const loadAndPlay = async () => {
+      const saved = await getPlaybackPosition(episode.id)
+      if (saved && !saved.completed && audioRef.current) {
+        // Resume from saved position (but not if completed)
+        audioRef.current.currentTime = saved.position
+        setCurrentTime(saved.position)
+      }
+
+      audioRef.current?.play().catch(() => {
         setIsPlaying(false)
       })
     }
+
+    loadAndPlay()
   }, [episode])
+
+  // Save playback position every 5 seconds while playing
+  useEffect(() => {
+    if (!episode || !isPlaying) {
+      if (saveIntervalRef.current) {
+        clearInterval(saveIntervalRef.current)
+        saveIntervalRef.current = null
+      }
+      return
+    }
+
+    saveIntervalRef.current = window.setInterval(() => {
+      const now = Date.now()
+      if (now - lastSaveRef.current >= 5000 && audioRef.current) {
+        lastSaveRef.current = now
+        savePlaybackPosition(
+          episode.id,
+          audioRef.current.currentTime,
+          audioRef.current.duration || duration
+        )
+      }
+    }, 1000)
+
+    return () => {
+      if (saveIntervalRef.current) {
+        clearInterval(saveIntervalRef.current)
+        saveIntervalRef.current = null
+      }
+    }
+  }, [episode, isPlaying, duration])
+
+  // Save position on pause/close
+  useEffect(() => {
+    const audio = audioRef.current
+    const currentEpisode = episode
+    const currentDuration = duration
+
+    return () => {
+      // Save on unmount if we have an episode
+      if (currentEpisode && audio) {
+        savePlaybackPosition(
+          currentEpisode.id,
+          audio.currentTime,
+          audio.duration || currentDuration
+        )
+      }
+    }
+  }, [episode, duration])
 
   // Media Session API - for lock screen controls and artwork
   useEffect(() => {
@@ -130,8 +194,30 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   }, [])
 
   const handlePlay = useCallback(() => setIsPlaying(true), [])
-  const handlePause = useCallback(() => setIsPlaying(false), [])
-  const handleEnded = useCallback(() => setIsPlaying(false), [])
+
+  const handlePause = useCallback(() => {
+    setIsPlaying(false)
+    // Save position immediately on pause
+    if (episode && audioRef.current) {
+      savePlaybackPosition(
+        episode.id,
+        audioRef.current.currentTime,
+        audioRef.current.duration || duration
+      )
+    }
+  }, [episode, duration])
+
+  const handleEnded = useCallback(() => {
+    setIsPlaying(false)
+    // Mark as completed when ended
+    if (episode && audioRef.current) {
+      savePlaybackPosition(
+        episode.id,
+        audioRef.current.duration,
+        audioRef.current.duration
+      )
+    }
+  }, [episode])
   const handleWaiting = useCallback(() => setIsLoading(true), [])
   const handleCanPlay = useCallback(() => setIsLoading(false), [])
 

@@ -22,16 +22,19 @@ export interface Episode {
   duration: number
   publishedAt: string
   imageUrl?: string
+  transcriptUrl?: string
+  chaptersUrl?: string
 }
 
 export interface SearchFilters {
   query: string
   categories: string[]
   languages: string[]
-  minRating: number
   maxDuration: number | null
-  sortBy: 'relevance' | 'rating' | 'newest' | 'popular'
+  sortBy: 'relevance' | 'newest' | 'oldest' | 'popular'
   explicit: boolean | null
+  dateFrom: number | null  // Year (e.g., 2020)
+  dateTo: number | null    // Year (e.g., 2024)
 }
 
 export interface FilterOption {

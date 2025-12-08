@@ -51,7 +51,9 @@ export function transformEpisode(episode: PodcastIndexEpisode): Episode {
     audioUrl: episode.enclosureUrl,
     duration: episode.duration || 0,
     publishedAt: safeTimestampToISO(episode.datePublished),
-    imageUrl: episode.image || episode.feedImage || undefined
+    imageUrl: episode.image || episode.feedImage || undefined,
+    transcriptUrl: episode.transcriptUrl || undefined,
+    chaptersUrl: episode.chaptersUrl || undefined,
   }
 }
 

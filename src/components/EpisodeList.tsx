@@ -10,6 +10,9 @@ interface EpisodeListProps {
   searchQuery?: string
   isLoading?: boolean
   onPlayEpisode: (episode: PlayingEpisode) => void
+  onAddToQueue?: (episode: EpisodeWithPodcast) => void
+  onPlayNext?: (episode: EpisodeWithPodcast) => void
+  isInQueue?: (episodeId: string) => boolean
 }
 
 function SkeletonCard() {
@@ -26,7 +29,15 @@ function SkeletonCard() {
   )
 }
 
-export function EpisodeList({ episodes, searchQuery, isLoading, onPlayEpisode }: EpisodeListProps) {
+export function EpisodeList({
+  episodes,
+  searchQuery,
+  isLoading,
+  onPlayEpisode,
+  onAddToQueue,
+  onPlayNext,
+  isInQueue,
+}: EpisodeListProps) {
   const [selectedEpisode, setSelectedEpisode] = useState<EpisodeWithPodcast | null>(null)
 
   if (isLoading) {
@@ -64,7 +75,15 @@ export function EpisodeList({ episodes, searchQuery, isLoading, onPlayEpisode }:
           <EpisodeCard
             key={episode.id}
             episode={episode}
-            onPlay={setSelectedEpisode}
+            onPlay={(ep) => onPlayEpisode({
+              ...ep,
+              podcastTitle: ep.podcast?.title,
+              podcastImage: ep.podcast?.imageUrl
+            })}
+            onShowDetails={setSelectedEpisode}
+            onAddToQueue={onAddToQueue}
+            onPlayNext={onPlayNext}
+            isInQueue={isInQueue?.(episode.id) ?? false}
           />
         ))}
       </div>

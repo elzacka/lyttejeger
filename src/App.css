@@ -35,11 +35,10 @@
   padding-bottom: 140px;
 }
 
-/* Footer - minimal with help button */
+/* Footer */
 .footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: center;
   padding: var(--space-md) var(--space-lg);
   font-family: var(--font-mono);
   font-size: var(--font-xs);
@@ -58,33 +57,6 @@
 
 .footer-attribution a:hover {
   text-decoration: underline;
-}
-
-/* Help button in footer */
-.help-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: border-color var(--transition-fast),
-              color var(--transition-fast),
-              background var(--transition-fast);
-}
-
-.help-button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--bg-secondary);
-}
-
-.help-button .help-icon {
-  font-size: 20px;
 }
 
 /* Error Banner */

@@ -1,15 +1,12 @@
-import { useState } from 'react'
 import type { Podcast } from '../types/podcast'
-import type { PlayingEpisode } from './AudioPlayer'
 import { PodcastCard } from './PodcastCard'
-import { PodcastModal } from './PodcastModal'
 import styles from './PodcastList.module.css'
 
 interface PodcastListProps {
   podcasts: Podcast[]
   searchQuery?: string
   isLoading?: boolean
-  onPlayEpisode: (episode: PlayingEpisode) => void
+  onSelectPodcast: (podcast: Podcast) => void
 }
 
 function SkeletonCard() {
@@ -25,9 +22,7 @@ function SkeletonCard() {
   )
 }
 
-export function PodcastList({ podcasts, searchQuery, isLoading, onPlayEpisode }: PodcastListProps) {
-  const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null)
-
+export function PodcastList({ podcasts, searchQuery, isLoading, onSelectPodcast }: PodcastListProps) {
   if (isLoading) {
     return (
       <div className={styles.container}>
@@ -65,17 +60,10 @@ export function PodcastList({ podcasts, searchQuery, isLoading, onPlayEpisode }:
             key={podcast.id}
             podcast={podcast}
             searchQuery={searchQuery}
-            onSelect={setSelectedPodcast}
+            onSelect={onSelectPodcast}
           />
         ))}
       </div>
-      {selectedPodcast && (
-        <PodcastModal
-          podcast={selectedPodcast}
-          onClose={() => setSelectedPodcast(null)}
-          onPlayEpisode={onPlayEpisode}
-        />
-      )}
     </div>
   )
 }

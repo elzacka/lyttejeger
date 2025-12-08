@@ -4,13 +4,15 @@ import { SearchBar } from './components/SearchBar'
 import { FilterPanel } from './components/FilterPanel'
 import { PodcastList } from './components/PodcastList'
 import { EpisodeList } from './components/EpisodeList'
-import { HelpModal } from './components/HelpModal'
+import { PodcastPage } from './components/PodcastPage'
 import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer'
 import { useSearch } from './hooks/useSearch'
+import { useQueue } from './hooks/useQueue'
 import { allLanguages } from './data/languages'
 import { getCategories, isConfigured } from './services/podcastIndex'
 import { translateCategory } from './utils/categoryTranslations'
-import type { FilterOption } from './types/podcast'
+import type { FilterOption, Podcast } from './types/podcast'
+import type { EpisodeWithPodcast } from './utils/search'
 import './App.css'
 
 // Fallback categories if API fails
@@ -29,8 +31,8 @@ const fallbackCategories: FilterOption[] = [
 
 function App() {
   const [categories, setCategories] = useState<FilterOption[]>(fallbackCategories)
-  const [isHelpOpen, setIsHelpOpen] = useState(false)
   const [playingEpisode, setPlayingEpisode] = useState<PlayingEpisode | null>(null)
+  const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null)
 
   // Fetch categories from API on mount
   useEffect(() => {
@@ -61,11 +63,14 @@ function App() {
     setQuery,
     toggleCategory,
     toggleLanguage,
-    setMinRating,
+    setDateFrom,
+    setDateTo,
     setSortBy,
     clearFilters,
     activeFilterCount
   } = useSearch()
+
+  const { addToQueue, playNext, isInQueue } = useQueue()
 
   const handlePlayEpisode = useCallback((episode: PlayingEpisode) => {
     setPlayingEpisode(episode)
@@ -74,6 +79,58 @@ function App() {
   const handleClosePlayer = useCallback(() => {
     setPlayingEpisode(null)
   }, [])
+
+  const handleAddToQueue = useCallback((episode: EpisodeWithPodcast) => {
+    addToQueue({
+      id: episode.id,
+      podcastId: episode.podcastId,
+      title: episode.title,
+      audioUrl: episode.audioUrl,
+      imageUrl: episode.imageUrl,
+      podcastTitle: episode.podcast?.title,
+      podcastImage: episode.podcast?.imageUrl,
+      duration: episode.duration,
+      description: episode.description,
+      publishedAt: episode.publishedAt,
+    })
+  }, [addToQueue])
+
+  const handlePlayNext = useCallback((episode: EpisodeWithPodcast) => {
+    playNext({
+      id: episode.id,
+      podcastId: episode.podcastId,
+      title: episode.title,
+      audioUrl: episode.audioUrl,
+      imageUrl: episode.imageUrl,
+      podcastTitle: episode.podcast?.title,
+      podcastImage: episode.podcast?.imageUrl,
+      duration: episode.duration,
+      description: episode.description,
+      publishedAt: episode.publishedAt,
+    })
+  }, [playNext])
+
+  const handleSelectPodcast = useCallback((podcast: Podcast) => {
+    setSelectedPodcast(podcast)
+  }, [])
+
+  const handleBackToSearch = useCallback(() => {
+    setSelectedPodcast(null)
+  }, [])
+
+  // If a podcast is selected, show the podcast page
+  if (selectedPodcast) {
+    return (
+      <div className="app">
+        <PodcastPage
+          podcast={selectedPodcast}
+          onBack={handleBackToSearch}
+          onPlayEpisode={handlePlayEpisode}
+        />
+        <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
+      </div>
+    )
+  }
 
   return (
     <div className="app">
@@ -107,7 +164,8 @@ function App() {
             onTabChange={setActiveTab}
             onToggleCategory={toggleCategory}
             onToggleLanguage={toggleLanguage}
-            onSetMinRating={setMinRating}
+            onSetDateFrom={setDateFrom}
+            onSetDateTo={setDateTo}
             onSetSortBy={setSortBy}
             onClearFilters={clearFilters}
             activeFilterCount={activeFilterCount}
@@ -120,7 +178,7 @@ function App() {
               podcasts={results.podcasts}
               searchQuery={filters.query}
               isLoading={isPending}
-              onPlayEpisode={handlePlayEpisode}
+              onSelectPodcast={handleSelectPodcast}
             />
           ) : (
             <EpisodeList
@@ -128,6 +186,9 @@ function App() {
               searchQuery={filters.query}
               isLoading={isPending}
               onPlayEpisode={handlePlayEpisode}
+              onAddToQueue={handleAddToQueue}
+              onPlayNext={handlePlayNext}
+              isInQueue={isInQueue}
             />
           )}
         </section>
@@ -152,17 +213,7 @@ function App() {
             Personvern
           </a>
         </p>
-        <button
-          className="help-button"
-          onClick={() => setIsHelpOpen(true)}
-          aria-label="Søketips"
-          title="Søketips"
-        >
-          <span className="material-symbols-outlined help-icon" aria-hidden="true">text_ad</span>
-        </button>
       </footer>
-
-      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
       <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
     </div>
   )

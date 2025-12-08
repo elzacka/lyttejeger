@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import styles from './SearchBar.module.css'
+import { SearchHelp } from './SearchHelp'
 
 interface SearchBarProps {
   value: string
@@ -27,6 +28,11 @@ export function SearchBar({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           aria-label="Søkefelt for podcaster og episoder"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
+          lang="no"
         />
         <div className={styles.actions}>
           {isPending && (
@@ -43,6 +49,7 @@ export function SearchBar({
               <span className="material-symbols-outlined">close</span>
             </button>
           )}
+          <SearchHelp />
         </div>
       </div>
     </div>

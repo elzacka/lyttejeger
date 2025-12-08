@@ -42,11 +42,21 @@
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.4);
+  border: none;
   border-radius: var(--radius-sm);
   color: white;
-  pointer-events: none;
+  cursor: pointer;
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: opacity var(--transition-fast),
+              background var(--transition-fast);
+}
+
+.playOverlay:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.playOverlay:active {
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .playOverlay .material-symbols-outlined {
@@ -125,6 +135,109 @@
   align-items: center;
   gap: var(--space-xs);
   white-space: nowrap;
+}
+
+.inQueue {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.actions {
+  position: relative;
+  margin-top: var(--space-xs);
+}
+
+.menuButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast),
+              background var(--transition-fast);
+}
+
+.menuButton:hover,
+.menuButton:focus-visible {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.menuButton .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.menu {
+  position: absolute;
+  bottom: calc(100% + var(--space-xs));
+  right: 0;
+  z-index: 50;
+  min-width: 160px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: fadeIn var(--transition-fast) ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu {
+    animation: none;
+  }
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast);
+}
+
+.menuItem:hover {
+  background: var(--bg-secondary);
+}
+
+.menuItem:first-child {
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.menuItem:last-child {
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.menuItem:only-child {
+  border-radius: var(--radius-md);
+}
+
+.menuItem .material-symbols-outlined {
+  font-size: 18px;
+  color: var(--text-muted);
 }
 
 /* Mobile */

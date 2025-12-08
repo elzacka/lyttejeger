@@ -8,6 +8,10 @@ import {
   isConfigured,
   type SearchOptions
 } from '../services/podcastIndex'
+import {
+  searchEpisodes as listenNotesSearchEpisodes,
+  isAvailable as isListenNotesAvailable
+} from '../services/listenNotes'
 import { transformFeeds, transformEpisodes } from '../services/podcastTransform'
 import { parseSearchQuery } from '../utils/search'
 
@@ -15,10 +19,11 @@ const initialFilters: SearchFilters = {
   query: '',
   categories: [],
   languages: [],
-  minRating: 0,
   maxDuration: null,
   sortBy: 'relevance',
-  explicit: null
+  explicit: null,
+  dateFrom: null,
+  dateTo: null
 }
 
 export interface SearchResultsState {
@@ -57,7 +62,15 @@ export function useSearch() {
   }, [])
 
   // Allowed language codes (Norwegian, Danish, Swedish, English)
+  // These are applied by default to filter out German, Spanish, etc.
   const ALLOWED_LANGUAGES = ['no', 'nb', 'nn', 'da', 'sv', 'en']
+
+  // Helper to check if a language code is allowed
+  const isAllowedLanguage = (langCode: string | undefined): boolean => {
+    if (!langCode) return true // Keep if no language specified
+    const code = langCode.toLowerCase().slice(0, 2)
+    return ALLOWED_LANGUAGES.includes(code)
+  }
 
   // Search via API with enhanced options
   const searchViaApi = async (query: string, searchType: 'podcasts' | 'episodes') => {
@@ -96,11 +109,7 @@ export function useSearch() {
       // Transform and filter by allowed languages locally
       // (API language filter doesn't work reliably)
       let podcasts = transformFeeds(searchRes.feeds)
-      podcasts = podcasts.filter(p => {
-        if (!p.language) return true // Keep if no language specified
-        const langCode = p.language.toLowerCase().slice(0, 2)
-        return ALLOWED_LANGUAGES.includes(langCode)
-      })
+      podcasts = podcasts.filter(p => isAllowedLanguage(p.language))
 
       // Store for incremental filtering
       lastSearchQueryRef.current = query
@@ -108,87 +117,149 @@ export function useSearch() {
 
       setApiPodcasts(podcasts)
 
-      // For episode search, use byperson API which searches episode content
+      // For episode search, use Listen Notes API (full-text search) as primary
+      // Fall back to Podcast Index if Listen Notes fails
       if (searchType === 'episodes') {
+        const allEpisodes: Episode[] = []
+        const existingIds = new Set<string>()
+
+        // Strategy 1: Listen Notes API - best full-text episode search
+        if (isListenNotesAvailable()) {
+          try {
+            const listenNotesRes = await listenNotesSearchEpisodes(query, {
+              sort_by_date: filters.sortBy === 'newest' ? 1 : 0
+            })
+
+            // Only update if this is still the current search
+            if (currentSearchRef.current !== query) {
+              return
+            }
+
+            // Transform Listen Notes results to our Episode format
+            for (const ep of listenNotesRes.results) {
+              const episode: Episode & {
+                podcastTitle: string
+                podcastAuthor: string
+                podcastImage: string
+                feedLanguage: string
+              } = {
+                id: ep.id,
+                podcastId: ep.podcast.id,
+                title: ep.title_original,
+                description: ep.description_original,
+                audioUrl: ep.audio,
+                duration: ep.audio_length_sec,
+                publishedAt: new Date(ep.pub_date_ms).toISOString(),
+                imageUrl: ep.image || ep.thumbnail,
+                podcastTitle: ep.podcast.title_original,
+                podcastAuthor: ep.podcast.publisher_original,
+                podcastImage: ep.podcast.image || ep.podcast.thumbnail,
+                feedLanguage: '' // Listen Notes already filtered by language
+              }
+              allEpisodes.push(episode)
+              existingIds.add(ep.id)
+            }
+          } catch {
+            // Continue to fallback strategies
+          }
+        }
+
+        // Strategy 2: Podcast Index byperson API
+        // Searches person tags, episode title, description, feed owner/author
         try {
-          // Use search/byperson which searches: Person tags, Episode title,
-          // Episode description, Feed owner, Feed author
           const episodesRes = await searchEpisodesByPerson(query, { max: 50, fulltext: true })
 
-          // Only update if this is still the current search
           if (currentSearchRef.current !== query) {
             return
           }
 
-          let episodes = transformEpisodes(episodesRes.items || [])
+          const episodes = transformEpisodes(episodesRes.items || [])
 
-          // Add podcast info from the API response
-          episodes = episodes.map((ep, idx) => {
+          for (let idx = 0; idx < episodes.length; idx++) {
+            const ep = episodes[idx]
             const apiEp = episodesRes.items?.[idx]
-            return {
+
+            // Skip if already have this episode or wrong language
+            if (existingIds.has(ep.id)) continue
+            if (!isAllowedLanguage(apiEp?.feedLanguage)) continue
+
+            allEpisodes.push({
               ...ep,
               podcastTitle: apiEp?.feedTitle || '',
               podcastAuthor: apiEp?.feedAuthor || '',
-              podcastImage: apiEp?.feedImage || ''
+              podcastImage: apiEp?.feedImage || '',
+              feedLanguage: apiEp?.feedLanguage || ''
+            } as Episode)
+            existingIds.add(ep.id)
+          }
+        } catch {
+          // Continue to strategy 3
+        }
+
+        // Strategy 3: Fetch episodes from matching podcasts and filter by query
+        // This is the main strategy for finding episodes about a topic
+        if (podcasts.length > 0) {
+          const topPodcasts = podcasts.slice(0, 10) // Search more podcasts
+          const episodePromises = topPodcasts.map(async (podcast) => {
+            try {
+              const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), 30) // More episodes per podcast
+              const episodes = transformEpisodes(episodesRes.items || [])
+              return episodes.map(ep => ({
+                ...ep,
+                podcastTitle: podcast.title,
+                podcastAuthor: podcast.author,
+                podcastImage: podcast.imageUrl,
+                feedLanguage: podcast.language
+              }))
+            } catch {
+              return []
             }
           })
+          const episodeResults = await Promise.all(episodePromises)
+          const podcastEpisodes = episodeResults.flat()
 
-          // Apply language filter locally if set (API doesn't support it for byperson)
-          if (filters.languages.length > 0) {
-            episodes = episodes.filter(ep => {
-              const apiEp = episodesRes.items?.find(item => item.id.toString() === ep.id)
-              if (!apiEp?.feedLanguage) return true
-              return filters.languages.some(lang =>
-                apiEp.feedLanguage.toLowerCase().includes(lang.toLowerCase().slice(0, 2))
-              )
-            })
-          }
-
-          // Apply local text filtering for advanced query syntax (OR, exact phrases, exclusions)
-          const parsed = parseSearchQuery(query)
-          if (parsed.exactPhrases.length > 0 || parsed.mustExclude.length > 0 || parsed.shouldInclude.length > 0) {
-            episodes = episodes.filter(ep => {
-              const fullText = `${ep.title} ${ep.description}`.toLowerCase()
-
-              // Must contain exact phrases
-              for (const phrase of parsed.exactPhrases) {
-                if (!fullText.includes(phrase)) return false
-              }
-
-              // Must not contain excluded terms
-              for (const term of parsed.mustExclude) {
-                if (fullText.includes(term)) return false
-              }
-
-              return true
-            })
-          }
-
-          setApiEpisodes(episodes)
-        } catch {
-          // Fallback: fetch from matching podcasts
-          if (podcasts.length > 0) {
-            const topPodcasts = podcasts.slice(0, 5)
-            const episodePromises = topPodcasts.map(async (podcast) => {
-              try {
-                const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), 10)
-                const episodes = transformEpisodes(episodesRes.items || [])
-                return episodes.map(ep => ({
-                  ...ep,
-                  podcastTitle: podcast.title,
-                  podcastAuthor: podcast.author,
-                  podcastImage: podcast.imageUrl
-                }))
-              } catch {
-                return []
-              }
-            })
-            const episodeResults = await Promise.all(episodePromises)
-            setApiEpisodes(episodeResults.flat())
-          } else {
-            setApiEpisodes([])
+          // Filter by query terms in title or description
+          const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 1)
+          for (const ep of podcastEpisodes) {
+            if (existingIds.has(ep.id)) continue
+            const text = `${ep.title} ${ep.description}`.toLowerCase()
+            // Episode must contain at least one query word
+            if (queryWords.some(word => text.includes(word))) {
+              allEpisodes.push(ep as Episode)
+              existingIds.add(ep.id)
+            }
           }
         }
+
+        // Apply local text filtering for advanced query syntax
+        let finalEpisodes = allEpisodes
+        const parsed = parseSearchQuery(query)
+        if (parsed.exactPhrases.length > 0 || parsed.mustExclude.length > 0) {
+          finalEpisodes = allEpisodes.filter(ep => {
+            const fullText = `${ep.title} ${ep.description}`.toLowerCase()
+
+            for (const phrase of parsed.exactPhrases) {
+              if (!fullText.includes(phrase)) return false
+            }
+
+            for (const term of parsed.mustExclude) {
+              if (fullText.includes(term)) return false
+            }
+
+            return true
+          })
+        }
+
+        // Sort by publish date (newest first) unless relevance
+        if (filters.sortBy !== 'relevance') {
+          finalEpisodes.sort((a, b) => {
+            const dateA = new Date(a.publishedAt).getTime()
+            const dateB = new Date(b.publishedAt).getTime()
+            return filters.sortBy === 'oldest' ? dateA - dateB : dateB - dateA
+          })
+        }
+
+        setApiEpisodes(finalEpisodes)
       } else {
         setApiEpisodes([])
       }
@@ -205,45 +276,6 @@ export function useSearch() {
     }
   }
 
-  // Extract complete words from query (words followed by space or at end after space)
-  // "hele hi" -> "hele" (only complete words for API)
-  // "hele historien" -> "hele historien" (both complete)
-  const getCompleteWords = (query: string): string => {
-    const trimmed = query.trim()
-    if (!trimmed) return ''
-
-    // If query ends with space, all words are complete
-    if (query.endsWith(' ')) {
-      return trimmed
-    }
-
-    // Otherwise, only words before the last space are complete
-    const lastSpaceIndex = trimmed.lastIndexOf(' ')
-    if (lastSpaceIndex === -1) {
-      // Single word being typed - use it for API (user might be done)
-      return trimmed
-    }
-
-    // Return only complete words (everything before and including last complete word)
-    return trimmed.substring(0, lastSpaceIndex).trim()
-  }
-
-  // Check if we should call API or filter locally
-  const shouldCallApi = useCallback((newQuery: string): boolean => {
-    const completeWords = getCompleteWords(newQuery)
-    const lastCompleteWords = getCompleteWords(lastSearchQueryRef.current)
-
-    // If no complete words yet, don't call API
-    if (!completeWords) return false
-
-    // If complete words changed, call API
-    if (completeWords !== lastCompleteWords) return true
-
-    // If we have no cached results, call API
-    if (lastSearchResultsRef.current.length === 0) return true
-
-    return false
-  }, [])
 
   // Track filters for re-triggering API search
   const filtersRef = useRef({ languages: filters.languages, categories: filters.categories })
@@ -252,7 +284,7 @@ export function useSearch() {
   useEffect(() => {
     if (!shouldUseApi) return
 
-    const query = filters.query
+    const query = filters.query.trim()
 
     // If query is empty, clear results
     if (query.length === 0) {
@@ -263,20 +295,15 @@ export function useSearch() {
     // If query is too short, do nothing
     if (query.length < 2) return
 
-    // Only call API when complete words change
-    if (shouldCallApi(query)) {
-      // Use complete words for API search
-      const completeWords = getCompleteWords(query)
-      if (completeWords.length >= 2) {
-        const timer = setTimeout(() => {
-          searchViaApi(completeWords, activeTab)
-        }, 300)
-        return () => clearTimeout(timer)
-      }
-    }
-    // Local filtering happens in useMemo below
+    // Debounce the search - use full query (not just complete words)
+    // This ensures "inga strümke" searches for both words
+    const timer = setTimeout(() => {
+      searchViaApi(query, activeTab)
+    }, 400) // Slightly longer debounce to wait for typing to finish
+
+    return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.query, shouldUseApi, shouldCallApi, clearResults, activeTab])
+  }, [filters.query, shouldUseApi, clearResults, activeTab])
 
   // Re-search when tab changes (if we have a query)
   useEffect(() => {
@@ -365,9 +392,9 @@ export function useSearch() {
   }, [podcasts, episodes, filters, shouldUseApi])
 
   const setQuery = useCallback((query: string) => {
-    startTransition(() => {
-      setFilters(prev => ({ ...prev, query }))
-    })
+    // Don't use startTransition for query updates - it breaks IME/dead key composition
+    // (e.g., typing ü with Option+u on macOS)
+    setFilters(prev => ({ ...prev, query }))
   }, [])
 
   const toggleCategory = useCallback((category: string) => {
@@ -392,9 +419,15 @@ export function useSearch() {
     })
   }, [])
 
-  const setMinRating = useCallback((rating: number) => {
+  const setDateFrom = useCallback((year: number | null) => {
     startTransition(() => {
-      setFilters(prev => ({ ...prev, minRating: rating }))
+      setFilters(prev => ({ ...prev, dateFrom: year }))
+    })
+  }, [])
+
+  const setDateTo = useCallback((year: number | null) => {
+    startTransition(() => {
+      setFilters(prev => ({ ...prev, dateTo: year }))
     })
   }, [])
 
@@ -421,8 +454,8 @@ export function useSearch() {
     let count = 0
     if (filters.categories.length > 0) count++
     if (filters.languages.length > 0) count++
-    if (filters.minRating > 0) count++
     if (filters.explicit !== null) count++
+    if (filters.dateFrom !== null || filters.dateTo !== null) count++
     return count
   }, [filters])
 
@@ -437,7 +470,8 @@ export function useSearch() {
     setQuery,
     toggleCategory,
     toggleLanguage,
-    setMinRating,
+    setDateFrom,
+    setDateTo,
     setSortBy,
     setExplicit,
     clearFilters,
@@ -504,9 +538,18 @@ function applyLocalFilters(podcasts: Podcast[], filters: SearchFilters): Podcast
     )
   }
 
-  // Filter by rating
-  if (filters.minRating > 0) {
-    filtered = filtered.filter(p => p.rating >= filters.minRating)
+  // Filter by date range (based on lastUpdated)
+  if (filters.dateFrom !== null) {
+    filtered = filtered.filter(p => {
+      const year = new Date(p.lastUpdated).getFullYear()
+      return year >= filters.dateFrom!
+    })
+  }
+  if (filters.dateTo !== null) {
+    filtered = filtered.filter(p => {
+      const year = new Date(p.lastUpdated).getFullYear()
+      return year <= filters.dateTo!
+    })
   }
 
   // Filter by explicit
@@ -516,12 +559,14 @@ function applyLocalFilters(podcasts: Podcast[], filters: SearchFilters): Podcast
 
   // Sort
   switch (filters.sortBy) {
-    case 'rating':
-      filtered.sort((a, b) => b.rating - a.rating)
-      break
     case 'newest':
       filtered.sort((a, b) =>
         new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+      )
+      break
+    case 'oldest':
+      filtered.sort((a, b) =>
+        new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime()
       )
       break
     case 'popular':
