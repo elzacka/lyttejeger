@@ -32,8 +32,9 @@
   position: absolute;
   top: calc(100% + var(--space-sm));
   right: 0;
-  z-index: 100;
-  width: min(360px, calc(100vw - var(--space-lg) * 2));
+  z-index: var(--z-dropdown);
+  width: min(360px, 90vw);
+  max-width: calc(100vw - var(--space-md) * 2);
   max-height: calc(100vh - 200px);
   overflow-y: auto;
   background: var(--bg-primary);

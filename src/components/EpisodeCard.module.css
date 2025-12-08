@@ -1,4 +1,5 @@
 .card {
+  position: relative;
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr);
   gap: var(--space-md);
@@ -10,6 +11,7 @@
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
+  overflow: visible;
   transition: border-color var(--transition-fast),
               background var(--transition-fast);
 }
@@ -149,6 +151,7 @@
 .actions {
   position: relative;
   margin-top: var(--space-xs);
+  z-index: 1;
 }
 
 .menuButton {
@@ -181,8 +184,9 @@
   position: absolute;
   bottom: calc(100% + var(--space-xs));
   right: 0;
-  z-index: 50;
+  z-index: var(--z-dropdown);
   min-width: 160px;
+  max-width: calc(100vw - var(--space-md) * 2);
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);

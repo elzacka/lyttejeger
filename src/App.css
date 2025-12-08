@@ -45,7 +45,6 @@
   margin-top: var(--space-xl);
   /* Add space at bottom for audio player when visible */
   padding-bottom: 140px;
-  overflow-x: hidden;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;

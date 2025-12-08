@@ -2,7 +2,6 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 .resultCount {
@@ -18,6 +17,7 @@
   gap: var(--space-sm);
   width: 100%;
   max-width: 100%;
+  overflow: visible;
 }
 
 .loading {

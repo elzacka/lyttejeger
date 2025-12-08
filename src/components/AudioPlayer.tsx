@@ -49,9 +49,16 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
         setCurrentTime(saved.position)
       }
 
-      audioRef.current?.play().catch(() => {
-        setIsPlaying(false)
-      })
+      // Use play() with proper error handling for iOS/PWA
+      // iOS Safari requires user gesture for autoplay, especially in standalone mode
+      const playPromise = audioRef.current?.play()
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay was prevented - user must tap play button
+          setIsPlaying(false)
+          setIsLoading(false)
+        })
+      }
     }
 
     loadAndPlay()
@@ -273,6 +280,8 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       <audio
         ref={audioRef}
         src={episode.audioUrl}
+        preload="metadata"
+        playsInline
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}
         onPlay={handlePlay}
