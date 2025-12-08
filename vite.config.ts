@@ -14,7 +14,7 @@ export default defineConfig({
       devOptions: {
         enabled: false
       },
-      includeAssets: ['favicon.svg', 'apple-touch-icon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'icon-192x192.png', 'icon-512x512.png'],
       manifest: {
         name: 'Lyttejeger - Podcast App',
         short_name: 'Lyttejeger',
@@ -32,9 +32,19 @@ export default defineConfig({
             type: 'image/svg+xml'
           },
           {
-            src: 'apple-touch-icon.svg',
-            sizes: '180x180',
-            type: 'image/svg+xml',
+            src: 'icon-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: 'icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
             purpose: 'maskable'
           }
         ]
