@@ -11,7 +11,7 @@ import { useQueue } from './hooks/useQueue'
 import { allLanguages } from './data/languages'
 import { getCategories, isConfigured } from './services/podcastIndex'
 import { translateCategory } from './utils/categoryTranslations'
-import type { FilterOption, Podcast } from './types/podcast'
+import type { FilterOption, Podcast, Episode } from './types/podcast'
 import type { EpisodeWithPodcast } from './utils/search'
 import './App.css'
 
@@ -110,6 +110,37 @@ function App() {
     })
   }, [playNext])
 
+  // Handlers for PodcastPage episodes (simpler Episode type)
+  const handleAddEpisodeToQueue = useCallback((episode: Episode, podcastTitle: string, podcastImage: string) => {
+    addToQueue({
+      id: episode.id,
+      podcastId: episode.podcastId,
+      title: episode.title,
+      audioUrl: episode.audioUrl,
+      imageUrl: episode.imageUrl,
+      podcastTitle,
+      podcastImage,
+      duration: episode.duration,
+      description: episode.description,
+      publishedAt: episode.publishedAt,
+    })
+  }, [addToQueue])
+
+  const handlePlayEpisodeNext = useCallback((episode: Episode, podcastTitle: string, podcastImage: string) => {
+    playNext({
+      id: episode.id,
+      podcastId: episode.podcastId,
+      title: episode.title,
+      audioUrl: episode.audioUrl,
+      imageUrl: episode.imageUrl,
+      podcastTitle,
+      podcastImage,
+      duration: episode.duration,
+      description: episode.description,
+      publishedAt: episode.publishedAt,
+    })
+  }, [playNext])
+
   const handleSelectPodcast = useCallback((podcast: Podcast) => {
     setSelectedPodcast(podcast)
   }, [])
@@ -126,6 +157,9 @@ function App() {
           podcast={selectedPodcast}
           onBack={handleBackToSearch}
           onPlayEpisode={handlePlayEpisode}
+          onAddToQueue={handleAddEpisodeToQueue}
+          onPlayNext={handlePlayEpisodeNext}
+          isInQueue={isInQueue}
         />
         <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
       </div>

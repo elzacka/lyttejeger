@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import type { Podcast, Episode } from '../types/podcast'
 import type { PlayingEpisode } from './AudioPlayer'
 import { getEpisodesByFeedId } from '../services/podcastIndex'
@@ -11,13 +11,32 @@ interface PodcastPageProps {
   podcast: Podcast
   onBack: () => void
   onPlayEpisode: (episode: PlayingEpisode) => void
+  onAddToQueue?: (episode: Episode, podcastTitle: string, podcastImage: string) => void
+  onPlayNext?: (episode: Episode, podcastTitle: string, podcastImage: string) => void
+  isInQueue?: (episodeId: string) => boolean
 }
 
-export function PodcastPage({ podcast, onBack, onPlayEpisode }: PodcastPageProps) {
+export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPlayNext, isInQueue }: PodcastPageProps) {
   const [episodes, setEpisodes] = useState<Episode[]>([])
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false)
   const [episodesError, setEpisodesError] = useState<string | null>(null)
   const [expandedEpisodeId, setExpandedEpisodeId] = useState<string | null>(null)
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!menuOpenId) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpenId(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [menuOpenId])
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -180,6 +199,43 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode }: PodcastPageProps
                           expand_more
                         </span>
                       </button>
+                      {onAddToQueue && (
+                        <div className={styles.menuContainer} ref={menuOpenId === episode.id ? menuRef : null}>
+                          <button
+                            className={styles.menuButton}
+                            onClick={() => setMenuOpenId(menuOpenId === episode.id ? null : episode.id)}
+                            aria-label="Flere valg"
+                            aria-expanded={menuOpenId === episode.id}
+                          >
+                            <span className="material-symbols-outlined">more_vert</span>
+                          </button>
+                          {menuOpenId === episode.id && (
+                            <div className={styles.menuDropdown}>
+                              <button
+                                className={styles.menuItem}
+                                onClick={() => {
+                                  onPlayNext?.(episode, podcast.title, podcast.imageUrl)
+                                  setMenuOpenId(null)
+                                }}
+                              >
+                                <span className="material-symbols-outlined">playlist_play</span>
+                                Spill neste
+                              </button>
+                              <button
+                                className={styles.menuItem}
+                                onClick={() => {
+                                  onAddToQueue(episode, podcast.title, podcast.imageUrl)
+                                  setMenuOpenId(null)
+                                }}
+                                disabled={isInQueue?.(episode.id)}
+                              >
+                                <span className="material-symbols-outlined">queue_music</span>
+                                {isInQueue?.(episode.id) ? 'I køen' : 'Legg til i kø'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                     {isExpanded && (
                       <div
