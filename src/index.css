@@ -162,6 +162,7 @@ body {
   min-height: 100dvh;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
 }
 
 /* Media elements */

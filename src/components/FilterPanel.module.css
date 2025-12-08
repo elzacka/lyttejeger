@@ -1,11 +1,14 @@
 .container {
   width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .header {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 
 /* Type selector - segmented control */

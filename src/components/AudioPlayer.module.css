@@ -15,7 +15,7 @@
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr auto auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
   gap: var(--space-md);
   align-items: center;
 }
@@ -139,7 +139,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  min-width: 200px;
+  min-width: 0;
+  flex: 1;
 }
 
 .time {
