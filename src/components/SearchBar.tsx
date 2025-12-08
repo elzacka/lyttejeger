@@ -22,7 +22,8 @@ export function SearchBar({
       <div className={styles.inputWrapper}>
         <input
           ref={inputRef}
-          type="text"
+          type="search"
+          name="podcast-search"
           className={styles.input}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -31,7 +32,10 @@ export function SearchBar({
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
-          spellCheck="false"
+          spellCheck={false}
+          enterKeyHint="search"
+          data-form-type="other"
+          data-lpignore="true"
           lang="no"
         />
         <div className={styles.actions}>
