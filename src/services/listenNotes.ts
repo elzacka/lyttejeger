@@ -3,7 +3,12 @@
  * Documentation: https://www.listennotes.com/api/docs/
  *
  * Free tier: 300 requests/month, 2 req/sec, 30 results per query
- * Used as secondary source for full-text episode search
+ * Used as secondary source for full-text episode and podcast search
+ *
+ * Listen Notes excels at:
+ * - Full-text search across episode titles, descriptions, and transcripts
+ * - Finding episodes by topic/keyword (not just podcast names)
+ * - Better relevance ranking for content-based searches
  */
 
 // Use test API if no key configured (returns mock but realistic data)
@@ -18,6 +23,24 @@ const ALLOWED_LANGUAGES = ['Norwegian', 'Danish', 'Swedish', 'English']
 // Rate limiting: max 2 req/sec for free tier
 let lastRequestTime = 0
 const MIN_REQUEST_INTERVAL = 500
+
+// Track API usage for monitoring
+let requestCount = 0
+const REQUEST_COUNT_RESET_INTERVAL = 60 * 60 * 1000 // 1 hour
+let lastResetTime = Date.now()
+
+function trackRequest(): void {
+  const now = Date.now()
+  if (now - lastResetTime > REQUEST_COUNT_RESET_INTERVAL) {
+    requestCount = 0
+    lastResetTime = now
+  }
+  requestCount++
+}
+
+export function getRequestCount(): number {
+  return requestCount
+}
 
 async function enforceRateLimit(): Promise<void> {
   const now = Date.now()
@@ -36,6 +59,7 @@ async function apiRequest<T>(endpoint: string, params: Record<string, string> = 
   const url = `${API_BASE}${endpoint}${queryString ? `?${queryString}` : ''}`
 
   await enforceRateLimit()
+  trackRequest()
 
   const headers: HeadersInit = {
     'Accept': 'application/json'
@@ -49,6 +73,10 @@ async function apiRequest<T>(endpoint: string, params: Record<string, string> = 
   const response = await fetch(url, { headers })
 
   if (!response.ok) {
+    // Handle rate limiting gracefully
+    if (response.status === 429) {
+      throw new Error('Listen Notes rate limit reached. Please try again in a moment.')
+    }
     throw new Error(`Listen Notes API error: ${response.status} ${response.statusText}`)
   }
 
@@ -94,6 +122,8 @@ export interface ListenNotesPodcast {
   explicit_content: boolean
   latest_pub_date_ms: number
   language: string
+  rss?: string
+  genre_ids?: number[]
 }
 
 export interface SearchResponse {
