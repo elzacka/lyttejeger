@@ -13,17 +13,19 @@
 }
 
 .logoIcon {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 200;
   color: var(--accent);
+  line-height: 1;
 }
 
 .logoText {
   font-family: var(--font-mono);
-  font-size: var(--font-lg);
-  font-weight: 600;
+  font-size: var(--font-xl);
+  font-weight: 500;
   color: var(--text-primary);
   letter-spacing: -0.5px;
+  line-height: 1;
 }
 
 /* Mobile */
@@ -33,10 +35,10 @@
   }
 
   .logoIcon {
-    font-size: var(--icon-lg);
+    font-size: 20px;
   }
 
   .logoText {
-    font-size: var(--font-base);
+    font-size: var(--font-lg);
   }
 }
