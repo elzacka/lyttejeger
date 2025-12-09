@@ -123,3 +123,34 @@ export function formatDateShort(dateString: string): string {
     year: 'numeric'
   })
 }
+
+// ============================================================================
+// TEXT UTILITIES
+// ============================================================================
+
+export interface TextPart {
+  type: 'text' | 'link'
+  content: string
+  url?: string
+}
+
+export function linkifyText(text: string): TextPart[] {
+  const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]+)/gi
+  const parts: TextPart[] = []
+  let lastIndex = 0
+  let match
+
+  while ((match = urlRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: 'text', content: text.slice(lastIndex, match.index) })
+    }
+    parts.push({ type: 'link', content: match[1], url: match[1] })
+    lastIndex = match.index + match[1].length
+  }
+
+  if (lastIndex < text.length) {
+    parts.push({ type: 'text', content: text.slice(lastIndex) })
+  }
+
+  return parts.length > 0 ? parts : [{ type: 'text', content: text }]
+}

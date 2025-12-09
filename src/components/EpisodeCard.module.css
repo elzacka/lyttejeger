@@ -1,9 +1,9 @@
 .card {
   position: relative;
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-columns: 64px minmax(0, 1fr);
   gap: var(--space-md);
-  padding: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -27,8 +27,8 @@
 
 .imageContainer {
   position: relative;
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   flex-shrink: 0;
 }
 
@@ -104,6 +104,12 @@
   text-overflow: ellipsis;
 }
 
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
 .title {
   margin: 0;
   font-family: var(--font-mono);
@@ -112,9 +118,11 @@
   color: var(--text-primary);
   line-height: 1.3;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex: 1;
+  min-width: 0;
 }
 
 .description {
@@ -150,7 +158,7 @@
 
 .actions {
   position: relative;
-  margin-top: var(--space-xs);
+  flex-shrink: 0;
   z-index: 1;
 }
 
@@ -183,7 +191,7 @@
 .menu {
   position: absolute;
   top: calc(100% + var(--space-xs));
-  right: 0;
+  left: 0;
   z-index: var(--z-dropdown);
   min-width: 160px;
   max-width: calc(100vw - var(--space-md) * 2);
@@ -251,13 +259,13 @@
 /* Mobile */
 @media (max-width: 640px) {
   .card {
-    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-columns: 56px minmax(0, 1fr);
     gap: var(--space-sm);
     padding: var(--space-sm);
   }
 
   .imageContainer {
-    width: 40px;
-    height: 40px;
+    width: 56px;
+    height: 56px;
   }
 }

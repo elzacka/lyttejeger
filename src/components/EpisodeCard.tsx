@@ -123,13 +123,48 @@ export function EpisodeCard({
           )}
         </div>
 
-        <h3 className={styles.title}>{episode.title}</h3>
+        <div className={styles.titleRow}>
+          {(onAddToQueue || onPlayNext) && (
+            <div className={styles.actions}>
+              <button
+                ref={buttonRef}
+                className={styles.menuButton}
+                onClick={handleMenuClick}
+                aria-label="Flere valg"
+                aria-expanded={menuOpen}
+                aria-haspopup="menu"
+              >
+                <span className="material-symbols-outlined">more_vert</span>
+              </button>
 
-        <p className={styles.description}>
-          {episode.description.length > 150
-            ? `${episode.description.slice(0, 150)}...`
-            : episode.description}
-        </p>
+              {menuOpen && (
+                <div ref={menuRef} className={styles.menu} role="menu">
+                  {onPlayNext && (
+                    <button
+                      className={styles.menuItem}
+                      onClick={handlePlayNext}
+                      role="menuitem"
+                    >
+                      <span className="material-symbols-outlined">queue_play_next</span>
+                      Spill neste
+                    </button>
+                  )}
+                  {onAddToQueue && !isInQueue && (
+                    <button
+                      className={styles.menuItem}
+                      onClick={handleAddToQueue}
+                      role="menuitem"
+                    >
+                      <span className="material-symbols-outlined">playlist_add</span>
+                      Legg i kø
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          <h3 className={styles.title}>{episode.title}</h3>
+        </div>
 
         <div className={styles.meta}>
           <span className={styles.date}>{formatDate(episode.publishedAt)}</span>
@@ -146,46 +181,6 @@ export function EpisodeCard({
             </>
           )}
         </div>
-
-        {(onAddToQueue || onPlayNext) && (
-          <div className={styles.actions}>
-            <button
-              ref={buttonRef}
-              className={styles.menuButton}
-              onClick={handleMenuClick}
-              aria-label="Flere valg"
-              aria-expanded={menuOpen}
-              aria-haspopup="menu"
-            >
-              <span className="material-symbols-outlined">more_vert</span>
-            </button>
-
-            {menuOpen && (
-              <div ref={menuRef} className={styles.menu} role="menu">
-                {onPlayNext && (
-                  <button
-                    className={styles.menuItem}
-                    onClick={handlePlayNext}
-                    role="menuitem"
-                  >
-                    <span className="material-symbols-outlined">queue_play_next</span>
-                    Spill neste
-                  </button>
-                )}
-                {onAddToQueue && !isInQueue && (
-                  <button
-                    className={styles.menuItem}
-                    onClick={handleAddToQueue}
-                    role="menuitem"
-                  >
-                    <span className="material-symbols-outlined">playlist_add</span>
-                    Legg i kø
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </article>
   )

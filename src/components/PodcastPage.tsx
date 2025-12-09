@@ -3,7 +3,7 @@ import type { Podcast, Episode } from '../types/podcast'
 import type { PlayingEpisode } from './AudioPlayer'
 import { getEpisodesByFeedId } from '../services/podcastIndex'
 import { transformEpisodes } from '../services/podcastTransform'
-import { formatDuration, formatDateShort, formatDateLong } from '../utils/search'
+import { formatDuration, formatDateShort, formatDateLong, linkifyText } from '../utils/search'
 import { translateCategory } from '../utils/categoryTranslations'
 import styles from './PodcastPage.module.css'
 
@@ -139,18 +139,6 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
           ))}
         </section>
 
-        {podcast.websiteUrl && (
-          <a
-            href={podcast.websiteUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.websiteLink}
-          >
-            <span className="material-symbols-outlined">language</span>
-            {new URL(podcast.websiteUrl).hostname.replace('www.', '')}
-          </a>
-        )}
-
         <section className={styles.episodesSection}>
           <h3 className={styles.episodesTitle}>Episoder</h3>
 
@@ -177,30 +165,6 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
                 return (
                   <li key={episode.id} className={`${styles.episodeItem} ${isMenuOpen ? styles.menuOpen : ''}`}>
                     <div className={styles.episodeHeader}>
-                      <button
-                        className={styles.playButton}
-                        onClick={() => handlePlayEpisode(episode)}
-                        aria-label={`Spill ${episode.title}`}
-                      >
-                        <span className="material-symbols-outlined">play_circle</span>
-                      </button>
-                      <button
-                        className={styles.episodeToggle}
-                        onClick={() => toggleEpisodeExpand(episode.id)}
-                        aria-expanded={isExpanded}
-                        aria-controls={`episode-details-${episode.id}`}
-                      >
-                        <div className={styles.episodeInfo}>
-                          <p className={styles.episodeTitle}>{episode.title}</p>
-                          <div className={styles.episodeMeta}>
-                            <span>{formatDateLong(episode.publishedAt)}</span>
-                            {formatDuration(episode.duration) && <span>{formatDuration(episode.duration)}</span>}
-                          </div>
-                        </div>
-                        <span className={`material-symbols-outlined ${styles.expandIcon} ${isExpanded ? styles.expanded : ''}`}>
-                          expand_more
-                        </span>
-                      </button>
                       {onAddToQueue && (
                         <div className={styles.menuContainer} ref={menuOpenId === episode.id ? menuRef : null}>
                           <button
@@ -238,6 +202,30 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
                           )}
                         </div>
                       )}
+                      <button
+                        className={styles.episodeToggle}
+                        onClick={() => toggleEpisodeExpand(episode.id)}
+                        aria-expanded={isExpanded}
+                        aria-controls={`episode-details-${episode.id}`}
+                      >
+                        <span className={`material-symbols-outlined ${styles.expandIcon} ${isExpanded ? styles.expanded : ''}`}>
+                          expand_more
+                        </span>
+                        <div className={styles.episodeInfo}>
+                          <p className={styles.episodeTitle}>{episode.title}</p>
+                          <div className={styles.episodeMeta}>
+                            <span>{formatDateLong(episode.publishedAt)}</span>
+                            {formatDuration(episode.duration) && <span>{formatDuration(episode.duration)}</span>}
+                          </div>
+                        </div>
+                      </button>
+                      <button
+                        className={styles.playButton}
+                        onClick={() => handlePlayEpisode(episode)}
+                        aria-label={`Spill ${episode.title}`}
+                      >
+                        <span className="material-symbols-outlined">play_circle</span>
+                      </button>
                     </div>
                     {isExpanded && (
                       <div
@@ -245,7 +233,24 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
                         className={styles.episodeDetails}
                       >
                         {episode.description ? (
-                          <p className={styles.episodeDescription}>{episode.description}</p>
+                          <p className={styles.episodeDescription}>
+                            {linkifyText(episode.description).map((part, idx) =>
+                              part.type === 'link' ? (
+                                <a
+                                  key={idx}
+                                  href={part.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={styles.descriptionLink}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {part.content}
+                                </a>
+                              ) : (
+                                <span key={idx}>{part.content}</span>
+                              )
+                            )}
+                          </p>
                         ) : (
                           <p className={styles.noDescription}>Ingen beskrivelse tilgjengelig</p>
                         )}
