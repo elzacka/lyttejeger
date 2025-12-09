@@ -267,10 +267,15 @@
 }
 
 .episodeItem {
+  position: relative;
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
-  overflow: hidden;
   transition: background var(--transition-fast);
+  z-index: 0;
+}
+
+.episodeItem.menuOpen {
+  z-index: var(--z-dropdown);
 }
 
 .episodeItem:hover {
@@ -380,6 +385,7 @@
 .menuContainer {
   position: relative;
   flex-shrink: 0;
+  z-index: 1;
 }
 
 .menuButton {

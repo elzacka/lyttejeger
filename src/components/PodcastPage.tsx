@@ -172,8 +172,9 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
             <ul className={styles.episodeList}>
               {episodes.map((episode) => {
                 const isExpanded = expandedEpisodeId === episode.id
+                const isMenuOpen = menuOpenId === episode.id
                 return (
-                  <li key={episode.id} className={styles.episodeItem}>
+                  <li key={episode.id} className={`${styles.episodeItem} ${isMenuOpen ? styles.menuOpen : ''}`}>
                     <div className={styles.episodeHeader}>
                       <button
                         className={styles.playButton}
