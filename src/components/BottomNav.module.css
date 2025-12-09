@@ -50,10 +50,6 @@
   font-size: 24px;
 }
 
-.label {
-  display: block;
-}
-
 .badge {
   position: absolute;
   top: var(--space-xs);
