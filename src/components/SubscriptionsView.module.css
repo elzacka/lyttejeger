@@ -15,7 +15,7 @@
   margin: 0;
   font-family: var(--font-mono);
   font-size: var(--font-base);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
 }
 
@@ -30,7 +30,7 @@
   color: white;
   font-family: var(--font-mono);
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 500;
   border-radius: var(--radius-full);
 }
 
@@ -160,7 +160,7 @@
   margin: 0 0 var(--space-xs) 0;
   font-family: var(--font-mono);
   font-size: var(--font-base);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 

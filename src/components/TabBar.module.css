@@ -52,7 +52,7 @@
   background: var(--bg-hover);
   border-radius: var(--radius-sm);
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .tab .material-symbols-outlined {

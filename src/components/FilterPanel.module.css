@@ -70,7 +70,7 @@
   padding: 0 var(--space-xs);
   background: rgba(255, 255, 255, 0.25);
   font-size: var(--font-2xs);
-  font-weight: 600;
+  font-weight: 500;
   border-radius: var(--radius-full);
 }
 
@@ -123,7 +123,7 @@
   background: var(--accent);
   color: white;
   font-size: var(--font-2xs);
-  font-weight: 600;
+  font-weight: 500;
   border-radius: var(--radius-full);
 }
 
@@ -189,10 +189,10 @@
   margin: 0 0 var(--space-sm) 0;
   font-family: var(--font-mono);
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 /* Chip grid for languages */

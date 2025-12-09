@@ -63,7 +63,7 @@
   margin: 0 0 var(--space-xs) 0;
   font-family: var(--font-mono);
   font-size: var(--font-base);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
 }
 
