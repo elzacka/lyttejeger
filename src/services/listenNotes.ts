@@ -195,7 +195,10 @@ export function isConfigured(): boolean {
  * Check if Listen Notes is available for real searches
  * Note: Test API returns mock data (same results for any query), so we only
  * enable Listen Notes when a real API key is configured
+ *
+ * PAUSED: Listen Notes has 300 requests/month limit. Disabled during development
+ * to preserve quota. Re-enable by returning Boolean(API_KEY) when ready for production.
  */
 export function isAvailable(): boolean {
-  return Boolean(API_KEY) // Only available with real API key
+  return false // PAUSED - using only Podcast Index API during development
 }

@@ -20,12 +20,13 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
+  const [shouldAutoPlay, setShouldAutoPlay] = useState(false)
 
   // Track last save time to debounce saves
   const lastSaveRef = useRef<number>(0)
   const saveIntervalRef = useRef<number | null>(null)
 
-  // Reset and auto-play when episode changes
+  // Reset and prepare for auto-play when episode changes
   const episodeId = episode?.id
   if (episodeId !== prevEpisodeIdRef.current) {
     prevEpisodeIdRef.current = episodeId
@@ -34,34 +35,28 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       if (currentTime !== 0) setCurrentTime(0)
       if (isPlaying !== false) setIsPlaying(false)
       if (isLoading !== true) setIsLoading(true)
+      // Mark that we should auto-play once audio is ready
+      if (!shouldAutoPlay) setShouldAutoPlay(true)
     }
   }
 
-  // Load saved position and auto-play when episode loads
+  // Load saved position when episode loads
+  // Note: We don't auto-play here because iOS requires user gesture
+  // The play action is triggered by user tap which calls togglePlayPause
   useEffect(() => {
     if (!episode || !audioRef.current) return
 
-    const loadAndPlay = async () => {
+    const loadSavedPosition = async () => {
       const saved = await getPlaybackPosition(episode.id)
       if (saved && !saved.completed && audioRef.current) {
         // Resume from saved position (but not if completed)
         audioRef.current.currentTime = saved.position
         setCurrentTime(saved.position)
       }
-
-      // Use play() with proper error handling for iOS/PWA
-      // iOS Safari requires user gesture for autoplay, especially in standalone mode
-      const playPromise = audioRef.current?.play()
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Autoplay was prevented - user must tap play button
-          setIsPlaying(false)
-          setIsLoading(false)
-        })
-      }
+      setIsLoading(false)
     }
 
-    loadAndPlay()
+    loadSavedPosition()
   }, [episode])
 
   // Save playback position every 5 seconds while playing
@@ -226,7 +221,24 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     }
   }, [episode])
   const handleWaiting = useCallback(() => setIsLoading(true), [])
-  const handleCanPlay = useCallback(() => setIsLoading(false), [])
+  const handleCanPlay = useCallback(() => {
+    setIsLoading(false)
+    // Auto-play when audio is ready and we have a pending play request
+    // This works on iOS because it's triggered by the loadeddata/canplay event
+    // which follows the user's tap action chain
+    if (shouldAutoPlay && audioRef.current) {
+      setShouldAutoPlay(false)
+      audioRef.current.play().catch(() => {
+        // Autoplay was blocked - user must tap play button manually
+        setIsPlaying(false)
+      })
+    }
+  }, [shouldAutoPlay])
+  const handleError = useCallback(() => {
+    setIsLoading(false)
+    setIsPlaying(false)
+    setShouldAutoPlay(false)
+  }, [])
 
   const togglePlayPause = useCallback(() => {
     if (!audioRef.current) return
@@ -289,6 +301,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
         onEnded={handleEnded}
         onWaiting={handleWaiting}
         onCanPlay={handleCanPlay}
+        onError={handleError}
       />
 
       <div className={styles.container}>
