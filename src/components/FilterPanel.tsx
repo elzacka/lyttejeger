@@ -15,7 +15,6 @@ interface FilterPanelProps {
   onToggleLanguage: (language: string) => void
   onSetDateFrom: (year: number | null) => void
   onSetDateTo: (year: number | null) => void
-  onSetSortBy: (sortBy: SearchFilters['sortBy']) => void
   onClearFilters: () => void
   activeFilterCount: number
 }
@@ -32,7 +31,6 @@ export function FilterPanel({
   onToggleLanguage,
   onSetDateFrom,
   onSetDateTo,
-  onSetSortBy,
   onClearFilters,
   activeFilterCount
 }: FilterPanelProps) {
@@ -103,22 +101,6 @@ export function FilterPanel({
             <span className={styles.badge}>{activeFilterCount}</span>
           )}
         </button>
-
-        <div className={styles.sortContainer}>
-          <select
-            id="sort-select"
-            className={styles.sortSelect}
-            value={filters.sortBy}
-            onChange={(e) => onSetSortBy(e.target.value as SearchFilters['sortBy'])}
-            aria-label="Velg sorteringsrekkefølge"
-            tabIndex={-1}
-          >
-            <option value="relevance">Relevans</option>
-            <option value="newest">Nyeste</option>
-            <option value="oldest">Eldste</option>
-            <option value="popular">Populære</option>
-          </select>
-        </div>
       </div>
 
       {isExpanded && (

@@ -79,12 +79,6 @@
   color: white;
 }
 
-/* Second row: filter button and sort */
-.secondRow {
-  display: flex;
-  gap: var(--space-sm);
-}
-
 .toggleButton {
   display: flex;
   align-items: center;
@@ -125,41 +119,6 @@
   font-size: var(--font-2xs);
   font-weight: 500;
   border-radius: var(--radius-full);
-}
-
-/* Sort container */
-.sortContainer {
-  flex: 1;
-}
-
-.sortSelect {
-  width: 100%;
-  min-height: var(--button-lg);
-  padding: var(--space-sm) var(--space-xl) var(--space-sm) var(--space-md);
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: var(--font-sm);
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235A5A5A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right var(--space-md) center;
-  transition: all var(--transition-fast);
-}
-
-.sortSelect:hover,
-.sortSelect:focus {
-  border-color: var(--accent);
-  color: var(--text-primary);
-  background-color: var(--bg-hover);
-}
-
-.sortSelect:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }
 
 /* Expandable filter panel */
@@ -477,18 +436,8 @@
     scroll-snap-align: start;
   }
 
-  .secondRow {
-    gap: var(--space-xs);
-  }
-
   .toggleButton {
-    flex: 1;
     padding: var(--space-sm);
-    font-size: var(--font-xs);
-  }
-
-  .sortSelect {
-    padding: var(--space-sm) var(--space-xl) var(--space-sm) var(--space-sm);
     font-size: var(--font-xs);
   }
 

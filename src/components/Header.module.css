@@ -13,32 +13,22 @@
 }
 
 .logoIcon {
-  font-size: 24px;
+  font-size: var(--icon-lg);
   font-weight: 200;
   color: var(--accent);
-  line-height: 1;
 }
 
 .logoText {
   font-family: var(--font-mono);
-  font-size: var(--font-xl);
+  font-size: var(--font-base);
   font-weight: 500;
   color: var(--text-primary);
   letter-spacing: -0.5px;
-  line-height: 1;
 }
 
 /* Mobile */
 @media (max-width: 640px) {
   .header {
     padding: var(--space-md) var(--space-sm);
-  }
-
-  .logoIcon {
-    font-size: 20px;
-  }
-
-  .logoText {
-    font-size: var(--font-lg);
   }
 }

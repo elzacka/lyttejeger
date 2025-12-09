@@ -121,9 +121,6 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
                 onClick={isSubscribed ? onUnsubscribe : onSubscribe}
                 aria-pressed={isSubscribed}
               >
-                <span className="material-symbols-outlined">
-                  {isSubscribed ? 'notifications_active' : 'notifications'}
-                </span>
                 {isSubscribed ? 'Abonnerer' : 'Abonner'}
               </button>
             )}

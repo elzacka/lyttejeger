@@ -277,7 +277,6 @@ function App() {
             onToggleLanguage={toggleLanguage}
             onSetDateFrom={setDateFrom}
             onSetDateTo={setDateTo}
-            onSetSortBy={setSortBy}
             onClearFilters={clearFilters}
             activeFilterCount={activeFilterCount}
           />
@@ -295,6 +294,21 @@ function App() {
         )}
 
         <section className="results-section">
+          {(activeTab === 'podcasts' || activeTab === 'episodes') && filters.query && (
+            <div className="sort-bar">
+              <select
+                className="sort-select"
+                value={filters.sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof filters.sortBy)}
+                aria-label="Sorter resultater"
+              >
+                <option value="relevance">Relevans</option>
+                <option value="newest">Nyeste</option>
+                <option value="oldest">Eldste</option>
+                <option value="popular">Populære</option>
+              </select>
+            </div>
+          )}
           {activeTab === 'queue' ? (
             <QueueView
               queue={queue}
