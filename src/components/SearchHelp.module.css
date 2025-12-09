@@ -100,17 +100,19 @@
   background: var(--border);
 }
 
-/* Mobile: full-width dropdown */
-@media (max-width: 480px) {
+/* Mobile: full-width bottom sheet */
+@media (max-width: 640px) {
   .dropdown {
     position: fixed;
     top: auto;
     bottom: 0;
     left: 0;
     right: 0;
-    width: 100%;
+    width: 100vw;
+    max-width: none;
     max-height: 60vh;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-sizing: border-box;
     animation: slideUp var(--transition-base) ease-out;
   }
 
@@ -154,14 +156,14 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) and (max-width: 480px) {
+@media (prefers-reduced-motion: reduce) and (max-width: 640px) {
   .dropdown {
     animation: none;
   }
 }
 
 /* Only show backdrop on mobile */
-@media (min-width: 481px) {
+@media (min-width: 641px) {
   .backdrop {
     display: none;
   }
