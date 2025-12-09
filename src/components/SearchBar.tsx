@@ -16,8 +16,11 @@ export function SearchBar({
   isPending = false
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const isIOS =
+    typeof navigator !== 'undefined' && /iP(ad|hone|od)/.test(navigator.userAgent)
   // Use inputMode toggle to suppress iOS keyboard accessory bar
-  const [inputMode, setInputMode] = useState<'none' | 'search'>('none')
+  const initialInputMode: 'none' | 'search' = isIOS ? 'none' : 'search'
+  const [inputMode, setInputMode] = useState<'none' | 'search'>(initialInputMode)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,20 +28,20 @@ export function SearchBar({
     inputRef.current?.blur()
   }
 
-  // iOS workaround: Start with inputmode="none" to suppress accessory bar,
-  // then switch to "search" after a short delay to enable text input
   const handleFocus = useCallback(() => {
-    setInputMode('none')
-    // Small delay then enable search inputmode for proper keyboard
-    setTimeout(() => {
+    if (!isIOS) {
       setInputMode('search')
-    }, 50)
-  }, [])
+      return
+    }
+
+    setInputMode('none')
+    requestAnimationFrame(() => setInputMode('search'))
+  }, [isIOS])
 
   const handleBlur = useCallback(() => {
-    // Reset to none for next focus
-    setInputMode('none')
-  }, [])
+    // Reset to the platform-appropriate default before next focus
+    setInputMode(initialInputMode)
+  }, [initialInputMode])
 
   return (
     <form
@@ -51,7 +54,7 @@ export function SearchBar({
       <div className={styles.inputWrapper}>
         <input
           ref={inputRef}
-          type="search"
+          type="text"
           id="podcast-search-input"
           name="podcast-search-query"
           className={styles.input}
