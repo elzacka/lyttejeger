@@ -7,12 +7,10 @@ En distraksjonsfri og uavhengig podcast-app med smart søkefunksjon og filtre: G
 - **Avansert fuzzy-søk**: Søk med Fuse.js for intelligent matching med skrivefeiltoleranse
 - **Søkeoperatorer**: Støtte for `AND` (standard), `OR`, `"eksakt frase"` og `-ekskluder`
 - **Episode-søk**: Søk direkte i episoder for å finne innhold som matcher alle søkeord
-- **Fleksible filtre**: Filtrer på kategori, språk, vurdering og eksplisitt innhold
-- **Sortering**: Sorter etter relevans, vurdering, nyeste eller mest populære
+- **Fleksible filtre**: Filtrer på språk, kategori og periode
 - **PWA**: Installerbar på mobil og desktop med offline-støtte
 - **Responsivt design**: Fluid typography og touch-vennlig på alle skjermstørrelser
 - **Tilgjengelighet**: Skip-link, aria-live regioner og redusert bevegelse-støtte
-- **Mørk/lys modus**: Automatisk basert på systeminnstillinger
 
 ## Teknologi
 
