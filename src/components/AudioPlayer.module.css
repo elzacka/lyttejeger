@@ -36,8 +36,8 @@
 }
 
 .image {
-  width: 48px;
-  height: 48px;
+  width: var(--image-size-md);
+  height: var(--image-size-md);
   border-radius: var(--radius-sm);
   object-fit: cover;
   flex-shrink: 0;
@@ -77,8 +77,8 @@
 }
 
 .playButton {
-  width: 44px;
-  height: 44px;
+  width: var(--button-size-lg);
+  height: var(--button-size-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,8 +118,8 @@
 
 .skipButton {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: var(--button-size-md);
+  height: var(--button-size-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -194,8 +194,8 @@
 
 /* Close button */
 .closeButton {
-  width: 32px;
-  height: 32px;
+  width: var(--button-size-lg);
+  height: var(--button-size-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -254,13 +254,13 @@
   }
 
   .image {
-    width: 48px;
-    height: 48px;
+    width: var(--image-size-md);
+    height: var(--image-size-md);
   }
 
   .skipButton {
-    width: 44px;
-    height: 44px;
+    width: var(--button-size-lg);
+    height: var(--button-size-lg);
   }
 
   .skipButton .material-symbols-outlined {
@@ -268,8 +268,8 @@
   }
 
   .playButton {
-    width: 56px;
-    height: 56px;
+    width: var(--image-size-lg);
+    height: var(--image-size-lg);
   }
 
   .playButton .material-symbols-outlined {

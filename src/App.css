@@ -44,7 +44,7 @@
 .results-section {
   margin-top: var(--space-xl);
   /* Add space at bottom for audio player when visible */
-  padding-bottom: 140px;
+  padding-bottom: calc(var(--player-height) + var(--space-xl));
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;

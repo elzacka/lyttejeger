@@ -84,7 +84,7 @@
 
 .topRow {
   display: grid;
-  grid-template-columns: 24px 48px 1fr auto;
+  grid-template-columns: 24px var(--image-size-md) 1fr auto;
   align-items: center;
   gap: var(--space-sm);
 }
@@ -98,8 +98,8 @@
 }
 
 .imageContainer {
-  width: 48px;
-  height: 48px;
+  width: var(--image-size-md);
+  height: var(--image-size-md);
   flex-shrink: 0;
 }
 
@@ -163,7 +163,7 @@
 /* Desktop: 5 columns including actions */
 @media (min-width: 641px) {
   .topRow {
-    grid-template-columns: 24px 48px 1fr auto auto;
+    grid-template-columns: 24px var(--image-size-md) 1fr auto auto;
   }
 }
 
@@ -171,8 +171,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: var(--button-size-sm);
+  height: var(--button-size-sm);
   padding: 0;
   background: transparent;
   border: none;
@@ -201,8 +201,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: var(--button-size-lg);
+  height: var(--button-size-lg);
   background: var(--accent);
   border: none;
   border-radius: 50%;
@@ -285,7 +285,7 @@
   }
 
   .topRow {
-    grid-template-columns: 20px 40px 1fr auto;
+    grid-template-columns: 20px var(--image-size-sm) 1fr auto;
     gap: var(--space-xs);
   }
 
@@ -310,8 +310,8 @@
   }
 
   .imageContainer {
-    width: 40px;
-    height: 40px;
+    width: var(--image-size-sm);
+    height: var(--image-size-sm);
   }
 
   .content {
@@ -332,8 +332,8 @@
   }
 
   .playButton {
-    width: 36px;
-    height: 36px;
+    width: var(--button-size-md);
+    height: var(--button-size-md);
   }
 
   .playButton .material-symbols-outlined {
@@ -341,8 +341,8 @@
   }
 
   .actionButton {
-    width: 36px;
-    height: 32px;
+    width: var(--button-size-sm);
+    height: var(--button-size-sm);
     background: var(--bg-primary);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);

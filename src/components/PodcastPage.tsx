@@ -91,7 +91,10 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
         >
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
-        <h1 className={styles.headerTitle}>Podcast</h1>
+        <div className={styles.logo}>
+          <span className={`material-symbols-outlined ${styles.logoIcon}`} aria-hidden="true">earbuds</span>
+          <span className={styles.logoText}>Lyttejeger</span>
+        </div>
       </header>
 
       <div className={styles.content}>

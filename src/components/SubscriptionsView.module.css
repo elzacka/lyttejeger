@@ -75,8 +75,8 @@
 }
 
 .image {
-  width: 48px;
-  height: 48px;
+  width: var(--image-size-md);
+  height: var(--image-size-md);
   border-radius: var(--radius-sm);
   object-fit: cover;
   flex-shrink: 0;
@@ -109,8 +109,8 @@
 }
 
 .unsubscribeButton {
-  width: 40px;
-  height: 40px;
+  width: var(--button-size-lg);
+  height: var(--button-size-lg);
   display: flex;
   align-items: center;
   justify-content: center;

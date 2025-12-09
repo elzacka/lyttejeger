@@ -42,19 +42,31 @@
   outline-offset: 2px;
 }
 
-.headerTitle {
-  margin: 0;
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.logoIcon {
+  font-size: 24px;
+  font-weight: 200;
+  color: var(--accent);
+}
+
+.logoText {
   font-family: var(--font-mono);
   font-size: var(--font-base);
   font-weight: 600;
   color: var(--text-primary);
+  letter-spacing: -0.5px;
 }
 
 .content {
   max-width: 800px;
   margin: 0 auto;
   padding: var(--space-md);
-  padding-bottom: calc(var(--space-xl) + 80px); /* Space for audio player */
+  padding-bottom: calc(var(--space-xl) + var(--player-height) + var(--space-md)); /* Space for audio player */
   overflow-x: hidden;
 }
 
@@ -305,8 +317,8 @@
 }
 
 .playButton {
-  width: 44px;
-  height: 44px;
+  width: var(--button-size-lg);
+  height: var(--button-size-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -404,8 +416,8 @@
 }
 
 .menuButton {
-  width: 40px;
-  height: 40px;
+  width: var(--button-size-lg);
+  height: var(--button-size-lg);
   display: flex;
   align-items: center;
   justify-content: center;

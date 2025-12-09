@@ -1,6 +1,6 @@
 .card {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-columns: var(--image-size-lg) minmax(0, 1fr);
   gap: var(--space-md);
   padding: var(--space-md);
   background: var(--bg-secondary);
@@ -25,8 +25,8 @@
 
 .imageContainer {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: var(--image-size-lg);
+  height: var(--image-size-lg);
   flex-shrink: 0;
 }
 
@@ -107,14 +107,14 @@
 /* Mobile */
 @media (max-width: 640px) {
   .card {
-    grid-template-columns: 48px minmax(0, 1fr);
+    grid-template-columns: var(--image-size-md) minmax(0, 1fr);
     gap: var(--space-sm);
     padding: var(--space-sm);
   }
 
   .imageContainer {
-    width: 48px;
-    height: 48px;
+    width: var(--image-size-md);
+    height: var(--image-size-md);
   }
 
   .title {

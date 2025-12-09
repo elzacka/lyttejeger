@@ -55,10 +55,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  margin-left: 4px;
+  min-width: var(--badge-size);
+  height: var(--badge-size);
+  padding: 0 var(--space-xs);
+  margin-left: var(--space-xs);
   background: rgba(255, 255, 255, 0.2);
   font-size: var(--font-xs);
   font-weight: 600;
@@ -116,8 +116,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
+  min-width: var(--badge-size);
+  height: var(--badge-size);
   padding: 0 var(--space-xs);
   background: var(--accent);
   color: white;
@@ -428,30 +428,53 @@
 
 /* Mobile */
 @media (max-width: 640px) {
-  .header {
-    flex-wrap: wrap;
-    gap: var(--space-xs);
+  .container {
+    overflow: visible;
   }
 
+  .header {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  /* Horizontal scrolling tabs on mobile */
   .typeSelector {
-    order: 1;
-    flex: 1;
+    width: calc(100% + var(--space-md) * 2);
+    margin-left: calc(var(--space-md) * -1);
+    margin-right: calc(var(--space-md) * -1);
+    padding: 0 var(--space-md);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .typeSelector::-webkit-scrollbar {
+    display: none;
   }
 
   .typeButton {
-    flex: 1;
-    padding: var(--space-sm) var(--space-sm);
+    flex-shrink: 0;
+    padding: var(--space-sm) var(--space-md);
     font-size: var(--font-xs);
+    white-space: nowrap;
+  }
+
+  /* Second row: filter button and sort */
+  .secondRow {
+    display: flex;
+    gap: var(--space-sm);
+    width: 100%;
   }
 
   .toggleButton {
-    order: 2;
-    padding: var(--space-sm) var(--space-sm);
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
     font-size: var(--font-xs);
   }
 
   .sortContainer {
-    order: 3;
     flex: 1;
     margin-left: 0;
   }
@@ -469,5 +492,11 @@
 
   .chipGrid {
     gap: var(--space-sm);
+  }
+
+  .queueBadge {
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
   }
 }

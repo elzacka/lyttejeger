@@ -20,13 +20,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
-  height: 24px;
+  min-width: var(--badge-size);
+  height: var(--badge-size);
   padding: 0 var(--space-xs);
   background: var(--accent);
   color: white;
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   font-weight: 600;
   border-radius: var(--radius-full);
 }
@@ -101,8 +101,8 @@
 }
 
 .image {
-  width: 56px;
-  height: 56px;
+  width: var(--image-size-lg);
+  height: var(--image-size-lg);
   border-radius: var(--radius-sm);
   object-fit: cover;
   flex-shrink: 0;
@@ -157,8 +157,8 @@
 }
 
 .menuButton {
-  width: 36px;
-  height: 36px;
+  width: var(--button-size-lg);
+  height: var(--button-size-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -243,8 +243,8 @@
 }
 
 .playButton {
-  width: 40px;
-  height: 40px;
+  width: var(--button-size-lg);
+  height: var(--button-size-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -277,8 +277,8 @@
 /* Mobile */
 @media (max-width: 640px) {
   .image {
-    width: 48px;
-    height: 48px;
+    width: var(--image-size-md);
+    height: var(--image-size-md);
   }
 
   .episodeTitle {

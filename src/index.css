@@ -69,6 +69,18 @@
   /* Layout */
   --max-width: 720px;
   --line-height: 1.6;
+  --player-height: 100px;
+
+  /* Consistent sizing */
+  --button-size-sm: 32px;
+  --button-size-md: 40px;
+  --button-size-lg: 44px;
+  --image-size-sm: 40px;
+  --image-size-md: 48px;
+  --image-size-lg: 56px;
+
+  /* Badge sizing */
+  --badge-size: 20px;
 
   /* Border radius - minimal */
   --radius-sm: 4px;
