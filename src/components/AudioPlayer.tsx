@@ -128,8 +128,21 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     })
 
     // Set up action handlers
-    navigator.mediaSession.setActionHandler('play', () => {
-      audioRef.current?.play()
+    // iOS/Bluetooth: Play handler needs to handle suspended audio context
+    navigator.mediaSession.setActionHandler('play', async () => {
+      if (!audioRef.current) return
+      try {
+        await audioRef.current.play()
+      } catch {
+        // Audio might be in suspended state - try to resume
+        // This can happen when screen is locked with Bluetooth connected
+        try {
+          audioRef.current.load()
+          await audioRef.current.play()
+        } catch {
+          // Still failed - user needs to unlock screen
+        }
+      }
     })
     navigator.mediaSession.setActionHandler('pause', () => {
       audioRef.current?.pause()
@@ -181,6 +194,22 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       // setPositionState may not be supported
     }
   }, [currentTime, duration])
+
+  // Handle visibility change - helps resume audio on iOS when returning from lock screen
+  useEffect(() => {
+    if (!episode) return
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && audioRef.current) {
+        // Sync UI state with actual audio state when app becomes visible
+        setIsPlaying(!audioRef.current.paused)
+        setCurrentTime(audioRef.current.currentTime)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [episode])
 
   const handleLoadedMetadata = useCallback(() => {
     if (audioRef.current) {
