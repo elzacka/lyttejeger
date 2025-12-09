@@ -1,3 +1,5 @@
+/* SubscriptionsView - Clean list with proper touch targets */
+
 .container {
   padding: var(--space-md);
 }
@@ -21,13 +23,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
-  height: 24px;
+  min-width: var(--badge-size);
+  height: var(--badge-size);
   padding: 0 var(--space-xs);
   background: var(--accent);
   color: white;
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   font-weight: 600;
   border-radius: var(--radius-full);
 }
@@ -75,8 +77,8 @@
 }
 
 .image {
-  width: var(--image-size-md);
-  height: var(--image-size-md);
+  width: var(--image-sm);
+  height: var(--image-sm);
   border-radius: var(--radius-sm);
   object-fit: cover;
   flex-shrink: 0;
@@ -85,7 +87,7 @@
 .info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-2xs);
   min-width: 0;
 }
 
@@ -109,8 +111,8 @@
 }
 
 .unsubscribeButton {
-  width: var(--button-size-lg);
-  height: var(--button-size-lg);
+  width: var(--button-lg);
+  height: var(--button-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -124,7 +126,7 @@
 }
 
 .unsubscribeButton:hover {
-  background: rgba(var(--error-rgb, 220, 53, 69), 0.1);
+  background: rgba(var(--error-rgb), 0.1);
   color: var(--error-color);
 }
 
@@ -134,7 +136,7 @@
 }
 
 .unsubscribeButton .material-symbols-outlined {
-  font-size: 20px;
+  font-size: var(--icon-md);
 }
 
 /* Empty state */
@@ -166,4 +168,40 @@
   margin: 0;
   font-family: var(--font-mono);
   font-size: var(--font-sm);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .container {
+    padding: var(--space-sm);
+  }
+
+  .header {
+    margin-bottom: var(--space-sm);
+  }
+
+  .title {
+    font-size: var(--font-sm);
+  }
+
+  .list {
+    gap: var(--space-xs);
+  }
+
+  .item {
+    padding: var(--space-sm);
+  }
+
+  .image {
+    width: var(--image-xs);
+    height: var(--image-xs);
+  }
+
+  .podcastTitle {
+    font-size: var(--font-xs);
+  }
+
+  .author {
+    font-size: var(--font-2xs);
+  }
 }

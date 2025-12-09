@@ -1,3 +1,5 @@
+/* Header - App branding */
+
 .header {
   text-align: center;
   padding: var(--space-lg) var(--space-md) var(--space-md);
@@ -27,11 +29,11 @@
 /* Mobile */
 @media (max-width: 640px) {
   .header {
-    padding: var(--space-md);
+    padding: var(--space-md) var(--space-sm);
   }
 
   .logoIcon {
-    font-size: 24px;
+    font-size: var(--icon-lg);
   }
 
   .logoText {

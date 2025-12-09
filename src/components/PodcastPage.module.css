@@ -1,3 +1,5 @@
+/* PodcastPage - Full podcast detail view */
+
 .page {
   min-height: 100vh;
   background: var(--bg-primary);
@@ -20,8 +22,8 @@
 }
 
 .backButton {
-  width: var(--touch-target);
-  height: var(--touch-target);
+  width: var(--button-lg);
+  height: var(--button-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,6 +44,10 @@
   outline-offset: 2px;
 }
 
+.backButton .material-symbols-outlined {
+  font-size: var(--icon-lg);
+}
+
 .logo {
   display: flex;
   align-items: center;
@@ -49,7 +55,7 @@
 }
 
 .logoIcon {
-  font-size: 24px;
+  font-size: var(--icon-lg);
   font-weight: 200;
   color: var(--accent);
 }
@@ -66,7 +72,7 @@
   max-width: 800px;
   margin: 0 auto;
   padding: var(--space-md);
-  padding-bottom: calc(var(--space-xl) + var(--player-height) + var(--space-md)); /* Space for audio player */
+  padding-bottom: calc(var(--space-xl) + var(--player-height) + var(--space-md));
   overflow-x: hidden;
 }
 
@@ -134,6 +140,7 @@
   align-items: center;
   gap: var(--space-xs);
   margin-top: var(--space-sm);
+  min-height: var(--button-lg);
   padding: var(--space-sm) var(--space-md);
   background: var(--accent);
   border: none;
@@ -160,7 +167,7 @@
 }
 
 .subscribeButton .material-symbols-outlined {
-  font-size: 18px;
+  font-size: var(--icon-sm);
 }
 
 .subscribeButton.subscribed {
@@ -317,8 +324,8 @@
 }
 
 .playButton {
-  width: var(--button-size-lg);
-  height: var(--button-size-lg);
+  width: var(--button-lg);
+  height: var(--button-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -345,7 +352,7 @@
 }
 
 .playButton .material-symbols-outlined {
-  font-size: 24px;
+  font-size: var(--icon-lg);
 }
 
 .episodeToggle {
@@ -416,8 +423,8 @@
 }
 
 .menuButton {
-  width: var(--button-size-lg);
-  height: var(--button-size-lg);
+  width: var(--button-lg);
+  height: var(--button-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -437,6 +444,10 @@
 .menuButton:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+.menuButton .material-symbols-outlined {
+  font-size: var(--icon-md);
 }
 
 .menuDropdown {
@@ -468,6 +479,7 @@
   align-items: center;
   gap: var(--space-sm);
   width: 100%;
+  min-height: var(--button-lg);
   padding: var(--space-sm) var(--space-md);
   background: none;
   border: none;
@@ -492,13 +504,18 @@
   color: var(--text-primary);
 }
 
+.menuItem:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 .menuItem:disabled {
   color: var(--text-muted);
   cursor: not-allowed;
 }
 
 .menuItem .material-symbols-outlined {
-  font-size: 20px;
+  font-size: var(--icon-md);
 }
 
 .episodeDetails {
@@ -543,6 +560,55 @@
   font-size: var(--font-sm);
   color: var(--text-muted);
   font-style: italic;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .header {
+    padding: var(--space-sm);
+  }
+
+  .content {
+    padding: var(--space-sm);
+    padding-bottom: calc(var(--space-lg) + var(--player-height-mobile) + var(--space-md));
+  }
+
+  .podcastInfo {
+    gap: var(--space-sm);
+  }
+
+  .image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .title {
+    font-size: var(--font-base);
+  }
+
+  .author {
+    font-size: var(--font-xs);
+  }
+
+  .episodesTitle {
+    font-size: var(--font-sm);
+  }
+
+  .episodeList {
+    gap: var(--space-xs);
+  }
+
+  .episodeHeader {
+    padding: var(--space-sm);
+  }
+
+  .episodeTitle {
+    font-size: var(--font-xs);
+  }
+
+  .episodeMeta {
+    font-size: var(--font-2xs);
+  }
 }
 
 /* Desktop */

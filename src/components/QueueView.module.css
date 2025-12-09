@@ -1,3 +1,5 @@
+/* QueueView - Clean mobile-first design */
+
 .container {
   padding: var(--space-md);
 }
@@ -21,7 +23,7 @@
 }
 
 .title .material-symbols-outlined {
-  font-size: 24px;
+  font-size: var(--icon-lg);
   color: var(--accent);
 }
 
@@ -29,6 +31,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-xs);
+  min-height: var(--button-sm);
   padding: var(--space-xs) var(--space-sm);
   background: transparent;
   border: 1px solid var(--border);
@@ -37,19 +40,22 @@
   font-family: var(--font-mono);
   font-size: var(--font-xs);
   cursor: pointer;
-  transition: color var(--transition-fast),
-              border-color var(--transition-fast),
-              background var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .clearButton:hover {
   color: var(--error-color);
   border-color: var(--error-color);
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(var(--error-rgb), 0.08);
+}
+
+.clearButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .clearButton .material-symbols-outlined {
-  font-size: 18px;
+  font-size: var(--icon-sm);
 }
 
 .count {
@@ -69,12 +75,11 @@
 }
 
 .item {
-  padding: var(--space-sm);
+  padding: var(--space-md);
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  transition: border-color var(--transition-fast),
-              background var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .item:hover {
@@ -84,7 +89,7 @@
 
 .topRow {
   display: grid;
-  grid-template-columns: 24px var(--image-size-md) 1fr auto;
+  grid-template-columns: 24px var(--image-sm) 1fr auto auto;
   align-items: center;
   gap: var(--space-sm);
 }
@@ -98,8 +103,8 @@
 }
 
 .imageContainer {
-  width: var(--image-size-md);
-  height: var(--image-size-md);
+  width: var(--image-sm);
+  height: var(--image-sm);
   flex-shrink: 0;
 }
 
@@ -115,7 +120,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-2xs);
 }
 
 .podcastName {
@@ -133,8 +138,9 @@
   margin: 0;
   font-family: var(--font-mono);
   font-size: var(--font-sm);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -148,39 +154,30 @@
   color: var(--text-muted);
 }
 
-/* Desktop actions - shown inline in grid */
+/* Actions */
 .actionsDesktop {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
 }
 
-/* Mobile actions - hidden on desktop */
 .actionsMobile {
   display: none;
-}
-
-/* Desktop: 5 columns including actions */
-@media (min-width: 641px) {
-  .topRow {
-    grid-template-columns: 24px var(--image-size-md) 1fr auto auto;
-  }
 }
 
 .actionButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--button-size-sm);
-  height: var(--button-size-sm);
+  width: var(--button-sm);
+  height: var(--button-sm);
   padding: 0;
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   cursor: pointer;
-  transition: color var(--transition-fast),
-              background var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .actionButton:hover:not(:disabled) {
@@ -188,29 +185,33 @@
   background: var(--bg-hover);
 }
 
+.actionButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .actionButton:disabled {
-  opacity: 0.3;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .actionButton .material-symbols-outlined {
-  font-size: 20px;
+  font-size: var(--icon-md);
 }
 
 .playButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--button-size-lg);
-  height: var(--button-size-lg);
+  width: var(--button-lg);
+  height: var(--button-lg);
   background: var(--accent);
   border: none;
   border-radius: 50%;
   color: white;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background var(--transition-fast),
-              transform var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .playButton:hover {
@@ -221,8 +222,13 @@
   transform: scale(0.95);
 }
 
+.playButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .playButton .material-symbols-outlined {
-  font-size: 24px;
+  font-size: var(--icon-lg);
 }
 
 /* Empty state */
@@ -231,27 +237,27 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-xl);
+  padding: var(--space-2xl);
   text-align: center;
   color: var(--text-muted);
 }
 
 .empty .material-symbols-outlined {
-  font-size: 64px;
+  font-size: 48px;
   margin-bottom: var(--space-md);
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .empty p {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-base);
+  font-size: var(--font-sm);
 }
 
 .hint {
   margin-top: var(--space-sm) !important;
-  font-size: var(--font-sm) !important;
-  opacity: 0.7;
+  font-size: var(--font-xs) !important;
+  color: var(--text-muted);
 }
 
 /* Mobile */
@@ -261,7 +267,7 @@
   }
 
   .header {
-    margin-bottom: var(--space-xs);
+    margin-bottom: var(--space-sm);
   }
 
   .title {
@@ -269,11 +275,12 @@
   }
 
   .title .material-symbols-outlined {
-    font-size: 20px;
+    font-size: var(--icon-md);
   }
 
   .count {
     margin-bottom: var(--space-sm);
+    font-size: var(--font-xs);
   }
 
   .list {
@@ -285,67 +292,64 @@
   }
 
   .topRow {
-    grid-template-columns: 20px var(--image-size-sm) 1fr auto;
-    gap: var(--space-xs);
+    grid-template-columns: var(--image-xs) 1fr auto;
+    gap: var(--space-sm);
   }
 
-  /* Hide desktop actions on mobile */
+  .position {
+    display: none;
+  }
+
+  .imageContainer {
+    width: var(--image-xs);
+    height: var(--image-xs);
+  }
+
   .actionsDesktop {
     display: none;
   }
 
-  /* Show mobile actions at bottom */
   .actionsMobile {
     display: flex;
-    flex-direction: row;
+    align-items: center;
     justify-content: flex-end;
-    gap: var(--space-sm);
-    margin-top: var(--space-xs);
-    padding-top: var(--space-xs);
-    border-top: 1px solid var(--border);
-  }
-
-  .position {
-    font-size: var(--font-xs);
-  }
-
-  .imageContainer {
-    width: var(--image-size-sm);
-    height: var(--image-size-sm);
+    gap: var(--space-xs);
+    margin-top: var(--space-sm);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--border-light);
   }
 
   .content {
-    gap: 1px;
+    gap: var(--space-2xs);
   }
 
   .podcastName {
-    font-size: 11px;
+    font-size: var(--font-2xs);
   }
 
   .episodeTitle {
     font-size: var(--font-xs);
-    -webkit-line-clamp: 1;
+    -webkit-line-clamp: 2;
   }
 
   .duration {
-    font-size: 11px;
+    font-size: var(--font-2xs);
   }
 
   .playButton {
-    width: var(--button-size-md);
-    height: var(--button-size-md);
+    width: var(--button-md);
+    height: var(--button-md);
   }
 
   .playButton .material-symbols-outlined {
-    font-size: 20px;
+    font-size: var(--icon-md);
   }
 
   .actionButton {
-    width: var(--button-size-sm);
-    height: var(--button-size-sm);
+    width: var(--button-sm);
+    height: var(--button-sm);
     background: var(--bg-primary);
     border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
   }
 
   .actionButton:hover:not(:disabled) {
@@ -353,6 +357,6 @@
   }
 
   .actionButton .material-symbols-outlined {
-    font-size: 18px;
+    font-size: var(--icon-sm);
   }
 }
