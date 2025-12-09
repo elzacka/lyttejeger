@@ -9,6 +9,7 @@ import { QueueView } from './components/QueueView'
 import { SubscriptionsView } from './components/SubscriptionsView'
 import { RecentEpisodes } from './components/RecentEpisodes'
 import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer'
+import { BottomNav, type NavItem } from './components/BottomNav'
 import { useSearch } from './hooks/useSearch'
 import { useQueue } from './hooks/useQueue'
 import { useSubscriptions } from './hooks/useSubscriptions'
@@ -221,6 +222,14 @@ function App() {
     }
   }, [subscriptions])
 
+  // Navigation handler for BottomNav
+  const handleNavigation = useCallback((item: NavItem) => {
+    if (item === 'subscriptions' || item === 'queue') {
+      setActiveTab(item)
+    }
+    // 'info' is handled internally by BottomNav (opens InfoSheet)
+  }, [setActiveTab])
+
   // If a podcast is selected, show the podcast page
   if (selectedPodcast) {
     return (
@@ -271,8 +280,6 @@ function App() {
             languages={allLanguages}
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            queueCount={queueLength}
-            subscriptionCount={subscriptionCount}
             onToggleCategory={toggleCategory}
             onToggleLanguage={toggleLanguage}
             onSetDateFrom={setDateFrom}
@@ -345,26 +352,12 @@ function App() {
         </section>
       </main>
 
-      <footer className="footer">
-        <p className="footer-attribution">
-          Data fra{' '}
-          <a
-            href="https://podcastindex.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Podcast Index
-          </a>
-          {' | '}
-          <a
-            href="https://github.com/elzacka/lyttejeger/blob/main/PRIVACY.md"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Personvern
-          </a>
-        </p>
-      </footer>
+      <BottomNav
+        activeItem={activeTab === 'subscriptions' || activeTab === 'queue' ? activeTab : null}
+        onNavigate={handleNavigation}
+        queueCount={queueLength}
+        subscriptionCount={subscriptionCount}
+      />
       <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
     </div>
   )

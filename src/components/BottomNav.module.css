@@ -1,0 +1,124 @@
+/* Bottom navigation bar - fixed at bottom on mobile, integrated on desktop */
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-nav);
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.navItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  min-height: 56px;
+  padding: var(--space-sm) var(--space-xs);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-2xs);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  position: relative;
+}
+
+.navItem:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.navItem:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.navItem.active {
+  color: var(--accent);
+}
+
+.navItem .material-symbols-outlined {
+  font-size: 24px;
+}
+
+.label {
+  display: block;
+}
+
+.badge {
+  position: absolute;
+  top: var(--space-xs);
+  right: 50%;
+  transform: translateX(16px);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--space-2xs);
+  background: var(--accent);
+  color: white;
+  font-size: 10px;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navItem.active .badge {
+  background: var(--accent);
+}
+
+/* Desktop: horizontal bar in header area */
+@media (min-width: 641px) {
+  .nav {
+    position: static;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    border-top: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    padding: var(--space-xs);
+    gap: var(--space-xs);
+  }
+
+  .navItem {
+    flex-direction: row;
+    gap: var(--space-xs);
+    min-height: var(--button-lg);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-sm);
+  }
+
+  .navItem .material-symbols-outlined {
+    font-size: 20px;
+  }
+
+  .navItem.active {
+    background: var(--accent);
+    color: white;
+  }
+
+  .navItem.active:hover {
+    background: var(--accent-hover);
+    color: white;
+  }
+
+  .navItem.active .badge {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .badge {
+    position: static;
+    transform: none;
+  }
+}

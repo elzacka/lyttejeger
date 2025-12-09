@@ -72,29 +72,6 @@
   border-radius: var(--radius-sm);
 }
 
-/* Footer */
-.footer {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-md) var(--space-lg);
-  font-family: var(--font-mono);
-  font-size: var(--font-xs);
-  color: var(--text-muted);
-  border-top: 1px solid var(--border);
-}
-
-.footer-attribution {
-  margin: 0;
-}
-
-.footer-attribution a {
-  color: var(--accent);
-}
-
-.footer-attribution a:hover {
-  text-decoration: underline;
-}
-
 /* Error Banner */
 .error-banner {
   display: flex;
@@ -119,10 +96,7 @@
   .main {
     gap: var(--space-md);
     padding: var(--space-md);
-    padding-bottom: calc(var(--player-height-mobile) + var(--space-xl));
-  }
-
-  .footer {
-    padding: var(--space-sm) var(--space-md);
+    /* Account for bottom nav (56px) + player height + spacing */
+    padding-bottom: calc(56px + var(--player-height-mobile) + var(--space-xl) + env(safe-area-inset-bottom, 0px));
   }
 }
