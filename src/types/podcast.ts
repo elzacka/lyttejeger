@@ -5,6 +5,7 @@ export interface Podcast {
   description: string
   imageUrl: string
   feedUrl: string
+  websiteUrl?: string
   categories: string[]
   language: string
   episodeCount: number

@@ -30,6 +30,7 @@ export function transformFeed(feed: PodcastIndexFeed): Podcast {
     description: stripHtml(feed.description || ''),
     imageUrl: feed.artwork || feed.image || '/placeholder-podcast.svg',
     feedUrl: feed.url || feed.originalUrl,
+    websiteUrl: feed.link || undefined,
     categories: Object.values(feed.categories || {}),
     language: normalizeLanguage(feed.language),
     episodeCount: feed.episodeCount || 0,

@@ -74,10 +74,6 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
     })
   }
 
-  const handleSubscribe = () => {
-    window.open(podcast.feedUrl, '_blank', 'noopener,noreferrer')
-  }
-
   const toggleEpisodeExpand = (episodeId: string) => {
     setExpandedEpisodeId(prev => prev === episodeId ? null : episodeId)
   }
@@ -143,12 +139,17 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
           ))}
         </section>
 
-        <div className={styles.actions}>
-          <button className={styles.subscribeButton} onClick={handleSubscribe}>
-            <span className="material-symbols-outlined">rss_feed</span>
-            Abonner
-          </button>
-        </div>
+        {podcast.websiteUrl && (
+          <a
+            href={podcast.websiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.websiteLink}
+          >
+            <span className="material-symbols-outlined">language</span>
+            {new URL(podcast.websiteUrl).hostname.replace('www.', '')}
+          </a>
+        )}
 
         <section className={styles.episodesSection}>
           <h3 className={styles.episodesTitle}>Episoder</h3>
