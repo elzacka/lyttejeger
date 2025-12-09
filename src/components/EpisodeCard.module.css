@@ -182,7 +182,7 @@
 
 .menu {
   position: absolute;
-  bottom: calc(100% + var(--space-xs));
+  top: calc(100% + var(--space-xs));
   right: 0;
   z-index: var(--z-dropdown);
   min-width: 160px;
@@ -197,7 +197,7 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
