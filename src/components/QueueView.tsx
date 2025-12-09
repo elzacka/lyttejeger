@@ -53,30 +53,68 @@ export function QueueView({
       <ul className={styles.list} role="list">
         {queue.map((item, index) => (
           <li key={item.id} className={styles.item}>
-            <div className={styles.position}>{index + 1}</div>
+            <div className={styles.topRow}>
+              <div className={styles.position}>{index + 1}</div>
 
-            <div className={styles.imageContainer}>
-              {(item.imageUrl || item.podcastImage) && (
-                <img
-                  src={item.imageUrl || item.podcastImage}
-                  alt=""
-                  className={styles.image}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/favicon.svg'
-                  }}
-                />
-              )}
+              <div className={styles.imageContainer}>
+                {(item.imageUrl || item.podcastImage) && (
+                  <img
+                    src={item.imageUrl || item.podcastImage}
+                    alt=""
+                    className={styles.image}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/favicon.svg'
+                    }}
+                  />
+                )}
+              </div>
+
+              <div className={styles.content}>
+                <p className={styles.podcastName}>{item.podcastTitle}</p>
+                <p className={styles.episodeTitle}>{item.title}</p>
+                {item.duration && (
+                  <p className={styles.duration}>{formatDuration(item.duration)}</p>
+                )}
+              </div>
+
+              {/* Desktop actions - hidden on mobile */}
+              <div className={styles.actionsDesktop}>
+                <button
+                  className={styles.actionButton}
+                  onClick={() => onMoveUp(index)}
+                  disabled={index === 0}
+                  aria-label="Flytt opp"
+                >
+                  <span className="material-symbols-outlined">arrow_upward</span>
+                </button>
+                <button
+                  className={styles.actionButton}
+                  onClick={() => onMoveDown(index)}
+                  disabled={index === queue.length - 1}
+                  aria-label="Flytt ned"
+                >
+                  <span className="material-symbols-outlined">arrow_downward</span>
+                </button>
+                <button
+                  className={styles.actionButton}
+                  onClick={() => item.id && onRemove(item.id)}
+                  aria-label="Fjern fra kø"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <button
+                className={styles.playButton}
+                onClick={() => onPlay(item)}
+                aria-label={`Spill ${item.title}`}
+              >
+                <span className="material-symbols-outlined">play_arrow</span>
+              </button>
             </div>
 
-            <div className={styles.content}>
-              <p className={styles.podcastName}>{item.podcastTitle}</p>
-              <p className={styles.episodeTitle}>{item.title}</p>
-              {item.duration && (
-                <p className={styles.duration}>{formatDuration(item.duration)}</p>
-              )}
-            </div>
-
-            <div className={styles.actions}>
+            {/* Mobile actions - shown at bottom */}
+            <div className={styles.actionsMobile}>
               <button
                 className={styles.actionButton}
                 onClick={() => onMoveUp(index)}
@@ -101,14 +139,6 @@ export function QueueView({
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
-
-            <button
-              className={styles.playButton}
-              onClick={() => onPlay(item)}
-              aria-label={`Spill ${item.title}`}
-            >
-              <span className="material-symbols-outlined">play_arrow</span>
-            </button>
           </li>
         ))}
       </ul>

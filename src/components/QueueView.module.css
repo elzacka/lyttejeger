@@ -69,10 +69,6 @@
 }
 
 .item {
-  display: grid;
-  grid-template-columns: 24px 48px 1fr auto auto;
-  align-items: center;
-  gap: var(--space-sm);
   padding: var(--space-sm);
   background: var(--bg-secondary);
   border: 1px solid var(--border);
@@ -84,6 +80,13 @@
 .item:hover {
   border-color: var(--accent);
   background: var(--bg-hover);
+}
+
+.topRow {
+  display: grid;
+  grid-template-columns: 24px 48px 1fr auto;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 .position {
@@ -145,10 +148,23 @@
   color: var(--text-muted);
 }
 
-.actions {
+/* Desktop actions - shown inline in grid */
+.actionsDesktop {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
+}
+
+/* Mobile actions - hidden on desktop */
+.actionsMobile {
+  display: none;
+}
+
+/* Desktop: 5 columns including actions */
+@media (min-width: 641px) {
+  .topRow {
+    grid-template-columns: 24px 48px 1fr auto auto;
+  }
 }
 
 .actionButton {
@@ -240,10 +256,57 @@
 
 /* Mobile */
 @media (max-width: 640px) {
-  .item {
-    grid-template-columns: 20px 40px 1fr auto auto;
+  .container {
+    padding: var(--space-sm);
+  }
+
+  .header {
+    margin-bottom: var(--space-xs);
+  }
+
+  .title {
+    font-size: var(--font-base);
+  }
+
+  .title .material-symbols-outlined {
+    font-size: 20px;
+  }
+
+  .count {
+    margin-bottom: var(--space-sm);
+  }
+
+  .list {
     gap: var(--space-xs);
-    padding: var(--space-xs);
+  }
+
+  .item {
+    padding: var(--space-sm);
+  }
+
+  .topRow {
+    grid-template-columns: 20px 40px 1fr auto;
+    gap: var(--space-xs);
+  }
+
+  /* Hide desktop actions on mobile */
+  .actionsDesktop {
+    display: none;
+  }
+
+  /* Show mobile actions at bottom */
+  .actionsMobile {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+    margin-top: var(--space-xs);
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--border);
+  }
+
+  .position {
+    font-size: var(--font-xs);
   }
 
   .imageContainer {
@@ -251,18 +314,21 @@
     height: 40px;
   }
 
-  .actions {
-    flex-direction: column;
-    gap: 2px;
+  .content {
+    gap: 1px;
   }
 
-  .actionButton {
-    width: 28px;
-    height: 28px;
+  .podcastName {
+    font-size: 11px;
   }
 
-  .actionButton .material-symbols-outlined {
-    font-size: 18px;
+  .episodeTitle {
+    font-size: var(--font-xs);
+    -webkit-line-clamp: 1;
+  }
+
+  .duration {
+    font-size: 11px;
   }
 
   .playButton {
@@ -272,5 +338,21 @@
 
   .playButton .material-symbols-outlined {
     font-size: 20px;
+  }
+
+  .actionButton {
+    width: 36px;
+    height: 32px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .actionButton:hover:not(:disabled) {
+    border-color: var(--accent);
+  }
+
+  .actionButton .material-symbols-outlined {
+    font-size: 18px;
   }
 }
