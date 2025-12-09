@@ -198,7 +198,8 @@ export async function searchPodcasts(query: string, options: SearchOptions = {})
 export async function getEpisodesByFeedId(feedId: number, max = 20): Promise<EpisodesResponse> {
   return apiRequest<EpisodesResponse>('/episodes/byfeedid', {
     id: feedId.toString(),
-    max: max.toString()
+    max: max.toString(),
+    fulltext: ''  // Request full descriptions instead of truncated
   })
 }
 

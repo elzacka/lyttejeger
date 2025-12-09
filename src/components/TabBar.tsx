@@ -1,17 +1,21 @@
 import styles from './TabBar.module.css'
 
+export type TabType = 'podcasts' | 'episodes' | 'queue'
+
 interface TabBarProps {
-  activeTab: 'podcasts' | 'episodes'
-  onTabChange: (tab: 'podcasts' | 'episodes') => void
+  activeTab: TabType
+  onTabChange: (tab: TabType) => void
   podcastCount: number
   episodeCount: number
+  queueCount: number
 }
 
 export function TabBar({
   activeTab,
   onTabChange,
   podcastCount,
-  episodeCount
+  episodeCount,
+  queueCount,
 }: TabBarProps) {
   return (
     <div className={styles.container}>
@@ -30,6 +34,14 @@ export function TabBar({
         <span className="material-symbols-outlined" aria-hidden="true">play_circle</span>
         <span>Episoder</span>
         <span className={styles.count}>{episodeCount}</span>
+      </button>
+      <button
+        className={`${styles.tab} ${activeTab === 'queue' ? styles.active : ''}`}
+        onClick={() => onTabChange('queue')}
+      >
+        <span className="material-symbols-outlined" aria-hidden="true">queue_music</span>
+        <span>Kø</span>
+        <span className={styles.count}>{queueCount}</span>
       </button>
     </div>
   )

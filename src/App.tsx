@@ -5,6 +5,7 @@ import { FilterPanel } from './components/FilterPanel'
 import { PodcastList } from './components/PodcastList'
 import { EpisodeList } from './components/EpisodeList'
 import { PodcastPage } from './components/PodcastPage'
+import { QueueView } from './components/QueueView'
 import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer'
 import { useSearch } from './hooks/useSearch'
 import { useQueue } from './hooks/useQueue'
@@ -13,6 +14,7 @@ import { getCategories, isConfigured } from './services/podcastIndex'
 import { translateCategory } from './utils/categoryTranslations'
 import type { FilterOption, Podcast, Episode } from './types/podcast'
 import type { EpisodeWithPodcast } from './utils/search'
+import type { QueueItem } from './services/db'
 import './App.css'
 
 // Fallback categories if API fails
@@ -70,7 +72,7 @@ function App() {
     activeFilterCount
   } = useSearch()
 
-  const { addToQueue, playNext, isInQueue } = useQueue()
+  const { queue, addToQueue, playNext, removeFromQueue, clearQueue, moveItem, isInQueue, queueLength } = useQueue()
 
   const handlePlayEpisode = useCallback((episode: PlayingEpisode) => {
     setPlayingEpisode(episode)
@@ -149,6 +151,34 @@ function App() {
     setSelectedPodcast(null)
   }, [])
 
+  // Queue handlers
+  const handlePlayFromQueue = useCallback((item: QueueItem) => {
+    setPlayingEpisode({
+      id: item.episodeId,
+      podcastId: item.podcastId,
+      title: item.title,
+      audioUrl: item.audioUrl,
+      imageUrl: item.imageUrl,
+      podcastTitle: item.podcastTitle,
+      podcastImage: item.podcastImage,
+      duration: item.duration ?? 0,
+      description: '',
+      publishedAt: '',
+    })
+  }, [])
+
+  const handleMoveUp = useCallback((index: number) => {
+    if (index > 0) {
+      moveItem(index, index - 1)
+    }
+  }, [moveItem])
+
+  const handleMoveDown = useCallback((index: number) => {
+    if (index < queue.length - 1) {
+      moveItem(index, index + 1)
+    }
+  }, [moveItem, queue.length])
+
   // If a podcast is selected, show the podcast page
   if (selectedPodcast) {
     return (
@@ -196,6 +226,7 @@ function App() {
             languages={allLanguages}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            queueCount={queueLength}
             onToggleCategory={toggleCategory}
             onToggleLanguage={toggleLanguage}
             onSetDateFrom={setDateFrom}
@@ -207,7 +238,16 @@ function App() {
         </section>
 
         <section className="results-section">
-          {activeTab === 'podcasts' ? (
+          {activeTab === 'queue' ? (
+            <QueueView
+              queue={queue}
+              onPlay={handlePlayFromQueue}
+              onRemove={removeFromQueue}
+              onClear={clearQueue}
+              onMoveUp={handleMoveUp}
+              onMoveDown={handleMoveDown}
+            />
+          ) : activeTab === 'podcasts' ? (
             <PodcastList
               podcasts={results.podcasts}
               searchQuery={filters.query}

@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import type { SearchFilters, FilterOption } from '../types/podcast'
+import type { TabType } from './TabBar'
 import styles from './FilterPanel.module.css'
 
 interface FilterPanelProps {
   filters: SearchFilters
   categories: FilterOption[]
   languages: string[]
-  activeTab: 'podcasts' | 'episodes'
-  onTabChange: (tab: 'podcasts' | 'episodes') => void
+  activeTab: TabType
+  onTabChange: (tab: TabType) => void
+  queueCount: number
   onToggleCategory: (category: string) => void
   onToggleLanguage: (language: string) => void
   onSetDateFrom: (year: number | null) => void
@@ -23,6 +25,7 @@ export function FilterPanel({
   languages,
   activeTab,
   onTabChange,
+  queueCount,
   onToggleCategory,
   onToggleLanguage,
   onSetDateFrom,
@@ -69,6 +72,14 @@ export function FilterPanel({
             aria-checked={activeTab === 'episodes'}
           >
             Episoder
+          </button>
+          <button
+            className={`${styles.typeButton} ${activeTab === 'queue' ? styles.typeButtonActive : ''}`}
+            onClick={() => onTabChange('queue')}
+            role="radio"
+            aria-checked={activeTab === 'queue'}
+          >
+            Kø {queueCount > 0 && <span className={styles.queueBadge}>{queueCount}</span>}
           </button>
         </div>
 

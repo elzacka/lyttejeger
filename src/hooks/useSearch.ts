@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useTransition, useEffect, useRef } from 'react'
 import type { Podcast, Episode, SearchFilters } from '../types/podcast'
 import { type EpisodeWithPodcast } from '../utils/search'
+import type { TabType } from '../components/TabBar'
 import {
   searchPodcasts as apiSearchPodcasts,
   searchEpisodesByPerson,
@@ -37,7 +38,7 @@ export function useSearch() {
 
   const [filters, setFilters] = useState<SearchFilters>(initialFilters)
   const [isPending, startTransition] = useTransition()
-  const [activeTab, setActiveTab] = useState<'podcasts' | 'episodes'>('podcasts')
+  const [activeTab, setActiveTab] = useState<TabType>('podcasts')
 
   // API state
   const [apiPodcasts, setApiPodcasts] = useState<Podcast[]>([])
@@ -349,8 +350,10 @@ export function useSearch() {
 
     // Debounce the search - use full query (not just complete words)
     // This ensures "inga strümke" searches for both words
+    // Only search for podcasts or episodes tabs, not queue
+    const searchTab = activeTab === 'queue' ? 'podcasts' : activeTab
     const timer = setTimeout(() => {
-      searchViaApi(query, activeTab)
+      searchViaApi(query, searchTab)
     }, 400) // Slightly longer debounce to wait for typing to finish
 
     return () => clearTimeout(timer)
@@ -360,6 +363,8 @@ export function useSearch() {
   // Re-search when tab changes (if we have a query)
   useEffect(() => {
     if (!shouldUseApi || filters.query.length < 2) return
+    // Don't search when switching to queue tab
+    if (activeTab === 'queue') return
 
     // Trigger new search with current query for the new tab
     searchViaApi(filters.query, activeTab)
@@ -369,6 +374,8 @@ export function useSearch() {
   // Re-search when language or category filters change (API supports these)
   useEffect(() => {
     if (!shouldUseApi || filters.query.length < 2) return
+    // Don't search when on queue tab
+    if (activeTab === 'queue') return
 
     const filtersChanged =
       JSON.stringify(filtersRef.current.languages) !== JSON.stringify(filters.languages) ||
@@ -377,8 +384,9 @@ export function useSearch() {
     if (filtersChanged) {
       filtersRef.current = { languages: filters.languages, categories: filters.categories }
       // Re-trigger API search with updated filters
+      const searchTab = activeTab === 'episodes' ? 'episodes' : 'podcasts'
       const timer = setTimeout(() => {
-        searchViaApi(filters.query, activeTab)
+        searchViaApi(filters.query, searchTab)
       }, 200)
       return () => clearTimeout(timer)
     }

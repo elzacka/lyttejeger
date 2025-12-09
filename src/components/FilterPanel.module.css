@@ -42,8 +42,32 @@
   border-right: none;
 }
 
+.typeButton:not(:first-child):not(:last-child) {
+  border-radius: 0;
+  border-right: none;
+}
+
 .typeButton:last-child {
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.queueBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  margin-left: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+}
+
+.typeButton:not(.typeButtonActive) .queueBadge {
+  background: var(--accent);
+  color: white;
 }
 
 .typeButton:hover {
