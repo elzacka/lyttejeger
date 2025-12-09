@@ -1,6 +1,6 @@
 import styles from './TabBar.module.css'
 
-export type TabType = 'podcasts' | 'episodes' | 'queue'
+export type TabType = 'podcasts' | 'episodes' | 'queue' | 'subscriptions'
 
 interface TabBarProps {
   activeTab: TabType

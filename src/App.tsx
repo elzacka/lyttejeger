@@ -6,9 +6,12 @@ import { PodcastList } from './components/PodcastList'
 import { EpisodeList } from './components/EpisodeList'
 import { PodcastPage } from './components/PodcastPage'
 import { QueueView } from './components/QueueView'
+import { SubscriptionsView } from './components/SubscriptionsView'
+import { RecentEpisodes } from './components/RecentEpisodes'
 import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer'
 import { useSearch } from './hooks/useSearch'
 import { useQueue } from './hooks/useQueue'
+import { useSubscriptions } from './hooks/useSubscriptions'
 import { allLanguages } from './data/languages'
 import { getCategories, isConfigured } from './services/podcastIndex'
 import { translateCategory } from './utils/categoryTranslations'
@@ -73,6 +76,7 @@ function App() {
   } = useSearch()
 
   const { queue, addToQueue, playNext, removeFromQueue, clearQueue, moveItem, isInQueue, queueLength } = useQueue()
+  const { subscriptions, subscribe, unsubscribe, isSubscribed, subscriptionCount } = useSubscriptions()
 
   const handlePlayEpisode = useCallback((episode: PlayingEpisode) => {
     setPlayingEpisode(episode)
@@ -179,6 +183,44 @@ function App() {
     }
   }, [moveItem, queue.length])
 
+  // Subscription handlers
+  const handleSubscribe = useCallback(() => {
+    if (selectedPodcast) {
+      subscribe(selectedPodcast)
+    }
+  }, [selectedPodcast, subscribe])
+
+  const handleUnsubscribe = useCallback(() => {
+    if (selectedPodcast) {
+      unsubscribe(selectedPodcast.id)
+    }
+  }, [selectedPodcast, unsubscribe])
+
+  // Handler to select podcast from subscriptions view
+  const handleSelectSubscribedPodcast = useCallback(async (podcastId: string) => {
+    // We need to fetch the podcast data from the API
+    const sub = subscriptions.find(s => s.podcastId === podcastId)
+    if (sub) {
+      // Create a minimal podcast object from subscription data
+      // The PodcastPage will fetch episodes anyway
+      const podcast: Podcast = {
+        id: sub.podcastId,
+        title: sub.title,
+        author: sub.author,
+        description: '',
+        imageUrl: sub.imageUrl,
+        feedUrl: sub.feedUrl,
+        categories: [],
+        language: '',
+        episodeCount: 0,
+        lastUpdated: '',
+        rating: 0,
+        explicit: false,
+      }
+      setSelectedPodcast(podcast)
+    }
+  }, [subscriptions])
+
   // If a podcast is selected, show the podcast page
   if (selectedPodcast) {
     return (
@@ -190,6 +232,9 @@ function App() {
           onAddToQueue={handleAddEpisodeToQueue}
           onPlayNext={handlePlayEpisodeNext}
           isInQueue={isInQueue}
+          isSubscribed={isSubscribed(selectedPodcast.id)}
+          onSubscribe={handleSubscribe}
+          onUnsubscribe={handleUnsubscribe}
         />
         <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
       </div>
@@ -227,6 +272,7 @@ function App() {
             activeTab={activeTab}
             onTabChange={setActiveTab}
             queueCount={queueLength}
+            subscriptionCount={subscriptionCount}
             onToggleCategory={toggleCategory}
             onToggleLanguage={toggleLanguage}
             onSetDateFrom={setDateFrom}
@@ -237,6 +283,17 @@ function App() {
           />
         </section>
 
+        {/* Show recent episodes from subscriptions when not searching */}
+        {subscriptionCount > 0 && !filters.query && activeTab !== 'queue' && activeTab !== 'subscriptions' && (
+          <RecentEpisodes
+            subscriptions={subscriptions}
+            onPlayEpisode={handlePlayEpisode}
+            onAddToQueue={handleAddEpisodeToQueue}
+            onPlayNext={handlePlayEpisodeNext}
+            isInQueue={isInQueue}
+          />
+        )}
+
         <section className="results-section">
           {activeTab === 'queue' ? (
             <QueueView
@@ -246,6 +303,12 @@ function App() {
               onClear={clearQueue}
               onMoveUp={handleMoveUp}
               onMoveDown={handleMoveDown}
+            />
+          ) : activeTab === 'subscriptions' ? (
+            <SubscriptionsView
+              subscriptions={subscriptions}
+              onUnsubscribe={unsubscribe}
+              onSelectPodcast={handleSelectSubscribedPodcast}
             />
           ) : activeTab === 'podcasts' ? (
             <PodcastList

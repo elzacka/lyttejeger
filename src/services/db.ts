@@ -24,10 +24,21 @@ export interface QueueItem {
   position: number // order in queue
 }
 
+// Subscription for podcast subscriptions
+export interface Subscription {
+  podcastId: string
+  title: string
+  author: string
+  imageUrl: string
+  feedUrl: string
+  subscribedAt: number // timestamp
+}
+
 // Database schema
 class LyttejegerDB extends Dexie {
   playbackPositions!: EntityTable<PlaybackPosition, 'episodeId'>
   queue!: EntityTable<QueueItem, 'id'>
+  subscriptions!: EntityTable<Subscription, 'podcastId'>
 
   constructor() {
     super('lyttejeger')
@@ -35,6 +46,12 @@ class LyttejegerDB extends Dexie {
     this.version(1).stores({
       playbackPositions: 'episodeId, updatedAt',
       queue: '++id, episodeId, position',
+    })
+
+    this.version(2).stores({
+      playbackPositions: 'episodeId, updatedAt',
+      queue: '++id, episodeId, position',
+      subscriptions: 'podcastId, subscribedAt',
     })
   }
 }
@@ -142,4 +159,25 @@ export async function popFromQueue(): Promise<QueueItem | undefined> {
     await removeFromQueue(next.id)
   }
   return next
+}
+
+// Subscription helpers
+export async function subscribe(subscription: Omit<Subscription, 'subscribedAt'>): Promise<void> {
+  await db.subscriptions.put({
+    ...subscription,
+    subscribedAt: Date.now(),
+  })
+}
+
+export async function unsubscribe(podcastId: string): Promise<void> {
+  await db.subscriptions.delete(podcastId)
+}
+
+export async function getSubscriptions(): Promise<Subscription[]> {
+  return db.subscriptions.orderBy('subscribedAt').reverse().toArray()
+}
+
+export async function isSubscribed(podcastId: string): Promise<boolean> {
+  const sub = await db.subscriptions.get(podcastId)
+  return !!sub
 }

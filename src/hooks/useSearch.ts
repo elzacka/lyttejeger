@@ -350,8 +350,8 @@ export function useSearch() {
 
     // Debounce the search - use full query (not just complete words)
     // This ensures "inga strümke" searches for both words
-    // Only search for podcasts or episodes tabs, not queue
-    const searchTab = activeTab === 'queue' ? 'podcasts' : activeTab
+    // Only search for podcasts or episodes tabs, not queue or subscriptions
+    const searchTab = (activeTab === 'queue' || activeTab === 'subscriptions') ? 'podcasts' : activeTab
     const timer = setTimeout(() => {
       searchViaApi(query, searchTab)
     }, 400) // Slightly longer debounce to wait for typing to finish
@@ -363,8 +363,8 @@ export function useSearch() {
   // Re-search when tab changes (if we have a query)
   useEffect(() => {
     if (!shouldUseApi || filters.query.length < 2) return
-    // Don't search when switching to queue tab
-    if (activeTab === 'queue') return
+    // Don't search when switching to queue or subscriptions tab
+    if (activeTab === 'queue' || activeTab === 'subscriptions') return
 
     // Trigger new search with current query for the new tab
     searchViaApi(filters.query, activeTab)
@@ -374,8 +374,8 @@ export function useSearch() {
   // Re-search when language or category filters change (API supports these)
   useEffect(() => {
     if (!shouldUseApi || filters.query.length < 2) return
-    // Don't search when on queue tab
-    if (activeTab === 'queue') return
+    // Don't search when on queue or subscriptions tab
+    if (activeTab === 'queue' || activeTab === 'subscriptions') return
 
     const filtersChanged =
       JSON.stringify(filtersRef.current.languages) !== JSON.stringify(filters.languages) ||

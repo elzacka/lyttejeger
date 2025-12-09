@@ -14,9 +14,12 @@ interface PodcastPageProps {
   onAddToQueue?: (episode: Episode, podcastTitle: string, podcastImage: string) => void
   onPlayNext?: (episode: Episode, podcastTitle: string, podcastImage: string) => void
   isInQueue?: (episodeId: string) => boolean
+  isSubscribed?: boolean
+  onSubscribe?: () => void
+  onUnsubscribe?: () => void
 }
 
-export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPlayNext, isInQueue }: PodcastPageProps) {
+export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPlayNext, isInQueue, isSubscribed, onSubscribe, onUnsubscribe }: PodcastPageProps) {
   const [episodes, setEpisodes] = useState<Episode[]>([])
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false)
   const [episodesError, setEpisodesError] = useState<string | null>(null)
@@ -109,6 +112,18 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
               <span>{podcast.rating.toFixed(1)}</span>
             </div>
             {podcast.explicit && <span className={styles.explicitBadge}>Eksplisitt</span>}
+            {(onSubscribe || onUnsubscribe) && (
+              <button
+                className={`${styles.subscribeButton} ${isSubscribed ? styles.subscribed : ''}`}
+                onClick={isSubscribed ? onUnsubscribe : onSubscribe}
+                aria-pressed={isSubscribed}
+              >
+                <span className="material-symbols-outlined">
+                  {isSubscribed ? 'notifications_active' : 'notifications'}
+                </span>
+                {isSubscribed ? 'Abonnerer' : 'Abonner'}
+              </button>
+            )}
           </div>
         </section>
 

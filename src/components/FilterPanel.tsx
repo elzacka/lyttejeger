@@ -10,6 +10,7 @@ interface FilterPanelProps {
   activeTab: TabType
   onTabChange: (tab: TabType) => void
   queueCount: number
+  subscriptionCount: number
   onToggleCategory: (category: string) => void
   onToggleLanguage: (language: string) => void
   onSetDateFrom: (year: number | null) => void
@@ -26,6 +27,7 @@ export function FilterPanel({
   activeTab,
   onTabChange,
   queueCount,
+  subscriptionCount,
   onToggleCategory,
   onToggleLanguage,
   onSetDateFrom,
@@ -80,6 +82,14 @@ export function FilterPanel({
             aria-checked={activeTab === 'queue'}
           >
             Kø {queueCount > 0 && <span className={styles.queueBadge}>{queueCount}</span>}
+          </button>
+          <button
+            className={`${styles.typeButton} ${activeTab === 'subscriptions' ? styles.typeButtonActive : ''}`}
+            onClick={() => onTabChange('subscriptions')}
+            role="radio"
+            aria-checked={activeTab === 'subscriptions'}
+          >
+            Abonnementer {subscriptionCount > 0 && <span className={styles.queueBadge}>{subscriptionCount}</span>}
           </button>
         </div>
 
