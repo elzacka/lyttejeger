@@ -450,16 +450,22 @@
 /* Mobile */
 @media (max-width: 640px) {
   .header {
-    gap: var(--space-sm);
+    gap: var(--space-xs);
   }
 
   .typeSelector {
-    gap: var(--space-sm);
+    gap: var(--space-xs);
+  }
+
+  .radioLabel {
+    gap: 4px;
+    font-size: var(--font-size-xs);
   }
 
   .radioInput {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
+    border-width: 1.5px;
   }
 
   .radioInput:checked::after {
@@ -467,27 +473,50 @@
     height: 6px;
   }
 
+  .radioText {
+    font-size: var(--font-size-xs);
+  }
+
+  .filterDropdown {
+    min-height: 32px;
+    padding: 4px 8px;
+    font-size: var(--font-size-xs);
+  }
+
   .panel {
     padding: var(--space-sm);
   }
 
   .chip {
-    min-height: var(--button-sm);
+    min-height: 28px;
+    padding: 4px 8px;
+    font-size: var(--font-size-xs);
   }
 
   .dateRangeContainer {
     gap: var(--space-sm);
   }
 
+  .dateLabel {
+    font-size: var(--font-size-xs);
+  }
+
+  .dateInputRow {
+    gap: 4px;
+  }
+
   .dateSelect {
-    min-height: var(--button-sm);
-    padding: var(--space-2xs) var(--space-xs);
-    padding-right: 20px;
+    min-height: 32px;
+    padding: 4px 6px;
+    padding-right: 18px;
+    font-size: var(--font-size-sm);
+    background-position: right 4px center;
   }
 
   .categorySelect {
-    min-height: var(--button-sm);
-    padding: var(--space-2xs) var(--space-xs);
+    min-height: 32px;
+    padding: 4px 8px;
+    font-size: var(--font-size-xs);
   }
 
   .categoryDropdown {
@@ -496,5 +525,22 @@
 
   .categoryOption {
     padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .selectedChip {
+    min-height: 24px;
+    padding: 2px 6px;
+    font-size: var(--font-size-xs);
+  }
+
+  .selectedChip .material-symbols-outlined {
+    font-size: 12px;
+  }
+
+  .clearButton {
+    min-height: 32px;
+    padding: var(--space-xs);
+    font-size: var(--font-size-xs);
   }
 }

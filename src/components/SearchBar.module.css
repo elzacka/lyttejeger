@@ -131,4 +131,9 @@
   .shortcut {
     display: none;
   }
+
+  /* Use 16px font to prevent iOS zoom on focus */
+  .input {
+    font-size: 16px;
+  }
 }
