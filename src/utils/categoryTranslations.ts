@@ -44,7 +44,7 @@ export const categoryTranslations: Record<string, string> = {
   'Games': 'Spill',
   'Garden': 'Hage',
   'Golf': 'Golf',
-  'Government': 'Politikk',
+  'Government': 'Forvaltning',
   'Health': 'Helse',
   'Health & Fitness': 'Helse og trening',
   'Hinduism': 'Hinduisme',

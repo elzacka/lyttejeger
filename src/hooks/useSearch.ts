@@ -386,28 +386,79 @@ export function useSearch() {
         setApiPodcasts(podcasts)
         setApiEpisodes([])
       } else {
-        // Fetch recent episodes
-        const recentRes = await getRecentEpisodes({
-          max: 100,
-          fulltext: true
-        })
+        // For episodes with category filter, we need to:
+        // 1. Get podcasts in the selected categories
+        // 2. Fetch episodes from those podcasts
+        // The /recent/episodes endpoint doesn't support category filtering
+        if (filters.categories.length > 0) {
+          // First get trending podcasts in the selected categories
+          const trendingRes = await getTrendingPodcasts({
+            max: 30,
+            cat: filters.categories.join(','),
+            lang: filters.languages.length > 0 ? filters.languages[0] : undefined
+          })
 
-        if (currentSearchRef.current !== '__browse__') return
+          if (currentSearchRef.current !== '__browse__') return
 
-        const episodes = transformEpisodes(recentRes.items || [])
-        const episodesWithMeta = episodes.map((ep, idx) => {
-          const apiEp = recentRes.items?.[idx]
-          return {
-            ...ep,
-            podcastTitle: apiEp?.feedTitle || '',
-            podcastAuthor: apiEp?.feedAuthor || '',
-            podcastImage: apiEp?.feedImage || '',
-            feedLanguage: apiEp?.feedLanguage || ''
+          const podcasts = transformFeeds(trendingRes.feeds)
+            .filter(p => isAllowedLanguage(p.language))
+
+          // Now fetch episodes from these podcasts
+          const allEpisodes: Episode[] = []
+          const episodePromises = podcasts.slice(0, 15).map(async (podcast) => {
+            try {
+              const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), 10)
+              const episodes = transformEpisodes(episodesRes.items || [])
+              return episodes.map(ep => ({
+                ...ep,
+                podcastTitle: podcast.title,
+                podcastAuthor: podcast.author,
+                podcastImage: podcast.imageUrl,
+                feedLanguage: podcast.language
+              }))
+            } catch {
+              return []
+            }
+          })
+
+          const episodeResults = await Promise.all(episodePromises)
+          for (const eps of episodeResults) {
+            allEpisodes.push(...eps)
           }
-        }).filter(ep => isAllowedLanguage(ep.feedLanguage))
 
-        setApiPodcasts([])
-        setApiEpisodes(episodesWithMeta as Episode[])
+          // Sort by publish date (newest first)
+          allEpisodes.sort((a, b) => {
+            const dateA = new Date(a.publishedAt).getTime()
+            const dateB = new Date(b.publishedAt).getTime()
+            return dateB - dateA
+          })
+
+          setApiPodcasts([])
+          setApiEpisodes(allEpisodes.slice(0, 100) as Episode[])
+        } else {
+          // No category filter - fetch recent episodes
+          const recentRes = await getRecentEpisodes({
+            max: 100,
+            fulltext: true
+          })
+
+          if (currentSearchRef.current !== '__browse__') return
+
+          const episodes = transformEpisodes(recentRes.items || [])
+          const episodesWithMeta = episodes.map((ep, idx) => {
+            const apiEp = recentRes.items?.[idx]
+            return {
+              ...ep,
+              podcastTitle: apiEp?.feedTitle || '',
+              podcastAuthor: apiEp?.feedAuthor || '',
+              podcastImage: apiEp?.feedImage || '',
+              feedLanguage: apiEp?.feedLanguage || ''
+            }
+          }).filter(ep => isAllowedLanguage(ep.feedLanguage))
+
+          setApiPodcasts([])
+          setApiEpisodes(episodesWithMeta as Episode[])
+        }
       }
     } catch {
       if (currentSearchRef.current === '__browse__') {
