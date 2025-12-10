@@ -6,26 +6,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 16px;
+  height: 16px;
   padding: 0;
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: var(--radius-sm);
+  border-radius: 50%;
   transition: color var(--transition-fast),
               background var(--transition-fast);
 }
 
 .trigger:hover,
 .trigger:focus-visible {
-  color: var(--accent);
+  color: var(--text-primary);
   background: var(--bg-hover);
 }
 
 .trigger .material-symbols-outlined {
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .dropdown {

@@ -1,0 +1,11 @@
+/* Z-index stacking scale */
+:root {
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-nav: 225;
+  --z-player: 250;
+  --z-modal-backdrop: 275;
+  --z-modal: 300;
+  --z-toast: 400;
+}

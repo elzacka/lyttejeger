@@ -167,7 +167,7 @@
 .empty p {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
 }
 
 /* Mobile */

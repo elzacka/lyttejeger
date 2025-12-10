@@ -1,11 +1,13 @@
 import { useState, useMemo, useCallback, useTransition, useEffect, useRef } from 'react'
-import type { Podcast, Episode, SearchFilters } from '../types/podcast'
+import type { Podcast, Episode, SearchFilters, DateFilter } from '../types/podcast'
 import { type EpisodeWithPodcast } from '../utils/search'
 import type { TabType } from '../components/TabBar'
 import {
   searchPodcasts as apiSearchPodcasts,
   searchEpisodesByPerson,
   getEpisodesByFeedId,
+  getTrendingPodcasts,
+  getRecentEpisodes,
   isConfigured,
   type SearchOptions
 } from '../services/podcastIndex'
@@ -114,6 +116,26 @@ export function useSearch() {
     setError(null)
 
     try {
+      // Parse query to extract only positive terms for API
+      // (exclusions like -word are handled client-side)
+      const parsed = parseSearchQuery(query)
+      const positiveTerms = [
+        ...parsed.mustInclude,
+        ...parsed.shouldInclude,
+        ...parsed.exactPhrases.map(p => `"${p}"`)
+      ]
+
+      // If only exclusions with no positive terms, we can't search the API
+      // Return empty results - user needs to provide something to search for
+      if (positiveTerms.length === 0) {
+        setApiPodcasts([])
+        setApiEpisodes([])
+        setIsLoading(false)
+        return
+      }
+
+      const apiQuery = positiveTerms.join(' ')
+
       // Build search options based on current filters
       const searchOptions: SearchOptions = {
         max: 100,         // Fetch more to compensate for local filtering
@@ -129,9 +151,9 @@ export function useSearch() {
 
       // Fetch from both APIs in parallel for better results
       const [podcastIndexRes, listenNotesRes] = await Promise.all([
-        apiSearchPodcasts(query, searchOptions),
+        apiSearchPodcasts(apiQuery, searchOptions),
         isListenNotesAvailable()
-          ? listenNotesSearchPodcasts(query, {
+          ? listenNotesSearchPodcasts(apiQuery, {
               sort_by_date: filters.sortBy === 'newest' ? 1 : 0
             }).catch(() => null)
           : Promise.resolve(null)
@@ -179,7 +201,7 @@ export function useSearch() {
         // Strategy 1: Listen Notes API - best full-text episode search
         if (isListenNotesAvailable()) {
           try {
-            const listenNotesRes = await listenNotesSearchEpisodes(query, {
+            const listenNotesRes = await listenNotesSearchEpisodes(apiQuery, {
               sort_by_date: filters.sortBy === 'newest' ? 1 : 0
             })
 
@@ -220,7 +242,7 @@ export function useSearch() {
         // Strategy 2: Podcast Index byperson API
         // Searches person tags, episode title, description, feed owner/author
         try {
-          const episodesRes = await searchEpisodesByPerson(query, { max: 50, fulltext: true })
+          const episodesRes = await searchEpisodesByPerson(apiQuery, { max: 50, fulltext: true })
 
           if (currentSearchRef.current !== query) {
             return
@@ -330,17 +352,88 @@ export function useSearch() {
   }
 
 
+  // Browse by filters only (no search query) - fetches trending/recent content
+  const browseByFilters = async (browseType: 'podcasts' | 'episodes') => {
+    setIsLoading(true)
+    setError(null)
+    currentSearchRef.current = '__browse__'
+
+    try {
+      if (browseType === 'podcasts') {
+        // Fetch trending podcasts with category/language filters
+        const trendingRes = await getTrendingPodcasts({
+          max: 100,
+          cat: filters.categories.length > 0 ? filters.categories.join(',') : undefined,
+          lang: filters.languages.length > 0 ? filters.languages[0] : undefined
+        })
+
+        if (currentSearchRef.current !== '__browse__') return
+
+        let podcasts = transformFeeds(trendingRes.feeds)
+        podcasts = podcasts.filter(p => isAllowedLanguage(p.language))
+
+        lastSearchQueryRef.current = ''
+        lastSearchResultsRef.current = podcasts
+        setApiPodcasts(podcasts)
+        setApiEpisodes([])
+      } else {
+        // Fetch recent episodes
+        const recentRes = await getRecentEpisodes({
+          max: 100,
+          fulltext: true
+        })
+
+        if (currentSearchRef.current !== '__browse__') return
+
+        const episodes = transformEpisodes(recentRes.items || [])
+        const episodesWithMeta = episodes.map((ep, idx) => {
+          const apiEp = recentRes.items?.[idx]
+          return {
+            ...ep,
+            podcastTitle: apiEp?.feedTitle || '',
+            podcastAuthor: apiEp?.feedAuthor || '',
+            podcastImage: apiEp?.feedImage || '',
+            feedLanguage: apiEp?.feedLanguage || ''
+          }
+        }).filter(ep => isAllowedLanguage(ep.feedLanguage))
+
+        setApiPodcasts([])
+        setApiEpisodes(episodesWithMeta as Episode[])
+      }
+    } catch {
+      if (currentSearchRef.current === '__browse__') {
+        setError('Kunne ikke hente innhold. Prøv igjen.')
+      }
+    } finally {
+      if (currentSearchRef.current === '__browse__') {
+        setIsLoading(false)
+      }
+    }
+  }
+
   // Track filters for re-triggering API search
   const filtersRef = useRef({ languages: filters.languages, categories: filters.categories })
 
-  // Debounced API search
+  // Check if any browse-relevant filters are active
+  const hasActiveFilters = filters.categories.length > 0 || filters.languages.length > 0
+
+  // Debounced API search or filter-only browse
   useEffect(() => {
     if (!shouldUseApi) return
+    // Don't search/browse when on queue or subscriptions tab
+    if (activeTab === 'queue' || activeTab === 'subscriptions') return
 
     const query = filters.query.trim()
 
-    // If query is empty, clear results
+    // If query is empty but filters are active, browse by filters
     if (query.length === 0) {
+      if (hasActiveFilters) {
+        const browseTab = activeTab === 'episodes' ? 'episodes' : 'podcasts'
+        const timer = setTimeout(() => {
+          browseByFilters(browseTab)
+        }, 300)
+        return () => clearTimeout(timer)
+      }
       clearResults()
       return
     }
@@ -350,15 +443,14 @@ export function useSearch() {
 
     // Debounce the search - use full query (not just complete words)
     // This ensures "inga strümke" searches for both words
-    // Only search for podcasts or episodes tabs, not queue or subscriptions
-    const searchTab = (activeTab === 'queue' || activeTab === 'subscriptions') ? 'podcasts' : activeTab
+    const searchTab = activeTab === 'episodes' ? 'episodes' : 'podcasts'
     const timer = setTimeout(() => {
       searchViaApi(query, searchTab)
     }, 400) // Slightly longer debounce to wait for typing to finish
 
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.query, shouldUseApi, clearResults, activeTab])
+  }, [filters.query, shouldUseApi, clearResults, activeTab, hasActiveFilters])
 
   // Re-search when tab changes (if we have a query)
   useEffect(() => {
@@ -399,6 +491,35 @@ export function useSearch() {
 
   // Apply local filters and search
   const results = useMemo(() => {
+    // Helper to convert episodes to EpisodeWithPodcast format
+    const convertEpisodes = (): EpisodeWithPodcast[] => {
+      return episodes.map(ep => {
+        const extendedEp = ep as Episode & {
+          podcastTitle?: string
+          podcastAuthor?: string
+          podcastImage?: string
+          feedLanguage?: string
+        }
+        return {
+          ...ep,
+          podcast: extendedEp.podcastTitle ? {
+            id: ep.podcastId,
+            title: extendedEp.podcastTitle,
+            author: extendedEp.podcastAuthor || '',
+            description: '',
+            imageUrl: extendedEp.podcastImage || '',
+            feedUrl: '',
+            categories: [],
+            language: extendedEp.feedLanguage || '',
+            episodeCount: 0,
+            lastUpdated: '',
+            rating: 0,
+            explicit: false
+          } : undefined
+        }
+      })
+    }
+
     // If using API and we have a query
     if (shouldUseApi && filters.query.length >= 2) {
       // Use cached results if available, otherwise current API results
@@ -412,35 +533,26 @@ export function useSearch() {
       // Apply other local filters
       const filteredPodcasts = applyLocalFilters(textFiltered, filters)
 
-      // Convert API episodes to EpisodeWithPodcast format
-      const episodesWithPodcast: EpisodeWithPodcast[] = episodes.map(ep => {
-        const extendedEp = ep as Episode & {
-          podcastTitle?: string
-          podcastAuthor?: string
-          podcastImage?: string
-        }
-        return {
-          ...ep,
-          podcast: extendedEp.podcastTitle ? {
-            id: ep.podcastId,
-            title: extendedEp.podcastTitle,
-            author: extendedEp.podcastAuthor || '',
-            description: '',
-            imageUrl: extendedEp.podcastImage || '',
-            feedUrl: '',
-            categories: [],
-            language: '',
-            episodeCount: 0,
-            lastUpdated: '',
-            rating: 0,
-            explicit: false
-          } : undefined
-        }
-      })
+      // Convert and filter episodes
+      const episodesWithPodcast = convertEpisodes()
+      const filteredEpisodes = applyLocalFiltersToEpisodes(episodesWithPodcast, filters)
 
       return {
         podcasts: filteredPodcasts,
-        episodes: episodesWithPodcast
+        episodes: filteredEpisodes
+      }
+    }
+
+    // Filter-only browsing (no query but has filters)
+    if (shouldUseApi && hasActiveFilters && (podcasts.length > 0 || episodes.length > 0)) {
+      // Apply local filters to browsed results
+      const filteredPodcasts = applyLocalFilters(podcasts, filters)
+      const episodesWithPodcast = convertEpisodes()
+      const filteredEpisodes = applyLocalFiltersToEpisodes(episodesWithPodcast, filters)
+
+      return {
+        podcasts: filteredPodcasts,
+        episodes: filteredEpisodes
       }
     }
 
@@ -449,7 +561,7 @@ export function useSearch() {
       podcasts: [],
       episodes: []
     }
-  }, [podcasts, episodes, filters, shouldUseApi])
+  }, [podcasts, episodes, filters, shouldUseApi, hasActiveFilters])
 
   const setQuery = useCallback((query: string) => {
     // Don't use startTransition for query updates - it breaks IME/dead key composition
@@ -479,15 +591,15 @@ export function useSearch() {
     })
   }, [])
 
-  const setDateFrom = useCallback((year: number | null) => {
+  const setDateFrom = useCallback((date: DateFilter | null) => {
     startTransition(() => {
-      setFilters(prev => ({ ...prev, dateFrom: year }))
+      setFilters(prev => ({ ...prev, dateFrom: date }))
     })
   }, [])
 
-  const setDateTo = useCallback((year: number | null) => {
+  const setDateTo = useCallback((date: DateFilter | null) => {
     startTransition(() => {
-      setFilters(prev => ({ ...prev, dateTo: year }))
+      setFilters(prev => ({ ...prev, dateTo: date }))
     })
   }, [])
 
@@ -551,24 +663,56 @@ function normalizeText(text: string): string {
 }
 
 /**
- * Filter podcasts by query text - matches if ALL words are found as prefixes
+ * Filter podcasts by query text - matches if ALL positive words are found as prefixes
+ * and NONE of the excluded words are present.
  * "hele hi" matches "Hele historien" because "hele" matches "hele" and "hi" matches "historien"
+ * "takk -lov" matches podcasts with "takk" but NOT containing "lov"
  */
 function filterByQueryText(podcasts: Podcast[], query: string): Podcast[] {
   if (!query.trim()) return podcasts
 
-  const words = query.toLowerCase().trim().split(/\s+/).filter(w => w.length > 0)
-  if (words.length === 0) return podcasts
+  const parsed = parseSearchQuery(query)
+
+  const excludeTerms = parsed.mustExclude
+  const exactPhrases = parsed.exactPhrases
+  const hasPositiveTerms = parsed.mustInclude.length > 0 || parsed.shouldInclude.length > 0 || exactPhrases.length > 0
+
+  // If no positive terms and no exclusions, return all
+  // If only exclusions, we still need to filter
+  if (!hasPositiveTerms && excludeTerms.length === 0) return podcasts
 
   return podcasts.filter(podcast => {
     const searchText = normalizeText(`${podcast.title} ${podcast.author} ${podcast.description}`)
     const searchWords = searchText.split(/\s+/)
 
-    // Each query word must match as prefix of some word in text
-    return words.every(queryWord => {
-      const normalizedQuery = normalizeText(queryWord)
-      return searchWords.some(textWord => textWord.startsWith(normalizedQuery))
-    })
+    // Check exact phrases - must all be present
+    for (const phrase of exactPhrases) {
+      if (!searchText.includes(normalizeText(phrase))) return false
+    }
+
+    // Check excluded terms - if any present, reject
+    for (const term of excludeTerms) {
+      if (searchText.includes(normalizeText(term))) return false
+    }
+
+    // Check positive terms - each must match as prefix of some word in text
+    // For OR queries (shouldInclude), at least one must match
+    if (parsed.shouldInclude.length > 0) {
+      const hasOrMatch = parsed.shouldInclude.some(term => {
+        const normalizedTerm = normalizeText(term)
+        return searchWords.some(textWord => textWord.startsWith(normalizedTerm))
+      })
+      if (!hasOrMatch) return false
+    }
+
+    // For AND queries (mustInclude), all must match
+    for (const term of parsed.mustInclude) {
+      const normalizedTerm = normalizeText(term)
+      const found = searchWords.some(textWord => textWord.startsWith(normalizedTerm))
+      if (!found) return false
+    }
+
+    return true
   })
 }
 
@@ -600,15 +744,17 @@ function applyLocalFilters(podcasts: Podcast[], filters: SearchFilters): Podcast
 
   // Filter by date range (based on lastUpdated)
   if (filters.dateFrom !== null) {
+    const fromDate = new Date(filters.dateFrom.year, filters.dateFrom.month - 1, filters.dateFrom.day)
     filtered = filtered.filter(p => {
-      const year = new Date(p.lastUpdated).getFullYear()
-      return year >= filters.dateFrom!
+      const podcastDate = new Date(p.lastUpdated)
+      return podcastDate >= fromDate
     })
   }
   if (filters.dateTo !== null) {
+    const toDate = new Date(filters.dateTo.year, filters.dateTo.month - 1, filters.dateTo.day, 23, 59, 59)
     filtered = filtered.filter(p => {
-      const year = new Date(p.lastUpdated).getFullYear()
-      return year <= filters.dateTo!
+      const podcastDate = new Date(p.lastUpdated)
+      return podcastDate <= toDate
     })
   }
 
@@ -633,6 +779,47 @@ function applyLocalFilters(podcasts: Podcast[], filters: SearchFilters): Podcast
       filtered.sort((a, b) => b.episodeCount - a.episodeCount)
       break
     // 'relevance' keeps API order
+  }
+
+  return filtered
+}
+
+/**
+ * Apply local filters to episodes
+ */
+function applyLocalFiltersToEpisodes(episodes: EpisodeWithPodcast[], filters: SearchFilters): EpisodeWithPodcast[] {
+  let filtered = [...episodes]
+
+  // Filter by languages (using podcast language)
+  if (filters.languages.length > 0) {
+    filtered = filtered.filter(ep =>
+      ep.podcast && filters.languages.some(l =>
+        ep.podcast!.language.toLowerCase().includes(l.toLowerCase())
+      )
+    )
+  }
+
+  // Filter by date range (based on publishedAt)
+  if (filters.dateFrom !== null) {
+    const fromDate = new Date(filters.dateFrom.year, filters.dateFrom.month - 1, filters.dateFrom.day)
+    filtered = filtered.filter(ep => {
+      const episodeDate = new Date(ep.publishedAt)
+      return episodeDate >= fromDate
+    })
+  }
+  if (filters.dateTo !== null) {
+    const toDate = new Date(filters.dateTo.year, filters.dateTo.month - 1, filters.dateTo.day, 23, 59, 59)
+    filtered = filtered.filter(ep => {
+      const episodeDate = new Date(ep.publishedAt)
+      return episodeDate <= toDate
+    })
+  }
+
+  // Filter by explicit (using podcast explicit flag if available)
+  if (filters.explicit !== null) {
+    filtered = filtered.filter(ep =>
+      ep.podcast ? ep.podcast.explicit === filters.explicit : true
+    )
   }
 
   return filtered

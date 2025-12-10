@@ -1,0 +1,41 @@
+/* Typography */
+:root {
+  /* Font families */
+  --font-mono: 'DM Mono', ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-icon: 'Material Symbols Outlined';
+
+  /* Font sizes */
+  --font-size-2xs: 0.625rem;   /* 10px */
+  --font-size-xs: 0.6875rem;   /* 11px */
+  --font-size-sm: 0.75rem;     /* 12px */
+  --font-size-base: 0.875rem;  /* 14px */
+  --font-size-md: 1rem;        /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.5rem;     /* 24px */
+
+  /* Legacy aliases */
+  --font-2xs: var(--font-size-xs);
+  --font-xs: var(--font-size-sm);
+  --font-sm: var(--font-size-base);
+  --font-base: var(--font-size-md);
+  --font-lg: var(--font-size-lg);
+  --font-xl: var(--font-size-xl);
+
+  /* Font weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Letter spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+}

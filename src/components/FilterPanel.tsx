@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import type { SearchFilters, FilterOption } from '../types/podcast'
+import { useState } from 'react'
+import type { SearchFilters, FilterOption, DateFilter } from '../types/podcast'
 import type { TabType } from './TabBar'
 import styles from './FilterPanel.module.css'
 
@@ -11,8 +11,8 @@ interface FilterPanelProps {
   onTabChange: (tab: TabType) => void
   onToggleCategory: (category: string) => void
   onToggleLanguage: (language: string) => void
-  onSetDateFrom: (year: number | null) => void
-  onSetDateTo: (year: number | null) => void
+  onSetDateFrom: (date: DateFilter | null) => void
+  onSetDateTo: (date: DateFilter | null) => void
   onClearFilters: () => void
   activeFilterCount: number
 }
@@ -31,63 +31,104 @@ export function FilterPanel({
   activeFilterCount
 }: FilterPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false)
-  const categoryDropdownRef = useRef<HTMLDivElement>(null)
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target as Node)) {
-        setCategoryDropdownOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  // Current date for defaults
+  const today = new Date()
+  const currentDay = today.getDate()
+  const currentMonth = today.getMonth() + 1
+  const currentYear = today.getFullYear()
 
-  // Generate year options (from 2004 when podcasting started to current year)
-  const currentYear = new Date().getFullYear()
+  // Generate options
+  const days = Array.from({ length: 31 }, (_, i) => i + 1)
+  const months = [
+    { value: 1, label: 'Jan' },
+    { value: 2, label: 'Feb' },
+    { value: 3, label: 'Mar' },
+    { value: 4, label: 'Apr' },
+    { value: 5, label: 'Mai' },
+    { value: 6, label: 'Jun' },
+    { value: 7, label: 'Jul' },
+    { value: 8, label: 'Aug' },
+    { value: 9, label: 'Sep' },
+    { value: 10, label: 'Okt' },
+    { value: 11, label: 'Nov' },
+    { value: 12, label: 'Des' },
+  ]
   const years = Array.from({ length: currentYear - 2004 + 1 }, (_, i) => currentYear - i)
+
+  // Helper to get days in month
+  const getDaysInMonth = (month: number, year: number) => {
+    return new Date(year, month, 0).getDate()
+  }
+
+  // Helper to update date field
+  const updateDateFrom = (field: 'day' | 'month' | 'year', value: number) => {
+    const current = filters.dateFrom ?? { day: currentDay, month: currentMonth, year: currentYear }
+    const updated = { ...current, [field]: value }
+    // Clamp day to valid range for the month
+    const maxDay = getDaysInMonth(updated.month, updated.year)
+    if (updated.day > maxDay) updated.day = maxDay
+    onSetDateFrom(updated)
+  }
+
+  const updateDateTo = (field: 'day' | 'month' | 'year', value: number) => {
+    const current = filters.dateTo ?? { day: currentDay, month: currentMonth, year: currentYear }
+    const updated = { ...current, [field]: value }
+    const maxDay = getDaysInMonth(updated.month, updated.year)
+    if (updated.day > maxDay) updated.day = maxDay
+    onSetDateTo(updated)
+  }
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.typeSelector} role="radiogroup" aria-label="Velg hva du vil søke etter">
-          <button
-            className={`${styles.typeButton} ${activeTab === 'podcasts' ? styles.typeButtonActive : ''}`}
-            onClick={() => onTabChange('podcasts')}
-            role="radio"
-            aria-checked={activeTab === 'podcasts'}
-          >
-            Podcaster
-          </button>
-          <button
-            className={`${styles.typeButton} ${activeTab === 'episodes' ? styles.typeButtonActive : ''}`}
-            onClick={() => onTabChange('episodes')}
-            role="radio"
-            aria-checked={activeTab === 'episodes'}
-          >
-            Episoder
-          </button>
+          <label className={styles.radioLabel}>
+            <input
+              type="radio"
+              name="searchType"
+              value="podcasts"
+              checked={activeTab === 'podcasts'}
+              onChange={() => onTabChange('podcasts')}
+              className={styles.radioInput}
+            />
+            <span className={styles.radioText}>Podcaster</span>
+          </label>
+          <label className={styles.radioLabel}>
+            <input
+              type="radio"
+              name="searchType"
+              value="episodes"
+              checked={activeTab === 'episodes'}
+              onChange={() => onTabChange('episodes')}
+              className={styles.radioInput}
+            />
+            <span className={styles.radioText}>Episoder</span>
+          </label>
         </div>
 
         <button
-          className={styles.toggleButton}
+          className={styles.filterDropdown}
           onClick={() => setIsExpanded(!isExpanded)}
           aria-expanded={isExpanded}
+          aria-haspopup="true"
         >
-          Filtre
-          {activeFilterCount > 0 && (
-            <span className={styles.badge}>{activeFilterCount}</span>
-          )}
+          <span className={styles.filterDropdownText}>
+            Filtre
+            {activeFilterCount > 0 && (
+              <span className={styles.filterBadge}>{activeFilterCount}</span>
+            )}
+          </span>
+          <span className="material-symbols-outlined" aria-hidden="true">
+            {isExpanded ? 'expand_less' : 'expand_more'}
+          </span>
         </button>
       </div>
 
       {isExpanded && (
         <div className={styles.panel}>
-          {/* Språk - first */}
+          {/* Språk */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Språk</h3>
             <div className={styles.chipGrid}>
               {languages.map((language) => (
                 <button
@@ -103,51 +144,34 @@ export function FilterPanel({
             </div>
           </div>
 
-          {/* Kategorier - dropdown with multiselect */}
+          {/* Kategorier */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Kategorier</h3>
-            <div className={styles.dropdownContainer} ref={categoryDropdownRef}>
-              <button
-                className={styles.dropdownButton}
-                onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                aria-expanded={categoryDropdownOpen}
-                aria-haspopup="listbox"
+            <div className={styles.categoryContainer}>
+              <select
+                className={styles.categorySelect}
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) {
+                    onToggleCategory(e.target.value)
+                  }
+                }}
+                aria-label="Velg kategori"
               >
-                <span className={styles.dropdownText}>
+                <option value="">
                   {filters.categories.length === 0
                     ? 'Velg kategorier'
                     : `${filters.categories.length} valgt`}
-                </span>
-                <span className="material-symbols-outlined" aria-hidden="true">
-                  {categoryDropdownOpen ? 'expand_less' : 'expand_more'}
-                </span>
-              </button>
+                </option>
+                {categories
+                  .filter(cat => !filters.categories.includes(cat.value))
+                  .map((category) => (
+                    <option key={category.value} value={category.value}>
+                      {category.label}
+                    </option>
+                  ))}
+              </select>
 
-              {categoryDropdownOpen && (
-                <div className={styles.dropdownMenu} role="listbox" aria-multiselectable="true">
-                  {categories.map((category) => {
-                    const isSelected = filters.categories.includes(category.value)
-                    return (
-                      <button
-                        key={category.value}
-                        className={`${styles.dropdownItem} ${isSelected ? styles.dropdownItemSelected : ''}`}
-                        onClick={() => onToggleCategory(category.value)}
-                        role="option"
-                        aria-selected={isSelected}
-                      >
-                        <span className={styles.checkbox}>
-                          {isSelected && (
-                            <span className="material-symbols-outlined" aria-hidden="true">check</span>
-                          )}
-                        </span>
-                        {category.label}
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-
-              {/* Show selected categories as chips below dropdown */}
+              {/* Show selected categories as chips below */}
               {filters.categories.length > 0 && (
                 <div className={styles.selectedChips}>
                   {filters.categories.map((catValue) => {
@@ -171,33 +195,88 @@ export function FilterPanel({
 
           {/* Date range filter */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Periode</h3>
             <div className={styles.dateRangeContainer}>
-              <select
-                className={styles.yearSelect}
-                value={filters.dateFrom ?? ''}
-                onChange={(e) => onSetDateFrom(e.target.value ? parseInt(e.target.value) : null)}
-                aria-label="Fra år"
-                tabIndex={-1}
-              >
-                <option value="">Fra</option>
-                {years.map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
+              <div className={styles.datePicker}>
+                <label className={styles.dateLabel}>Fra</label>
+                <div className={styles.dateInputRow}>
+                  <select
+                    className={styles.dateSelect}
+                    value={filters.dateFrom?.day ?? currentDay}
+                    onChange={(e) => updateDateFrom('day', parseInt(e.target.value))}
+                    aria-label="Fra dag"
+                  >
+                    {days.map((d) => {
+                      const maxDay = getDaysInMonth(
+                        filters.dateFrom?.month ?? currentMonth,
+                        filters.dateFrom?.year ?? currentYear
+                      )
+                      if (d > maxDay) return null
+                      return <option key={d} value={d}>{d}</option>
+                    })}
+                  </select>
+                  <select
+                    className={styles.dateSelect}
+                    value={filters.dateFrom?.month ?? currentMonth}
+                    onChange={(e) => updateDateFrom('month', parseInt(e.target.value))}
+                    aria-label="Fra måned"
+                  >
+                    {months.map((m) => (
+                      <option key={m.value} value={m.value}>{m.label}</option>
+                    ))}
+                  </select>
+                  <select
+                    className={styles.dateSelect}
+                    value={filters.dateFrom?.year ?? currentYear}
+                    onChange={(e) => updateDateFrom('year', parseInt(e.target.value))}
+                    aria-label="Fra år"
+                  >
+                    {years.map((y) => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <span className={styles.dateRangeSeparator}>–</span>
-              <select
-                className={styles.yearSelect}
-                value={filters.dateTo ?? ''}
-                onChange={(e) => onSetDateTo(e.target.value ? parseInt(e.target.value) : null)}
-                aria-label="Til år"
-                tabIndex={-1}
-              >
-                <option value="">Til</option>
-                {years.map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
+              <div className={styles.datePicker}>
+                <label className={styles.dateLabel}>Til</label>
+                <div className={styles.dateInputRow}>
+                  <select
+                    className={styles.dateSelect}
+                    value={filters.dateTo?.day ?? currentDay}
+                    onChange={(e) => updateDateTo('day', parseInt(e.target.value))}
+                    aria-label="Til dag"
+                  >
+                    {days.map((d) => {
+                      const maxDay = getDaysInMonth(
+                        filters.dateTo?.month ?? currentMonth,
+                        filters.dateTo?.year ?? currentYear
+                      )
+                      if (d > maxDay) return null
+                      return <option key={d} value={d}>{d}</option>
+                    })}
+                  </select>
+                  <select
+                    className={styles.dateSelect}
+                    value={filters.dateTo?.month ?? currentMonth}
+                    onChange={(e) => updateDateTo('month', parseInt(e.target.value))}
+                    aria-label="Til måned"
+                  >
+                    {months.map((m) => (
+                      <option key={m.value} value={m.value}>{m.label}</option>
+                    ))}
+                  </select>
+                  <select
+                    className={styles.dateSelect}
+                    value={filters.dateTo?.year ?? currentYear}
+                    onChange={(e) => updateDateTo('year', parseInt(e.target.value))}
+                    aria-label="Til år"
+                  >
+                    {years.map((y) => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 

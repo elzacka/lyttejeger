@@ -30,37 +30,43 @@ export function BottomNav({
           className={`${styles.navItem} ${activeItem === 'subscriptions' ? styles.active : ''}`}
           onClick={() => onNavigate('subscriptions')}
           aria-current={activeItem === 'subscriptions' ? 'page' : undefined}
-          aria-label="Mine podcaster"
         >
-          <span className="material-symbols-outlined" aria-hidden="true">
-            {activeItem === 'subscriptions' ? 'bookmark' : 'bookmark_border'}
+          <span className={styles.iconWrapper}>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              {activeItem === 'subscriptions' ? 'bookmark' : 'bookmark_border'}
+            </span>
+            {subscriptionCount > 0 && (
+              <span className={styles.badge}>{subscriptionCount}</span>
+            )}
           </span>
-          {subscriptionCount > 0 && (
-            <span className={styles.badge}>{subscriptionCount}</span>
-          )}
+          <span className={styles.label}>Mine podder</span>
         </button>
 
         <button
           className={`${styles.navItem} ${activeItem === 'queue' ? styles.active : ''}`}
           onClick={() => onNavigate('queue')}
           aria-current={activeItem === 'queue' ? 'page' : undefined}
-          aria-label="Kø"
         >
-          <span className="material-symbols-outlined" aria-hidden="true">
-            {activeItem === 'queue' ? 'queue_music' : 'queue_music'}
+          <span className={styles.iconWrapper}>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              queue_music
+            </span>
+            {queueCount > 0 && (
+              <span className={styles.badge}>{queueCount}</span>
+            )}
           </span>
-          {queueCount > 0 && (
-            <span className={styles.badge}>{queueCount}</span>
-          )}
+          <span className={styles.label}>Kø</span>
         </button>
 
         <button
           className={styles.navItem}
           onClick={handleInfoClick}
           aria-haspopup="dialog"
-          aria-label="Info"
         >
-          <span className="material-symbols-outlined" aria-hidden="true">info</span>
+          <span className={styles.iconWrapper}>
+            <span className="material-symbols-outlined" aria-hidden="true">info</span>
+          </span>
+          <span className={styles.label}>Info</span>
         </button>
       </nav>
 

@@ -1,0 +1,40 @@
+/* Colors - Warm, muted tones (Sporjeger-inspired) */
+:root {
+  /* Background colors */
+  --color-bg-primary: #F4F1EA;
+  --color-bg-secondary: #EBE7DE;
+  --color-bg-hover: #E2DED4;
+
+  /* Text colors */
+  --color-text-primary: #2C2C2C;
+  --color-text-secondary: #4A4A4A;
+  --color-text-muted: #5A5A5A;
+  --color-text-inverse: #FFFFFF;
+
+  /* Accent colors */
+  --color-accent: #1a5f7a;
+  --color-accent-hover: #134a5f;
+  --color-accent-rgb: 26, 95, 122;
+  --color-accent-alpha: rgba(26, 95, 122, 0.15);
+  --color-accent-subtle: rgba(26, 95, 122, 0.08);
+  --color-accent-highlight: rgba(26, 95, 122, 0.2);
+
+  /* Border colors */
+  --color-border: #C8C4BA;
+  --color-border-light: #E8E4DA;
+
+  /* Semantic colors */
+  --color-error: #9B2915;
+  --color-error-rgb: 155, 41, 21;
+  --color-warning: #7B6D4D;
+  --color-success: #4A7C59;
+
+  /* Badge colors */
+  --color-badge-explicit: #9B2915;
+  --color-badge-clean: #4A7C59;
+
+  /* Overlay colors */
+  --color-overlay-strong: rgba(0, 0, 0, 0.3);
+  --color-overlay-soft: rgba(0, 0, 0, 0.08);
+  --color-shadow: rgba(0, 0, 0, 0.08);
+}

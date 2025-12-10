@@ -27,6 +27,12 @@ export interface Episode {
   chaptersUrl?: string
 }
 
+export interface DateFilter {
+  day: number
+  month: number  // 1-12
+  year: number
+}
+
 export interface SearchFilters {
   query: string
   categories: string[]
@@ -34,8 +40,8 @@ export interface SearchFilters {
   maxDuration: number | null
   sortBy: 'relevance' | 'newest' | 'oldest' | 'popular'
   explicit: boolean | null
-  dateFrom: number | null  // Year (e.g., 2020)
-  dateTo: number | null    // Year (e.g., 2024)
+  dateFrom: DateFilter | null
+  dateTo: DateFilter | null
 }
 
 export interface FilterOption {

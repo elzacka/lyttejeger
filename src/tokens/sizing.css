@@ -1,0 +1,27 @@
+/* Sizing - Component dimensions */
+:root {
+  /* Layout */
+  --max-width: 720px;
+  --player-height: 80px;
+  --player-height-mobile: 140px;
+  --nav-height: 56px;
+
+  /* Button sizing */
+  --button-sm: 36px;
+  --button-md: 40px;
+  --button-lg: 44px;
+
+  /* Image sizing */
+  --image-xs: 40px;
+  --image-sm: 48px;
+  --image-md: 56px;
+  --image-lg: 64px;
+
+  /* Icon sizing */
+  --icon-sm: 18px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+
+  /* Badge sizing */
+  --badge-size: 18px;
+}

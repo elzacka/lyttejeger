@@ -52,7 +52,7 @@
 
 .label {
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   color: var(--text-secondary);
   transition: color var(--transition-fast);
 }

@@ -238,3 +238,66 @@ export async function getCategories(): Promise<CategoriesResponse> {
 export function isConfigured(): boolean {
   return Boolean(API_KEY && API_SECRET && API_KEY !== 'your_api_key_here')
 }
+
+// Trending/Browse endpoints for filter-only browsing
+
+export interface TrendingOptions {
+  max?: number
+  since?: number  // Unix timestamp - return items since this time
+  lang?: string   // Language code (e.g., 'no', 'en')
+  cat?: string    // Category ID
+  notcat?: string // Exclude category ID
+}
+
+export async function getTrendingPodcasts(options: TrendingOptions = {}): Promise<SearchResponse> {
+  const params: Record<string, string> = {
+    max: (options.max || 50).toString()
+  }
+
+  if (options.since) params.since = options.since.toString()
+  if (options.lang) params.lang = options.lang
+  if (options.cat) params.cat = options.cat
+  if (options.notcat) params.notcat = options.notcat
+
+  return apiRequest<SearchResponse>('/podcasts/trending', params)
+}
+
+export interface RecentFeedsOptions {
+  max?: number
+  since?: number  // Unix timestamp
+  cat?: string
+  lang?: string
+  notcat?: string
+}
+
+export async function getRecentFeeds(options: RecentFeedsOptions = {}): Promise<SearchResponse> {
+  const params: Record<string, string> = {
+    max: (options.max || 50).toString()
+  }
+
+  if (options.since) params.since = options.since.toString()
+  if (options.cat) params.cat = options.cat
+  if (options.lang) params.lang = options.lang
+  if (options.notcat) params.notcat = options.notcat
+
+  return apiRequest<SearchResponse>('/recent/feeds', params)
+}
+
+export interface RecentEpisodesOptions {
+  max?: number
+  excludeString?: string  // Exclude episodes with this string in title
+  before?: number         // Only return episodes before this episode ID
+  fulltext?: boolean
+}
+
+export async function getRecentEpisodes(options: RecentEpisodesOptions = {}): Promise<EpisodesResponse> {
+  const params: Record<string, string> = {
+    max: (options.max || 50).toString()
+  }
+
+  if (options.excludeString) params.excludeString = options.excludeString
+  if (options.before) params.before = options.before.toString()
+  if (options.fulltext !== false) params.fulltext = ''
+
+  return apiRequest<EpisodesResponse>('/recent/episodes', params)
+}

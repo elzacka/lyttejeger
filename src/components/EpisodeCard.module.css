@@ -242,7 +242,7 @@
   background: none;
   border: none;
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   color: var(--text-primary);
   cursor: pointer;
   text-align: left;

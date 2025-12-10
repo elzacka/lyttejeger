@@ -15,11 +15,8 @@ export function SubscriptionsView({
   if (subscriptions.length === 0) {
     return (
       <div className={styles.empty}>
-        <span className="material-symbols-outlined" aria-hidden="true">
-          notifications_off
-        </span>
-        <h3>Ingen abonnementer</h3>
-        <p>Abonner på podcaster for å se nye episoder her</p>
+        <h3>Du følger ingen podcaster</h3>
+        <p>Abonner for å se nye episoder her</p>
       </div>
     )
   }

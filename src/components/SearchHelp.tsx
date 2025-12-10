@@ -4,27 +4,23 @@ import styles from './SearchHelp.module.css'
 const searchTips = [
   {
     example: 'fotball vålerenga',
-    description: 'Finn resultater som inneholder begge ordene',
+    description: 'Begge ord må finnes (AND)',
   },
   {
-    example: 'krim OR krimjournalistikk',
-    description: 'Finn resultater som inneholder minst ett av ordene',
+    example: 'krim OR true crime',
+    description: 'Minst ett av ordene må finnes',
   },
   {
-    example: '"ki og klarspråk"',
-    description: 'Søk etter en eksakt frase',
+    example: '"true crime"',
+    description: 'Søk etter eksakt frase',
   },
   {
     example: 'politikk -nyheter',
-    description: 'Utelukk resultater som inneholder et ord',
-  },
-  {
-    example: 'helse OR trening kosthold',
-    description: 'Kombiner flere søketyper i ett søk',
+    description: 'Må ha "politikk", ikke "nyheter"',
   },
   {
     example: '"true crime" -mord',
-    description: 'Søk etter frase, men utelukk visse ord',
+    description: 'Frase uten visse ord',
   },
 ]
 
