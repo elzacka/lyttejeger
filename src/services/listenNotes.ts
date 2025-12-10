@@ -24,24 +24,6 @@ const ALLOWED_LANGUAGES = ['Norwegian', 'Danish', 'Swedish', 'English']
 let lastRequestTime = 0
 const MIN_REQUEST_INTERVAL = 500
 
-// Track API usage for monitoring
-let requestCount = 0
-const REQUEST_COUNT_RESET_INTERVAL = 60 * 60 * 1000 // 1 hour
-let lastResetTime = Date.now()
-
-function trackRequest(): void {
-  const now = Date.now()
-  if (now - lastResetTime > REQUEST_COUNT_RESET_INTERVAL) {
-    requestCount = 0
-    lastResetTime = now
-  }
-  requestCount++
-}
-
-export function getRequestCount(): number {
-  return requestCount
-}
-
 async function enforceRateLimit(): Promise<void> {
   const now = Date.now()
   const timeSinceLastRequest = now - lastRequestTime
@@ -59,7 +41,6 @@ async function apiRequest<T>(endpoint: string, params: Record<string, string> = 
   const url = `${API_BASE}${endpoint}${queryString ? `?${queryString}` : ''}`
 
   await enforceRateLimit()
-  trackRequest()
 
   const headers: HeadersInit = {
     'Accept': 'application/json'

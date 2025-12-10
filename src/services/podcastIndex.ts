@@ -262,27 +262,6 @@ export async function getTrendingPodcasts(options: TrendingOptions = {}): Promis
   return apiRequest<SearchResponse>('/podcasts/trending', params)
 }
 
-export interface RecentFeedsOptions {
-  max?: number
-  since?: number  // Unix timestamp
-  cat?: string
-  lang?: string
-  notcat?: string
-}
-
-export async function getRecentFeeds(options: RecentFeedsOptions = {}): Promise<SearchResponse> {
-  const params: Record<string, string> = {
-    max: (options.max || 50).toString()
-  }
-
-  if (options.since) params.since = options.since.toString()
-  if (options.cat) params.cat = options.cat
-  if (options.lang) params.lang = options.lang
-  if (options.notcat) params.notcat = options.notcat
-
-  return apiRequest<SearchResponse>('/recent/feeds', params)
-}
-
 export interface RecentEpisodesOptions {
   max?: number
   excludeString?: string  // Exclude episodes with this string in title
