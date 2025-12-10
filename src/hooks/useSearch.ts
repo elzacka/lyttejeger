@@ -272,12 +272,13 @@ export function useSearch() {
         }
 
         // Strategy 3: Fetch episodes from matching podcasts and filter by query
-        // This is the main strategy for finding episodes about a topic
+        // Only include episodes where the search term appears in episode title/description
+        // (not just in podcast name)
         if (podcasts.length > 0) {
-          const topPodcasts = podcasts.slice(0, 10) // Search more podcasts
+          const topPodcasts = podcasts.slice(0, 10)
           const episodePromises = topPodcasts.map(async (podcast) => {
             try {
-              const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), 30) // More episodes per podcast
+              const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), 30)
               const episodes = transformEpisodes(episodesRes.items || [])
               return episodes.map(ep => ({
                 ...ep,
@@ -293,31 +294,39 @@ export function useSearch() {
           const episodeResults = await Promise.all(episodePromises)
           const podcastEpisodes = episodeResults.flat()
 
-          // Filter by query terms in title or description
-          const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 1)
+          // Parse query to get positive search terms
+          const parsed = parseSearchQuery(query)
+
+          // Only include episodes where search term appears in title or description
           for (const ep of podcastEpisodes) {
             if (existingIds.has(ep.id)) continue
             const text = `${ep.title} ${ep.description}`.toLowerCase()
-            // Episode must contain at least one query word
-            if (queryWords.some(word => text.includes(word))) {
+
+            // For exact phrases, check exact match
+            const matchesPhrase = parsed.exactPhrases.length === 0 ||
+              parsed.exactPhrases.some(phrase => text.includes(phrase.toLowerCase()))
+
+            // For regular terms, at least one must appear in episode text
+            const matchesTerm = (parsed.mustInclude.length === 0 && parsed.shouldInclude.length === 0) ||
+              [...parsed.mustInclude, ...parsed.shouldInclude].some(term =>
+                text.includes(term.toLowerCase())
+              )
+
+            if (matchesPhrase && matchesTerm) {
               allEpisodes.push(ep as Episode)
               existingIds.add(ep.id)
             }
           }
         }
 
-        // Apply local text filtering for advanced query syntax
+        // Apply exclusion filtering for advanced query syntax
         let finalEpisodes = allEpisodes
-        const parsed = parseSearchQuery(query)
-        if (parsed.exactPhrases.length > 0 || parsed.mustExclude.length > 0) {
+        const parsedForExclusions = parseSearchQuery(query)
+        if (parsedForExclusions.mustExclude.length > 0) {
           finalEpisodes = allEpisodes.filter(ep => {
             const fullText = `${ep.title} ${ep.description}`.toLowerCase()
 
-            for (const phrase of parsed.exactPhrases) {
-              if (!fullText.includes(phrase)) return false
-            }
-
-            for (const term of parsed.mustExclude) {
+            for (const term of parsedForExclusions.mustExclude) {
               if (fullText.includes(term)) return false
             }
 
