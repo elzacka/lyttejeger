@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { SearchFilters, FilterOption, DateFilter } from '../types/podcast'
 import type { TabType } from './TabBar'
 import styles from './FilterPanel.module.css'
@@ -31,6 +31,22 @@ export function FilterPanel({
   activeFilterCount
 }: FilterPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false)
+  const categoryDropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close category dropdown when clicking outside
+  useEffect(() => {
+    if (!isCategoryOpen) return
+
+    function handleClickOutside(event: MouseEvent) {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
+        setIsCategoryOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isCategoryOpen])
 
   // Current date for defaults
   const today = new Date()
@@ -146,30 +162,49 @@ export function FilterPanel({
 
           {/* Kategorier */}
           <div className={styles.section}>
-            <div className={styles.categoryContainer}>
-              <select
+            <div className={styles.categoryContainer} ref={categoryDropdownRef}>
+              <button
                 className={styles.categorySelect}
-                value=""
-                onChange={(e) => {
-                  if (e.target.value) {
-                    onToggleCategory(e.target.value)
-                  }
-                }}
+                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                aria-expanded={isCategoryOpen}
+                aria-haspopup="listbox"
                 aria-label="Velg kategori"
+                type="button"
               >
-                <option value="">
+                <span>
                   {filters.categories.length === 0
                     ? 'Velg kategorier'
                     : `${filters.categories.length} valgt`}
-                </option>
-                {categories
-                  .filter(cat => !filters.categories.includes(cat.value))
-                  .map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
-                    </option>
-                  ))}
-              </select>
+                </span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  {isCategoryOpen ? 'expand_less' : 'expand_more'}
+                </span>
+              </button>
+
+              {isCategoryOpen && (
+                <div className={styles.categoryDropdown} role="listbox">
+                  {categories.map((category) => {
+                    const isSelected = filters.categories.includes(category.value)
+                    return (
+                      <button
+                        key={category.value}
+                        className={`${styles.categoryOption} ${isSelected ? styles.categoryOptionSelected : ''}`}
+                        onClick={() => onToggleCategory(category.value)}
+                        role="option"
+                        aria-selected={isSelected}
+                        type="button"
+                      >
+                        <span className={styles.categoryCheckbox}>
+                          {isSelected && (
+                            <span className="material-symbols-outlined" aria-hidden="true">check</span>
+                          )}
+                        </span>
+                        {category.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
 
               {/* Show selected categories as chips below */}
               {filters.categories.length > 0 && (
@@ -182,6 +217,7 @@ export function FilterPanel({
                         className={styles.selectedChip}
                         onClick={() => onToggleCategory(catValue)}
                         aria-label={`Fjern ${category?.label || catValue}`}
+                        type="button"
                       >
                         {category?.label || catValue}
                         <span className="material-symbols-outlined" aria-hidden="true">close</span>

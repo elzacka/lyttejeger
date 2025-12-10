@@ -218,14 +218,18 @@
   border-color: var(--accent-hover);
 }
 
-/* Category select - same styling as date selects */
+/* Category select - custom dropdown */
 .categoryContainer {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
 }
 
 .categorySelect {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
   min-height: var(--button-md);
   padding: var(--space-xs) var(--space-sm);
@@ -237,11 +241,6 @@
   font-size: var(--font-xs);
   cursor: pointer;
   transition: border-color var(--transition-fast);
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%235A5A5A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  padding-right: 28px;
 }
 
 .categorySelect:hover {
@@ -251,6 +250,81 @@
 .categorySelect:focus {
   border-color: var(--accent);
   outline: none;
+}
+
+.categorySelect .material-symbols-outlined {
+  font-size: var(--icon-sm);
+  color: var(--text-muted);
+}
+
+/* Category dropdown menu */
+.categoryDropdown {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  right: 0;
+  z-index: var(--z-dropdown);
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.categoryOption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm);
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.categoryOption:hover {
+  background: var(--bg-hover);
+}
+
+.categoryOption:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.categoryOptionSelected {
+  background: var(--bg-secondary);
+  color: var(--accent);
+}
+
+.categoryOptionSelected:hover {
+  background: var(--bg-hover);
+}
+
+.categoryCheckbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+}
+
+.categoryOptionSelected .categoryCheckbox {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.categoryCheckbox .material-symbols-outlined {
+  font-size: 14px;
+  color: white;
 }
 
 /* Selected category chips */
@@ -414,6 +488,13 @@
   .categorySelect {
     min-height: var(--button-sm);
     padding: var(--space-2xs) var(--space-xs);
-    padding-right: 24px;
+  }
+
+  .categoryDropdown {
+    max-height: 200px;
+  }
+
+  .categoryOption {
+    padding: var(--space-xs) var(--space-sm);
   }
 }
