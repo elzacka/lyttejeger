@@ -1,0 +1,183 @@
+/* InstallSheet styles */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.intro {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.instructions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  counter-reset: step;
+}
+
+.steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.steps li::before {
+  counter-increment: step;
+  content: counter(step);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stepIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--bg-hover);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.stepIcon .material-symbols-outlined {
+  font-size: 18px;
+  color: var(--accent);
+}
+
+.steps li span:last-child {
+  flex: 1;
+  padding-top: 4px;
+}
+
+.steps li strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--warning-color);
+}
+
+.warning .material-symbols-outlined {
+  font-size: 20px;
+  color: var(--warning-color);
+  flex-shrink: 0;
+}
+
+.warning p {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.warning strong {
+  color: var(--accent);
+}
+
+.tip {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+}
+
+.tip .material-symbols-outlined {
+  font-size: 18px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.tip p {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-2xs);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.note {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .steps li {
+    padding: var(--space-xs);
+    font-size: 11px;
+  }
+
+  .steps li::before {
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+
+  .stepIcon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .stepIcon .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  .warning {
+    padding: var(--space-sm);
+  }
+
+  .warning .material-symbols-outlined {
+    font-size: 18px;
+  }
+}

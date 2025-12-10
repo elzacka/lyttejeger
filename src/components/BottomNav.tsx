@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { InfoSheet } from './InfoSheet'
+import { InstallSheet } from './InstallSheet'
+import { shouldShowInstallButton } from '../utils/deviceDetection'
 import styles from './BottomNav.module.css'
 
 export type NavItem = 'subscriptions' | 'queue' | 'info'
@@ -18,14 +20,38 @@ export function BottomNav({
   subscriptionCount,
 }: BottomNavProps) {
   const [infoOpen, setInfoOpen] = useState(false)
+  const [installOpen, setInstallOpen] = useState(false)
+  const [showInstall, setShowInstall] = useState(false)
+
+  // Check if we should show install button (only in browser, not standalone)
+  useEffect(() => {
+    setShowInstall(shouldShowInstallButton())
+  }, [])
 
   const handleInfoClick = () => {
     setInfoOpen(true)
   }
 
+  const handleInstallClick = () => {
+    setInstallOpen(true)
+  }
+
   return (
     <>
       <nav className={styles.nav} aria-label="Hovednavigasjon">
+        {showInstall && (
+          <button
+            className={styles.navItem}
+            onClick={handleInstallClick}
+            aria-haspopup="dialog"
+          >
+            <span className={styles.iconWrapper}>
+              <span className="material-symbols-outlined" aria-hidden="true">download</span>
+            </span>
+            <span className={styles.label}>Installer</span>
+          </button>
+        )}
+
         <button
           className={`${styles.navItem} ${activeItem === 'subscriptions' ? styles.active : ''}`}
           onClick={() => onNavigate('subscriptions')}
@@ -70,6 +96,7 @@ export function BottomNav({
         </button>
       </nav>
 
+      <InstallSheet isOpen={installOpen} onClose={() => setInstallOpen(false)} />
       <InfoSheet isOpen={infoOpen} onClose={() => setInfoOpen(false)} />
     </>
   )
