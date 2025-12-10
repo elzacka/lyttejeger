@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { SearchFilters, FilterOption, DateFilter } from '../types/podcast'
 import type { TabType } from './TabBar'
+import { WheelPicker } from './WheelPicker'
 import styles from './FilterPanel.module.css'
 
 interface FilterPanelProps {
@@ -52,7 +53,10 @@ export function FilterPanel({
   const currentYear = new Date().getFullYear()
 
   // Generate year options (2005 to current year)
-  const years = Array.from({ length: currentYear - 2004 }, (_, i) => currentYear - i)
+  const yearOptions = Array.from({ length: currentYear - 2004 }, (_, i) => {
+    const year = currentYear - i
+    return { value: year, label: String(year) }
+  })
 
   // Year filter handlers
   const setYearFrom = (year: number | null) => {
@@ -215,35 +219,21 @@ export function FilterPanel({
               <div className={styles.yearFilterContainer}>
                 <div className={styles.yearFilterRow}>
                   <span className={styles.yearLabel}>Fra</span>
-                  <div className={styles.yearChips}>
-                    {years.slice(0, 8).map((year) => (
-                      <button
-                        key={year}
-                        type="button"
-                        className={`${styles.yearChip} ${yearFrom === year ? styles.yearChipActive : ''}`}
-                        onClick={() => setYearFrom(yearFrom === year ? null : year)}
-                        aria-pressed={yearFrom === year}
-                      >
-                        {year}
-                      </button>
-                    ))}
-                  </div>
+                  <WheelPicker
+                    options={yearOptions}
+                    value={yearFrom}
+                    onChange={(v) => setYearFrom(v as number | null)}
+                    placeholder="År"
+                  />
                 </div>
                 <div className={styles.yearFilterRow}>
                   <span className={styles.yearLabel}>Til</span>
-                  <div className={styles.yearChips}>
-                    {years.slice(0, 8).map((year) => (
-                      <button
-                        key={year}
-                        type="button"
-                        className={`${styles.yearChip} ${yearTo === year ? styles.yearChipActive : ''}`}
-                        onClick={() => setYearTo(yearTo === year ? null : year)}
-                        aria-pressed={yearTo === year}
-                      >
-                        {year}
-                      </button>
-                    ))}
-                  </div>
+                  <WheelPicker
+                    options={yearOptions}
+                    value={yearTo}
+                    onChange={(v) => setYearTo(v as number | null)}
+                    placeholder="År"
+                  />
                 </div>
               </div>
             </div>

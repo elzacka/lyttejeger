@@ -376,62 +376,20 @@
 /* Year filter */
 .yearFilterContainer {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+  align-items: center;
+  gap: var(--space-md);
 }
 
 .yearFilterRow {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
 }
 
 .yearLabel {
   font-family: var(--font-mono);
   font-size: var(--font-xs);
   color: var(--text-muted);
-  min-width: 28px;
-}
-
-.yearChips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.yearChip {
-  min-height: 28px;
-  padding: 4px 8px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: var(--font-xs);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.yearChip:hover {
-  border-color: var(--accent);
-  color: var(--text-primary);
-}
-
-.yearChip:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.yearChipActive,
-.yearChipActive:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
-}
-
-.yearChipActive:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
 }
 
 /* Clear button */
@@ -521,26 +479,15 @@
   }
 
   .yearFilterContainer {
-    gap: 6px;
+    gap: var(--space-sm);
   }
 
   .yearFilterRow {
-    gap: 6px;
+    gap: 4px;
   }
 
   .yearLabel {
     font-size: 10px;
-    min-width: 22px;
-  }
-
-  .yearChips {
-    gap: 3px;
-  }
-
-  .yearChip {
-    min-height: 24px;
-    padding: 3px 6px;
-    font-size: 11px;
   }
 
   .categorySelect {

@@ -1,0 +1,117 @@
+/* iOS-style wheel picker */
+.container {
+  position: relative;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  min-width: 80px;
+  min-height: 32px;
+  padding: 6px 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.trigger:hover {
+  border-color: var(--accent);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.trigger .material-symbols-outlined {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+.placeholder {
+  color: var(--text-muted);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: var(--z-dropdown);
+  width: 100%;
+  min-width: 100px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.highlight {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  height: 36px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+}
+
+.scroll {
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  scroll-snap-align: center;
+  user-select: none;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.item:hover {
+  color: var(--accent);
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .trigger {
+    min-width: 70px;
+    min-height: 28px;
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+
+  .trigger .material-symbols-outlined {
+    font-size: 14px;
+  }
+
+  .item {
+    height: 32px;
+    font-size: var(--font-xs);
+  }
+
+  .highlight {
+    height: 32px;
+  }
+}
