@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import styles from './WheelPicker.module.css'
 
 interface WheelPickerProps {
@@ -6,27 +6,22 @@ interface WheelPickerProps {
   value: number | string | null
   onChange: (value: number | string | null) => void
   placeholder?: string
-  height?: number
 }
 
-const ITEM_HEIGHT = 36
-const VISIBLE_ITEMS = 5
+const ITEM_HEIGHT = 32
+const VISIBLE_ITEMS = 3
 
 export function WheelPicker({
   options,
   value,
   onChange,
-  placeholder = 'Velg',
-  height = ITEM_HEIGHT * VISIBLE_ITEMS
+  placeholder = 'Alle'
 }: WheelPickerProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [isOpen, setIsOpen] = useState(false)
-  const [scrollTop, setScrollTop] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
   const isScrollingRef = useRef(false)
   const scrollTimeoutRef = useRef<number | null>(null)
 
-  // Include "none" option at the start
+  // Include placeholder option at the start
   const allOptions = [{ value: '', label: placeholder }, ...options]
 
   // Find current index
@@ -34,21 +29,19 @@ export function WheelPicker({
     ? 0
     : allOptions.findIndex(opt => opt.value === value)
 
-  // Scroll to selected item when opening
+  const height = ITEM_HEIGHT * VISIBLE_ITEMS
+
+  // Scroll to selected item on mount and value change
   useEffect(() => {
-    if (isOpen && scrollRef.current) {
+    if (scrollRef.current && !isScrollingRef.current) {
       const targetScroll = currentIndex * ITEM_HEIGHT
       scrollRef.current.scrollTop = targetScroll
-      setScrollTop(targetScroll)
     }
-  }, [isOpen, currentIndex])
+  }, [currentIndex])
 
   // Handle scroll with snap
   const handleScroll = useCallback(() => {
     if (!scrollRef.current || isScrollingRef.current) return
-
-    const scroll = scrollRef.current.scrollTop
-    setScrollTop(scroll)
 
     // Clear existing timeout
     if (scrollTimeoutRef.current) {
@@ -59,6 +52,7 @@ export function WheelPicker({
     scrollTimeoutRef.current = window.setTimeout(() => {
       if (!scrollRef.current) return
 
+      const scroll = scrollRef.current.scrollTop
       const nearestIndex = Math.round(scroll / ITEM_HEIGHT)
       const clampedIndex = Math.max(0, Math.min(nearestIndex, allOptions.length - 1))
       const targetScroll = clampedIndex * ITEM_HEIGHT
@@ -76,7 +70,7 @@ export function WheelPicker({
           onChange(selectedOption.value === '' ? null : selectedOption.value)
         }
       }, 150)
-    }, 100)
+    }, 80)
   }, [allOptions, onChange])
 
   // Handle item click
@@ -99,20 +93,6 @@ export function WheelPicker({
     }, 200)
   }
 
-  // Close on click outside
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isOpen])
-
   // Clean up timeout on unmount
   useEffect(() => {
     return () => {
@@ -122,69 +102,38 @@ export function WheelPicker({
     }
   }, [])
 
-  // Get display label
-  const displayLabel = value === null || value === ''
-    ? placeholder
-    : options.find(opt => opt.value === value)?.label || String(value)
-
   return (
-    <div className={styles.container} ref={containerRef}>
-      <button
-        type="button"
-        className={styles.trigger}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
+    <div className={styles.spinner} style={{ height }}>
+      {/* Gradient overlays for fade effect */}
+      <div className={styles.fadeTop} />
+      <div className={styles.fadeBottom} />
+
+      {/* Selection highlight */}
+      <div className={styles.highlight} />
+
+      {/* Scrollable wheel */}
+      <div
+        ref={scrollRef}
+        className={styles.wheel}
+        onScroll={handleScroll}
+        style={{
+          paddingTop: ITEM_HEIGHT,
+          paddingBottom: ITEM_HEIGHT
+        }}
       >
-        <span className={value === null ? styles.placeholder : undefined}>
-          {displayLabel}
-        </span>
-        <span className="material-symbols-outlined" aria-hidden="true">
-          {isOpen ? 'expand_less' : 'expand_more'}
-        </span>
-      </button>
-
-      {isOpen && (
-        <div className={styles.dropdown} style={{ height }}>
-          <div className={styles.highlight} style={{ top: (height - ITEM_HEIGHT) / 2 }} />
+        {allOptions.map((option, index) => (
           <div
-            ref={scrollRef}
-            className={styles.scroll}
-            onScroll={handleScroll}
-            style={{
-              paddingTop: (height - ITEM_HEIGHT) / 2,
-              paddingBottom: (height - ITEM_HEIGHT) / 2
-            }}
+            key={option.value === '' ? '__placeholder__' : option.value}
+            className={`${styles.item} ${index === currentIndex ? styles.itemSelected : ''}`}
+            style={{ height: ITEM_HEIGHT }}
+            onClick={() => handleItemClick(index)}
+            role="option"
+            aria-selected={index === currentIndex}
           >
-            {allOptions.map((option, index) => {
-              const offset = scrollTop - index * ITEM_HEIGHT
-              const centerOffset = (height - ITEM_HEIGHT) / 2
-              const distanceFromCenter = Math.abs(offset + centerOffset)
-              const scale = Math.max(0.8, 1 - distanceFromCenter / (height / 2) * 0.2)
-              const opacity = Math.max(0.4, 1 - distanceFromCenter / (height / 2) * 0.6)
-
-              return (
-                <div
-                  key={option.value}
-                  className={styles.item}
-                  style={{
-                    transform: `scale(${scale})`,
-                    opacity
-                  }}
-                  onClick={() => handleItemClick(index)}
-                  role="option"
-                  aria-selected={
-                    (value === null && option.value === '') ||
-                    value === option.value
-                  }
-                >
-                  {option.label}
-                </div>
-              )
-            })}
+            {option.label}
           </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   )
 }
