@@ -229,92 +229,94 @@ export function FilterPanel({
             </div>
           </div>
 
-          {/* Date range filter */}
-          <div className={styles.section}>
-            <div className={styles.dateRangeContainer}>
-              <div className={styles.datePicker}>
-                <label className={styles.dateLabel}>Fra</label>
-                <div className={styles.dateInputRow}>
-                  <select
-                    className={styles.dateSelect}
-                    value={filters.dateFrom?.day ?? currentDay}
-                    onChange={(e) => updateDateFrom('day', parseInt(e.target.value))}
-                    aria-label="Fra dag"
-                  >
-                    {days.map((d) => {
-                      const maxDay = getDaysInMonth(
-                        filters.dateFrom?.month ?? currentMonth,
-                        filters.dateFrom?.year ?? currentYear
-                      )
-                      if (d > maxDay) return null
-                      return <option key={d} value={d}>{d}</option>
-                    })}
-                  </select>
-                  <select
-                    className={styles.dateSelect}
-                    value={filters.dateFrom?.month ?? currentMonth}
-                    onChange={(e) => updateDateFrom('month', parseInt(e.target.value))}
-                    aria-label="Fra måned"
-                  >
-                    {months.map((m) => (
-                      <option key={m.value} value={m.value}>{m.label}</option>
-                    ))}
-                  </select>
-                  <select
-                    className={styles.dateSelect}
-                    value={filters.dateFrom?.year ?? currentYear}
-                    onChange={(e) => updateDateFrom('year', parseInt(e.target.value))}
-                    aria-label="Fra år"
-                  >
-                    {years.map((y) => (
-                      <option key={y} value={y}>{y}</option>
-                    ))}
-                  </select>
+          {/* Date range filter - only for episodes */}
+          {activeTab === 'episodes' && (
+            <div className={styles.section}>
+              <div className={styles.dateRangeContainer}>
+                <div className={styles.datePicker}>
+                  <label className={styles.dateLabel}>Fra</label>
+                  <div className={styles.dateInputRow}>
+                    <select
+                      className={styles.dateSelect}
+                      value={filters.dateFrom?.day ?? currentDay}
+                      onChange={(e) => updateDateFrom('day', parseInt(e.target.value))}
+                      aria-label="Fra dag"
+                    >
+                      {days.map((d) => {
+                        const maxDay = getDaysInMonth(
+                          filters.dateFrom?.month ?? currentMonth,
+                          filters.dateFrom?.year ?? currentYear
+                        )
+                        if (d > maxDay) return null
+                        return <option key={d} value={d}>{d}</option>
+                      })}
+                    </select>
+                    <select
+                      className={styles.dateSelect}
+                      value={filters.dateFrom?.month ?? currentMonth}
+                      onChange={(e) => updateDateFrom('month', parseInt(e.target.value))}
+                      aria-label="Fra måned"
+                    >
+                      {months.map((m) => (
+                        <option key={m.value} value={m.value}>{m.label}</option>
+                      ))}
+                    </select>
+                    <select
+                      className={styles.dateSelect}
+                      value={filters.dateFrom?.year ?? currentYear}
+                      onChange={(e) => updateDateFrom('year', parseInt(e.target.value))}
+                      aria-label="Fra år"
+                    >
+                      {years.map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <span className={styles.dateRangeSeparator}>–</span>
-              <div className={styles.datePicker}>
-                <label className={styles.dateLabel}>Til</label>
-                <div className={styles.dateInputRow}>
-                  <select
-                    className={styles.dateSelect}
-                    value={filters.dateTo?.day ?? currentDay}
-                    onChange={(e) => updateDateTo('day', parseInt(e.target.value))}
-                    aria-label="Til dag"
-                  >
-                    {days.map((d) => {
-                      const maxDay = getDaysInMonth(
-                        filters.dateTo?.month ?? currentMonth,
-                        filters.dateTo?.year ?? currentYear
-                      )
-                      if (d > maxDay) return null
-                      return <option key={d} value={d}>{d}</option>
-                    })}
-                  </select>
-                  <select
-                    className={styles.dateSelect}
-                    value={filters.dateTo?.month ?? currentMonth}
-                    onChange={(e) => updateDateTo('month', parseInt(e.target.value))}
-                    aria-label="Til måned"
-                  >
-                    {months.map((m) => (
-                      <option key={m.value} value={m.value}>{m.label}</option>
-                    ))}
-                  </select>
-                  <select
-                    className={styles.dateSelect}
-                    value={filters.dateTo?.year ?? currentYear}
-                    onChange={(e) => updateDateTo('year', parseInt(e.target.value))}
-                    aria-label="Til år"
-                  >
-                    {years.map((y) => (
-                      <option key={y} value={y}>{y}</option>
-                    ))}
-                  </select>
+                <span className={styles.dateRangeSeparator}>–</span>
+                <div className={styles.datePicker}>
+                  <label className={styles.dateLabel}>Til</label>
+                  <div className={styles.dateInputRow}>
+                    <select
+                      className={styles.dateSelect}
+                      value={filters.dateTo?.day ?? currentDay}
+                      onChange={(e) => updateDateTo('day', parseInt(e.target.value))}
+                      aria-label="Til dag"
+                    >
+                      {days.map((d) => {
+                        const maxDay = getDaysInMonth(
+                          filters.dateTo?.month ?? currentMonth,
+                          filters.dateTo?.year ?? currentYear
+                        )
+                        if (d > maxDay) return null
+                        return <option key={d} value={d}>{d}</option>
+                      })}
+                    </select>
+                    <select
+                      className={styles.dateSelect}
+                      value={filters.dateTo?.month ?? currentMonth}
+                      onChange={(e) => updateDateTo('month', parseInt(e.target.value))}
+                      aria-label="Til måned"
+                    >
+                      {months.map((m) => (
+                        <option key={m.value} value={m.value}>{m.label}</option>
+                      ))}
+                    </select>
+                    <select
+                      className={styles.dateSelect}
+                      value={filters.dateTo?.year ?? currentYear}
+                      onChange={(e) => updateDateTo('year', parseInt(e.target.value))}
+                      aria-label="Til år"
+                    >
+                      {years.map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           {activeFilterCount > 0 && (
             <button className={styles.clearButton} onClick={onClearFilters}>
