@@ -450,37 +450,47 @@
 /* Mobile */
 @media (max-width: 640px) {
   .header {
-    gap: var(--space-xs);
+    gap: 6px;
   }
 
   .typeSelector {
-    gap: var(--space-xs);
+    gap: 8px;
   }
 
   .radioLabel {
-    gap: 4px;
-    font-size: var(--font-size-xs);
+    gap: 3px;
   }
 
   .radioInput {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     border-width: 1.5px;
+    flex-shrink: 0;
   }
 
   .radioInput:checked::after {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
 
   .radioText {
-    font-size: var(--font-size-xs);
+    font-size: 11px;
   }
 
   .filterDropdown {
-    min-height: 32px;
-    padding: 4px 8px;
-    font-size: var(--font-size-xs);
+    min-height: 28px;
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+
+  .filterDropdown .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  .filterBadge {
+    min-width: 14px;
+    height: 14px;
+    font-size: 9px;
   }
 
   .panel {
@@ -488,17 +498,17 @@
   }
 
   .chip {
-    min-height: 28px;
-    padding: 4px 8px;
-    font-size: var(--font-size-xs);
+    min-height: 26px;
+    padding: 3px 6px;
+    font-size: 11px;
   }
 
   .dateRangeContainer {
-    gap: var(--space-sm);
+    gap: var(--space-xs);
   }
 
   .dateLabel {
-    font-size: var(--font-size-xs);
+    font-size: 10px;
   }
 
   .dateInputRow {
@@ -506,17 +516,20 @@
   }
 
   .dateSelect {
-    min-height: 32px;
-    padding: 4px 6px;
-    padding-right: 18px;
-    font-size: var(--font-size-sm);
-    background-position: right 4px center;
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 0;
+    min-height: 28px;
+    padding: 3px 4px;
+    padding-right: 16px;
+    font-size: 12px;
+    background-position: right 2px center;
   }
 
   .categorySelect {
-    min-height: 32px;
-    padding: 4px 8px;
-    font-size: var(--font-size-xs);
+    min-height: 28px;
+    padding: 3px 6px;
+    font-size: 11px;
   }
 
   .categoryDropdown {
@@ -524,23 +537,32 @@
   }
 
   .categoryOption {
-    padding: var(--space-xs) var(--space-sm);
-    font-size: var(--font-size-xs);
+    padding: 6px 8px;
+    font-size: 11px;
   }
 
-  .selectedChip {
-    min-height: 24px;
-    padding: 2px 6px;
-    font-size: var(--font-size-xs);
+  .categoryCheckbox {
+    width: 14px;
+    height: 14px;
   }
 
-  .selectedChip .material-symbols-outlined {
+  .categoryCheckbox .material-symbols-outlined {
     font-size: 12px;
   }
 
+  .selectedChip {
+    min-height: 22px;
+    padding: 2px 5px;
+    font-size: 10px;
+  }
+
+  .selectedChip .material-symbols-outlined {
+    font-size: 10px;
+  }
+
   .clearButton {
-    min-height: 32px;
-    padding: var(--space-xs);
-    font-size: var(--font-size-xs);
+    min-height: 28px;
+    padding: 6px;
+    font-size: 11px;
   }
 }
