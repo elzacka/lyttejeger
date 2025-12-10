@@ -83,53 +83,63 @@
   background: var(--accent, var(--color-accent));
 }
 
-/* Desktop: horizontal bar in header area */
+/* Desktop: subtle inline tabs */
 @media (min-width: 641px) {
   .nav {
     position: static;
     max-width: var(--max-width);
     margin: 0 auto;
     border-top: none;
-    border: 1px solid var(--border, var(--color-border));
-    border-radius: var(--radius-md);
-    background: var(--bg-secondary, var(--color-bg-secondary));
-    padding: var(--space-xs);
-    gap: var(--space-xs);
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+    gap: var(--space-sm);
+    justify-content: flex-start;
   }
 
   .navItem {
+    flex: 0 0 auto;
     flex-direction: row;
     gap: var(--space-xs);
-    min-height: var(--button-lg);
-    padding: var(--space-sm) var(--space-md);
+    min-height: var(--button-sm);
+    padding: var(--space-xs) var(--space-sm);
     border-radius: var(--radius-sm);
+    font-size: var(--font-xs);
+  }
+
+  .navItem:hover {
+    background: var(--bg-hover, var(--color-bg-hover));
   }
 
   .iconWrapper .material-symbols-outlined {
-    font-size: 20px;
+    font-size: var(--icon-sm);
   }
 
   .label {
-    font-size: var(--font-sm, var(--font-size-base));
+    font-size: var(--font-xs);
   }
 
   .navItem.active {
-    background: var(--accent, var(--color-accent));
-    color: var(--text-inverse, white);
+    background: var(--bg-secondary, var(--color-bg-secondary));
+    color: var(--accent, var(--color-accent));
   }
 
   .navItem.active:hover {
-    background: var(--accent-hover, var(--color-accent-hover));
-    color: var(--text-inverse, white);
+    background: var(--bg-hover, var(--color-bg-hover));
+    color: var(--accent, var(--color-accent));
   }
 
   .navItem.active .badge {
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--accent, var(--color-accent));
   }
 
   .badge {
     position: static;
     top: auto;
     right: auto;
+    min-width: 14px;
+    height: 14px;
+    font-size: 8px;
   }
 }
