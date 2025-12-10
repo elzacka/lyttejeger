@@ -58,26 +58,19 @@ export function FilterPanel({
     return { value: year, label: String(year) }
   })
 
-  // Year filter handlers
-  const setYearFrom = (year: number | null) => {
+  // Year filter handler - single year, sets both from and to
+  const setYear = (year: number | null) => {
     if (year === null) {
       onSetDateFrom(null)
-    } else {
-      onSetDateFrom({ day: 1, month: 1, year })
-    }
-  }
-
-  const setYearTo = (year: number | null) => {
-    if (year === null) {
       onSetDateTo(null)
     } else {
+      onSetDateFrom({ day: 1, month: 1, year })
       onSetDateTo({ day: 31, month: 12, year })
     }
   }
 
-  // Get selected years
-  const yearFrom = filters.dateFrom?.year ?? null
-  const yearTo = filters.dateTo?.year ?? null
+  // Get selected year
+  const selectedYear = filters.dateFrom?.year ?? null
 
   return (
     <div className={styles.container}>
@@ -216,25 +209,14 @@ export function FilterPanel({
           {/* Year filter - only for episodes */}
           {activeTab === 'episodes' && (
             <div className={styles.section}>
-              <div className={styles.yearFilterContainer}>
-                <div className={styles.yearFilterRow}>
-                  <span className={styles.yearLabel}>Fra</span>
-                  <WheelPicker
-                    options={yearOptions}
-                    value={yearFrom}
-                    onChange={(v) => setYearFrom(v as number | null)}
-                    placeholder="År"
-                  />
-                </div>
-                <div className={styles.yearFilterRow}>
-                  <span className={styles.yearLabel}>Til</span>
-                  <WheelPicker
-                    options={yearOptions}
-                    value={yearTo}
-                    onChange={(v) => setYearTo(v as number | null)}
-                    placeholder="År"
-                  />
-                </div>
+              <div className={styles.yearFilterRow}>
+                <span className={styles.yearLabel}>År</span>
+                <WheelPicker
+                  options={yearOptions}
+                  value={selectedYear}
+                  onChange={(v) => setYear(v as number | null)}
+                  placeholder="Alle"
+                />
               </div>
             </div>
           )}
