@@ -48,52 +48,32 @@ export function FilterPanel({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isCategoryOpen])
 
-  // Current date for defaults
-  const today = new Date()
-  const currentDay = today.getDate()
-  const currentMonth = today.getMonth() + 1
-  const currentYear = today.getFullYear()
+  // Current year
+  const currentYear = new Date().getFullYear()
 
-  // Generate options
-  const days = Array.from({ length: 31 }, (_, i) => i + 1)
-  const months = [
-    { value: 1, label: 'Jan' },
-    { value: 2, label: 'Feb' },
-    { value: 3, label: 'Mar' },
-    { value: 4, label: 'Apr' },
-    { value: 5, label: 'Mai' },
-    { value: 6, label: 'Jun' },
-    { value: 7, label: 'Jul' },
-    { value: 8, label: 'Aug' },
-    { value: 9, label: 'Sep' },
-    { value: 10, label: 'Okt' },
-    { value: 11, label: 'Nov' },
-    { value: 12, label: 'Des' },
-  ]
-  const years = Array.from({ length: currentYear - 2004 + 1 }, (_, i) => currentYear - i)
+  // Generate year options (2005 to current year)
+  const years = Array.from({ length: currentYear - 2004 }, (_, i) => currentYear - i)
 
-  // Helper to get days in month
-  const getDaysInMonth = (month: number, year: number) => {
-    return new Date(year, month, 0).getDate()
+  // Year filter handlers
+  const setYearFrom = (year: number | null) => {
+    if (year === null) {
+      onSetDateFrom(null)
+    } else {
+      onSetDateFrom({ day: 1, month: 1, year })
+    }
   }
 
-  // Helper to update date field
-  const updateDateFrom = (field: 'day' | 'month' | 'year', value: number) => {
-    const current = filters.dateFrom ?? { day: currentDay, month: currentMonth, year: currentYear }
-    const updated = { ...current, [field]: value }
-    // Clamp day to valid range for the month
-    const maxDay = getDaysInMonth(updated.month, updated.year)
-    if (updated.day > maxDay) updated.day = maxDay
-    onSetDateFrom(updated)
+  const setYearTo = (year: number | null) => {
+    if (year === null) {
+      onSetDateTo(null)
+    } else {
+      onSetDateTo({ day: 31, month: 12, year })
+    }
   }
 
-  const updateDateTo = (field: 'day' | 'month' | 'year', value: number) => {
-    const current = filters.dateTo ?? { day: currentDay, month: currentMonth, year: currentYear }
-    const updated = { ...current, [field]: value }
-    const maxDay = getDaysInMonth(updated.month, updated.year)
-    if (updated.day > maxDay) updated.day = maxDay
-    onSetDateTo(updated)
-  }
+  // Get selected years
+  const yearFrom = filters.dateFrom?.year ?? null
+  const yearTo = filters.dateTo?.year ?? null
 
   return (
     <div className={styles.container}>
@@ -229,89 +209,40 @@ export function FilterPanel({
             </div>
           </div>
 
-          {/* Date range filter - only for episodes */}
+          {/* Year filter - only for episodes */}
           {activeTab === 'episodes' && (
             <div className={styles.section}>
-              <div className={styles.dateRangeContainer}>
-                <div className={styles.datePicker}>
-                  <label className={styles.dateLabel}>Fra</label>
-                  <div className={styles.dateInputRow}>
-                    <select
-                      className={styles.dateSelect}
-                      value={filters.dateFrom?.day ?? currentDay}
-                      onChange={(e) => updateDateFrom('day', parseInt(e.target.value))}
-                      aria-label="Fra dag"
-                    >
-                      {days.map((d) => {
-                        const maxDay = getDaysInMonth(
-                          filters.dateFrom?.month ?? currentMonth,
-                          filters.dateFrom?.year ?? currentYear
-                        )
-                        if (d > maxDay) return null
-                        return <option key={d} value={d}>{d}</option>
-                      })}
-                    </select>
-                    <select
-                      className={styles.dateSelect}
-                      value={filters.dateFrom?.month ?? currentMonth}
-                      onChange={(e) => updateDateFrom('month', parseInt(e.target.value))}
-                      aria-label="Fra måned"
-                    >
-                      {months.map((m) => (
-                        <option key={m.value} value={m.value}>{m.label}</option>
-                      ))}
-                    </select>
-                    <select
-                      className={styles.dateSelect}
-                      value={filters.dateFrom?.year ?? currentYear}
-                      onChange={(e) => updateDateFrom('year', parseInt(e.target.value))}
-                      aria-label="Fra år"
-                    >
-                      {years.map((y) => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
+              <div className={styles.yearFilterContainer}>
+                <div className={styles.yearFilterRow}>
+                  <span className={styles.yearLabel}>Fra</span>
+                  <div className={styles.yearChips}>
+                    {years.slice(0, 8).map((year) => (
+                      <button
+                        key={year}
+                        type="button"
+                        className={`${styles.yearChip} ${yearFrom === year ? styles.yearChipActive : ''}`}
+                        onClick={() => setYearFrom(yearFrom === year ? null : year)}
+                        aria-pressed={yearFrom === year}
+                      >
+                        {year}
+                      </button>
+                    ))}
                   </div>
                 </div>
-                <span className={styles.dateRangeSeparator}>–</span>
-                <div className={styles.datePicker}>
-                  <label className={styles.dateLabel}>Til</label>
-                  <div className={styles.dateInputRow}>
-                    <select
-                      className={styles.dateSelect}
-                      value={filters.dateTo?.day ?? currentDay}
-                      onChange={(e) => updateDateTo('day', parseInt(e.target.value))}
-                      aria-label="Til dag"
-                    >
-                      {days.map((d) => {
-                        const maxDay = getDaysInMonth(
-                          filters.dateTo?.month ?? currentMonth,
-                          filters.dateTo?.year ?? currentYear
-                        )
-                        if (d > maxDay) return null
-                        return <option key={d} value={d}>{d}</option>
-                      })}
-                    </select>
-                    <select
-                      className={styles.dateSelect}
-                      value={filters.dateTo?.month ?? currentMonth}
-                      onChange={(e) => updateDateTo('month', parseInt(e.target.value))}
-                      aria-label="Til måned"
-                    >
-                      {months.map((m) => (
-                        <option key={m.value} value={m.value}>{m.label}</option>
-                      ))}
-                    </select>
-                    <select
-                      className={styles.dateSelect}
-                      value={filters.dateTo?.year ?? currentYear}
-                      onChange={(e) => updateDateTo('year', parseInt(e.target.value))}
-                      aria-label="Til år"
-                    >
-                      {years.map((y) => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
+                <div className={styles.yearFilterRow}>
+                  <span className={styles.yearLabel}>Til</span>
+                  <div className={styles.yearChips}>
+                    {years.slice(0, 8).map((year) => (
+                      <button
+                        key={year}
+                        type="button"
+                        className={`${styles.yearChip} ${yearTo === year ? styles.yearChipActive : ''}`}
+                        onClick={() => setYearTo(yearTo === year ? null : year)}
+                        aria-pressed={yearTo === year}
+                      >
+                        {year}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
