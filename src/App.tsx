@@ -152,10 +152,6 @@ function App() {
     setSelectedPodcast(podcast)
   }, [])
 
-  const handleBackToSearch = useCallback(() => {
-    setSelectedPodcast(null)
-  }, [])
-
   // Queue handlers
   const handlePlayFromQueue = useCallback((item: QueueItem) => {
     setPlayingEpisode({
@@ -224,11 +220,17 @@ function App() {
 
   // Navigation handler for BottomNav
   const handleNavigation = useCallback((item: NavItem) => {
-    if (item === 'subscriptions' || item === 'queue') {
+    // Clear selected podcast when navigating away
+    setSelectedPodcast(null)
+
+    if (item === 'home') {
+      setActiveTab('podcasts')
+      setQuery('')
+    } else if (item === 'subscriptions' || item === 'queue') {
       setActiveTab(item)
     }
     // 'info' is handled internally by BottomNav (opens InfoSheet)
-  }, [setActiveTab])
+  }, [setActiveTab, setQuery])
 
   // If a podcast is selected, show the podcast page
   if (selectedPodcast) {
@@ -236,7 +238,6 @@ function App() {
       <div className="app">
         <PodcastPage
           podcast={selectedPodcast}
-          onBack={handleBackToSearch}
           onPlayEpisode={handlePlayEpisode}
           onAddToQueue={handleAddEpisodeToQueue}
           onPlayNext={handlePlayEpisodeNext}
@@ -244,6 +245,12 @@ function App() {
           isSubscribed={isSubscribed(selectedPodcast.id)}
           onSubscribe={handleSubscribe}
           onUnsubscribe={handleUnsubscribe}
+        />
+        <BottomNav
+          activeItem={null}
+          onNavigate={handleNavigation}
+          queueCount={queueLength}
+          subscriptionCount={subscriptionCount}
         />
         <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
       </div>
@@ -258,36 +265,40 @@ function App() {
       <Header />
 
       <main className="main" id="main-content">
-        <section className="search-section">
-          <SearchBar
-            value={filters.query}
-            onChange={setQuery}
-            isPending={isPending}
-          />
-        </section>
+        {activeTab !== 'subscriptions' && activeTab !== 'queue' && (
+          <>
+            <section className="search-section">
+              <SearchBar
+                value={filters.query}
+                onChange={setQuery}
+                isPending={isPending}
+              />
+            </section>
 
-        {error && (
-          <div className="error-banner" role="alert">
-            <span className="material-symbols-outlined" aria-hidden="true">error</span>
-            <span>{error}</span>
-          </div>
+            {error && (
+              <div className="error-banner" role="alert">
+                <span className="material-symbols-outlined" aria-hidden="true">error</span>
+                <span>{error}</span>
+              </div>
+            )}
+
+            <section className="filter-section">
+              <FilterPanel
+                filters={filters}
+                categories={categories}
+                languages={allLanguages}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                onToggleCategory={toggleCategory}
+                onToggleLanguage={toggleLanguage}
+                onSetDateFrom={setDateFrom}
+                onSetDateTo={setDateTo}
+                onClearFilters={clearFilters}
+                activeFilterCount={activeFilterCount}
+              />
+            </section>
+          </>
         )}
-
-        <section className="filter-section">
-          <FilterPanel
-            filters={filters}
-            categories={categories}
-            languages={allLanguages}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            onToggleCategory={toggleCategory}
-            onToggleLanguage={toggleLanguage}
-            onSetDateFrom={setDateFrom}
-            onSetDateTo={setDateTo}
-            onClearFilters={clearFilters}
-            activeFilterCount={activeFilterCount}
-          />
-        </section>
 
         {/* Show recent episodes from subscriptions when not searching */}
         {subscriptionCount > 0 && !filters.query && activeTab !== 'queue' && activeTab !== 'subscriptions' && (
@@ -353,7 +364,7 @@ function App() {
       </main>
 
       <BottomNav
-        activeItem={activeTab === 'subscriptions' || activeTab === 'queue' ? activeTab : null}
+        activeItem={activeTab === 'subscriptions' || activeTab === 'queue' ? activeTab : 'home'}
         onNavigate={handleNavigation}
         queueCount={queueLength}
         subscriptionCount={subscriptionCount}

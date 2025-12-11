@@ -1,7 +1,7 @@
 /* Inline wheel spinner - iOS style */
 .spinner {
   position: relative;
-  width: 80px;
+  width: 64px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -14,7 +14,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  height: 32px;
+  height: 52px;
   pointer-events: none;
   z-index: 2;
 }
@@ -41,9 +41,9 @@
 .highlight {
   position: absolute;
   top: 50%;
-  left: 4px;
-  right: 4px;
-  height: 32px;
+  left: 3px;
+  right: 3px;
+  height: 26px;
   transform: translateY(-50%);
   background: var(--bg-primary);
   border-radius: var(--radius-sm);
@@ -72,7 +72,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: 11px;
   color: var(--text-muted);
   cursor: pointer;
   scroll-snap-align: center;
@@ -92,15 +92,19 @@
 /* Mobile adjustments */
 @media (max-width: 640px) {
   .spinner {
-    width: 70px;
+    width: 56px;
   }
 
   .item {
-    font-size: var(--font-xs);
+    font-size: 11px;
   }
 
   .fadeTop,
   .fadeBottom {
-    height: 28px;
+    height: 48px;
+  }
+
+  .highlight {
+    height: 24px;
   }
 }

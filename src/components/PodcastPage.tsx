@@ -9,7 +9,6 @@ import styles from './PodcastPage.module.css'
 
 interface PodcastPageProps {
   podcast: Podcast
-  onBack: () => void
   onPlayEpisode: (episode: PlayingEpisode) => void
   onAddToQueue?: (episode: Episode, podcastTitle: string, podcastImage: string) => void
   onPlayNext?: (episode: Episode, podcastTitle: string, podcastImage: string) => void
@@ -19,7 +18,7 @@ interface PodcastPageProps {
   onUnsubscribe?: () => void
 }
 
-export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPlayNext, isInQueue, isSubscribed, onSubscribe, onUnsubscribe }: PodcastPageProps) {
+export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, isInQueue, isSubscribed, onSubscribe, onUnsubscribe }: PodcastPageProps) {
   const [episodes, setEpisodes] = useState<Episode[]>([])
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false)
   const [episodesError, setEpisodesError] = useState<string | null>(null)
@@ -84,13 +83,6 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <button
-          className={styles.backButton}
-          onClick={onBack}
-          aria-label="Tilbake til søkeresultater"
-        >
-          <span className="material-symbols-outlined">arrow_back</span>
-        </button>
         <div className={styles.logo}>
           <span className={`material-symbols-outlined ${styles.logoIcon}`} aria-hidden="true">earbuds</span>
           <span className={styles.logoText}>Lyttejeger</span>
@@ -239,7 +231,7 @@ export function PodcastPage({ podcast, onBack, onPlayEpisode, onAddToQueue, onPl
                         onClick={() => handlePlayEpisode(episode)}
                         aria-label={`Spill ${episode.title}`}
                       >
-                        <span className="material-symbols-outlined">play_circle</span>
+                        <span className="material-symbols-outlined">play_arrow</span>
                       </button>
                     </div>
                     {isExpanded && (

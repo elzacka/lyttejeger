@@ -219,7 +219,7 @@ export function RecentEpisodes({
                   onClick={() => handlePlayEpisode(episode)}
                   aria-label={`Spill ${episode.title}`}
                 >
-                  <span className="material-symbols-outlined">play_circle</span>
+                  <span className="material-symbols-outlined">play_arrow</span>
                 </button>
               </div>
             </li>

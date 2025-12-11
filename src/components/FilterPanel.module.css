@@ -273,7 +273,7 @@
   left: 0;
   right: 0;
   z-index: var(--z-dropdown);
-  max-height: 240px;
+  max-height: 360px;
   overflow-y: auto;
   background: var(--bg-primary);
   border: 1px solid var(--border);
@@ -382,11 +382,12 @@
 
 .yearFilterRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-xs);
 }
 
 .yearLabel {
+  padding-top: 4px;
   font-family: var(--font-mono);
   font-size: var(--font-xs);
   color: var(--text-muted);
@@ -497,7 +498,7 @@
   }
 
   .categoryDropdown {
-    max-height: 200px;
+    max-height: 300px;
   }
 
   .categoryOption {

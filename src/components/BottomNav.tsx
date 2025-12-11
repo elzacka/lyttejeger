@@ -4,7 +4,7 @@ import { InstallSheet } from './InstallSheet'
 import { shouldShowInstallButton } from '../utils/deviceDetection'
 import styles from './BottomNav.module.css'
 
-export type NavItem = 'subscriptions' | 'queue' | 'info'
+export type NavItem = 'home' | 'subscriptions' | 'queue' | 'info'
 
 interface BottomNavProps {
   activeItem: NavItem | null
@@ -51,6 +51,19 @@ export function BottomNav({
             <span className={styles.label}>Installer</span>
           </button>
         )}
+
+        <button
+          className={`${styles.navItem} ${activeItem === 'home' ? styles.active : ''}`}
+          onClick={() => onNavigate('home')}
+          aria-current={activeItem === 'home' ? 'page' : undefined}
+        >
+          <span className={styles.iconWrapper}>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              {activeItem === 'home' ? 'home' : 'home'}
+            </span>
+          </span>
+          <span className={styles.label}>Hjem</span>
+        </button>
 
         <button
           className={`${styles.navItem} ${activeItem === 'subscriptions' ? styles.active : ''}`}

@@ -8,8 +8,8 @@ interface WheelPickerProps {
   placeholder?: string
 }
 
-const ITEM_HEIGHT = 32
-const VISIBLE_ITEMS = 3
+const ITEM_HEIGHT = 26
+const VISIBLE_ITEMS = 5
 
 export function WheelPicker({
   options,

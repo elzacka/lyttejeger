@@ -14,38 +14,11 @@
   z-index: var(--z-sticky);
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  justify-content: center;
   padding: var(--space-sm) var(--space-md);
   padding-top: calc(var(--space-sm) + env(safe-area-inset-top, 0px));
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border);
-}
-
-.backButton {
-  width: var(--button-lg);
-  height: var(--button-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.backButton:hover {
-  background: var(--bg-hover);
-}
-
-.backButton:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.backButton .material-symbols-outlined {
-  font-size: var(--icon-lg);
 }
 
 .logo {
@@ -320,23 +293,26 @@
   padding: var(--space-sm);
 }
 
+/* Ghost-style play button - less dominant, content-first design */
 .playButton {
-  width: var(--button-lg);
-  height: var(--button-lg);
+  width: var(--button-md);
+  height: var(--button-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent);
-  border: none;
+  background: transparent;
+  border: 1.5px solid var(--border);
   border-radius: 50%;
-  color: white;
+  color: var(--text-muted);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background var(--transition-fast), transform var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .playButton:hover {
-  background: var(--accent-hover);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
 }
 
 .playButton:active {
@@ -349,7 +325,7 @@
 }
 
 .playButton .material-symbols-outlined {
-  font-size: var(--icon-lg);
+  font-size: var(--icon-md);
 }
 
 .episodeToggle {

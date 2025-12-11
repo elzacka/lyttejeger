@@ -254,23 +254,26 @@
   font-size: var(--icon-sm);
 }
 
+/* Ghost-style play button - less dominant, content-first design */
 .playButton {
-  width: var(--button-lg);
-  height: var(--button-lg);
+  width: var(--button-md);
+  height: var(--button-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent);
-  border: none;
+  background: transparent;
+  border: 1.5px solid var(--border);
   border-radius: 50%;
-  color: white;
+  color: var(--text-muted);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background var(--transition-fast), transform var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .playButton:hover {
-  background: var(--accent-hover);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
 }
 
 .playButton:active {
@@ -283,7 +286,7 @@
 }
 
 .playButton .material-symbols-outlined {
-  font-size: var(--icon-lg);
+  font-size: var(--icon-md);
 }
 
 /* Mobile */
