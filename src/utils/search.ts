@@ -109,10 +109,31 @@ export function formatDate(dateString: string): string {
 }
 
 export function formatDateLong(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('nb-NO', {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+  // Same day - show hours ago
+  if (diffDays === 0 && diffHours >= 1) {
+    return `${diffHours} ${diffHours === 1 ? 'time' : 'timer'} siden`
+  }
+  if (diffDays === 0) return 'Nettopp'
+  if (diffDays === 1) return 'I går'
+  if (diffDays < 7) return `${diffDays} dager siden`
+
+  // Same week - show day name
+  const dayNames = ['søn', 'man', 'tir', 'ons', 'tor', 'fre', 'lør']
+  if (diffDays < 14) {
+    return dayNames[date.getDay()]
+  }
+
+  // Older - show full date
+  return date.toLocaleDateString('nb-NO', {
     day: 'numeric',
     month: 'long',
-    year: 'numeric'
+    year: diffDays > 365 ? 'numeric' : undefined
   })
 }
 

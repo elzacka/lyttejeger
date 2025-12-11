@@ -8,7 +8,7 @@
   /* Text colors */
   --color-text-primary: #2C2C2C;
   --color-text-secondary: #4A4A4A;
-  --color-text-muted: #5A5A5A;
+  --color-text-muted: #4F4F4F; /* Improved contrast for outdoor readability */
   --color-text-inverse: #FFFFFF;
 
   /* Accent colors */

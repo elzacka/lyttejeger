@@ -10,7 +10,8 @@
   align-items: stretch;
   background: var(--bg-primary, var(--color-bg-primary));
   border-top: 1px solid var(--border, var(--color-border));
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  /* Extra padding for iPhone home indicator */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
 }
 
 .navItem {

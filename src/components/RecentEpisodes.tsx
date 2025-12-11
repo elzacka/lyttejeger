@@ -149,7 +149,12 @@ export function RecentEpisodes({
                 alt=""
                 className={styles.image}
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/favicon.svg'
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                  const placeholder = document.createElement('div')
+                  placeholder.className = `${styles.image} image-placeholder`
+                  placeholder.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">podcasts</span>'
+                  target.parentNode?.insertBefore(placeholder, target)
                 }}
               />
               <div className={styles.info}>

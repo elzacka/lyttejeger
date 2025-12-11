@@ -24,6 +24,7 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
   const [episodesError, setEpisodesError] = useState<string | null>(null)
   const [expandedEpisodeId, setExpandedEpisodeId] = useState<string | null>(null)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const [imageError, setImageError] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Close menu when clicking outside
@@ -91,14 +92,18 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
 
       <div className={styles.content}>
         <section className={styles.podcastInfo}>
-          <img
-            src={podcast.imageUrl}
-            alt={`Omslagsbilde for ${podcast.title}`}
-            className={styles.image}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/favicon.svg'
-            }}
-          />
+          {imageError ? (
+            <div className={`${styles.image} image-placeholder`}>
+              <span className="material-symbols-outlined" aria-hidden="true">podcasts</span>
+            </div>
+          ) : (
+            <img
+              src={podcast.imageUrl}
+              alt={`Omslagsbilde for ${podcast.title}`}
+              className={styles.image}
+              onError={() => setImageError(true)}
+            />
+          )}
           <div className={styles.infoContent}>
             <h2 className={styles.title}>{podcast.title}</h2>
             <p className={styles.author}>{podcast.author}</p>
@@ -113,7 +118,7 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                 onClick={isSubscribed ? onUnsubscribe : onSubscribe}
                 aria-pressed={isSubscribed}
               >
-                {isSubscribed ? 'Abonnerer' : 'Abonner'}
+                {isSubscribed ? 'Følger' : 'Følg'}
               </button>
             )}
           </div>
@@ -150,9 +155,13 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
           <h3 className={styles.episodesTitle}>Episoder</h3>
 
           {isLoadingEpisodes && (
-            <div className={styles.loading}>
-              <span className={`material-symbols-outlined ${styles.spinner}`}>progress_activity</span>
-              <span>Henter episoder ...</span>
+            <div className={styles.skeletonList}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className={styles.skeletonItem}>
+                  <div className={`skeleton ${styles.skeletonTitle}`} />
+                  <div className={`skeleton ${styles.skeletonMeta}`} />
+                </div>
+              ))}
             </div>
           )}
 
@@ -172,6 +181,23 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                 return (
                   <li key={episode.id} className={`${styles.episodeItem} ${isMenuOpen ? styles.menuOpen : ''}`}>
                     <div className={styles.episodeHeader}>
+                      <button
+                        className={styles.episodeToggle}
+                        onClick={() => toggleEpisodeExpand(episode.id)}
+                        aria-expanded={isExpanded}
+                        aria-controls={`episode-details-${episode.id}`}
+                      >
+                        <span className={`material-symbols-outlined ${styles.expandIcon} ${isExpanded ? styles.expanded : ''}`}>
+                          expand_more
+                        </span>
+                        <div className={styles.episodeInfo}>
+                          <p className={styles.episodeTitle}>{episode.title}</p>
+                          <div className={styles.episodeMeta}>
+                            <span>{formatDateLong(episode.publishedAt)}</span>
+                            {formatDuration(episode.duration) && <span>{formatDuration(episode.duration)}</span>}
+                          </div>
+                        </div>
+                      </button>
                       {onAddToQueue && (
                         <div className={styles.menuContainer} ref={menuOpenId === episode.id ? menuRef : null}>
                           <button
@@ -209,23 +235,6 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                           )}
                         </div>
                       )}
-                      <button
-                        className={styles.episodeToggle}
-                        onClick={() => toggleEpisodeExpand(episode.id)}
-                        aria-expanded={isExpanded}
-                        aria-controls={`episode-details-${episode.id}`}
-                      >
-                        <span className={`material-symbols-outlined ${styles.expandIcon} ${isExpanded ? styles.expanded : ''}`}>
-                          expand_more
-                        </span>
-                        <div className={styles.episodeInfo}>
-                          <p className={styles.episodeTitle}>{episode.title}</p>
-                          <div className={styles.episodeMeta}>
-                            <span>{formatDateLong(episode.publishedAt)}</span>
-                            {formatDuration(episode.duration) && <span>{formatDuration(episode.duration)}</span>}
-                          </div>
-                        </div>
-                      </button>
                       <button
                         className={styles.playButton}
                         onClick={() => handlePlayEpisode(episode)}

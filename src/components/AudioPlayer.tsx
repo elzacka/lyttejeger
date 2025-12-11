@@ -21,6 +21,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const [duration, setDuration] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   // Track last save time to debounce saves
   const lastSaveRef = useRef<number>(0)
@@ -351,8 +352,23 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0
   const imageUrl = episode.imageUrl || episode.podcastImage
 
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded(prev => !prev)
+  }, [])
+
+  // Handle click on the info area - behavior depends on mobile/expanded state
+  const handleInfoClick = useCallback(() => {
+    // On mobile collapsed state, tapping info should play/pause (expected mini-player behavior)
+    // On desktop or expanded state, toggle expansion
+    if (window.innerWidth <= 640 && !isExpanded) {
+      togglePlayPause()
+    } else {
+      toggleExpanded()
+    }
+  }, [isExpanded, togglePlayPause, toggleExpanded])
+
   return (
-    <div className={styles.player}>
+    <div className={`${styles.player} ${isExpanded ? styles.expanded : styles.collapsed}`}>
       <audio
         ref={audioRef}
         src={episode.audioUrl}
@@ -368,18 +384,39 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
         onError={handleError}
       />
 
+      {/* Mini progress bar - visible in collapsed state */}
+      <div
+        className={styles.miniProgress}
+        style={{ width: `${progress}%` }}
+        aria-hidden="true"
+      />
+
       <div className={styles.container}>
-        {/* Episode info */}
-        <div className={styles.info}>
-          {imageUrl && (
+        {/* Episode info - on mobile collapsed: play/pause, otherwise: expand/collapse */}
+        <button
+          className={styles.info}
+          onClick={handleInfoClick}
+          aria-label={isExpanded ? 'Skjul kontroller' : (window.innerWidth <= 640 ? (isPlaying ? 'Pause' : 'Spill') : 'Vis kontroller')}
+          aria-expanded={isExpanded}
+        >
+          {imageUrl ? (
             <img
               src={imageUrl}
               alt={episode.podcastTitle || episode.title}
               className={styles.image}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/favicon.svg'
+                const target = e.target as HTMLImageElement
+                target.style.display = 'none'
+                const placeholder = document.createElement('div')
+                placeholder.className = `${styles.image} image-placeholder`
+                placeholder.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">podcasts</span>'
+                target.parentNode?.insertBefore(placeholder, target)
               }}
             />
+          ) : (
+            <div className={`${styles.image} image-placeholder`}>
+              <span className="material-symbols-outlined" aria-hidden="true">podcasts</span>
+            </div>
           )}
           <div className={styles.text}>
             <p className={styles.title}>{episode.title}</p>
@@ -387,19 +424,13 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               <p className={styles.podcast}>{episode.podcastTitle}</p>
             )}
           </div>
-        </div>
+          <span className={`material-symbols-outlined ${styles.expandIcon}`} aria-hidden="true">
+            {isExpanded ? 'expand_more' : 'expand_less'}
+          </span>
+        </button>
 
-        {/* Controls */}
-        <div className={styles.controls}>
-          <button
-            className={styles.skipButton}
-            onClick={skipBackward}
-            aria-label="Spol tilbake 10 sekunder"
-            title="Spol tilbake 10 sekunder"
-          >
-            <span className="material-symbols-outlined">replay_10</span>
-          </button>
-
+        {/* Mini controls - visible in collapsed state */}
+        <div className={styles.miniControls}>
           <button
             className={styles.playButton}
             onClick={togglePlayPause}
@@ -414,34 +445,70 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               <span className="material-symbols-outlined">play_arrow</span>
             )}
           </button>
-
           <button
-            className={styles.skipButton}
-            onClick={skipForward}
-            aria-label="Spol fremover 30 sekunder"
-            title="Spol fremover 30 sekunder"
+            className={styles.expandButton}
+            onClick={toggleExpanded}
+            aria-label="Vis full avspiller"
           >
-            <span className="material-symbols-outlined">forward_30</span>
+            <span className="material-symbols-outlined">expand_less</span>
           </button>
         </div>
 
-        {/* Progress bar */}
-        <div className={styles.progress}>
-          <span className={styles.time}>{formatTime(currentTime)}</span>
-          <input
-            type="range"
-            min="0"
-            max={duration || 0}
-            value={currentTime}
-            onChange={handleSeek}
-            className={styles.slider}
-            aria-label="Avspillingsposisjon"
-            tabIndex={-1}
-            style={{
-              background: `linear-gradient(to right, var(--accent) ${progress}%, var(--border) ${progress}%)`
-            }}
-          />
-          <span className={styles.time}>{formatTime(duration)}</span>
+        {/* Full controls - visible in expanded state */}
+        <div className={styles.fullControls}>
+          <div className={styles.controls}>
+            <button
+              className={styles.skipButton}
+              onClick={skipBackward}
+              aria-label="Spol tilbake 10 sekunder"
+              title="Spol tilbake 10 sekunder"
+            >
+              <span className="material-symbols-outlined">replay_10</span>
+            </button>
+
+            <button
+              className={styles.playButton}
+              onClick={togglePlayPause}
+              aria-label={isPlaying ? 'Pause' : 'Spill'}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className={`material-symbols-outlined ${styles.loading}`}>progress_activity</span>
+              ) : isPlaying ? (
+                <span className="material-symbols-outlined">pause</span>
+              ) : (
+                <span className="material-symbols-outlined">play_arrow</span>
+              )}
+            </button>
+
+            <button
+              className={styles.skipButton}
+              onClick={skipForward}
+              aria-label="Spol fremover 30 sekunder"
+              title="Spol fremover 30 sekunder"
+            >
+              <span className="material-symbols-outlined">forward_30</span>
+            </button>
+          </div>
+
+          {/* Progress bar */}
+          <div className={styles.progress}>
+            <span className={styles.time}>{formatTime(currentTime)}</span>
+            <input
+              type="range"
+              min="0"
+              max={duration || 0}
+              value={currentTime}
+              onChange={handleSeek}
+              className={styles.slider}
+              aria-label="Avspillingsposisjon"
+              tabIndex={-1}
+              style={{
+                background: `linear-gradient(to right, var(--accent) ${progress}%, var(--border) ${progress}%)`
+              }}
+            />
+            <span className={styles.time}>{formatTime(duration)}</span>
+          </div>
         </div>
 
         {/* Close button */}

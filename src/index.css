@@ -295,6 +295,20 @@ a:hover {
   border-radius: var(--radius-sm);
 }
 
+/* Image placeholder with podcast icon */
+.image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+}
+
+.image-placeholder .material-symbols-outlined {
+  font-size: 32px;
+  opacity: 0.5;
+}
+
 /* Touch-friendly interactive elements */
 /* Note: radio/checkbox excluded - they use custom styling with touch-friendly labels */
 @media (hover: none) and (pointer: coarse) {

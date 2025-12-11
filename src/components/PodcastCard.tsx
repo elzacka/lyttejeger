@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Podcast } from '../types/podcast'
 import styles from './PodcastCard.module.css'
 
@@ -8,6 +9,7 @@ interface PodcastCardProps {
 }
 
 export function PodcastCard({ podcast, searchQuery, onSelect }: PodcastCardProps) {
+  const [imageError, setImageError] = useState(false)
   const highlightText = (text: string, query: string) => {
     if (!query.trim()) return text
 
@@ -46,15 +48,19 @@ export function PodcastCard({ podcast, searchQuery, onSelect }: PodcastCardProps
       aria-label={`${podcast.title} av ${podcast.author}`}
     >
       <div className={styles.imageContainer}>
-        <img
-          src={podcast.imageUrl}
-          alt=""
-          className={styles.image}
-          loading="lazy"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = '/favicon.svg'
-          }}
-        />
+        {imageError ? (
+          <div className={`${styles.image} image-placeholder`}>
+            <span className="material-symbols-outlined" aria-hidden="true">podcasts</span>
+          </div>
+        ) : (
+          <img
+            src={podcast.imageUrl}
+            alt=""
+            className={styles.image}
+            loading="lazy"
+            onError={() => setImageError(true)}
+          />
+        )}
         {podcast.explicit && <span className={styles.explicitBadge}>E</span>}
       </div>
 

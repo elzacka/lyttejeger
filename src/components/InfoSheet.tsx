@@ -8,7 +8,7 @@ interface InfoSheetProps {
 
 export function InfoSheet({ isOpen, onClose }: InfoSheetProps) {
   return (
-    <Sheet isOpen={isOpen} onClose={onClose} title="Om Lyttejeger">
+    <Sheet isOpen={isOpen} onClose={onClose} title="Info">
       <div className={styles.links}>
         <a
           href="https://podcastindex.org/"

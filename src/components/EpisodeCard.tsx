@@ -21,6 +21,7 @@ export function EpisodeCard({
   isInQueue = false,
 }: EpisodeCardProps) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [imageError, setImageError] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -95,16 +96,18 @@ export function EpisodeCard({
       tabIndex={0}
       aria-label={`${episode.title}${episode.podcast ? ` fra ${episode.podcast.title}` : ''}`}
     >
-      {imageUrl && (
+      {imageUrl && !imageError ? (
         <img
           src={imageUrl}
           alt=""
           className={styles.image}
           loading="lazy"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = '/favicon.svg'
-          }}
+          onError={() => setImageError(true)}
         />
+      ) : (
+        <div className={`${styles.image} image-placeholder`}>
+          <span className="material-symbols-outlined" aria-hidden="true">podcasts</span>
+        </div>
       )}
 
       <div className={styles.info}>

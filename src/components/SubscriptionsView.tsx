@@ -15,8 +15,9 @@ export function SubscriptionsView({
   if (subscriptions.length === 0) {
     return (
       <div className={styles.empty}>
-        <h3>Du følger ingen podcaster</h3>
-        <p>Abonner for å se nye episoder her</p>
+        <span className="material-symbols-outlined" aria-hidden="true">bookmark_border</span>
+        <h3>Du følger ingen podcaster ennå</h3>
+        <p>Søk etter podcaster og trykk på klokken for å følge</p>
       </div>
     )
   }
@@ -24,7 +25,7 @@ export function SubscriptionsView({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Abonnementer</h2>
+        <h2 className={styles.title}>Mine podder</h2>
         <span className={styles.count}>{subscriptions.length}</span>
       </div>
       <ul className={styles.list}>
@@ -39,7 +40,12 @@ export function SubscriptionsView({
                 alt=""
                 className={styles.image}
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/favicon.svg'
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                  const placeholder = document.createElement('div')
+                  placeholder.className = `${styles.image} image-placeholder`
+                  placeholder.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">podcasts</span>'
+                  target.parentNode?.insertBefore(placeholder, target)
                 }}
               />
               <div className={styles.info}>

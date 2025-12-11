@@ -1,4 +1,4 @@
-/* AudioPlayer - Fixed position at bottom */
+/* AudioPlayer - Fixed position at bottom with collapsible mobile state */
 
 .player {
   position: fixed;
@@ -8,13 +8,22 @@
   z-index: var(--z-player);
   background: var(--bg-primary);
   border-top: 1px solid var(--border);
-  padding: var(--space-sm) var(--space-md);
-  padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
   overflow: hidden;
+  transition: height 0.2s ease;
+}
+
+/* Mini progress bar at top of player */
+.miniProgress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent);
+  transition: width 0.1s linear;
 }
 
 .container {
@@ -26,15 +35,75 @@
   align-items: center;
   box-sizing: border-box;
   width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
 }
 
-/* Episode info */
+/* Episode info - now a button for expand/collapse */
 .info {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   min-width: 0;
   overflow: hidden;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.info:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.expandIcon {
+  display: none;
+  color: var(--text-muted);
+  font-size: var(--icon-sm);
+  flex-shrink: 0;
+}
+
+/* Mini controls - shown in collapsed mobile state */
+.miniControls {
+  display: none;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Expand button in mini controls */
+.expandButton {
+  width: var(--button-sm);
+  height: var(--button-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.expandButton:hover {
+  color: var(--text-primary);
+}
+
+.expandButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.expandButton .material-symbols-outlined {
+  font-size: var(--icon-sm);
+}
+
+/* Full controls wrapper */
+.fullControls {
+  display: contents;
 }
 
 .image {
@@ -97,7 +166,7 @@
 }
 
 .playButton:active:not(:disabled) {
-  transform: scale(0.95);
+  transform: scale(0.92);
 }
 
 .playButton:focus-visible {
@@ -238,41 +307,103 @@
   font-size: var(--icon-md);
 }
 
-/* Mobile layout - stacked with proper touch targets */
+/* Mobile layout - collapsible */
 @media (max-width: 640px) {
   .player {
+    padding: 0;
+  }
+
+  /* Collapsed state (default on mobile) */
+  .player.collapsed .container {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
     padding: var(--space-sm);
     padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
   }
 
-  .container {
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto auto;
+  .player.collapsed .info {
+    flex: 1;
+  }
+
+  /* Hide expand icon in info area when collapsed - expand button is in miniControls */
+  .player.collapsed .expandIcon {
+    display: none;
+  }
+
+  .player.collapsed .miniControls {
+    display: flex;
+  }
+
+  .player.collapsed .miniControls .playButton {
+    width: var(--button-md);
+    height: var(--button-md);
+  }
+
+  .player.collapsed .miniControls .playButton .material-symbols-outlined {
+    font-size: var(--icon-md);
+  }
+
+  .player.collapsed .fullControls {
+    display: none;
+  }
+
+  .player.collapsed .miniProgress {
+    display: block;
+  }
+
+  .player.collapsed .closeButton {
+    display: none;
+  }
+
+  /* Expanded state */
+  .player.expanded .container {
+    display: flex;
+    flex-direction: column;
     gap: var(--space-sm);
+    padding: var(--space-sm);
+    padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
+    position: relative;
   }
 
-  .info {
-    grid-column: 1;
-    grid-row: 1;
+  .player.expanded .info {
+    width: 100%;
+    justify-content: flex-start;
   }
 
-  .closeButton {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: start;
+  .player.expanded .expandIcon {
+    display: block;
+    margin-left: auto;
   }
 
-  .controls {
-    grid-column: 1 / -1;
-    grid-row: 2;
+  .player.expanded .miniControls {
+    display: none;
+  }
+
+  .player.expanded .fullControls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    width: 100%;
+  }
+
+  .player.expanded .controls {
     justify-content: center;
     gap: var(--space-md);
   }
 
-  .progress {
-    grid-column: 1 / -1;
-    grid-row: 3;
-    min-width: 0;
+  .player.expanded .progress {
+    width: 100%;
+  }
+
+  .player.expanded .miniProgress {
+    display: none;
+  }
+
+  .player.expanded .closeButton {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
   }
 
   .image {
@@ -297,12 +428,12 @@
     font-size: var(--icon-lg);
   }
 
-  .playButton {
+  .player.expanded .playButton {
     width: 52px;
     height: 52px;
   }
 
-  .playButton .material-symbols-outlined {
+  .player.expanded .playButton .material-symbols-outlined {
     font-size: 28px;
   }
 
@@ -323,5 +454,24 @@
   .slider::-moz-range-thumb {
     width: 20px;
     height: 20px;
+  }
+}
+
+/* Desktop - always show full controls, hide mini elements */
+@media (min-width: 641px) {
+  .miniProgress {
+    display: none;
+  }
+
+  .miniControls {
+    display: none;
+  }
+
+  .expandIcon {
+    display: none;
+  }
+
+  .info {
+    cursor: default;
   }
 }

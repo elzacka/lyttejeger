@@ -68,15 +68,24 @@ export function EpisodeModal({ episode, onClose, onPlayEpisode }: EpisodeModalPr
         </button>
 
         <div className={styles.header}>
-          {imageUrl && (
+          {imageUrl ? (
             <img
               src={imageUrl}
               alt={`Omslagsbilde for ${episode.title}`}
               className={styles.image}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/favicon.svg'
+                const target = e.target as HTMLImageElement
+                target.style.display = 'none'
+                const placeholder = document.createElement('div')
+                placeholder.className = `${styles.image} image-placeholder`
+                placeholder.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">podcasts</span>'
+                target.parentNode?.insertBefore(placeholder, target)
               }}
             />
+          ) : (
+            <div className={`${styles.image} image-placeholder`}>
+              <span className="material-symbols-outlined" aria-hidden="true">podcasts</span>
+            </div>
           )}
           <div className={styles.headerInfo}>
             {episode.podcast && (
