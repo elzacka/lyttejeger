@@ -19,42 +19,64 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
-  const [shouldAutoPlay, setShouldAutoPlay] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
+  const [audioError, setAudioError] = useState(false)
+
+  // Track episode id for change detection
+  const currentEpisodeIdRef = useRef<string | null>(null)
+  // Track if we should auto-play when audio becomes ready
+  const shouldAutoPlayRef = useRef(false)
 
   // Track last save time to debounce saves
   const lastSaveRef = useRef<number>(0)
   const saveIntervalRef = useRef<number | null>(null)
 
-  // Reset state when episode changes
+  // Handle episode changes - single unified effect
   useEffect(() => {
-    if (!episode) return
+    const episodeId = episode?.id ?? null
 
-    // Reset state for new episode
-    setCurrentTime(0)
-    setIsPlaying(false)
-    setIsLoading(true)
-    setShouldAutoPlay(true)
-  }, [episode?.id])
-
-  // Load saved position when episode loads
-  // Note: We don't auto-play here because iOS requires user gesture
-  // The play action is triggered by user tap which calls togglePlayPause
-  useEffect(() => {
-    if (!episode || !audioRef.current) return
-
-    const loadSavedPosition = async () => {
-      const saved = await getPlaybackPosition(episode.id)
-      if (saved && !saved.completed && audioRef.current) {
-        // Resume from saved position (but not if completed)
-        audioRef.current.currentTime = saved.position
-        setCurrentTime(saved.position)
-      }
-      setIsLoading(false)
+    // If episode hasn't changed, do nothing
+    if (episodeId === currentEpisodeIdRef.current) {
+      return
     }
 
-    loadSavedPosition()
-  }, [episode])
+    // Update ref
+    currentEpisodeIdRef.current = episodeId
+
+    // If no episode, reset everything
+    if (!episode) {
+      setIsPlaying(false)
+      setCurrentTime(0)
+      setDuration(0)
+      setIsLoading(false)
+      setAudioError(false)
+      shouldAutoPlayRef.current = false
+      return
+    }
+
+    // New episode - reset state and mark for auto-play
+    setIsPlaying(false)
+    setCurrentTime(0)
+    setDuration(0)
+    setIsLoading(true)
+    setAudioError(false)
+    shouldAutoPlayRef.current = true // Auto-play when ready
+
+    // Load saved position asynchronously
+    const loadPosition = async () => {
+      try {
+        const saved = await getPlaybackPosition(episode.id)
+        if (saved && !saved.completed && audioRef.current) {
+          audioRef.current.currentTime = saved.position
+          setCurrentTime(saved.position)
+        }
+      } catch {
+        // Ignore position load errors
+      }
+    }
+
+    loadPosition()
+  }, [episode?.id, episode])
 
   // Save playback position every 5 seconds while playing
   useEffect(() => {
@@ -86,14 +108,13 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     }
   }, [episode, isPlaying, duration])
 
-  // Save position on pause/close
+  // Save position on unmount
   useEffect(() => {
     const audio = audioRef.current
     const currentEpisode = episode
     const currentDuration = duration
 
     return () => {
-      // Save on unmount if we have an episode
       if (currentEpisode && audio) {
         savePlaybackPosition(
           currentEpisode.id,
@@ -114,30 +135,29 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       title: episode.title,
       artist: episode.podcastTitle || '',
       album: episode.podcastTitle || 'Lyttejeger',
-      artwork: imageUrl ? [
-        { src: imageUrl, sizes: '96x96', type: 'image/jpeg' },
-        { src: imageUrl, sizes: '128x128', type: 'image/jpeg' },
-        { src: imageUrl, sizes: '192x192', type: 'image/jpeg' },
-        { src: imageUrl, sizes: '256x256', type: 'image/jpeg' },
-        { src: imageUrl, sizes: '384x384', type: 'image/jpeg' },
-        { src: imageUrl, sizes: '512x512', type: 'image/jpeg' }
-      ] : []
+      artwork: imageUrl
+        ? [
+            { src: imageUrl, sizes: '96x96', type: 'image/jpeg' },
+            { src: imageUrl, sizes: '128x128', type: 'image/jpeg' },
+            { src: imageUrl, sizes: '192x192', type: 'image/jpeg' },
+            { src: imageUrl, sizes: '256x256', type: 'image/jpeg' },
+            { src: imageUrl, sizes: '384x384', type: 'image/jpeg' },
+            { src: imageUrl, sizes: '512x512', type: 'image/jpeg' },
+          ]
+        : [],
     })
 
     // Set up action handlers
-    // iOS/Bluetooth: Play handler needs to handle suspended audio context
     navigator.mediaSession.setActionHandler('play', async () => {
       if (!audioRef.current) return
       try {
         await audioRef.current.play()
       } catch {
-        // Audio might be in suspended state - try to resume
-        // This can happen when screen is locked with Bluetooth connected
         try {
           audioRef.current.load()
           await audioRef.current.play()
         } catch {
-          // Still failed - user needs to unlock screen
+          // Still failed - user needs to interact
         }
       }
     })
@@ -161,7 +181,6 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     })
 
     return () => {
-      // Clean up action handlers
       navigator.mediaSession.setActionHandler('play', null)
       navigator.mediaSession.setActionHandler('pause', null)
       navigator.mediaSession.setActionHandler('seekbackward', null)
@@ -170,10 +189,9 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     }
   }, [episode, duration])
 
-  // Update Media Session playback state and position
+  // Update Media Session playback state
   useEffect(() => {
     if (!('mediaSession' in navigator)) return
-
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused'
   }, [isPlaying])
 
@@ -185,20 +203,19 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       navigator.mediaSession.setPositionState({
         duration: duration,
         playbackRate: 1,
-        position: currentTime
+        position: currentTime,
       })
     } catch {
       // setPositionState may not be supported
     }
   }, [currentTime, duration])
 
-  // Handle visibility change - helps resume audio on iOS when returning from lock screen
+  // Handle visibility change - sync UI with audio state
   useEffect(() => {
     if (!episode) return
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && audioRef.current) {
-        // Sync UI state with actual audio state when app becomes visible
         setIsPlaying(!audioRef.current.paused)
         setCurrentTime(audioRef.current.currentTime)
       }
@@ -208,6 +225,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [episode])
 
+  // Audio event handlers
   const handleLoadedMetadata = useCallback(() => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration)
@@ -225,7 +243,6 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
 
   const handlePause = useCallback(() => {
     setIsPlaying(false)
-    // Save position immediately on pause
     if (episode && audioRef.current) {
       savePlaybackPosition(
         episode.id,
@@ -237,47 +254,36 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
 
   const handleEnded = useCallback(() => {
     setIsPlaying(false)
-    // Mark as completed when ended
     if (episode && audioRef.current) {
-      savePlaybackPosition(
-        episode.id,
-        audioRef.current.duration,
-        audioRef.current.duration
-      )
+      savePlaybackPosition(episode.id, audioRef.current.duration, audioRef.current.duration)
     }
   }, [episode])
+
   const handleWaiting = useCallback(() => setIsLoading(true), [])
+
   const handleCanPlay = useCallback(() => {
     setIsLoading(false)
-    // Auto-play when audio is ready and we have a pending play request
-    // On iOS, we need to be careful - play() promise may resolve but audio may not actually play
-    if (shouldAutoPlay && audioRef.current) {
-      setShouldAutoPlay(false)
-      const audio = audioRef.current
-      audio.play()
-        .then(() => {
-          // Check if audio is actually playing after a short delay
-          // iOS sometimes resolves play() but doesn't actually start playback
-          setTimeout(() => {
-            if (audio.paused) {
-              setIsPlaying(false)
-            }
-          }, 100)
-        })
-        .catch(() => {
-          // Autoplay was blocked - user must tap play button manually
-          setIsPlaying(false)
-        })
+    setAudioError(false)
+
+    // Auto-play if this is a new episode
+    if (shouldAutoPlayRef.current && audioRef.current) {
+      shouldAutoPlayRef.current = false
+      audioRef.current.play().catch(() => {
+        // Autoplay blocked - user needs to tap play manually
+        // This is expected on iOS without user gesture
+      })
     }
-  }, [shouldAutoPlay])
+  }, [])
+
   const handleError = useCallback(() => {
     setIsLoading(false)
     setIsPlaying(false)
-    setShouldAutoPlay(false)
+    setAudioError(true)
+    shouldAutoPlayRef.current = false
   }, [])
 
   const togglePlayPause = useCallback(async () => {
-    if (!audioRef.current) return
+    if (!audioRef.current || audioError) return
 
     const audio = audioRef.current
 
@@ -290,26 +296,18 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
           audio.load()
         }
         await audio.play()
-        // Double-check that playback actually started (iOS quirk)
-        setTimeout(() => {
-          if (audio.paused && !isPlaying) {
-            // Playback didn't actually start - try loading and playing again
-            audio.load()
-            audio.play().catch(() => {})
-          }
-        }, 150)
       } catch {
-        // Play failed - might need user interaction on iOS
-        // Try loading first then playing
+        // Play failed - try loading first
         try {
           audio.load()
           await audio.play()
         } catch {
-          // Still failed - nothing more we can do
+          // Still failed - set error state
+          setAudioError(true)
         }
       }
     }
-  }, [isPlaying])
+  }, [isPlaying, audioError])
 
   const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const time = parseFloat(e.target.value)
@@ -343,25 +341,23 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  if (!episode) return null
-
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0
-  const imageUrl = episode.imageUrl || episode.podcastImage
-
   const toggleExpanded = useCallback(() => {
-    setIsExpanded(prev => !prev)
+    setIsExpanded((prev) => !prev)
   }, [])
 
-  // Handle click on the info area - behavior depends on mobile/expanded state
   const handleInfoClick = useCallback(() => {
-    // On mobile collapsed state, tapping info should play/pause (expected mini-player behavior)
-    // On desktop or expanded state, toggle expansion
     if (window.innerWidth <= 640 && !isExpanded) {
       togglePlayPause()
     } else {
       toggleExpanded()
     }
   }, [isExpanded, togglePlayPause, toggleExpanded])
+
+  // Don't render if no episode
+  if (!episode) return null
+
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0
+  const imageUrl = episode.imageUrl || episode.podcastImage
 
   return (
     <div className={`${styles.player} ${isExpanded ? styles.expanded : styles.collapsed}`}>
@@ -381,18 +377,22 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       />
 
       {/* Mini progress bar - visible in collapsed state */}
-      <div
-        className={styles.miniProgress}
-        style={{ width: `${progress}%` }}
-        aria-hidden="true"
-      />
+      <div className={styles.miniProgress} style={{ width: `${progress}%` }} aria-hidden="true" />
 
       <div className={styles.container}>
         {/* Episode info - on mobile collapsed: play/pause, otherwise: expand/collapse */}
         <button
           className={styles.info}
           onClick={handleInfoClick}
-          aria-label={isExpanded ? 'Skjul kontroller' : (window.innerWidth <= 640 ? (isPlaying ? 'Pause' : 'Spill') : 'Vis kontroller')}
+          aria-label={
+            isExpanded
+              ? 'Skjul kontroller'
+              : window.innerWidth <= 640
+                ? isPlaying
+                  ? 'Pause'
+                  : 'Spill'
+                : 'Vis kontroller'
+          }
           aria-expanded={isExpanded}
         >
           {imageUrl ? (
@@ -405,20 +405,21 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
                 target.style.display = 'none'
                 const placeholder = document.createElement('div')
                 placeholder.className = `${styles.image} image-placeholder`
-                placeholder.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">podcasts</span>'
+                placeholder.innerHTML =
+                  '<span class="material-symbols-outlined" aria-hidden="true">podcasts</span>'
                 target.parentNode?.insertBefore(placeholder, target)
               }}
             />
           ) : (
             <div className={`${styles.image} image-placeholder`}>
-              <span className="material-symbols-outlined" aria-hidden="true">podcasts</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                podcasts
+              </span>
             </div>
           )}
           <div className={styles.text}>
             <p className={styles.title}>{episode.title}</p>
-            {episode.podcastTitle && (
-              <p className={styles.podcast}>{episode.podcastTitle}</p>
-            )}
+            {episode.podcastTitle && <p className={styles.podcast}>{episode.podcastTitle}</p>}
           </div>
           <span className={`material-symbols-outlined ${styles.expandIcon}`} aria-hidden="true">
             {isExpanded ? 'expand_more' : 'expand_less'}
@@ -431,10 +432,14 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
             className={styles.playButton}
             onClick={togglePlayPause}
             aria-label={isPlaying ? 'Pause' : 'Spill'}
-            disabled={isLoading}
+            disabled={isLoading || audioError}
           >
             {isLoading ? (
-              <span className={`material-symbols-outlined ${styles.loading}`}>progress_activity</span>
+              <span className={`material-symbols-outlined ${styles.loading}`}>
+                progress_activity
+              </span>
+            ) : audioError ? (
+              <span className="material-symbols-outlined">error</span>
             ) : isPlaying ? (
               <span className="material-symbols-outlined">pause</span>
             ) : (
@@ -466,10 +471,14 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               className={styles.playButton}
               onClick={togglePlayPause}
               aria-label={isPlaying ? 'Pause' : 'Spill'}
-              disabled={isLoading}
+              disabled={isLoading || audioError}
             >
               {isLoading ? (
-                <span className={`material-symbols-outlined ${styles.loading}`}>progress_activity</span>
+                <span className={`material-symbols-outlined ${styles.loading}`}>
+                  progress_activity
+                </span>
+              ) : audioError ? (
+                <span className="material-symbols-outlined">error</span>
               ) : isPlaying ? (
                 <span className="material-symbols-outlined">pause</span>
               ) : (
@@ -500,19 +509,20 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               aria-label="Avspillingsposisjon"
               tabIndex={-1}
               style={{
-                background: `linear-gradient(to right, var(--accent) ${progress}%, var(--border) ${progress}%)`
+                background: `linear-gradient(to right, var(--accent) ${progress}%, var(--border) ${progress}%)`,
               }}
             />
             <span className={styles.time}>{formatTime(duration)}</span>
           </div>
+
+          {/* Error message */}
+          {audioError && (
+            <p className={styles.errorMessage}>Kunne ikke laste av lydfilen</p>
+          )}
         </div>
 
         {/* Close button */}
-        <button
-          className={styles.closeButton}
-          onClick={onClose}
-          aria-label="Lukk avspiller"
-        >
+        <button className={styles.closeButton} onClick={onClose} aria-label="Lukk avspiller">
           <span className="material-symbols-outlined">close</span>
         </button>
       </div>

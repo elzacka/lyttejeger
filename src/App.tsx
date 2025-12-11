@@ -9,6 +9,7 @@ import { QueueView } from './components/QueueView'
 import { SubscriptionsView } from './components/SubscriptionsView'
 import { RecentEpisodes } from './components/RecentEpisodes'
 import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { BottomNav, type NavItem } from './components/BottomNav'
 import { useSearch } from './hooks/useSearch'
 import { useQueue } from './hooks/useQueue'
@@ -244,7 +245,9 @@ function App() {
           queueCount={queueLength}
           subscriptionCount={subscriptionCount}
         />
-        <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
+        <ErrorBoundary>
+          <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
+        </ErrorBoundary>
       </div>
     )
   }
@@ -360,7 +363,9 @@ function App() {
         queueCount={queueLength}
         subscriptionCount={subscriptionCount}
       />
-      <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
+      <ErrorBoundary>
+        <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
+      </ErrorBoundary>
     </div>
   )
 }

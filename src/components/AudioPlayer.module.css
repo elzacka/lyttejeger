@@ -307,6 +307,16 @@
   font-size: var(--icon-md);
 }
 
+/* Error message */
+.errorMessage {
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--error-color);
+  text-align: center;
+  margin: 0;
+  padding: var(--space-xs) 0;
+}
+
 /* Mobile layout - collapsible */
 @media (max-width: 640px) {
   .player {
