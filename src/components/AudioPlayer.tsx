@@ -253,14 +253,24 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const handleCanPlay = useCallback(() => {
     setIsLoading(false)
     // Auto-play when audio is ready and we have a pending play request
-    // This works on iOS because it's triggered by the loadeddata/canplay event
-    // which follows the user's tap action chain
+    // On iOS, we need to be careful - play() promise may resolve but audio may not actually play
     if (shouldAutoPlay && audioRef.current) {
       setShouldAutoPlay(false)
-      audioRef.current.play().catch(() => {
-        // Autoplay was blocked - user must tap play button manually
-        setIsPlaying(false)
-      })
+      const audio = audioRef.current
+      audio.play()
+        .then(() => {
+          // Check if audio is actually playing after a short delay
+          // iOS sometimes resolves play() but doesn't actually start playback
+          setTimeout(() => {
+            if (audio.paused) {
+              setIsPlaying(false)
+            }
+          }, 100)
+        })
+        .catch(() => {
+          // Autoplay was blocked - user must tap play button manually
+          setIsPlaying(false)
+        })
     }
   }, [shouldAutoPlay])
   const handleError = useCallback(() => {
@@ -269,13 +279,38 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     setShouldAutoPlay(false)
   }, [])
 
-  const togglePlayPause = useCallback(() => {
+  const togglePlayPause = useCallback(async () => {
     if (!audioRef.current) return
 
+    const audio = audioRef.current
+
     if (isPlaying) {
-      audioRef.current.pause()
+      audio.pause()
     } else {
-      audioRef.current.play().catch(() => {})
+      try {
+        // On iOS, we may need to load the audio first if it was suspended
+        if (audio.readyState < 2) {
+          audio.load()
+        }
+        await audio.play()
+        // Double-check that playback actually started (iOS quirk)
+        setTimeout(() => {
+          if (audio.paused && !isPlaying) {
+            // Playback didn't actually start - try loading and playing again
+            audio.load()
+            audio.play().catch(() => {})
+          }
+        }, 150)
+      } catch {
+        // Play failed - might need user interaction on iOS
+        // Try loading first then playing
+        try {
+          audio.load()
+          await audio.play()
+        } catch {
+          // Still failed - nothing more we can do
+        }
+      }
     }
   }, [isPlaying])
 
