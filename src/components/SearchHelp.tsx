@@ -61,6 +61,7 @@ export function SearchHelp() {
     <div className={styles.container} ref={containerRef}>
       <button
         ref={triggerRef}
+        type="button"
         className={styles.trigger}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}

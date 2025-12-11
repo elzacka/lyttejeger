@@ -14,7 +14,7 @@
 .title {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-lg);
+  font-size: var(--font-base);
   font-weight: 500;
   color: var(--text-primary);
 }
@@ -126,6 +126,45 @@
   gap: var(--space-sm);
 }
 
+/* Drag handle */
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--button-sm);
+  height: var(--button-lg);
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: grab;
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragHandle:hover {
+  color: var(--text-primary);
+}
+
+.dragHandle .material-symbols-outlined {
+  font-size: var(--icon-md);
+}
+
+/* Drag states */
+.item.dragging {
+  opacity: 0.5;
+  background: var(--accent-alpha);
+}
+
+.item.dragOver {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-alpha);
+}
+
 .imageContainer {
   width: var(--image-sm);
   height: var(--image-sm);
@@ -187,14 +226,8 @@
   flex-shrink: 0;
 }
 
-.actionsDesktop {
+.desktopOnly {
   display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.actionsMobile {
-  display: none;
 }
 
 .actionButton {
@@ -312,10 +345,6 @@
     margin-bottom: var(--space-sm);
   }
 
-  .title {
-    font-size: var(--font-base);
-  }
-
   .count {
     margin-bottom: var(--space-sm);
   }
@@ -343,14 +372,17 @@
     height: var(--image-xs);
   }
 
-  .actionsDesktop {
+  .desktopOnly {
     display: none;
   }
 
-  .actionsMobile {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
+  .dragHandle {
+    width: var(--button-sm);
+    height: var(--button-md);
+  }
+
+  .dragHandle .material-symbols-outlined {
+    font-size: var(--icon-sm);
   }
 
   .content {

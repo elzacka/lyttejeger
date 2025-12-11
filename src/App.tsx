@@ -168,17 +168,9 @@ function App() {
     })
   }, [])
 
-  const handleMoveUp = useCallback((index: number) => {
-    if (index > 0) {
-      moveItem(index, index - 1)
-    }
+  const handleReorder = useCallback((fromIndex: number, toIndex: number) => {
+    moveItem(fromIndex, toIndex)
   }, [moveItem])
-
-  const handleMoveDown = useCallback((index: number) => {
-    if (index < queue.length - 1) {
-      moveItem(index, index + 1)
-    }
-  }, [moveItem, queue.length])
 
   // Subscription handlers
   const handleSubscribe = useCallback(() => {
@@ -333,8 +325,7 @@ function App() {
               onPlay={handlePlayFromQueue}
               onRemove={removeFromQueue}
               onClear={clearQueue}
-              onMoveUp={handleMoveUp}
-              onMoveDown={handleMoveDown}
+              onReorder={handleReorder}
             />
           ) : activeTab === 'subscriptions' ? (
             <SubscriptionsView
