@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import type { EpisodeWithPodcast } from '../utils/search'
-import { formatDuration, formatDate } from '../utils/search'
+import { formatDuration, formatDateLong } from '../utils/search'
 import styles from './EpisodeCard.module.css'
 
 interface EpisodeCardProps {
@@ -88,99 +88,88 @@ export function EpisodeCard({
 
   return (
     <article
-      className={styles.card}
+      className={`${styles.item} ${menuOpen ? styles.menuOpen : ''}`}
       role="listitem"
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       aria-label={`${episode.title}${episode.podcast ? ` fra ${episode.podcast.title}` : ''}`}
     >
-      <div className={styles.imageContainer}>
-        {imageUrl && (
-          <img
-            src={imageUrl}
-            alt=""
-            className={styles.image}
-            loading="lazy"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/favicon.svg'
-            }}
-          />
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt=""
+          className={styles.image}
+          loading="lazy"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/favicon.svg'
+          }}
+        />
+      )}
+
+      <div className={styles.info}>
+        {episode.podcast && (
+          <span className={styles.podcastName}>{episode.podcast.title}</span>
+        )}
+        <span className={styles.episodeTitle}>{episode.title}</span>
+        <div className={styles.meta}>
+          <span>{formatDateLong(episode.publishedAt)}</span>
+          {formatDuration(episode.duration) && (
+            <span>{formatDuration(episode.duration)}</span>
+          )}
+          {isInQueue && (
+            <span className={styles.inQueue}>I kø</span>
+          )}
+        </div>
+      </div>
+
+      <div className={styles.actions}>
+        {(onAddToQueue || onPlayNext) && (
+          <div className={styles.menuContainer}>
+            <button
+              ref={buttonRef}
+              className={styles.menuButton}
+              onClick={handleMenuClick}
+              aria-label="Flere valg"
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
+            >
+              <span className="material-symbols-outlined">more_vert</span>
+            </button>
+
+            {menuOpen && (
+              <div ref={menuRef} className={styles.menuDropdown} role="menu">
+                {onPlayNext && (
+                  <button
+                    className={styles.menuItem}
+                    onClick={handlePlayNext}
+                    role="menuitem"
+                  >
+                    <span className="material-symbols-outlined">playlist_play</span>
+                    Spill neste
+                  </button>
+                )}
+                {onAddToQueue && !isInQueue && (
+                  <button
+                    className={styles.menuItem}
+                    onClick={handleAddToQueue}
+                    role="menuitem"
+                  >
+                    <span className="material-symbols-outlined">queue_music</span>
+                    Legg til i kø
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         )}
         <button
-          className={styles.playOverlay}
+          className={styles.playButton}
           onClick={playEpisode}
           aria-label={`Spill ${episode.title}`}
         >
           <span className="material-symbols-outlined">play_arrow</span>
         </button>
-      </div>
-
-      <div className={styles.content}>
-        <div className={styles.podcastInfo}>
-          {episode.podcast && (
-            <span className={styles.podcastName}>{episode.podcast.title}</span>
-          )}
-        </div>
-
-        <div className={styles.titleRow}>
-          {(onAddToQueue || onPlayNext) && (
-            <div className={styles.actions}>
-              <button
-                ref={buttonRef}
-                className={styles.menuButton}
-                onClick={handleMenuClick}
-                aria-label="Flere valg"
-                aria-expanded={menuOpen}
-                aria-haspopup="menu"
-              >
-                <span className="material-symbols-outlined">more_vert</span>
-              </button>
-
-              {menuOpen && (
-                <div ref={menuRef} className={styles.menu} role="menu">
-                  {onPlayNext && (
-                    <button
-                      className={styles.menuItem}
-                      onClick={handlePlayNext}
-                      role="menuitem"
-                    >
-                      <span className="material-symbols-outlined">queue_play_next</span>
-                      Spill neste
-                    </button>
-                  )}
-                  {onAddToQueue && !isInQueue && (
-                    <button
-                      className={styles.menuItem}
-                      onClick={handleAddToQueue}
-                      role="menuitem"
-                    >
-                      <span className="material-symbols-outlined">playlist_add</span>
-                      Legg i kø
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-          <h3 className={styles.title}>{episode.title}</h3>
-        </div>
-
-        <div className={styles.meta}>
-          <span className={styles.date}>{formatDate(episode.publishedAt)}</span>
-          {formatDuration(episode.duration) && (
-            <>
-              <span className={styles.separator}>•</span>
-              <span className={styles.duration}>{formatDuration(episode.duration)}</span>
-            </>
-          )}
-          {isInQueue && (
-            <>
-              <span className={styles.separator}>•</span>
-              <span className={styles.inQueue}>I kø</span>
-            </>
-          )}
-        </div>
       </div>
     </article>
   )

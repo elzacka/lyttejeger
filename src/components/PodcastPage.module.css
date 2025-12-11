@@ -272,7 +272,7 @@
 
 .episodeItem {
   position: relative;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border-radius: var(--radius-md);
   transition: background var(--transition-fast);
   z-index: 0;
@@ -458,7 +458,7 @@
   border: none;
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   text-align: left;
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
@@ -488,7 +488,7 @@
 }
 
 .menuItem .material-symbols-outlined {
-  font-size: var(--icon-md);
+  font-size: var(--icon-sm);
 }
 
 .episodeDetails {

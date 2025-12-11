@@ -80,7 +80,7 @@
   font-size: var(--font-sm);
 }
 
-/* Skeleton loading */
+/* Skeleton loading - matches RecentEpisodes-style items */
 .skeletonList {
   display: flex;
   flex-direction: column;
@@ -88,26 +88,27 @@
 }
 
 .skeletonCard {
-  display: grid;
-  grid-template-columns: 48px 1fr;
-  gap: var(--space-md);
-  padding: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
   background: var(--bg-secondary);
-  border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
 
 .skeletonImage {
-  width: 48px;
-  height: 48px;
+  width: var(--image-sm);
+  height: var(--image-sm);
   border-radius: var(--radius-sm);
+  flex-shrink: 0;
 }
 
 .skeletonContent {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: var(--space-xs);
+  gap: var(--space-2xs);
 }
 
 .skeletonPodcast {
@@ -123,13 +124,19 @@
 }
 
 .skeletonText {
-  height: 12px;
-  width: 80%;
-  border-radius: var(--radius-sm);
+  display: none;
 }
 
 .skeletonMeta {
   height: 10px;
-  width: 20%;
+  width: 30%;
   border-radius: var(--radius-sm);
+}
+
+/* Mobile skeleton */
+@media (max-width: 640px) {
+  .skeletonImage {
+    width: var(--image-xs);
+    height: var(--image-xs);
+  }
 }
