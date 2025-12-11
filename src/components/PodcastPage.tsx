@@ -16,9 +16,10 @@ interface PodcastPageProps {
   isSubscribed?: boolean
   onSubscribe?: () => void
   onUnsubscribe?: () => void
+  onBack?: () => void
 }
 
-export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, isInQueue, isSubscribed, onSubscribe, onUnsubscribe }: PodcastPageProps) {
+export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, isInQueue, isSubscribed, onSubscribe, onUnsubscribe, onBack }: PodcastPageProps) {
   const [episodes, setEpisodes] = useState<Episode[]>([])
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false)
   const [episodesError, setEpisodesError] = useState<string | null>(null)
@@ -27,7 +28,7 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
   const [imageError, setImageError] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Close menu when clicking outside
+  // Close menu when clicking outside or pressing Escape
   useEffect(() => {
     if (!menuOpenId) return
 
@@ -37,8 +38,18 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
       }
     }
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuOpenId(null)
+      }
+    }
+
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [menuOpenId])
 
   useEffect(() => {
@@ -84,10 +95,21 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
+        {onBack && (
+          <button
+            className={styles.backButton}
+            onClick={onBack}
+            aria-label="Tilbake"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+        )}
         <div className={styles.logo}>
           <span className={`material-symbols-outlined ${styles.logoIcon}`} aria-hidden="true">earbuds</span>
           <span className={styles.logoText}>Lyttejeger</span>
         </div>
+        {/* Spacer to center logo when back button is present */}
+        {onBack && <div className={styles.headerSpacer} />}
       </header>
 
       <div className={styles.content}>
@@ -207,13 +229,34 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                               <span className="material-symbols-outlined">more_vert</span>
                             </button>
                             {menuOpenId === episode.id && (
-                              <div className={styles.menuDropdown}>
+                              <div
+                                className={styles.menuDropdown}
+                                role="menu"
+                                onKeyDown={(e) => {
+                                  const dropdown = e.currentTarget
+                                  const items = dropdown.querySelectorAll('button:not(:disabled)')
+                                  if (!items?.length) return
+                                  const currentIndex = Array.from(items).findIndex(
+                                    (item) => item === document.activeElement
+                                  )
+                                  if (e.key === 'ArrowDown') {
+                                    e.preventDefault()
+                                    const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0
+                                    ;(items[nextIndex] as HTMLElement).focus()
+                                  } else if (e.key === 'ArrowUp') {
+                                    e.preventDefault()
+                                    const prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1
+                                    ;(items[prevIndex] as HTMLElement).focus()
+                                  }
+                                }}
+                              >
                                 <button
                                   className={styles.menuItem}
                                   onClick={() => {
                                     onPlayNext?.(episode, podcast.title, podcast.imageUrl)
                                     setMenuOpenId(null)
                                   }}
+                                  role="menuitem"
                                 >
                                   <span className="material-symbols-outlined">playlist_play</span>
                                   Spill neste
@@ -225,6 +268,7 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                                     setMenuOpenId(null)
                                   }}
                                   disabled={isInQueue?.(episode.id)}
+                                  role="menuitem"
                                 >
                                   <span className="material-symbols-outlined">queue_music</span>
                                   {isInQueue?.(episode.id) ? 'I køen' : 'Legg til i kø'}

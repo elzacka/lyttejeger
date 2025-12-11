@@ -15,7 +15,8 @@ import { useSearch } from './hooks/useSearch'
 import { useQueue } from './hooks/useQueue'
 import { useSubscriptions } from './hooks/useSubscriptions'
 import { allLanguages } from './data/languages'
-import { getCategories, isConfigured } from './services/podcastIndex'
+import { getCategories, isConfigured, getPodcastByFeedId } from './services/podcastIndex'
+import { transformFeed } from './services/podcastTransform'
 import { translateCategory } from './utils/categoryTranslations'
 import type { FilterOption, Podcast, Episode } from './types/podcast'
 import type { EpisodeWithPodcast } from './utils/search'
@@ -40,6 +41,7 @@ function App() {
   const [categories, setCategories] = useState<FilterOption[]>(fallbackCategories)
   const [playingEpisode, setPlayingEpisode] = useState<PlayingEpisode | null>(null)
   const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null)
+  const [previousActiveTab, setPreviousActiveTab] = useState<'home' | 'subscriptions'>('home')
 
   // Fetch categories from API on mount
   useEffect(() => {
@@ -150,7 +152,28 @@ function App() {
   }, [playNext])
 
   const handleSelectPodcast = useCallback((podcast: Podcast) => {
+    // Track which tab user came from for back navigation
+    setPreviousActiveTab(activeTab === 'subscriptions' ? 'subscriptions' : 'home')
     setSelectedPodcast(podcast)
+  }, [activeTab])
+
+  const handleBackFromPodcast = useCallback(() => {
+    setSelectedPodcast(null)
+  }, [])
+
+  // Navigate to podcast by ID (from episode modal)
+  const handleSelectPodcastById = useCallback(async (podcastId: string) => {
+    try {
+      const feedId = parseInt(podcastId)
+      if (isNaN(feedId)) return
+
+      const res = await getPodcastByFeedId(feedId)
+      const podcast = transformFeed(res.feed)
+      setPreviousActiveTab('home')
+      setSelectedPodcast(podcast)
+    } catch {
+      // Failed to fetch podcast - ignore
+    }
   }, [])
 
   // Queue handlers
@@ -238,9 +261,10 @@ function App() {
           isSubscribed={isSubscribed(selectedPodcast.id)}
           onSubscribe={handleSubscribe}
           onUnsubscribe={handleUnsubscribe}
+          onBack={handleBackFromPodcast}
         />
         <BottomNav
-          activeItem={null}
+          activeItem={previousActiveTab}
           onNavigate={handleNavigation}
           queueCount={queueLength}
           subscriptionCount={subscriptionCount}
@@ -352,6 +376,7 @@ function App() {
               onAddToQueue={handleAddToQueue}
               onPlayNext={handlePlayNext}
               isInQueue={isInQueue}
+              onSelectPodcast={handleSelectPodcastById}
             />
           )}
         </section>

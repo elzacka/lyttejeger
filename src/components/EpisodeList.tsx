@@ -13,6 +13,7 @@ interface EpisodeListProps {
   onAddToQueue?: (episode: EpisodeWithPodcast) => void
   onPlayNext?: (episode: EpisodeWithPodcast) => void
   isInQueue?: (episodeId: string) => boolean
+  onSelectPodcast?: (podcastId: string) => void
 }
 
 function SkeletonCard() {
@@ -37,6 +38,7 @@ export function EpisodeList({
   onAddToQueue,
   onPlayNext,
   isInQueue,
+  onSelectPodcast,
 }: EpisodeListProps) {
   const [selectedEpisode, setSelectedEpisode] = useState<EpisodeWithPodcast | null>(null)
 
@@ -92,6 +94,7 @@ export function EpisodeList({
           episode={selectedEpisode}
           onClose={() => setSelectedEpisode(null)}
           onPlayEpisode={onPlayEpisode}
+          onSelectPodcast={onSelectPodcast}
         />
       )}
     </div>

@@ -203,6 +203,21 @@ export async function getEpisodesByFeedId(feedId: number, max = 20): Promise<Epi
   })
 }
 
+export interface PodcastByIdResponse {
+  status: string
+  feed: PodcastIndexFeed
+  query: {
+    id: string
+  }
+  description: string
+}
+
+export async function getPodcastByFeedId(feedId: number): Promise<PodcastByIdResponse> {
+  return apiRequest<PodcastByIdResponse>('/podcasts/byfeedid', {
+    id: feedId.toString()
+  })
+}
+
 export interface PersonSearchOptions {
   max?: number
   fulltext?: boolean

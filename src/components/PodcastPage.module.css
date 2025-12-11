@@ -14,11 +14,43 @@
   z-index: var(--z-sticky);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   padding: var(--space-sm) var(--space-md);
   padding-top: calc(var(--space-sm) + env(safe-area-inset-top, 0px));
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border);
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--button-lg);
+  height: var(--button-lg);
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.backButton:hover {
+  background: var(--bg-hover);
+}
+
+.backButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.backButton .material-symbols-outlined {
+  font-size: var(--icon-md);
+}
+
+.headerSpacer {
+  width: var(--button-lg);
 }
 
 .logo {

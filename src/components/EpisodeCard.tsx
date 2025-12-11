@@ -27,7 +27,7 @@ export function EpisodeCard({
 
   const imageUrl = episode.imageUrl || episode.podcast?.imageUrl
 
-  // Close menu when clicking outside
+  // Close menu when clicking outside or pressing Escape
   useEffect(() => {
     if (!menuOpen) return
 
@@ -42,8 +42,19 @@ export function EpisodeCard({
       }
     }
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuOpen(false)
+        buttonRef.current?.focus()
+      }
+    }
+
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [menuOpen])
 
   const playEpisode = (e: React.MouseEvent) => {
@@ -141,7 +152,27 @@ export function EpisodeCard({
             </button>
 
             {menuOpen && (
-              <div ref={menuRef} className={styles.menuDropdown} role="menu">
+              <div
+                ref={menuRef}
+                className={styles.menuDropdown}
+                role="menu"
+                onKeyDown={(e) => {
+                  const items = menuRef.current?.querySelectorAll('[role="menuitem"]')
+                  if (!items?.length) return
+                  const currentIndex = Array.from(items).findIndex(
+                    (item) => item === document.activeElement
+                  )
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault()
+                    const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0
+                    ;(items[nextIndex] as HTMLElement).focus()
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault()
+                    const prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1
+                    ;(items[prevIndex] as HTMLElement).focus()
+                  }
+                }}
+              >
                 {onPlayNext && (
                   <button
                     className={styles.menuItem}

@@ -10,14 +10,19 @@ interface EpisodeModalProps {
   episode: EpisodeWithPodcast
   onClose: () => void
   onPlayEpisode: (episode: PlayingEpisode) => void
+  onSelectPodcast?: (podcastId: string) => void
 }
 
-export function EpisodeModal({ episode, onClose, onPlayEpisode }: EpisodeModalProps) {
+export function EpisodeModal({ episode, onClose, onPlayEpisode, onSelectPodcast }: EpisodeModalProps) {
   const focusTrapRef = useFocusTrap<HTMLDivElement>()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null)
   const [showTranscript, setShowTranscript] = useState(false)
 
   useEffect(() => {
+    // Save the currently focused element to restore later
+    previouslyFocusedRef.current = document.activeElement as HTMLElement
+
     closeButtonRef.current?.focus()
     document.body.style.overflow = 'hidden'
 
@@ -29,6 +34,8 @@ export function EpisodeModal({ episode, onClose, onPlayEpisode }: EpisodeModalPr
     return () => {
       document.body.style.overflow = ''
       document.removeEventListener('keydown', handleEscape)
+      // Restore focus to previously focused element
+      previouslyFocusedRef.current?.focus()
     }
   }, [onClose])
 
@@ -89,7 +96,19 @@ export function EpisodeModal({ episode, onClose, onPlayEpisode }: EpisodeModalPr
           )}
           <div className={styles.headerInfo}>
             {episode.podcast && (
-              <p className={styles.podcastName}>{episode.podcast.title}</p>
+              onSelectPodcast ? (
+                <button
+                  className={styles.podcastLink}
+                  onClick={() => {
+                    onSelectPodcast(episode.podcast!.id)
+                    onClose()
+                  }}
+                >
+                  {episode.podcast.title}
+                </button>
+              ) : (
+                <p className={styles.podcastName}>{episode.podcast.title}</p>
+              )
             )}
             <h2 id="episode-modal-title" className={styles.title}>
               {episode.title}

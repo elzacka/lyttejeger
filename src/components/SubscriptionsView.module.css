@@ -1,4 +1,4 @@
-/* SubscriptionsView - Clean list with proper touch targets */
+/* SubscriptionsView - Clean list with swipe-to-unsubscribe */
 
 .container {
   padding: var(--space-md);
@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
 }
 
 .title {
@@ -34,6 +34,13 @@
   border-radius: var(--radius-full);
 }
 
+.swipeHint {
+  margin: 0 0 var(--space-sm) 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+}
+
 .list {
   list-style: none;
   margin: 0;
@@ -44,16 +51,38 @@
 }
 
 .item {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+
+/* Swipe action - revealed on swipe left */
+.swipeAction {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--error-color);
+}
+
+/* Swipeable content */
+.swipeContent {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-sm);
   background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-  transition: background var(--transition-fast);
+  transition: transform 0.15s ease-out;
+  position: relative;
+  z-index: 1;
 }
 
-.item:hover {
+.swipeContent:hover {
   background: var(--bg-hover);
 }
 
@@ -110,10 +139,33 @@
   text-overflow: ellipsis;
 }
 
+/* Unsubscribe button in swipe action */
 .unsubscribeButton {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.unsubscribeButton:focus-visible {
+  outline: 2px solid white;
+  outline-offset: -4px;
+}
+
+.unsubscribeButton .material-symbols-outlined {
+  font-size: var(--icon-lg);
+}
+
+/* Desktop unsubscribe button */
+.desktopUnsubscribe {
+  display: none;
   width: var(--button-lg);
   height: var(--button-lg);
-  display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
@@ -125,17 +177,17 @@
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.unsubscribeButton:hover {
+.desktopUnsubscribe:hover {
   background: rgba(var(--error-rgb), 0.1);
   color: var(--error-color);
 }
 
-.unsubscribeButton:focus-visible {
+.desktopUnsubscribe:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.unsubscribeButton .material-symbols-outlined {
+.desktopUnsubscribe .material-symbols-outlined {
   font-size: var(--icon-md);
 }
 
@@ -177,7 +229,7 @@
   }
 
   .header {
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-xs);
   }
 
   .title {
@@ -188,7 +240,7 @@
     gap: var(--space-xs);
   }
 
-  .item {
+  .swipeContent {
     padding: var(--space-sm);
   }
 
@@ -203,5 +255,20 @@
 
   .author {
     font-size: var(--font-2xs);
+  }
+}
+
+/* Desktop - show unsubscribe button, hide swipe hint */
+@media (min-width: 641px) {
+  .swipeHint {
+    display: none;
+  }
+
+  .desktopUnsubscribe {
+    display: flex;
+  }
+
+  .swipeAction {
+    display: none;
   }
 }
