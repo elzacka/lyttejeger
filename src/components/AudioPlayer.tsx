@@ -15,7 +15,6 @@ interface AudioPlayerProps {
 
 export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
-  const prevEpisodeIdRef = useRef<string | undefined>(undefined)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -27,19 +26,16 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const lastSaveRef = useRef<number>(0)
   const saveIntervalRef = useRef<number | null>(null)
 
-  // Reset and prepare for auto-play when episode changes
-  const episodeId = episode?.id
-  if (episodeId !== prevEpisodeIdRef.current) {
-    prevEpisodeIdRef.current = episodeId
-    if (episode) {
-      // These will be set before render completes
-      if (currentTime !== 0) setCurrentTime(0)
-      if (isPlaying !== false) setIsPlaying(false)
-      if (isLoading !== true) setIsLoading(true)
-      // Mark that we should auto-play once audio is ready
-      if (!shouldAutoPlay) setShouldAutoPlay(true)
-    }
-  }
+  // Reset state when episode changes
+  useEffect(() => {
+    if (!episode) return
+
+    // Reset state for new episode
+    setCurrentTime(0)
+    setIsPlaying(false)
+    setIsLoading(true)
+    setShouldAutoPlay(true)
+  }, [episode?.id])
 
   // Load saved position when episode loads
   // Note: We don't auto-play here because iOS requires user gesture
