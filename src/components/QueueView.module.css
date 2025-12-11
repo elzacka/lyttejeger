@@ -121,18 +121,9 @@
 }
 
 .topRow {
-  display: grid;
-  grid-template-columns: 24px var(--image-sm) 1fr auto auto;
+  display: flex;
   align-items: center;
   gap: var(--space-sm);
-}
-
-.position {
-  font-family: var(--font-mono);
-  font-size: var(--font-xs);
-  font-weight: 500;
-  color: var(--text-muted);
-  text-align: center;
 }
 
 .imageContainer {
@@ -150,6 +141,7 @@
 }
 
 .content {
+  flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -187,7 +179,14 @@
   color: var(--text-muted);
 }
 
-/* Actions */
+/* Actions wrapper - matches RecentEpisodes pattern */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
 .actionsDesktop {
   display: flex;
   align-items: center;
@@ -232,23 +231,26 @@
   font-size: var(--icon-md);
 }
 
+/* Ghost-style play button - matches RecentEpisodes */
 .playButton {
+  width: var(--button-md);
+  height: var(--button-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--button-lg);
-  height: var(--button-lg);
-  background: var(--accent);
-  border: none;
+  background: transparent;
+  border: 1.5px solid var(--border);
   border-radius: 50%;
-  color: white;
+  color: var(--text-muted);
   cursor: pointer;
   flex-shrink: 0;
   transition: all var(--transition-fast);
 }
 
 .playButton:hover {
-  background: var(--accent-hover);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
 }
 
 .playButton:active {
@@ -261,7 +263,7 @@
 }
 
 .playButton .material-symbols-outlined {
-  font-size: var(--icon-lg);
+  font-size: var(--icon-md);
 }
 
 /* Empty state */
@@ -333,12 +335,7 @@
   }
 
   .topRow {
-    grid-template-columns: var(--image-xs) 1fr auto;
-    gap: var(--space-sm);
-  }
-
-  .position {
-    display: none;
+    flex-wrap: wrap;
   }
 
   .imageContainer {
@@ -353,11 +350,7 @@
   .actionsMobile {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
     gap: var(--space-xs);
-    margin-top: var(--space-sm);
-    padding-top: var(--space-sm);
-    border-top: 1px solid var(--border-light);
   }
 
   .content {

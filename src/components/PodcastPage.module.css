@@ -321,6 +321,13 @@
   padding: var(--space-sm);
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
 /* Ghost-style play button - less dominant, content-first design */
 .playButton {
   width: var(--button-md);
@@ -404,16 +411,6 @@
   font-family: var(--font-mono);
   font-size: var(--font-xs);
   color: var(--text-muted);
-}
-
-.expandIcon {
-  color: var(--text-muted);
-  transition: transform var(--transition-fast);
-  flex-shrink: 0;
-}
-
-.expandIcon.expanded {
-  transform: rotate(180deg);
 }
 
 /* Context menu */

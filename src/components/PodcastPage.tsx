@@ -187,9 +187,6 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                         aria-expanded={isExpanded}
                         aria-controls={`episode-details-${episode.id}`}
                       >
-                        <span className={`material-symbols-outlined ${styles.expandIcon} ${isExpanded ? styles.expanded : ''}`}>
-                          expand_more
-                        </span>
                         <div className={styles.episodeInfo}>
                           <p className={styles.episodeTitle}>{episode.title}</p>
                           <div className={styles.episodeMeta}>
@@ -198,50 +195,52 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                           </div>
                         </div>
                       </button>
-                      {onAddToQueue && (
-                        <div className={styles.menuContainer} ref={menuOpenId === episode.id ? menuRef : null}>
-                          <button
-                            className={styles.menuButton}
-                            onClick={() => setMenuOpenId(menuOpenId === episode.id ? null : episode.id)}
-                            aria-label="Flere valg"
-                            aria-expanded={menuOpenId === episode.id}
-                          >
-                            <span className="material-symbols-outlined">more_vert</span>
-                          </button>
-                          {menuOpenId === episode.id && (
-                            <div className={styles.menuDropdown}>
-                              <button
-                                className={styles.menuItem}
-                                onClick={() => {
-                                  onPlayNext?.(episode, podcast.title, podcast.imageUrl)
-                                  setMenuOpenId(null)
-                                }}
-                              >
-                                <span className="material-symbols-outlined">playlist_play</span>
-                                Spill neste
-                              </button>
-                              <button
-                                className={styles.menuItem}
-                                onClick={() => {
-                                  onAddToQueue(episode, podcast.title, podcast.imageUrl)
-                                  setMenuOpenId(null)
-                                }}
-                                disabled={isInQueue?.(episode.id)}
-                              >
-                                <span className="material-symbols-outlined">queue_music</span>
-                                {isInQueue?.(episode.id) ? 'I køen' : 'Legg til i kø'}
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      <button
-                        className={styles.playButton}
-                        onClick={() => handlePlayEpisode(episode)}
-                        aria-label={`Spill ${episode.title}`}
-                      >
-                        <span className="material-symbols-outlined">play_arrow</span>
-                      </button>
+                      <div className={styles.actions}>
+                        {onAddToQueue && (
+                          <div className={styles.menuContainer} ref={menuOpenId === episode.id ? menuRef : null}>
+                            <button
+                              className={styles.menuButton}
+                              onClick={() => setMenuOpenId(menuOpenId === episode.id ? null : episode.id)}
+                              aria-label="Flere valg"
+                              aria-expanded={menuOpenId === episode.id}
+                            >
+                              <span className="material-symbols-outlined">more_vert</span>
+                            </button>
+                            {menuOpenId === episode.id && (
+                              <div className={styles.menuDropdown}>
+                                <button
+                                  className={styles.menuItem}
+                                  onClick={() => {
+                                    onPlayNext?.(episode, podcast.title, podcast.imageUrl)
+                                    setMenuOpenId(null)
+                                  }}
+                                >
+                                  <span className="material-symbols-outlined">playlist_play</span>
+                                  Spill neste
+                                </button>
+                                <button
+                                  className={styles.menuItem}
+                                  onClick={() => {
+                                    onAddToQueue(episode, podcast.title, podcast.imageUrl)
+                                    setMenuOpenId(null)
+                                  }}
+                                  disabled={isInQueue?.(episode.id)}
+                                >
+                                  <span className="material-symbols-outlined">queue_music</span>
+                                  {isInQueue?.(episode.id) ? 'I køen' : 'Legg til i kø'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <button
+                          className={styles.playButton}
+                          onClick={() => handlePlayEpisode(episode)}
+                          aria-label={`Spill ${episode.title}`}
+                        >
+                          <span className="material-symbols-outlined">play_arrow</span>
+                        </button>
+                      </div>
                     </div>
                     {isExpanded && (
                       <div

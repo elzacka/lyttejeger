@@ -176,8 +176,6 @@ export function QueueView({
             {/* Swipeable content */}
             <div className={styles.swipeContent}>
               <div className={styles.topRow}>
-                <div className={styles.position}>{index + 1}</div>
-
                 <div className={styles.imageContainer}>
                   {(item.imageUrl || item.podcastImage) ? (
                     <img
@@ -208,60 +206,62 @@ export function QueueView({
                   )}
                 </div>
 
-                {/* Desktop actions - hidden on mobile */}
-                <div className={styles.actionsDesktop}>
+                <div className={styles.actions}>
+                  {/* Desktop actions - move and remove */}
+                  <div className={styles.actionsDesktop}>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => onMoveUp(index)}
+                      disabled={index === 0}
+                      aria-label="Flytt opp"
+                    >
+                      <span className="material-symbols-outlined">arrow_upward</span>
+                    </button>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => onMoveDown(index)}
+                      disabled={index === queue.length - 1}
+                      aria-label="Flytt ned"
+                    >
+                      <span className="material-symbols-outlined">arrow_downward</span>
+                    </button>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => item.id && onRemove(item.id)}
+                      aria-label="Fjern fra kø"
+                    >
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+
+                  {/* Mobile actions - move only, swipe to delete */}
+                  <div className={styles.actionsMobile}>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => onMoveUp(index)}
+                      disabled={index === 0}
+                      aria-label="Flytt opp"
+                    >
+                      <span className="material-symbols-outlined">arrow_upward</span>
+                    </button>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => onMoveDown(index)}
+                      disabled={index === queue.length - 1}
+                      aria-label="Flytt ned"
+                    >
+                      <span className="material-symbols-outlined">arrow_downward</span>
+                    </button>
+                  </div>
+
                   <button
-                    className={styles.actionButton}
-                    onClick={() => onMoveUp(index)}
-                    disabled={index === 0}
-                    aria-label="Flytt opp"
+                    className={styles.playButton}
+                    onClick={() => onPlay(item)}
+                    aria-label={`Spill ${item.title}`}
                   >
-                    <span className="material-symbols-outlined">arrow_upward</span>
-                  </button>
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => onMoveDown(index)}
-                    disabled={index === queue.length - 1}
-                    aria-label="Flytt ned"
-                  >
-                    <span className="material-symbols-outlined">arrow_downward</span>
-                  </button>
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => item.id && onRemove(item.id)}
-                    aria-label="Fjern fra kø"
-                  >
-                    <span className="material-symbols-outlined">close</span>
+                    <span className="material-symbols-outlined">play_arrow</span>
                   </button>
                 </div>
-
-                <button
-                  className={styles.playButton}
-                  onClick={() => onPlay(item)}
-                  aria-label={`Spill ${item.title}`}
-                >
-                  <span className="material-symbols-outlined">play_arrow</span>
-                </button>
-              </div>
-
-              {/* Mobile actions - shown at bottom */}
-              <div className={styles.actionsMobile}>
-                <button
-                  className={styles.actionButton}
-                  onClick={() => onMoveUp(index)}
-                  disabled={index === 0}
-                  aria-label="Flytt opp"
-                >
-                  <span className="material-symbols-outlined">arrow_upward</span>
-                </button>
-                <button
-                  className={styles.actionButton}
-                  onClick={() => onMoveDown(index)}
-                  disabled={index === queue.length - 1}
-                  aria-label="Flytt ned"
-                >
-                  <span className="material-symbols-outlined">arrow_downward</span>
-                </button>
               </div>
             </div>
           </li>
