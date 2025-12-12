@@ -47,15 +47,10 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     currentEpisodeIdRef.current = episodeId
 
     if (episode && audioRef.current) {
-      // Reset state for new episode
-      setIsLoading(true)
-      setAudioError(false)
-      setIsPlaying(false)
-
       // New episode - mark for auto-play when audio becomes ready
       shouldAutoPlayRef.current = true
 
-      // Explicitly load the new source
+      // Explicitly load the new source - this triggers onLoadStart which sets loading state
       audioRef.current.load()
 
       // Load saved position asynchronously
@@ -64,7 +59,6 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
           const saved = await getPlaybackPosition(episode.id)
           if (saved && !saved.completed && audioRef.current) {
             audioRef.current.currentTime = saved.position
-            setCurrentTime(saved.position)
           }
         } catch {
           // Ignore position load errors
@@ -258,6 +252,11 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     }
   }, [episode])
 
+  const handleLoadStart = useCallback(() => {
+    setIsLoading(true)
+    setAudioError(false)
+  }, [])
+
   const handleWaiting = useCallback(() => setIsLoading(true), [])
 
   const handleCanPlay = useCallback(() => {
@@ -408,6 +407,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
         src={episode.audioUrl}
         preload="auto"
         playsInline
+        onLoadStart={handleLoadStart}
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}
         onPlay={handlePlay}

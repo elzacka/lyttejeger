@@ -11,12 +11,6 @@ import {
   isConfigured,
   type SearchOptions
 } from '../services/podcastIndex'
-import {
-  searchEpisodes as listenNotesSearchEpisodes,
-  searchPodcasts as listenNotesSearchPodcasts,
-  isAvailable as isListenNotesAvailable,
-  type ListenNotesPodcast
-} from '../services/listenNotes'
 import { transformFeeds, transformEpisodes } from '../services/podcastTransform'
 import { parseSearchQuery } from '../utils/search'
 
@@ -67,40 +61,14 @@ export function useSearch() {
   }, [])
 
   // Allowed language codes (Norwegian, Danish, Swedish, English)
-  // These are applied by default to filter out German, Spanish, etc.
   const ALLOWED_LANGUAGES = ['no', 'nb', 'nn', 'da', 'sv', 'en']
-  const ALLOWED_LANGUAGE_NAMES = ['norwegian', 'danish', 'swedish', 'english']
 
-  // Helper to check if a language code is allowed
+  // Check if a language code is allowed
   const isAllowedLanguage = (langCode: string | undefined): boolean => {
-    if (!langCode) return true // Keep if no language specified
+    if (!langCode) return true
     const code = langCode.toLowerCase().slice(0, 2)
     return ALLOWED_LANGUAGES.includes(code)
   }
-
-  // Helper to check if a language name (from Listen Notes) is allowed
-  const isAllowedLanguageName = (langName: string | undefined): boolean => {
-    if (!langName) return true
-    return ALLOWED_LANGUAGE_NAMES.includes(langName.toLowerCase())
-  }
-
-  // Transform Listen Notes podcast to our Podcast type
-  const transformListenNotesPodcast = (lnPodcast: ListenNotesPodcast): Podcast => ({
-    id: `ln_${lnPodcast.id}`, // Prefix to avoid ID collisions
-    title: lnPodcast.title_original,
-    author: lnPodcast.publisher_original,
-    description: lnPodcast.description_original,
-    imageUrl: lnPodcast.image || lnPodcast.thumbnail || '/favicon.svg',
-    feedUrl: lnPodcast.rss || '',
-    categories: [],
-    language: lnPodcast.language || 'Unknown',
-    episodeCount: lnPodcast.total_episodes || 0,
-    lastUpdated: lnPodcast.latest_pub_date_ms
-      ? new Date(lnPodcast.latest_pub_date_ms).toISOString()
-      : new Date().toISOString(),
-    rating: 3.5, // Default rating since Listen Notes doesn't provide ratings
-    explicit: lnPodcast.explicit_content || false
-  })
 
   // Search via API with enhanced options
   const searchViaApi = async (query: string, searchType: 'podcasts' | 'episodes') => {
@@ -149,42 +117,14 @@ export function useSearch() {
         searchOptions.cat = filters.categories.join(',')
       }
 
-      // Fetch from both APIs in parallel for better results
-      const [podcastIndexRes, listenNotesRes] = await Promise.all([
-        apiSearchPodcasts(apiQuery, searchOptions),
-        isListenNotesAvailable()
-          ? listenNotesSearchPodcasts(apiQuery, {
-              sort_by_date: filters.sortBy === 'newest' ? 1 : 0
-            }).catch(() => null)
-          : Promise.resolve(null)
-      ])
+      // Search podcasts via Podcast Index API
+      const podcastIndexRes = await apiSearchPodcasts(apiQuery, searchOptions)
 
-      // Only update if this is still the current search
-      if (currentSearchRef.current !== query) {
-        return
-      }
+      if (currentSearchRef.current !== query) return
 
-      // Transform and filter Podcast Index results by allowed languages
-      let podcasts = transformFeeds(podcastIndexRes.feeds)
-      podcasts = podcasts.filter(p => isAllowedLanguage(p.language))
-
-      // Track titles for deduplication (case-insensitive)
-      const seenTitles = new Set(podcasts.map(p => p.title.toLowerCase().trim()))
-
-      // Add Listen Notes results that aren't duplicates
-      if (listenNotesRes?.results) {
-        for (const lnPodcast of listenNotesRes.results) {
-          // Skip if not in allowed language
-          if (!isAllowedLanguageName(lnPodcast.language)) continue
-
-          // Skip if we already have a podcast with same title (deduplication)
-          const normalizedTitle = lnPodcast.title_original.toLowerCase().trim()
-          if (seenTitles.has(normalizedTitle)) continue
-
-          seenTitles.add(normalizedTitle)
-          podcasts.push(transformListenNotesPodcast(lnPodcast))
-        }
-      }
+      // Transform and filter by allowed languages
+      const podcasts = transformFeeds(podcastIndexRes.feeds)
+        .filter(p => isAllowedLanguage(p.language))
 
       // Store for incremental filtering
       lastSearchQueryRef.current = query
@@ -192,55 +132,12 @@ export function useSearch() {
 
       setApiPodcasts(podcasts)
 
-      // For episode search, use Listen Notes API (full-text search) as primary
-      // Fall back to Podcast Index if Listen Notes fails
+      // Episode search
       if (searchType === 'episodes') {
         const allEpisodes: Episode[] = []
         const existingIds = new Set<string>()
 
-        // Strategy 1: Listen Notes API - best full-text episode search
-        if (isListenNotesAvailable()) {
-          try {
-            const listenNotesRes = await listenNotesSearchEpisodes(apiQuery, {
-              sort_by_date: filters.sortBy === 'newest' ? 1 : 0
-            })
-
-            // Only update if this is still the current search
-            if (currentSearchRef.current !== query) {
-              return
-            }
-
-            // Transform Listen Notes results to our Episode format
-            for (const ep of listenNotesRes.results) {
-              const episode: Episode & {
-                podcastTitle: string
-                podcastAuthor: string
-                podcastImage: string
-                feedLanguage: string
-              } = {
-                id: ep.id,
-                podcastId: ep.podcast.id,
-                title: ep.title_original,
-                description: ep.description_original,
-                audioUrl: ep.audio,
-                duration: ep.audio_length_sec,
-                publishedAt: new Date(ep.pub_date_ms).toISOString(),
-                imageUrl: ep.image || ep.thumbnail,
-                podcastTitle: ep.podcast.title_original,
-                podcastAuthor: ep.podcast.publisher_original,
-                podcastImage: ep.podcast.image || ep.podcast.thumbnail,
-                feedLanguage: '' // Listen Notes already filtered by language
-              }
-              allEpisodes.push(episode)
-              existingIds.add(ep.id)
-            }
-          } catch {
-            // Continue to fallback strategies
-          }
-        }
-
-        // Strategy 2: Podcast Index byperson API
-        // Searches person tags, episode title, description, feed owner/author
+        // Strategy 1: byperson API - searches person tags, title, description
         try {
           const episodesRes = await searchEpisodesByPerson(apiQuery, { max: 50, fulltext: true })
 
@@ -268,12 +165,10 @@ export function useSearch() {
             existingIds.add(ep.id)
           }
         } catch {
-          // Continue to strategy 3
+          // Continue to strategy 2
         }
 
-        // Strategy 3: Fetch episodes from matching podcasts and filter by query
-        // Only include episodes where the search term appears in episode title/description
-        // (not just in podcast name)
+        // Strategy 2: Fetch episodes from matching podcasts and filter by query
         if (podcasts.length > 0) {
           const topPodcasts = podcasts.slice(0, 10)
 
