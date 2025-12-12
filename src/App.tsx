@@ -212,26 +212,35 @@ function App() {
 
   // Handler to select podcast from subscriptions view
   const handleSelectSubscribedPodcast = useCallback(async (podcastId: string) => {
-    // We need to fetch the podcast data from the API
-    const sub = subscriptions.find(s => s.podcastId === podcastId)
-    if (sub) {
-      // Create a minimal podcast object from subscription data
-      // The PodcastPage will fetch episodes anyway
-      const podcast: Podcast = {
-        id: sub.podcastId,
-        title: sub.title,
-        author: sub.author,
-        description: '',
-        imageUrl: sub.imageUrl,
-        feedUrl: sub.feedUrl,
-        categories: [],
-        language: '',
-        episodeCount: 0,
-        lastUpdated: '',
-        rating: 0,
-        explicit: false,
-      }
+    try {
+      const feedId = parseInt(podcastId)
+      if (isNaN(feedId)) return
+
+      const res = await getPodcastByFeedId(feedId)
+      const podcast = transformFeed(res.feed)
+      setPreviousActiveTab('subscriptions')
       setSelectedPodcast(podcast)
+    } catch {
+      // Fallback to minimal data if API fails
+      const sub = subscriptions.find(s => s.podcastId === podcastId)
+      if (sub) {
+        const podcast: Podcast = {
+          id: sub.podcastId,
+          title: sub.title,
+          author: sub.author,
+          description: '',
+          imageUrl: sub.imageUrl,
+          feedUrl: sub.feedUrl,
+          categories: [],
+          language: '',
+          episodeCount: 0,
+          lastUpdated: '',
+          rating: 0,
+          explicit: false,
+        }
+        setPreviousActiveTab('subscriptions')
+        setSelectedPodcast(podcast)
+      }
     }
   }, [subscriptions])
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { Subscription } from '../services/db'
 import type { Episode } from '../types/podcast'
 import type { PlayingEpisode } from './AudioPlayer'
-import { getEpisodesByFeedId } from '../services/podcastIndex'
+import { getEpisodesByFeedIds } from '../services/podcastIndex'
 import { transformEpisodes } from '../services/podcastTransform'
 import { formatDuration, formatDateLong, linkifyText } from '../utils/search'
 import styles from './RecentEpisodes.module.css'
@@ -47,30 +47,34 @@ export function RecentEpisodes({
 
     try {
       const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
-      const allEpisodes: EpisodeWithSubscription[] = []
 
-      // Fetch episodes for each subscription
+      // Build subscription lookup map
+      const subMap = new Map<string, Subscription>()
+      const feedIds: number[] = []
+
       for (const sub of subscriptions) {
-        try {
-          const feedId = parseInt(sub.podcastId)
-          if (isNaN(feedId)) continue
-
-          const res = await getEpisodesByFeedId(feedId, 10)
-          const transformed = transformEpisodes(res.items || [])
-
-          // Filter to last 7 days and add subscription info
-          const recentEpisodes = transformed
-            .filter((ep) => {
-              const pubDate = new Date(ep.publishedAt).getTime()
-              return pubDate >= sevenDaysAgo
-            })
-            .map((ep) => ({ ...ep, subscription: sub }))
-
-          allEpisodes.push(...recentEpisodes)
-        } catch {
-          // Skip failed fetches for individual podcasts
+        const feedId = parseInt(sub.podcastId)
+        if (!isNaN(feedId)) {
+          feedIds.push(feedId)
+          subMap.set(sub.podcastId, sub)
         }
       }
+
+      // Fetch all episodes in a single API call (up to 200 feeds supported)
+      const res = await getEpisodesByFeedIds(feedIds, 100)
+      const transformed = transformEpisodes(res.items || [])
+
+      // Filter to last 7 days and attach subscription info
+      const allEpisodes: EpisodeWithSubscription[] = transformed
+        .filter((ep) => {
+          const pubDate = new Date(ep.publishedAt).getTime()
+          return pubDate >= sevenDaysAgo
+        })
+        .map((ep) => {
+          const subscription = subMap.get(ep.podcastId)!
+          return { ...ep, subscription }
+        })
+        .filter((ep) => ep.subscription) // Safety check
 
       // Sort by publish date, newest first
       allEpisodes.sort((a, b) => {

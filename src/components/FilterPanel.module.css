@@ -187,6 +187,7 @@
 
 .chip {
   min-height: var(--button-sm);
+  min-width: 56px;
   padding: var(--space-xs) var(--space-sm);
   background: var(--bg-primary);
   border: 1px solid var(--border);
@@ -196,6 +197,7 @@
   font-size: var(--font-xs);
   cursor: pointer;
   transition: all var(--transition-fast);
+  text-align: center;
 }
 
 .chip:hover {
@@ -475,6 +477,7 @@
 
   .chip {
     min-height: 26px;
+    min-width: 48px;
     padding: 3px 6px;
     font-size: 11px;
   }

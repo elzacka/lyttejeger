@@ -203,6 +203,25 @@ export async function getEpisodesByFeedId(feedId: number, max = 20): Promise<Epi
   })
 }
 
+/**
+ * Fetch episodes from multiple feed IDs in a single request
+ * API supports up to 200 comma-separated feed IDs
+ */
+export async function getEpisodesByFeedIds(feedIds: number[], max = 100): Promise<EpisodesResponse> {
+  if (feedIds.length === 0) {
+    return { status: 'true', items: [], count: 0, query: '', description: '' }
+  }
+
+  // API limit: max 200 feed IDs per request
+  const limitedIds = feedIds.slice(0, 200)
+
+  return apiRequest<EpisodesResponse>('/episodes/byfeedid', {
+    id: limitedIds.join(','),
+    max: max.toString(),
+    fulltext: ''
+  })
+}
+
 export interface PodcastByIdResponse {
   status: string
   feed: PodcastIndexFeed

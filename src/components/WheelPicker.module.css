@@ -42,7 +42,7 @@
 
 /* Scrollable wheel container */
 .wheel {
-  width: 32px;
+  width: 40px;
   height: var(--button-sm);
   overflow-y: auto;
   scroll-snap-type: y mandatory;
@@ -96,7 +96,7 @@
   }
 
   .wheel {
-    width: 28px;
+    width: 35px;
     height: 26px;
   }
 
