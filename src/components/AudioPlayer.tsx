@@ -46,9 +46,17 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     // Update ref
     currentEpisodeIdRef.current = episodeId
 
-    if (episode) {
+    if (episode && audioRef.current) {
+      // Reset state for new episode
+      setIsLoading(true)
+      setAudioError(false)
+      setIsPlaying(false)
+
       // New episode - mark for auto-play when audio becomes ready
       shouldAutoPlayRef.current = true
+
+      // Explicitly load the new source
+      audioRef.current.load()
 
       // Load saved position asynchronously
       const loadPosition = async () => {
@@ -259,10 +267,20 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     // Auto-play if this is a new episode
     if (shouldAutoPlayRef.current && audioRef.current) {
       shouldAutoPlayRef.current = false
-      audioRef.current.play().catch(() => {
-        // Autoplay blocked - user needs to tap play manually
-        // This is expected on iOS without user gesture
-      })
+      const audio = audioRef.current
+
+      // Try to play - use a small delay to ensure audio is truly ready
+      const attemptPlay = async () => {
+        try {
+          await audio.play()
+        } catch {
+          // Autoplay blocked - this is expected on iOS/Safari without user gesture
+          // The user will need to tap play manually
+          setIsPlaying(false)
+        }
+      }
+
+      attemptPlay()
     }
   }, [])
 
@@ -388,7 +406,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       <audio
         ref={audioRef}
         src={episode.audioUrl}
-        preload="metadata"
+        preload="auto"
         playsInline
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}
