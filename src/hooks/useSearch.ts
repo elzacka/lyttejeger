@@ -276,9 +276,15 @@ export function useSearch() {
         // (not just in podcast name)
         if (podcasts.length > 0) {
           const topPodcasts = podcasts.slice(0, 10)
+
+          // Calculate since timestamp if year filter is active
+          const sinceTimestamp = filters.dateFrom
+            ? Math.floor(new Date(filters.dateFrom.year, filters.dateFrom.month - 1, filters.dateFrom.day).getTime() / 1000)
+            : undefined
+
           const episodePromises = topPodcasts.map(async (podcast) => {
             try {
-              const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), 30)
+              const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), { max: 50, since: sinceTimestamp })
               const episodes = transformEpisodes(episodesRes.items || [])
               return episodes.map(ep => ({
                 ...ep,
@@ -403,11 +409,16 @@ export function useSearch() {
           const podcasts = transformFeeds(trendingRes.feeds)
             .filter(p => isAllowedLanguage(p.language))
 
+          // Calculate since timestamp if year filter is active
+          const sinceTimestamp = filters.dateFrom
+            ? Math.floor(new Date(filters.dateFrom.year, filters.dateFrom.month - 1, filters.dateFrom.day).getTime() / 1000)
+            : undefined
+
           // Now fetch episodes from these podcasts
           const allEpisodes: Episode[] = []
           const episodePromises = podcasts.slice(0, 15).map(async (podcast) => {
             try {
-              const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), 10)
+              const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), { max: 20, since: sinceTimestamp })
               const episodes = transformEpisodes(episodesRes.items || [])
               return episodes.map(ep => ({
                 ...ep,

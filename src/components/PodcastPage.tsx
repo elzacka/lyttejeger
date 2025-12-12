@@ -68,7 +68,7 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
           throw new Error('Invalid podcast ID')
         }
 
-        const res = await getEpisodesByFeedId(feedId, 50)
+        const res = await getEpisodesByFeedId(feedId, { max: 50 })
         const transformedEpisodes = transformEpisodes(res.items || [])
         setEpisodes(transformedEpisodes)
       } catch {

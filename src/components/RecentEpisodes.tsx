@@ -61,7 +61,9 @@ export function RecentEpisodes({
       }
 
       // Fetch all episodes in a single API call (up to 200 feeds supported)
-      const res = await getEpisodesByFeedIds(feedIds, 100)
+      // Use 'since' parameter to only fetch episodes from last 7 days
+      const sinceTimestamp = Math.floor(sevenDaysAgo / 1000)
+      const res = await getEpisodesByFeedIds(feedIds, { max: 100, since: sinceTimestamp })
       const transformed = transformEpisodes(res.items || [])
 
       // Filter to last 7 days and attach subscription info

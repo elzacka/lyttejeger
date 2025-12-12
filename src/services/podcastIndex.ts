@@ -195,19 +195,35 @@ export async function searchPodcasts(query: string, options: SearchOptions = {})
   return apiRequest<SearchResponse>('/search/byterm', params)
 }
 
-export async function getEpisodesByFeedId(feedId: number, max = 20): Promise<EpisodesResponse> {
-  return apiRequest<EpisodesResponse>('/episodes/byfeedid', {
+export interface EpisodesByFeedIdOptions {
+  max?: number
+  since?: number  // Unix timestamp - only return episodes published since this time
+}
+
+export async function getEpisodesByFeedId(feedId: number, options: EpisodesByFeedIdOptions = {}): Promise<EpisodesResponse> {
+  const params: Record<string, string> = {
     id: feedId.toString(),
-    max: max.toString(),
+    max: (options.max || 20).toString(),
     fulltext: ''  // Request full descriptions instead of truncated
-  })
+  }
+
+  if (options.since) {
+    params.since = options.since.toString()
+  }
+
+  return apiRequest<EpisodesResponse>('/episodes/byfeedid', params)
+}
+
+export interface EpisodesByFeedIdsOptions {
+  max?: number
+  since?: number  // Unix timestamp - only return episodes published since this time
 }
 
 /**
  * Fetch episodes from multiple feed IDs in a single request
  * API supports up to 200 comma-separated feed IDs
  */
-export async function getEpisodesByFeedIds(feedIds: number[], max = 100): Promise<EpisodesResponse> {
+export async function getEpisodesByFeedIds(feedIds: number[], options: EpisodesByFeedIdsOptions = {}): Promise<EpisodesResponse> {
   if (feedIds.length === 0) {
     return { status: 'true', items: [], count: 0, query: '', description: '' }
   }
@@ -215,11 +231,17 @@ export async function getEpisodesByFeedIds(feedIds: number[], max = 100): Promis
   // API limit: max 200 feed IDs per request
   const limitedIds = feedIds.slice(0, 200)
 
-  return apiRequest<EpisodesResponse>('/episodes/byfeedid', {
+  const params: Record<string, string> = {
     id: limitedIds.join(','),
-    max: max.toString(),
+    max: (options.max || 100).toString(),
     fulltext: ''
-  })
+  }
+
+  if (options.since) {
+    params.since = options.since.toString()
+  }
+
+  return apiRequest<EpisodesResponse>('/episodes/byfeedid', params)
 }
 
 export interface PodcastByIdResponse {
