@@ -385,8 +385,7 @@
   }
 
   .player.expanded .expandIcon {
-    display: block;
-    margin-left: auto;
+    display: none;
   }
 
   .player.expanded .miniControls {
@@ -414,9 +413,7 @@
   }
 
   .player.expanded .closeButton {
-    position: absolute;
-    top: var(--space-sm);
-    right: var(--space-sm);
+    display: none;
   }
 
   .image {

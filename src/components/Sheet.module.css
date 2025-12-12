@@ -86,8 +86,14 @@
   padding: var(--space-md);
 }
 
-/* Desktop: centered modal */
+/* Desktop: slide-in panel with blur backdrop */
 @media (min-width: 641px) {
+  .backdrop {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
   .sheet {
     top: 50%;
     bottom: auto;
@@ -95,20 +101,21 @@
     right: auto;
     transform: translate(-50%, -50%);
     width: 100%;
-    max-width: 400px;
-    max-height: 80vh;
+    max-width: 420px;
+    max-height: 70vh;
     border-radius: var(--radius-lg);
-    animation: fadeInScale var(--transition-base) ease-out;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    animation: slideInFromTop 0.25s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  @keyframes fadeInScale {
+  @keyframes slideInFromTop {
     from {
       opacity: 0;
-      transform: translate(-50%, -50%) scale(0.95);
+      transform: translate(-50%, -60%);
     }
     to {
       opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
+      transform: translate(-50%, -50%);
     }
   }
 
@@ -118,6 +125,15 @@
 
   .header {
     padding-top: var(--space-md);
+    border-bottom: none;
+  }
+
+  .title {
+    font-size: var(--font-lg);
+  }
+
+  .content {
+    padding: var(--space-sm) var(--space-lg) var(--space-lg);
   }
 }
 

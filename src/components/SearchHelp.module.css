@@ -36,9 +36,9 @@
 .item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   transition: background var(--transition-fast);
 }
 
@@ -57,4 +57,28 @@
   font-size: var(--font-xs);
   color: var(--text-secondary);
   line-height: 1.4;
+}
+
+/* Desktop enhancements */
+@media (min-width: 641px) {
+  .list {
+    gap: var(--space-sm);
+  }
+
+  .item {
+    padding: var(--space-md);
+    background: var(--bg-secondary);
+  }
+
+  .item:hover {
+    background: var(--bg-hover);
+  }
+
+  .example {
+    font-size: var(--font-base);
+  }
+
+  .description {
+    font-size: var(--font-sm);
+  }
 }
