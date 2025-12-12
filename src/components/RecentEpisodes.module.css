@@ -1,10 +1,7 @@
-/* RecentEpisodes - Compact list with proper touch targets */
+/* RecentEpisodes - Full page view for Siste tab */
 
 .container {
   padding: var(--space-md);
-  margin-bottom: var(--space-md);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
 }
 
 .title {
@@ -71,6 +68,38 @@
   font-family: var(--font-mono);
   font-size: var(--font-sm);
   text-align: center;
+}
+
+/* Empty state - centered with icon */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  color: var(--text-muted);
+  opacity: 0.5;
+  margin-bottom: var(--space-md);
+}
+
+.emptyText {
+  margin: 0 0 var(--space-xs) 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-base);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.emptyHint {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--text-muted);
 }
 
 .list {
@@ -346,7 +375,6 @@
 @media (max-width: 640px) {
   .container {
     padding: var(--space-sm);
-    margin-bottom: var(--space-sm);
   }
 
   .title {

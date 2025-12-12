@@ -110,10 +110,17 @@ export function RecentEpisodes({
   if (subscriptions.length === 0) {
     return (
       <section className={styles.container}>
-        <h2 className={styles.title}>Velkommen til Lyttejeger</h2>
-        <p className={styles.empty}>
-          Bruk Søk for å finne podkaster, og abonner på dine favoritter for å se nye episoder her.
-        </p>
+        <div className={styles.emptyState}>
+          <span className={`material-symbols-outlined ${styles.emptyIcon}`} aria-hidden="true">
+            subscriptions
+          </span>
+          <p className={styles.emptyText}>
+            Ingen abonnementer enda
+          </p>
+          <p className={styles.emptyHint}>
+            Bruk Søk for å finne podkaster du liker
+          </p>
+        </div>
       </section>
     )
   }
@@ -144,8 +151,17 @@ export function RecentEpisodes({
   if (episodes.length === 0) {
     return (
       <section className={styles.container}>
-        <h2 className={styles.title}>Nye episoder</h2>
-        <p className={styles.empty}>Ingen nye episoder siste 7 dager</p>
+        <div className={styles.emptyState}>
+          <span className={`material-symbols-outlined ${styles.emptyIcon}`} aria-hidden="true">
+            schedule
+          </span>
+          <p className={styles.emptyText}>
+            Ingen nye episoder
+          </p>
+          <p className={styles.emptyHint}>
+            Siste 7 dager fra dine abonnementer
+          </p>
+        </div>
       </section>
     )
   }

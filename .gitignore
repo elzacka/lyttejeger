@@ -50,3 +50,4 @@ dev-dist
 
 # For developer and Claude only
 dev_only/*
+.obsidian/
