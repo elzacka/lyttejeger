@@ -5,7 +5,7 @@ import { shouldShowInstallButton } from '../utils/deviceDetection'
 import { useSheetContext } from '../hooks/useSheetContext'
 import styles from './BottomNav.module.css'
 
-export type NavItem = 'home' | 'subscriptions' | 'queue' | 'info'
+export type NavItem = 'home' | 'search' | 'subscriptions' | 'queue' | 'info'
 
 interface BottomNavProps {
   activeItem: NavItem | null
@@ -53,16 +53,25 @@ export function BottomNav({
         )}
 
         <button
+          className={`${styles.navItem} ${activeItem === 'search' ? styles.active : ''}`}
+          onClick={() => onNavigate('search')}
+          aria-current={activeItem === 'search' ? 'page' : undefined}
+        >
+          <span className={styles.iconWrapper}>
+            <span className="material-symbols-outlined" aria-hidden="true">search</span>
+          </span>
+          <span className={styles.label}>Søk</span>
+        </button>
+
+        <button
           className={`${styles.navItem} ${activeItem === 'home' ? styles.active : ''}`}
           onClick={() => onNavigate('home')}
           aria-current={activeItem === 'home' ? 'page' : undefined}
         >
           <span className={styles.iconWrapper}>
-            <span className="material-symbols-outlined" aria-hidden="true">
-              {activeItem === 'home' ? 'home' : 'home'}
-            </span>
+            <span className="material-symbols-outlined" aria-hidden="true">schedule</span>
           </span>
-          <span className={styles.label}>Hjem</span>
+          <span className={styles.label}>Siste</span>
         </button>
 
         <button

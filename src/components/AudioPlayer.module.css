@@ -2,7 +2,8 @@
 
 .player {
   position: fixed;
-  bottom: 0;
+  /* Position above the bottom nav (approx 56px + safe area) */
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
   left: 0;
   right: 0;
   z-index: var(--z-player);
@@ -36,7 +37,6 @@
   box-sizing: border-box;
   width: 100%;
   padding: var(--space-sm) var(--space-md);
-  padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
 }
 
 /* Episode info - now a button for expand/collapse */
@@ -311,7 +311,6 @@
     flex-direction: column;
     gap: 0;
     padding: var(--space-xs) var(--space-sm);
-    padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom, 0px));
   }
 
   .player.collapsed .swipeHandle {
@@ -366,7 +365,6 @@
     flex-direction: column;
     gap: var(--space-sm);
     padding: var(--space-sm);
-    padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
     position: relative;
   }
 
@@ -413,7 +411,9 @@
   }
 
   .player.expanded .closeButton {
-    display: none;
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
   }
 
   .image {

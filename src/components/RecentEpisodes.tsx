@@ -108,7 +108,14 @@ export function RecentEpisodes({
   }
 
   if (subscriptions.length === 0) {
-    return null
+    return (
+      <section className={styles.container}>
+        <h2 className={styles.title}>Velkommen til Lyttejeger</h2>
+        <p className={styles.empty}>
+          Bruk Søk for å finne podkaster, og abonner på dine favoritter for å se nye episoder her.
+        </p>
+      </section>
+    )
   }
 
   if (isLoading) {

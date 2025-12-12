@@ -42,7 +42,8 @@ function App() {
   const [categories, setCategories] = useState<FilterOption[]>(fallbackCategories)
   const [playingEpisode, setPlayingEpisode] = useState<PlayingEpisode | null>(null)
   const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null)
-  const [previousActiveTab, setPreviousActiveTab] = useState<'home' | 'subscriptions'>('home')
+  const [previousActiveTab, setPreviousActiveTab] = useState<'home' | 'search' | 'subscriptions'>('search')
+  const [currentView, setCurrentView] = useState<'home' | 'search' | 'subscriptions' | 'queue'>('search')
 
   // Fetch categories from API on mount
   useEffect(() => {
@@ -153,10 +154,10 @@ function App() {
   }, [playNext])
 
   const handleSelectPodcast = useCallback((podcast: Podcast) => {
-    // Track which tab user came from for back navigation
-    setPreviousActiveTab(activeTab === 'subscriptions' ? 'subscriptions' : 'home')
+    // Track which view user came from for back navigation
+    setPreviousActiveTab(currentView === 'subscriptions' ? 'subscriptions' : currentView === 'search' ? 'search' : 'home')
     setSelectedPodcast(podcast)
-  }, [activeTab])
+  }, [currentView])
 
   const handleBackFromPodcast = useCallback(() => {
     setSelectedPodcast(null)
@@ -170,7 +171,7 @@ function App() {
 
       const res = await getPodcastByFeedId(feedId)
       const podcast = transformFeed(res.feed)
-      setPreviousActiveTab('home')
+      setPreviousActiveTab('search')
       setSelectedPodcast(podcast)
     } catch {
       // Failed to fetch podcast - ignore
@@ -250,10 +251,17 @@ function App() {
     setSelectedPodcast(null)
 
     if (item === 'home') {
-      setActiveTab('podcasts')
+      setCurrentView('home')
       setQuery('')
-    } else if (item === 'subscriptions' || item === 'queue') {
-      setActiveTab(item)
+    } else if (item === 'search') {
+      setCurrentView('search')
+      setActiveTab('podcasts')
+    } else if (item === 'subscriptions') {
+      setCurrentView('subscriptions')
+      setActiveTab('subscriptions')
+    } else if (item === 'queue') {
+      setCurrentView('queue')
+      setActiveTab('queue')
     }
     // 'info' is handled internally by BottomNav (opens InfoSheet)
   }, [setActiveTab, setQuery])
@@ -261,9 +269,7 @@ function App() {
   // Determine active nav item
   const activeNavItem = selectedPodcast
     ? previousActiveTab
-    : activeTab === 'subscriptions' || activeTab === 'queue'
-    ? activeTab
-    : 'home'
+    : currentView
 
   return (
     <SheetProvider>
@@ -289,7 +295,19 @@ function App() {
           <Header />
 
           <main className="main" id="main-content">
-            {activeTab !== 'subscriptions' && activeTab !== 'queue' && (
+            {/* Home view - only shows recent episodes */}
+            {currentView === 'home' && (
+              <RecentEpisodes
+                subscriptions={subscriptions}
+                onPlayEpisode={handlePlayEpisode}
+                onAddToQueue={handleAddEpisodeToQueue}
+                onPlayNext={handlePlayEpisodeNext}
+                isInQueue={isInQueue}
+              />
+            )}
+
+            {/* Search view - search bar, filters, and results */}
+            {currentView === 'search' && (
               <>
                 <section className="search-section">
                   <SearchBar
@@ -321,70 +339,65 @@ function App() {
                     activeFilterCount={activeFilterCount}
                   />
                 </section>
+
+                <section className="results-section">
+                  {(activeTab === 'podcasts' || activeTab === 'episodes') && filters.query && (
+                    <div className="sort-bar">
+                      <select
+                        className="sort-select"
+                        value={filters.sortBy}
+                        onChange={(e) => setSortBy(e.target.value as typeof filters.sortBy)}
+                        aria-label="Sorter resultater"
+                      >
+                        <option value="relevance">Relevans</option>
+                        <option value="newest">Nyeste</option>
+                        <option value="oldest">Eldste</option>
+                        <option value="popular">Populære</option>
+                      </select>
+                    </div>
+                  )}
+                  {activeTab === 'podcasts' ? (
+                    <PodcastList
+                      podcasts={results.podcasts}
+                      searchQuery={filters.query}
+                      isLoading={isPending}
+                      onSelectPodcast={handleSelectPodcast}
+                    />
+                  ) : (
+                    <EpisodeList
+                      episodes={results.episodes}
+                      searchQuery={filters.query}
+                      isLoading={isPending}
+                      onPlayEpisode={handlePlayEpisode}
+                      onAddToQueue={handleAddToQueue}
+                      onPlayNext={handlePlayNext}
+                      isInQueue={isInQueue}
+                      onSelectPodcast={handleSelectPodcastById}
+                    />
+                  )}
+                </section>
               </>
             )}
 
-            {/* Show recent episodes from subscriptions when not searching */}
-            {subscriptionCount > 0 && !filters.query && activeTab !== 'queue' && activeTab !== 'subscriptions' && (
-              <RecentEpisodes
+            {/* Subscriptions view */}
+            {currentView === 'subscriptions' && (
+              <SubscriptionsView
                 subscriptions={subscriptions}
-                onPlayEpisode={handlePlayEpisode}
-                onAddToQueue={handleAddEpisodeToQueue}
-                onPlayNext={handlePlayEpisodeNext}
-                isInQueue={isInQueue}
+                onUnsubscribe={unsubscribe}
+                onSelectPodcast={handleSelectSubscribedPodcast}
               />
             )}
 
-            <section className="results-section">
-              {(activeTab === 'podcasts' || activeTab === 'episodes') && filters.query && (
-                <div className="sort-bar">
-                  <select
-                    className="sort-select"
-                    value={filters.sortBy}
-                    onChange={(e) => setSortBy(e.target.value as typeof filters.sortBy)}
-                    aria-label="Sorter resultater"
-                  >
-                    <option value="relevance">Relevans</option>
-                    <option value="newest">Nyeste</option>
-                    <option value="oldest">Eldste</option>
-                    <option value="popular">Populære</option>
-                  </select>
-                </div>
-              )}
-              {activeTab === 'queue' ? (
-                <QueueView
-                  queue={queue}
-                  onPlay={handlePlayFromQueue}
-                  onRemove={removeFromQueue}
-                  onClear={clearQueue}
-                  onReorder={handleReorder}
-                />
-              ) : activeTab === 'subscriptions' ? (
-                <SubscriptionsView
-                  subscriptions={subscriptions}
-                  onUnsubscribe={unsubscribe}
-                  onSelectPodcast={handleSelectSubscribedPodcast}
-                />
-              ) : activeTab === 'podcasts' ? (
-                <PodcastList
-                  podcasts={results.podcasts}
-                  searchQuery={filters.query}
-                  isLoading={isPending}
-                  onSelectPodcast={handleSelectPodcast}
-                />
-              ) : (
-                <EpisodeList
-                  episodes={results.episodes}
-                  searchQuery={filters.query}
-                  isLoading={isPending}
-                  onPlayEpisode={handlePlayEpisode}
-                  onAddToQueue={handleAddToQueue}
-                  onPlayNext={handlePlayNext}
-                  isInQueue={isInQueue}
-                  onSelectPodcast={handleSelectPodcastById}
-                />
-              )}
-            </section>
+            {/* Queue view */}
+            {currentView === 'queue' && (
+              <QueueView
+                queue={queue}
+                onPlay={handlePlayFromQueue}
+                onRemove={removeFromQueue}
+                onClear={clearQueue}
+                onReorder={handleReorder}
+              />
+            )}
           </main>
         </>
       )}
