@@ -4,7 +4,7 @@ import type { Episode } from '../types/podcast'
 import type { PlayingEpisode } from './AudioPlayer'
 import { getEpisodesByFeedId } from '../services/podcastIndex'
 import { transformEpisodes } from '../services/podcastTransform'
-import { formatDuration, formatDateLong } from '../utils/search'
+import { formatDuration, formatDateLong, linkifyText } from '../utils/search'
 import styles from './RecentEpisodes.module.css'
 
 interface RecentEpisodesProps {
@@ -30,6 +30,11 @@ export function RecentEpisodes({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const [expandedEpisodeId, setExpandedEpisodeId] = useState<string | null>(null)
+
+  const toggleEpisodeExpand = useCallback((episodeId: string) => {
+    setExpandedEpisodeId(prev => prev === episodeId ? null : episodeId)
+  }, [])
 
   const fetchRecentEpisodes = useCallback(async () => {
     if (subscriptions.length === 0) {
@@ -141,100 +146,139 @@ export function RecentEpisodes({
       <ul className={styles.list}>
         {episodes.map((episode) => {
           const isMenuOpen = menuOpenId === episode.id
+          const isExpanded = expandedEpisodeId === episode.id
           return (
             <li
               key={episode.id}
               className={`${styles.item} ${isMenuOpen ? styles.menuOpen : ''}`}
             >
-              <img
-                src={episode.subscription.imageUrl}
-                alt=""
-                className={styles.image}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.style.display = 'none'
-                  const placeholder = document.createElement('div')
-                  placeholder.className = `${styles.image} image-placeholder`
-                  placeholder.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">podcasts</span>'
-                  target.parentNode?.insertBefore(placeholder, target)
-                }}
-              />
-              <div className={styles.info}>
-                <span className={styles.podcastName}>
-                  {episode.subscription.title}
-                </span>
-                <span className={styles.episodeTitle}>{episode.title}</span>
-                <div className={styles.meta}>
-                  <span>{formatDateLong(episode.publishedAt)}</span>
-                  {formatDuration(episode.duration) && (
-                    <span>{formatDuration(episode.duration)}</span>
-                  )}
-                </div>
-              </div>
-              <div className={styles.actions}>
-                <div className={styles.menuContainer}>
-                  <button
-                    className={styles.menuButton}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      e.preventDefault()
-                      setMenuOpenId(menuOpenId === episode.id ? null : episode.id)
-                    }}
-                    aria-label="Flere valg"
-                    aria-expanded={isMenuOpen}
-                  >
-                    <span className="material-symbols-outlined">more_vert</span>
-                  </button>
-                  {isMenuOpen && (
-                    <div className={styles.menuDropdown}>
-                      <button
-                        className={styles.menuItem}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          e.preventDefault()
-                          onPlayNext(
-                            episode,
-                            episode.subscription.title,
-                            episode.subscription.imageUrl
-                          )
-                          setMenuOpenId(null)
-                        }}
-                      >
-                        <span className="material-symbols-outlined">
-                          playlist_play
-                        </span>
-                        Spill neste
-                      </button>
-                      <button
-                        className={styles.menuItem}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          e.preventDefault()
-                          onAddToQueue(
-                            episode,
-                            episode.subscription.title,
-                            episode.subscription.imageUrl
-                          )
-                          setMenuOpenId(null)
-                        }}
-                        disabled={isInQueue(episode.id)}
-                      >
-                        <span className="material-symbols-outlined">
-                          queue_music
-                        </span>
-                        {isInQueue(episode.id) ? 'I køen' : 'Legg til i kø'}
-                      </button>
-                    </div>
-                  )}
-                </div>
+              <div className={styles.episodeHeader}>
                 <button
-                  className={styles.playButton}
-                  onClick={(e) => handlePlayEpisode(episode, e)}
-                  aria-label={`Spill ${episode.title}`}
+                  className={styles.episodeToggle}
+                  onClick={() => toggleEpisodeExpand(episode.id)}
+                  aria-expanded={isExpanded}
+                  aria-controls={`episode-details-${episode.id}`}
                 >
-                  <span className="material-symbols-outlined">play_arrow</span>
+                  <img
+                    src={episode.subscription.imageUrl}
+                    alt=""
+                    className={styles.image}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                      const placeholder = document.createElement('div')
+                      placeholder.className = `${styles.image} image-placeholder`
+                      placeholder.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">podcasts</span>'
+                      target.parentNode?.insertBefore(placeholder, target)
+                    }}
+                  />
+                  <div className={styles.info}>
+                    <span className={styles.podcastName}>
+                      {episode.subscription.title}
+                    </span>
+                    <span className={styles.episodeTitle}>{episode.title}</span>
+                    <div className={styles.meta}>
+                      <span>{formatDateLong(episode.publishedAt)}</span>
+                      {formatDuration(episode.duration) && (
+                        <span>{formatDuration(episode.duration)}</span>
+                      )}
+                    </div>
+                  </div>
                 </button>
+                <div className={styles.actions}>
+                  <div className={styles.menuContainer}>
+                    <button
+                      className={styles.menuButton}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
+                        setMenuOpenId(menuOpenId === episode.id ? null : episode.id)
+                      }}
+                      aria-label="Flere valg"
+                      aria-expanded={isMenuOpen}
+                    >
+                      <span className="material-symbols-outlined">more_vert</span>
+                    </button>
+                    {isMenuOpen && (
+                      <div className={styles.menuDropdown}>
+                        <button
+                          className={styles.menuItem}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                            onPlayNext(
+                              episode,
+                              episode.subscription.title,
+                              episode.subscription.imageUrl
+                            )
+                            setMenuOpenId(null)
+                          }}
+                        >
+                          <span className="material-symbols-outlined">
+                            playlist_play
+                          </span>
+                          Spill neste
+                        </button>
+                        <button
+                          className={styles.menuItem}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                            onAddToQueue(
+                              episode,
+                              episode.subscription.title,
+                              episode.subscription.imageUrl
+                            )
+                            setMenuOpenId(null)
+                          }}
+                          disabled={isInQueue(episode.id)}
+                        >
+                          <span className="material-symbols-outlined">
+                            queue_music
+                          </span>
+                          {isInQueue(episode.id) ? 'I køen' : 'Legg til i kø'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    className={styles.playButton}
+                    onClick={(e) => handlePlayEpisode(episode, e)}
+                    aria-label={`Spill ${episode.title}`}
+                  >
+                    <span className="material-symbols-outlined">play_arrow</span>
+                  </button>
+                </div>
               </div>
+              {isExpanded && (
+                <div
+                  id={`episode-details-${episode.id}`}
+                  className={styles.episodeDetails}
+                >
+                  {episode.description ? (
+                    <p className={styles.episodeDescription}>
+                      {linkifyText(episode.description).map((part, idx) =>
+                        part.type === 'link' ? (
+                          <a
+                            key={idx}
+                            href={part.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.descriptionLink}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {part.content}
+                          </a>
+                        ) : (
+                          <span key={idx}>{part.content}</span>
+                        )
+                      )}
+                    </p>
+                  ) : (
+                    <p className={styles.noDescription}>Ingen beskrivelse tilgjengelig</p>
+                  )}
+                </div>
+              )}
             </li>
           )
         })}

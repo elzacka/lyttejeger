@@ -24,6 +24,7 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false)
   const [episodesError, setEpisodesError] = useState<string | null>(null)
   const [expandedEpisodeId, setExpandedEpisodeId] = useState<string | null>(null)
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const [imageError, setImageError] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -150,9 +151,35 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
           </div>
         </section>
 
-        <section className={styles.description}>
-          <p>{podcast.description}</p>
-        </section>
+        {podcast.description && (
+          <section className={styles.description}>
+            <p className={`${styles.descriptionText} ${isDescriptionExpanded ? styles.descriptionExpanded : ''}`}>
+              {linkifyText(podcast.description).map((part, idx) =>
+                part.type === 'link' ? (
+                  <a
+                    key={idx}
+                    href={part.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.descriptionLink}
+                  >
+                    {part.content}
+                  </a>
+                ) : (
+                  <span key={idx}>{part.content}</span>
+                )
+              )}
+            </p>
+            {podcast.description.length > 200 && (
+              <button
+                className={styles.expandButton}
+                onClick={() => setIsDescriptionExpanded(prev => !prev)}
+              >
+                {isDescriptionExpanded ? 'Vis mindre' : 'Vis mer'}
+              </button>
+            )}
+          </section>
+        )}
 
         <section className={styles.meta}>
           <div className={styles.metaItem}>

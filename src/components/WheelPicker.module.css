@@ -1,65 +1,47 @@
-/* Inline wheel spinner - iOS style */
+/* Single-slot spinner - slot machine style */
 .spinner {
   position: relative;
-  width: 64px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   overflow: hidden;
+  padding: 0 var(--space-xs);
 }
 
-/* Gradient fade overlays */
-.fadeTop,
-.fadeBottom {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 52px;
-  pointer-events: none;
-  z-index: 2;
+/* Arrow buttons */
+.arrowButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 32px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--transition-fast);
 }
 
-.fadeTop {
-  top: 0;
-  background: linear-gradient(
-    to bottom,
-    var(--bg-secondary) 0%,
-    transparent 100%
-  );
+.arrowButton:hover {
+  color: var(--text-primary);
 }
 
-.fadeBottom {
-  bottom: 0;
-  background: linear-gradient(
-    to top,
-    var(--bg-secondary) 0%,
-    transparent 100%
-  );
-}
-
-/* Selection highlight bar */
-.highlight {
-  position: absolute;
-  top: 50%;
-  left: 3px;
-  right: 3px;
-  height: 26px;
-  transform: translateY(-50%);
-  background: var(--bg-primary);
-  border-radius: var(--radius-sm);
-  pointer-events: none;
-  z-index: 1;
+.arrowButton .material-symbols-outlined {
+  font-size: 16px;
 }
 
 /* Scrollable wheel container */
 .wheel {
-  height: 100%;
+  width: 48px;
+  height: 32px;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  position: relative;
-  z-index: 3;
 }
 
 .wheel::-webkit-scrollbar {
@@ -71,40 +53,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 32px;
   font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
+  font-size: var(--font-sm);
+  color: var(--text-primary);
   cursor: pointer;
-  scroll-snap-align: center;
+  scroll-snap-align: start;
   user-select: none;
-  transition: color 0.15s ease;
-}
-
-.item:hover {
-  color: var(--text-secondary);
 }
 
 .itemSelected {
-  color: var(--text-primary);
   font-weight: 500;
 }
 
-/* Mobile adjustments */
-@media (max-width: 640px) {
-  .spinner {
-    width: 56px;
-  }
-
-  .item {
-    font-size: 11px;
-  }
-
-  .fadeTop,
-  .fadeBottom {
-    height: 48px;
-  }
-
-  .highlight {
-    height: 24px;
-  }
+/* Hide non-visible elements */
+.fadeTop,
+.fadeBottom,
+.highlight {
+  display: none;
 }

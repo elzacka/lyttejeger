@@ -8,8 +8,7 @@ interface WheelPickerProps {
   placeholder?: string
 }
 
-const ITEM_HEIGHT = 26
-const VISIBLE_ITEMS = 5
+const ITEM_HEIGHT = 32
 
 export function WheelPicker({
   options,
@@ -31,8 +30,6 @@ export function WheelPicker({
   const currentIndex = value === null || value === ''
     ? 0
     : allOptions.findIndex(opt => opt.value === value)
-
-  const height = ITEM_HEIGHT * VISIBLE_ITEMS
 
   // Scroll to selected item on mount and value change
   useEffect(() => {
@@ -76,25 +73,26 @@ export function WheelPicker({
     }, 80)
   }, [allOptions, onChange])
 
-  // Handle item click
-  const handleItemClick = (index: number) => {
-    if (!scrollRef.current) return
-
-    isScrollingRef.current = true
-    const targetScroll = index * ITEM_HEIGHT
-    scrollRef.current.scrollTo({
-      top: targetScroll,
-      behavior: 'smooth'
-    })
-
-    setTimeout(() => {
-      isScrollingRef.current = false
-      const selectedOption = allOptions[index]
+  // Navigate to previous/next item
+  const goToPrev = useCallback(() => {
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1
+      const selectedOption = allOptions[newIndex]
       if (selectedOption) {
         onChange(selectedOption.value === '' ? null : selectedOption.value)
       }
-    }, 200)
-  }
+    }
+  }, [currentIndex, allOptions, onChange])
+
+  const goToNext = useCallback(() => {
+    if (currentIndex < allOptions.length - 1) {
+      const newIndex = currentIndex + 1
+      const selectedOption = allOptions[newIndex]
+      if (selectedOption) {
+        onChange(selectedOption.value === '' ? null : selectedOption.value)
+      }
+    }
+  }, [currentIndex, allOptions, onChange])
 
   // Clean up timeout on unmount
   useEffect(() => {
@@ -106,30 +104,30 @@ export function WheelPicker({
   }, [])
 
   return (
-    <div className={styles.spinner} style={{ height }}>
-      {/* Gradient overlays for fade effect */}
-      <div className={styles.fadeTop} />
-      <div className={styles.fadeBottom} />
+    <div className={styles.spinner}>
+      {/* Up arrow */}
+      <button
+        type="button"
+        className={styles.arrowButton}
+        onClick={goToPrev}
+        disabled={currentIndex === 0}
+        aria-label="Forrige"
+      >
+        <span className="material-symbols-outlined" aria-hidden="true">
+          keyboard_arrow_up
+        </span>
+      </button>
 
-      {/* Selection highlight */}
-      <div className={styles.highlight} />
-
-      {/* Scrollable wheel */}
+      {/* Scrollable wheel showing single item */}
       <div
         ref={scrollRef}
         className={styles.wheel}
         onScroll={handleScroll}
-        style={{
-          paddingTop: ITEM_HEIGHT,
-          paddingBottom: ITEM_HEIGHT
-        }}
       >
         {allOptions.map((option, index) => (
           <div
             key={option.value === '' ? '__placeholder__' : option.value}
             className={`${styles.item} ${index === currentIndex ? styles.itemSelected : ''}`}
-            style={{ height: ITEM_HEIGHT }}
-            onClick={() => handleItemClick(index)}
             role="option"
             aria-selected={index === currentIndex}
           >
@@ -137,6 +135,19 @@ export function WheelPicker({
           </div>
         ))}
       </div>
+
+      {/* Down arrow */}
+      <button
+        type="button"
+        className={styles.arrowButton}
+        onClick={goToNext}
+        disabled={currentIndex === allOptions.length - 1}
+        aria-label="Neste"
+      >
+        <span className="material-symbols-outlined" aria-hidden="true">
+          keyboard_arrow_down
+        </span>
+      </button>
     </div>
   )
 }

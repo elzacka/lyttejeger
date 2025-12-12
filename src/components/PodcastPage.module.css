@@ -153,7 +153,7 @@
   justify-content: center;
   width: 100px;
   min-height: var(--button-sm);
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-xs) 0;
   background: var(--accent);
   border: none;
   border-radius: var(--radius-md);
@@ -163,6 +163,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: background var(--transition-fast), transform var(--transition-fast);
+  box-sizing: border-box;
 }
 
 .subscribeButton:hover {
@@ -195,18 +196,57 @@
   margin-bottom: var(--space-md);
 }
 
-.description p {
+.descriptionText {
   margin: 0;
   font-family: var(--font-mono);
   font-size: var(--font-sm);
   color: var(--text-secondary);
   line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.descriptionText.descriptionExpanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.descriptionLink {
+  color: var(--accent);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.descriptionLink:hover {
+  text-decoration: underline;
+}
+
+.expandButton {
+  display: inline-block;
+  margin-top: var(--space-xs);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  cursor: pointer;
+}
+
+.expandButton:hover {
+  text-decoration: underline;
 }
 
 .meta {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-sm);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-sm) var(--space-md);
   padding: var(--space-md);
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
@@ -219,6 +259,7 @@
   align-items: center;
   gap: 2px;
   text-align: center;
+  white-space: nowrap;
 }
 
 .metaLabel {
@@ -619,6 +660,11 @@
     height: 80px;
   }
 
+  .subscribeButton {
+    width: 80px;
+    font-size: var(--font-xs);
+  }
+
   .title {
     font-size: var(--font-base);
   }
@@ -665,6 +711,10 @@
   .image {
     width: 150px;
     height: 150px;
+  }
+
+  .subscribeButton {
+    width: 150px;
   }
 
   .title {

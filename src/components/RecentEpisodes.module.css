@@ -84,8 +84,7 @@
 
 .item {
   display: flex;
-  align-items: center;
-  gap: var(--space-sm);
+  flex-direction: column;
   padding: var(--space-sm);
   background: var(--bg-primary);
   border-radius: var(--radius-md);
@@ -100,6 +99,26 @@
 
 .item:hover {
   background: var(--bg-hover);
+}
+
+.episodeHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.episodeToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
 }
 
 .image {
@@ -289,6 +308,40 @@
   font-size: var(--icon-md);
 }
 
+/* Episode details (show notes) */
+.episodeDetails {
+  padding: var(--space-md) 0 var(--space-xs);
+  margin-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+}
+
+.episodeDescription {
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+.descriptionLink {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.descriptionLink:hover {
+  text-decoration: underline;
+}
+
+.noDescription {
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
 /* Mobile */
 @media (max-width: 640px) {
   .container {
@@ -325,5 +378,9 @@
 
   .meta {
     font-size: var(--font-2xs);
+  }
+
+  .episodeDescription {
+    font-size: var(--font-xs);
   }
 }

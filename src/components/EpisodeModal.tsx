@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { EpisodeWithPodcast } from '../utils/search'
 import type { PlayingEpisode } from './AudioPlayer'
-import { formatDuration, formatDateLong } from '../utils/search'
+import { formatDuration, formatDateLong, linkifyText } from '../utils/search'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import { TranscriptViewer } from './TranscriptViewer'
 import styles from './EpisodeModal.module.css'
@@ -136,7 +136,25 @@ export function EpisodeModal({ episode, onClose, onPlayEpisode, onSelectPodcast 
             )}
           </div>
 
-          <p className={styles.description}>{episode.description}</p>
+          {episode.description && (
+            <p className={styles.description}>
+              {linkifyText(episode.description).map((part, idx) =>
+                part.type === 'link' ? (
+                  <a
+                    key={idx}
+                    href={part.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.descriptionLink}
+                  >
+                    {part.content}
+                  </a>
+                ) : (
+                  <span key={idx}>{part.content}</span>
+                )
+              )}
+            </p>
+          )}
 
           {episode.transcriptUrl && (
             <div className={styles.transcriptSection}>
