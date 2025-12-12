@@ -120,7 +120,7 @@ export function FilterPanel({
 
       {isExpanded && (
         <div className={styles.panel}>
-          {/* Språk */}
+          {/* Språk og år */}
           <div className={styles.section}>
             <div className={styles.chipGrid}>
               {languages.map((language) => (
@@ -134,6 +134,14 @@ export function FilterPanel({
                   {language}
                 </button>
               ))}
+              {activeTab === 'episodes' && (
+                <WheelPicker
+                  options={yearOptions}
+                  value={selectedYear}
+                  onChange={(v) => setYear(v as number | null)}
+                  placeholder="Alle"
+                />
+              )}
             </div>
           </div>
 
@@ -205,21 +213,6 @@ export function FilterPanel({
               )}
             </div>
           </div>
-
-          {/* Year filter - only for episodes */}
-          {activeTab === 'episodes' && (
-            <div className={styles.section}>
-              <div className={styles.yearFilterRow}>
-                <span className={styles.yearLabel}>År</span>
-                <WheelPicker
-                  options={yearOptions}
-                  value={selectedYear}
-                  onChange={(v) => setYear(v as number | null)}
-                  placeholder="Alle"
-                />
-              </div>
-            </div>
-          )}
 
           {activeFilterCount > 0 && (
             <button className={styles.clearButton} onClick={onClearFilters}>

@@ -1,12 +1,13 @@
-/* Single-slot spinner - slot machine style */
+/* Single-slot spinner - matches chip styling */
 .spinner {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2xs);
-  background: var(--bg-secondary);
+  gap: 2px;
+  min-height: var(--button-sm);
+  background: var(--bg-primary);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   overflow: hidden;
   padding: 0 var(--space-xs);
 }
@@ -16,8 +17,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 32px;
+  width: 14px;
+  height: var(--button-sm);
   background: none;
   border: none;
   color: var(--text-muted);
@@ -30,14 +31,19 @@
   color: var(--text-primary);
 }
 
+.arrowButton:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
 .arrowButton .material-symbols-outlined {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 /* Scrollable wheel container */
 .wheel {
-  width: 48px;
-  height: 32px;
+  width: 32px;
+  height: var(--button-sm);
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
@@ -48,22 +54,22 @@
   display: none;
 }
 
-/* Individual items */
+/* Individual items - matches chip font */
 .item {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
+  height: var(--button-sm);
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
-  color: var(--text-primary);
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
   cursor: pointer;
   scroll-snap-align: start;
   user-select: none;
 }
 
 .itemSelected {
-  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 /* Hide non-visible elements */
@@ -71,4 +77,31 @@
 .fadeBottom,
 .highlight {
   display: none;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .spinner {
+    min-height: 26px;
+    padding: 0 4px;
+  }
+
+  .arrowButton {
+    width: 12px;
+    height: 26px;
+  }
+
+  .arrowButton .material-symbols-outlined {
+    font-size: 12px;
+  }
+
+  .wheel {
+    width: 28px;
+    height: 26px;
+  }
+
+  .item {
+    height: 26px;
+    font-size: 11px;
+  }
 }

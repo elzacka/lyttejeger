@@ -8,7 +8,8 @@ interface WheelPickerProps {
   placeholder?: string
 }
 
-const ITEM_HEIGHT = 32
+// Must match CSS height - use 36 (--button-sm) for desktop, mobile uses 26px
+const ITEM_HEIGHT = 36
 
 export function WheelPicker({
   options,
