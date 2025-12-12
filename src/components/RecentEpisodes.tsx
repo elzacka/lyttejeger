@@ -86,7 +86,9 @@ export function RecentEpisodes({
     fetchRecentEpisodes()
   }, [fetchRecentEpisodes])
 
-  const handlePlayEpisode = (episode: EpisodeWithSubscription) => {
+  const handlePlayEpisode = (episode: EpisodeWithSubscription, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    e?.preventDefault()
     onPlayEpisode({
       ...episode,
       podcastTitle: episode.subscription.title,
@@ -173,9 +175,11 @@ export function RecentEpisodes({
                 <div className={styles.menuContainer}>
                   <button
                     className={styles.menuButton}
-                    onClick={() =>
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      e.preventDefault()
                       setMenuOpenId(menuOpenId === episode.id ? null : episode.id)
-                    }
+                    }}
                     aria-label="Flere valg"
                     aria-expanded={isMenuOpen}
                   >
@@ -185,7 +189,9 @@ export function RecentEpisodes({
                     <div className={styles.menuDropdown}>
                       <button
                         className={styles.menuItem}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          e.preventDefault()
                           onPlayNext(
                             episode,
                             episode.subscription.title,
@@ -201,7 +207,9 @@ export function RecentEpisodes({
                       </button>
                       <button
                         className={styles.menuItem}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          e.preventDefault()
                           onAddToQueue(
                             episode,
                             episode.subscription.title,
@@ -221,7 +229,7 @@ export function RecentEpisodes({
                 </div>
                 <button
                   className={styles.playButton}
-                  onClick={() => handlePlayEpisode(episode)}
+                  onClick={(e) => handlePlayEpisode(episode, e)}
                   aria-label={`Spill ${episode.title}`}
                 >
                   <span className="material-symbols-outlined">play_arrow</span>

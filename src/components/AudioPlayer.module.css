@@ -73,32 +73,14 @@
   gap: var(--space-xs);
 }
 
-/* Expand button in mini controls */
-.expandButton {
-  width: var(--button-sm);
-  height: var(--button-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: color var(--transition-fast);
-}
-
-.expandButton:hover {
-  color: var(--text-primary);
-}
-
-.expandButton:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.expandButton .material-symbols-outlined {
-  font-size: var(--icon-sm);
+/* Swipe handle indicator */
+.swipeHandle {
+  display: none;
+  width: 36px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: var(--space-xs) auto 0;
 }
 
 /* Full controls wrapper */
@@ -326,17 +308,29 @@
   /* Collapsed state (default on mobile) */
   .player.collapsed .container {
     display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: var(--space-xs) var(--space-sm);
+    padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .player.collapsed .swipeHandle {
+    display: block;
+    order: -1;
+  }
+
+  .player.collapsed .contentRow {
+    display: flex;
     align-items: center;
     gap: var(--space-sm);
-    padding: var(--space-sm);
-    padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
+    width: 100%;
   }
 
   .player.collapsed .info {
     flex: 1;
   }
 
-  /* Hide expand icon in info area when collapsed - expand button is in miniControls */
+  /* Hide expand icon in info area when collapsed - swipe to expand */
   .player.collapsed .expandIcon {
     display: none;
   }
@@ -374,6 +368,15 @@
     padding: var(--space-sm);
     padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
     position: relative;
+  }
+
+  .player.expanded .swipeHandle {
+    display: block;
+    margin-bottom: var(--space-xs);
+  }
+
+  .player.expanded .contentRow {
+    display: contents;
   }
 
   .player.expanded .info {
@@ -479,6 +482,14 @@
 
   .expandIcon {
     display: none;
+  }
+
+  .swipeHandle {
+    display: none;
+  }
+
+  .contentRow {
+    display: contents;
   }
 
   .info {

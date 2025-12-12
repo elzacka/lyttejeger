@@ -11,6 +11,7 @@ import { RecentEpisodes } from './components/RecentEpisodes'
 import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { BottomNav, type NavItem } from './components/BottomNav'
+import { SheetProvider } from './components/SheetProvider'
 import { useSearch } from './hooks/useSearch'
 import { useQueue } from './hooks/useQueue'
 import { useSubscriptions } from './hooks/useSubscriptions'
@@ -248,10 +249,18 @@ function App() {
     // 'info' is handled internally by BottomNav (opens InfoSheet)
   }, [setActiveTab, setQuery])
 
-  // If a podcast is selected, show the podcast page
-  if (selectedPodcast) {
-    return (
-      <div className="app">
+  // Determine active nav item
+  const activeNavItem = selectedPodcast
+    ? previousActiveTab
+    : activeTab === 'subscriptions' || activeTab === 'queue'
+    ? activeTab
+    : 'home'
+
+  return (
+    <SheetProvider>
+    <div className="app">
+      {/* Show PodcastPage when selected, otherwise show main content */}
+      {selectedPodcast ? (
         <PodcastPage
           podcast={selectedPodcast}
           onPlayEpisode={handlePlayEpisode}
@@ -263,127 +272,117 @@ function App() {
           onUnsubscribe={handleUnsubscribe}
           onBack={handleBackFromPodcast}
         />
-        <BottomNav
-          activeItem={previousActiveTab}
-          onNavigate={handleNavigation}
-          queueCount={queueLength}
-          subscriptionCount={subscriptionCount}
-        />
-        <ErrorBoundary>
-          <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
-        </ErrorBoundary>
-      </div>
-    )
-  }
+      ) : (
+        <>
+          <a href="#main-content" className="skip-link">
+            Hopp til hovedinnhold
+          </a>
+          <Header />
 
-  return (
-    <div className="app">
-      <a href="#main-content" className="skip-link">
-        Hopp til hovedinnhold
-      </a>
-      <Header />
+          <main className="main" id="main-content">
+            {activeTab !== 'subscriptions' && activeTab !== 'queue' && (
+              <>
+                <section className="search-section">
+                  <SearchBar
+                    value={filters.query}
+                    onChange={setQuery}
+                    isPending={isPending}
+                  />
+                </section>
 
-      <main className="main" id="main-content">
-        {activeTab !== 'subscriptions' && activeTab !== 'queue' && (
-          <>
-            <section className="search-section">
-              <SearchBar
-                value={filters.query}
-                onChange={setQuery}
-                isPending={isPending}
-              />
-            </section>
+                {error && (
+                  <div className="error-banner" role="alert">
+                    <span className="material-symbols-outlined" aria-hidden="true">error</span>
+                    <span>{error}</span>
+                  </div>
+                )}
 
-            {error && (
-              <div className="error-banner" role="alert">
-                <span className="material-symbols-outlined" aria-hidden="true">error</span>
-                <span>{error}</span>
-              </div>
+                <section className="filter-section">
+                  <FilterPanel
+                    filters={filters}
+                    categories={categories}
+                    languages={allLanguages}
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                    onToggleCategory={toggleCategory}
+                    onToggleLanguage={toggleLanguage}
+                    onSetDateFrom={setDateFrom}
+                    onSetDateTo={setDateTo}
+                    onClearFilters={clearFilters}
+                    activeFilterCount={activeFilterCount}
+                  />
+                </section>
+              </>
             )}
 
-            <section className="filter-section">
-              <FilterPanel
-                filters={filters}
-                categories={categories}
-                languages={allLanguages}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                onToggleCategory={toggleCategory}
-                onToggleLanguage={toggleLanguage}
-                onSetDateFrom={setDateFrom}
-                onSetDateTo={setDateTo}
-                onClearFilters={clearFilters}
-                activeFilterCount={activeFilterCount}
+            {/* Show recent episodes from subscriptions when not searching */}
+            {subscriptionCount > 0 && !filters.query && activeTab !== 'queue' && activeTab !== 'subscriptions' && (
+              <RecentEpisodes
+                subscriptions={subscriptions}
+                onPlayEpisode={handlePlayEpisode}
+                onAddToQueue={handleAddEpisodeToQueue}
+                onPlayNext={handlePlayEpisodeNext}
+                isInQueue={isInQueue}
               />
+            )}
+
+            <section className="results-section">
+              {(activeTab === 'podcasts' || activeTab === 'episodes') && filters.query && (
+                <div className="sort-bar">
+                  <select
+                    className="sort-select"
+                    value={filters.sortBy}
+                    onChange={(e) => setSortBy(e.target.value as typeof filters.sortBy)}
+                    aria-label="Sorter resultater"
+                  >
+                    <option value="relevance">Relevans</option>
+                    <option value="newest">Nyeste</option>
+                    <option value="oldest">Eldste</option>
+                    <option value="popular">Populære</option>
+                  </select>
+                </div>
+              )}
+              {activeTab === 'queue' ? (
+                <QueueView
+                  queue={queue}
+                  onPlay={handlePlayFromQueue}
+                  onRemove={removeFromQueue}
+                  onClear={clearQueue}
+                  onReorder={handleReorder}
+                />
+              ) : activeTab === 'subscriptions' ? (
+                <SubscriptionsView
+                  subscriptions={subscriptions}
+                  onUnsubscribe={unsubscribe}
+                  onSelectPodcast={handleSelectSubscribedPodcast}
+                />
+              ) : activeTab === 'podcasts' ? (
+                <PodcastList
+                  podcasts={results.podcasts}
+                  searchQuery={filters.query}
+                  isLoading={isPending}
+                  onSelectPodcast={handleSelectPodcast}
+                />
+              ) : (
+                <EpisodeList
+                  episodes={results.episodes}
+                  searchQuery={filters.query}
+                  isLoading={isPending}
+                  onPlayEpisode={handlePlayEpisode}
+                  onAddToQueue={handleAddToQueue}
+                  onPlayNext={handlePlayNext}
+                  isInQueue={isInQueue}
+                  onSelectPodcast={handleSelectPodcastById}
+                />
+              )}
             </section>
-          </>
-        )}
+          </main>
+        </>
+      )}
 
-        {/* Show recent episodes from subscriptions when not searching */}
-        {subscriptionCount > 0 && !filters.query && activeTab !== 'queue' && activeTab !== 'subscriptions' && (
-          <RecentEpisodes
-            subscriptions={subscriptions}
-            onPlayEpisode={handlePlayEpisode}
-            onAddToQueue={handleAddEpisodeToQueue}
-            onPlayNext={handlePlayEpisodeNext}
-            isInQueue={isInQueue}
-          />
-        )}
-
-        <section className="results-section">
-          {(activeTab === 'podcasts' || activeTab === 'episodes') && filters.query && (
-            <div className="sort-bar">
-              <select
-                className="sort-select"
-                value={filters.sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof filters.sortBy)}
-                aria-label="Sorter resultater"
-              >
-                <option value="relevance">Relevans</option>
-                <option value="newest">Nyeste</option>
-                <option value="oldest">Eldste</option>
-                <option value="popular">Populære</option>
-              </select>
-            </div>
-          )}
-          {activeTab === 'queue' ? (
-            <QueueView
-              queue={queue}
-              onPlay={handlePlayFromQueue}
-              onRemove={removeFromQueue}
-              onClear={clearQueue}
-              onReorder={handleReorder}
-            />
-          ) : activeTab === 'subscriptions' ? (
-            <SubscriptionsView
-              subscriptions={subscriptions}
-              onUnsubscribe={unsubscribe}
-              onSelectPodcast={handleSelectSubscribedPodcast}
-            />
-          ) : activeTab === 'podcasts' ? (
-            <PodcastList
-              podcasts={results.podcasts}
-              searchQuery={filters.query}
-              isLoading={isPending}
-              onSelectPodcast={handleSelectPodcast}
-            />
-          ) : (
-            <EpisodeList
-              episodes={results.episodes}
-              searchQuery={filters.query}
-              isLoading={isPending}
-              onPlayEpisode={handlePlayEpisode}
-              onAddToQueue={handleAddToQueue}
-              onPlayNext={handlePlayNext}
-              isInQueue={isInQueue}
-              onSelectPodcast={handleSelectPodcastById}
-            />
-          )}
-        </section>
-      </main>
-
+      {/* Always render BottomNav and AudioPlayer at the same level to prevent remounting */}
       <BottomNav
-        activeItem={activeTab === 'subscriptions' || activeTab === 'queue' ? activeTab : 'home'}
+        activeItem={activeNavItem}
         onNavigate={handleNavigation}
         queueCount={queueLength}
         subscriptionCount={subscriptionCount}
@@ -392,6 +391,7 @@ function App() {
         <AudioPlayer episode={playingEpisode} onClose={handleClosePlayer} />
       </ErrorBoundary>
     </div>
+    </SheetProvider>
   )
 }
 

@@ -66,7 +66,7 @@
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 0 var(--space-md) var(--space-md);
   border-bottom: 1px solid var(--border, var(--color-border));
 }
@@ -77,30 +77,6 @@
   font-size: var(--font-base, var(--font-size-md));
   font-weight: var(--font-weight-medium, 500);
   color: var(--text-primary, var(--color-text-primary));
-}
-
-.closeButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--button-sm);
-  height: var(--button-sm);
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-sm);
-  color: var(--text-muted, var(--color-text-muted));
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-
-.closeButton:hover {
-  background: var(--bg-hover, var(--color-bg-hover));
-  color: var(--text-primary, var(--color-text-primary));
-}
-
-.closeButton .material-symbols-outlined {
-  font-size: var(--icon-md);
 }
 
 .content {

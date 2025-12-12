@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { InfoSheet } from './InfoSheet'
 import { InstallSheet } from './InstallSheet'
 import { shouldShowInstallButton } from '../utils/deviceDetection'
+import { useSheetContext } from '../hooks/useSheetContext'
 import styles from './BottomNav.module.css'
 
 export type NavItem = 'home' | 'subscriptions' | 'queue' | 'info'
@@ -21,12 +22,11 @@ export function BottomNav({
 }: BottomNavProps) {
   const [infoOpen, setInfoOpen] = useState(false)
   const [installOpen, setInstallOpen] = useState(false)
-  const [showInstall, setShowInstall] = useState(false)
+  const { hasOpenSheet } = useSheetContext()
 
   // Check if we should show install button (only in browser, not standalone)
-  useEffect(() => {
-    setShowInstall(shouldShowInstallButton())
-  }, [])
+  // This is evaluated once on initial render - shouldShowInstallButton is synchronous
+  const showInstall = shouldShowInstallButton()
 
   const handleInfoClick = () => {
     setInfoOpen(true)
@@ -38,7 +38,7 @@ export function BottomNav({
 
   return (
     <>
-      <nav className={styles.nav} aria-label="Hovednavigasjon">
+      <nav className={`${styles.nav} ${hasOpenSheet ? styles.hidden : ''}`} aria-label="Hovednavigasjon">
         {showInstall && (
           <button
             className={styles.navItem}

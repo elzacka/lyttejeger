@@ -1,7 +1,10 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import type { Episode } from '../types/podcast'
 import { savePlaybackPosition, getPlaybackPosition } from '../services/db'
 import styles from './AudioPlayer.module.css'
+
+// Swipe detection threshold in pixels
+const SWIPE_THRESHOLD = 50
 
 export interface PlayingEpisode extends Episode {
   podcastTitle?: string
@@ -31,7 +34,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const lastSaveRef = useRef<number>(0)
   const saveIntervalRef = useRef<number | null>(null)
 
-  // Handle episode changes - single unified effect
+  // Handle episode changes - set autoplay flag and load position
   useEffect(() => {
     const episodeId = episode?.id ?? null
 
@@ -43,40 +46,28 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     // Update ref
     currentEpisodeIdRef.current = episodeId
 
-    // If no episode, reset everything
-    if (!episode) {
-      setIsPlaying(false)
-      setCurrentTime(0)
-      setDuration(0)
-      setIsLoading(false)
-      setAudioError(false)
-      shouldAutoPlayRef.current = false
-      return
-    }
+    if (episode) {
+      // New episode - mark for auto-play when audio becomes ready
+      shouldAutoPlayRef.current = true
 
-    // New episode - reset state and mark for auto-play
-    setIsPlaying(false)
-    setCurrentTime(0)
-    setDuration(0)
-    setIsLoading(true)
-    setAudioError(false)
-    shouldAutoPlayRef.current = true // Auto-play when ready
-
-    // Load saved position asynchronously
-    const loadPosition = async () => {
-      try {
-        const saved = await getPlaybackPosition(episode.id)
-        if (saved && !saved.completed && audioRef.current) {
-          audioRef.current.currentTime = saved.position
-          setCurrentTime(saved.position)
+      // Load saved position asynchronously
+      const loadPosition = async () => {
+        try {
+          const saved = await getPlaybackPosition(episode.id)
+          if (saved && !saved.completed && audioRef.current) {
+            audioRef.current.currentTime = saved.position
+            setCurrentTime(saved.position)
+          }
+        } catch {
+          // Ignore position load errors
         }
-      } catch {
-        // Ignore position load errors
       }
-    }
 
-    loadPosition()
-  }, [episode?.id, episode])
+      loadPosition()
+    } else {
+      shouldAutoPlayRef.current = false
+    }
+  }, [episode])
 
   // Save playback position every 5 seconds while playing
   useEffect(() => {
@@ -346,12 +337,42 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   }, [])
 
   const handleInfoClick = useCallback(() => {
-    if (window.innerWidth <= 640 && !isExpanded) {
-      togglePlayPause()
-    } else {
-      toggleExpanded()
+    toggleExpanded()
+  }, [toggleExpanded])
+
+  // Swipe gesture handling
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY }
+  }, [])
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return
+
+    const touch = e.changedTouches[0]
+    const deltaY = touchStartRef.current.y - touch.clientY
+    const deltaX = Math.abs(touchStartRef.current.x - touch.clientX)
+
+    // Only trigger swipe if vertical movement is dominant and exceeds threshold
+    if (Math.abs(deltaY) > SWIPE_THRESHOLD && Math.abs(deltaY) > deltaX) {
+      if (deltaY > 0 && !isExpanded) {
+        // Swipe up - expand
+        setIsExpanded(true)
+      } else if (deltaY < 0 && isExpanded) {
+        // Swipe down - collapse
+        setIsExpanded(false)
+      }
     }
-  }, [isExpanded, togglePlayPause, toggleExpanded])
+
+    touchStartRef.current = null
+  }, [isExpanded])
+
+  const swipeHandlers = useMemo(() => ({
+    onTouchStart: handleTouchStart,
+    onTouchEnd: handleTouchEnd,
+  }), [handleTouchStart, handleTouchEnd])
 
   // Don't render if no episode
   if (!episode) return null
@@ -360,7 +381,10 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const imageUrl = episode.imageUrl || episode.podcastImage
 
   return (
-    <div className={`${styles.player} ${isExpanded ? styles.expanded : styles.collapsed}`}>
+    <div
+      className={`${styles.player} ${isExpanded ? styles.expanded : styles.collapsed}`}
+      {...swipeHandlers}
+    >
       <audio
         ref={audioRef}
         src={episode.audioUrl}
@@ -380,19 +404,15 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       <div className={styles.miniProgress} style={{ width: `${progress}%` }} aria-hidden="true" />
 
       <div className={styles.container}>
+        {/* Swipe handle indicator */}
+        <div className={styles.swipeHandle} aria-hidden="true" />
+
+        <div className={styles.contentRow}>
         {/* Episode info - on mobile collapsed: play/pause, otherwise: expand/collapse */}
         <button
           className={styles.info}
           onClick={handleInfoClick}
-          aria-label={
-            isExpanded
-              ? 'Skjul kontroller'
-              : window.innerWidth <= 640
-                ? isPlaying
-                  ? 'Pause'
-                  : 'Spill'
-                : 'Vis kontroller'
-          }
+          aria-label={isExpanded ? 'Skjul kontroller' : 'Vis kontroller'}
           aria-expanded={isExpanded}
         >
           {imageUrl ? (
@@ -446,14 +466,8 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               <span className="material-symbols-outlined">play_arrow</span>
             )}
           </button>
-          <button
-            className={styles.expandButton}
-            onClick={toggleExpanded}
-            aria-label="Vis full avspiller"
-          >
-            <span className="material-symbols-outlined">expand_less</span>
-          </button>
         </div>
+        </div>{/* End contentRow */}
 
         {/* Full controls - visible in expanded state */}
         <div className={styles.fullControls}>

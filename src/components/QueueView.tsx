@@ -210,7 +210,6 @@ export function QueueView({
   if (queue.length === 0) {
     return (
       <div className={styles.empty}>
-        <span className="material-symbols-outlined" aria-hidden="true">queue_music</span>
         <h3>Køen er tom</h3>
         <p>Legg til episoder fra søkeresultatene eller en podcast-side</p>
       </div>

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useCallback, type ReactNode } from 'react'
+import { useEffect, useRef, useCallback, useId, type ReactNode } from 'react'
+import { useSheetContext } from '../hooks/useSheetContext'
 import styles from './Sheet.module.css'
 
 interface SheetProps {
@@ -19,6 +20,8 @@ export function Sheet({
   children,
   ariaLabel,
 }: SheetProps) {
+  const sheetId = useId()
+  const { registerSheet, unregisterSheet } = useSheetContext()
   const sheetRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef({
     startY: 0,
@@ -26,6 +29,14 @@ export function Sheet({
     startTime: 0,
     isDragging: false,
   })
+
+  // Register/unregister sheet with context
+  useEffect(() => {
+    if (isOpen) {
+      registerSheet(sheetId)
+      return () => unregisterSheet(sheetId)
+    }
+  }, [isOpen, sheetId, registerSheet, unregisterSheet])
 
   const handleDragStart = useCallback((clientY: number) => {
     dragRef.current = {
@@ -173,13 +184,6 @@ export function Sheet({
         {title && (
           <div className={styles.header}>
             <h2 className={styles.title}>{title}</h2>
-            <button
-              className={styles.closeButton}
-              onClick={onClose}
-              aria-label="Lukk"
-            >
-              <span className="material-symbols-outlined">close</span>
-            </button>
           </div>
         )}
 

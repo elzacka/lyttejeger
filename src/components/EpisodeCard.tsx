@@ -24,6 +24,7 @@ export function EpisodeCard({
   const [imageError, setImageError] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const actionClickedRef = useRef(false)
 
   const imageUrl = episode.imageUrl || episode.podcast?.imageUrl
 
@@ -57,8 +58,11 @@ export function EpisodeCard({
     }
   }, [menuOpen])
 
-  const playEpisode = (e: React.MouseEvent) => {
+  const playEpisode = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation()
+    e.preventDefault()
+    actionClickedRef.current = true
+    setTimeout(() => { actionClickedRef.current = false }, 100)
     if (onPlay) {
       onPlay(episode)
     } else if (episode.audioUrl) {
@@ -67,6 +71,8 @@ export function EpisodeCard({
   }
 
   const handleCardClick = () => {
+    // Ignore if an action button was just clicked
+    if (actionClickedRef.current) return
     if (onShowDetails) {
       onShowDetails(episode)
     }
@@ -81,19 +87,28 @@ export function EpisodeCard({
     }
   }
 
-  const handleMenuClick = (e: React.MouseEvent) => {
+  const handleMenuClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation()
+    e.preventDefault()
+    actionClickedRef.current = true
+    setTimeout(() => { actionClickedRef.current = false }, 100)
     setMenuOpen(!menuOpen)
   }
 
-  const handleAddToQueue = (e: React.MouseEvent) => {
+  const handleAddToQueue = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation()
+    e.preventDefault()
+    actionClickedRef.current = true
+    setTimeout(() => { actionClickedRef.current = false }, 100)
     onAddToQueue?.(episode)
     setMenuOpen(false)
   }
 
-  const handlePlayNext = (e: React.MouseEvent) => {
+  const handlePlayNext = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation()
+    e.preventDefault()
+    actionClickedRef.current = true
+    setTimeout(() => { actionClickedRef.current = false }, 100)
     onPlayNext?.(episode)
     setMenuOpen(false)
   }

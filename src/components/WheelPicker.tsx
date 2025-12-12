@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useMemo } from 'react'
 import styles from './WheelPicker.module.css'
 
 interface WheelPickerProps {
@@ -21,8 +21,11 @@ export function WheelPicker({
   const isScrollingRef = useRef(false)
   const scrollTimeoutRef = useRef<number | null>(null)
 
-  // Include placeholder option at the start
-  const allOptions = [{ value: '', label: placeholder }, ...options]
+  // Include placeholder option at the start - memoize to prevent re-creation
+  const allOptions = useMemo(
+    () => [{ value: '', label: placeholder }, ...options],
+    [options, placeholder]
+  )
 
   // Find current index
   const currentIndex = value === null || value === ''

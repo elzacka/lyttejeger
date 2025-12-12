@@ -113,9 +113,6 @@ export function SubscriptionsView({
   if (subscriptions.length === 0) {
     return (
       <div className={styles.empty}>
-        <span className="material-symbols-outlined" aria-hidden="true">
-          bookmark_border
-        </span>
         <h3>Du følger ingen podcaster ennå</h3>
         <p>Søk etter podcaster og trykk på Følg for å abonnere</p>
       </div>

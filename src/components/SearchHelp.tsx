@@ -1,71 +1,39 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
+import { Sheet } from './Sheet'
 import styles from './SearchHelp.module.css'
 
 const searchTips = [
   {
     example: 'fotball vålerenga',
-    description: 'Begge ord må finnes (AND)',
+    description: 'Treff der både fotball og Vålerenga er nevnt',
   },
   {
     example: 'krim OR true crime',
-    description: 'Minst ett av ordene må finnes',
+    description: 'Krim eller True Crime',
   },
   {
     example: '"true crime"',
-    description: 'Søk etter eksakt frase',
+    description: 'Eksakt frase',
   },
   {
     example: 'politikk -nyheter',
-    description: 'Må ha "politikk", ikke "nyheter"',
+    description: 'Treff på politikk, men ikke der nyheter er nevnt',
   },
   {
     example: '"true crime" -mord',
-    description: 'Frase uten visse ord',
+    description: 'Eksakt frase, men ikke der mord er nevnt',
   },
 ]
 
 export function SearchHelp() {
   const [isOpen, setIsOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const triggerRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    if (!isOpen) return
-
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false)
-      }
-    }
-
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setIsOpen(false)
-        triggerRef.current?.focus()
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('keydown', handleEscape)
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [isOpen])
 
   return (
-    <div className={styles.container} ref={containerRef}>
+    <>
       <button
-        ref={triggerRef}
         type="button"
         className={styles.trigger}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-haspopup="true"
+        onClick={() => setIsOpen(true)}
         aria-label="Vis søketips"
         title="Søketips"
       >
@@ -74,25 +42,16 @@ export function SearchHelp() {
         </span>
       </button>
 
-      {isOpen && (
-        <>
-          <div
-            className={styles.backdrop}
-            onClick={() => setIsOpen(false)}
-            aria-hidden="true"
-          />
-          <div className={styles.dropdown} role="tooltip">
-            <ul className={styles.list} role="list">
-              {searchTips.map((tip, index) => (
-                <li key={index} className={styles.item}>
-                  <span className={styles.example}>{tip.example}</span>
-                  <span className={styles.description}>{tip.description}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </>
-      )}
-    </div>
+      <Sheet isOpen={isOpen} onClose={() => setIsOpen(false)} title="Søketips">
+        <ul className={styles.list} role="list">
+          {searchTips.map((tip, index) => (
+            <li key={index} className={styles.item}>
+              <span className={styles.example}>{tip.example}</span>
+              <span className={styles.description}>{tip.description}</span>
+            </li>
+          ))}
+        </ul>
+      </Sheet>
+    </>
   )
 }

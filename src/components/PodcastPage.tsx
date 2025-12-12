@@ -80,7 +80,9 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
     fetchEpisodes()
   }, [podcast.id])
 
-  const handlePlayEpisode = (episode: Episode) => {
+  const handlePlayEpisode = (episode: Episode, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    e?.preventDefault()
     onPlayEpisode({
       ...episode,
       podcastTitle: podcast.title,
@@ -114,26 +116,19 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
 
       <div className={styles.content}>
         <section className={styles.podcastInfo}>
-          {imageError ? (
-            <div className={`${styles.image} image-placeholder`}>
-              <span className="material-symbols-outlined" aria-hidden="true">podcasts</span>
-            </div>
-          ) : (
-            <img
-              src={podcast.imageUrl}
-              alt={`Omslagsbilde for ${podcast.title}`}
-              className={styles.image}
-              onError={() => setImageError(true)}
-            />
-          )}
-          <div className={styles.infoContent}>
-            <h2 className={styles.title}>{podcast.title}</h2>
-            <p className={styles.author}>{podcast.author}</p>
-            <div className={styles.rating}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--warning-color)' }}>star</span>
-              <span>{podcast.rating.toFixed(1)}</span>
-            </div>
-            {podcast.explicit && <span className={styles.explicitBadge}>Eksplisitt</span>}
+          <div className={styles.imageWrapper}>
+            {imageError ? (
+              <div className={`${styles.image} image-placeholder`}>
+                <span className="material-symbols-outlined" aria-hidden="true">podcasts</span>
+              </div>
+            ) : (
+              <img
+                src={podcast.imageUrl}
+                alt={`Omslagsbilde for ${podcast.title}`}
+                className={styles.image}
+                onError={() => setImageError(true)}
+              />
+            )}
             {(onSubscribe || onUnsubscribe) && (
               <button
                 className={`${styles.subscribeButton} ${isSubscribed ? styles.subscribed : ''}`}
@@ -143,6 +138,15 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                 {isSubscribed ? 'Følger' : 'Følg'}
               </button>
             )}
+          </div>
+          <div className={styles.infoContent}>
+            <h2 className={styles.title}>{podcast.title}</h2>
+            <p className={styles.author}>{podcast.author}</p>
+            <div className={styles.rating}>
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--warning-color)' }}>star</span>
+              <span>{podcast.rating.toFixed(1)}</span>
+            </div>
+            {podcast.explicit && <span className={styles.explicitBadge}>Eksplisitt</span>}
           </div>
         </section>
 
@@ -222,7 +226,11 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                           <div className={styles.menuContainer} ref={menuOpenId === episode.id ? menuRef : null}>
                             <button
                               className={styles.menuButton}
-                              onClick={() => setMenuOpenId(menuOpenId === episode.id ? null : episode.id)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
+                                setMenuOpenId(menuOpenId === episode.id ? null : episode.id)
+                              }}
                               aria-label="Flere valg"
                               aria-expanded={menuOpenId === episode.id}
                             >
@@ -252,7 +260,9 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                               >
                                 <button
                                   className={styles.menuItem}
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    e.preventDefault()
                                     onPlayNext?.(episode, podcast.title, podcast.imageUrl)
                                     setMenuOpenId(null)
                                   }}
@@ -263,7 +273,9 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                                 </button>
                                 <button
                                   className={styles.menuItem}
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    e.preventDefault()
                                     onAddToQueue(episode, podcast.title, podcast.imageUrl)
                                     setMenuOpenId(null)
                                   }}
@@ -279,7 +291,7 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                         )}
                         <button
                           className={styles.playButton}
-                          onClick={() => handlePlayEpisode(episode)}
+                          onClick={(e) => handlePlayEpisode(episode, e)}
                           aria-label={`Spill ${episode.title}`}
                         >
                           <span className="material-symbols-outlined">play_arrow</span>
