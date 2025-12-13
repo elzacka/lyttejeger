@@ -30,6 +30,19 @@ export function BottomNav({
   return (
     <>
       <nav className={`${styles.nav} ${hasOpenSheet ? styles.hidden : ''}`} aria-label="Hovednavigasjon">
+        {showInstall && (
+          <button
+            className={styles.navItem}
+            onClick={() => setInstallOpen(true)}
+            aria-haspopup="dialog"
+          >
+            <span className={styles.iconWrapper}>
+              <span className="material-symbols-outlined" aria-hidden="true">download</span>
+            </span>
+            <span className={styles.label}>Installer</span>
+          </button>
+        )}
+
         <button
           className={`${styles.navItem} ${activeItem === 'search' ? styles.active : ''}`}
           onClick={() => onNavigate('search')}
@@ -83,19 +96,6 @@ export function BottomNav({
           </span>
           <span className={styles.label}>Kø</span>
         </button>
-
-        {showInstall && (
-          <button
-            className={styles.navItem}
-            onClick={() => setInstallOpen(true)}
-            aria-haspopup="dialog"
-          >
-            <span className={styles.iconWrapper}>
-              <span className="material-symbols-outlined" aria-hidden="true">download</span>
-            </span>
-            <span className={styles.label}>Installer</span>
-          </button>
-        )}
 
         <button
           className={styles.navItem}
