@@ -84,30 +84,33 @@ export function BottomNav({
           <span className={styles.label}>Kø</span>
         </button>
 
+        {showInstall && (
+          <button
+            className={styles.navItem}
+            onClick={() => setInstallOpen(true)}
+            aria-haspopup="dialog"
+          >
+            <span className={styles.iconWrapper}>
+              <span className="material-symbols-outlined" aria-hidden="true">download</span>
+            </span>
+            <span className={styles.label}>Installer</span>
+          </button>
+        )}
+
         <button
           className={styles.navItem}
           onClick={() => setInfoOpen(true)}
           aria-haspopup="dialog"
         >
           <span className={styles.iconWrapper}>
-            <span className="material-symbols-outlined" aria-hidden="true">
-              {showInstall ? 'more_horiz' : 'info'}
-            </span>
+            <span className="material-symbols-outlined" aria-hidden="true">info</span>
           </span>
-          <span className={styles.label}>Mer</span>
+          <span className={styles.label}>Info</span>
         </button>
       </nav>
 
       <InstallSheet isOpen={installOpen} onClose={() => setInstallOpen(false)} />
-      <InfoSheet
-        isOpen={infoOpen}
-        onClose={() => setInfoOpen(false)}
-        showInstall={showInstall}
-        onInstallClick={() => {
-          setInfoOpen(false)
-          setInstallOpen(true)
-        }}
-      />
+      <InfoSheet isOpen={infoOpen} onClose={() => setInfoOpen(false)} />
     </>
   )
 }
