@@ -67,7 +67,7 @@
 }
 
 .spinnerIcon {
-  font-size: 18px;
+  font-size: var(--icon-md);
   animation: spin 1s linear infinite;
 }
 
@@ -103,7 +103,7 @@
 }
 
 .clearButton .material-symbols-outlined {
-  font-size: 16px;
+  font-size: var(--icon-sm);
 }
 
 .clearButton:hover {

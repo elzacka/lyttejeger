@@ -37,7 +37,7 @@
 }
 
 .arrowButton .material-symbols-outlined {
-  font-size: 14px;
+  font-size: var(--icon-sm);
 }
 
 /* Scrollable wheel container */
@@ -83,7 +83,7 @@
 @media (max-width: 640px) {
   .spinner {
     min-height: 26px;
-    padding: 0 4px;
+    padding: 0 var(--space-2xs);
   }
 
   .arrowButton {
@@ -92,7 +92,7 @@
   }
 
   .arrowButton .material-symbols-outlined {
-    font-size: 12px;
+    font-size: var(--font-xs);
   }
 
   .wheel {
@@ -102,6 +102,6 @@
 
   .item {
     height: 26px;
-    font-size: 11px;
+    font-size: var(--font-2xs);
   }
 }

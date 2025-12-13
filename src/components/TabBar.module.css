@@ -56,7 +56,7 @@
 }
 
 .tab .material-symbols-outlined {
-  font-size: 20px;
+  font-size: var(--icon-md);
 }
 
 /* Mobile - icons only */

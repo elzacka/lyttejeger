@@ -140,7 +140,7 @@
   padding: 0 4px;
   background: var(--accent);
   color: white;
-  font-size: 10px;
+  font-size: var(--font-2xs);
   font-weight: 600;
   border-radius: var(--radius-full);
 }
@@ -171,7 +171,7 @@
 .sectionTitle {
   margin: 0 0 var(--space-sm) 0;
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -334,7 +334,7 @@
 }
 
 .categoryCheckbox .material-symbols-outlined {
-  font-size: 14px;
+  font-size: var(--icon-sm);
   color: white;
 }
 
@@ -372,7 +372,7 @@
 }
 
 .selectedChip .material-symbols-outlined {
-  font-size: 14px;
+  font-size: var(--icon-sm);
 }
 
 /* Year filter */
@@ -425,15 +425,15 @@
 /* Mobile */
 @media (max-width: 640px) {
   .header {
-    gap: 6px;
+    gap: var(--space-xs);
   }
 
   .typeSelector {
-    gap: 8px;
+    gap: var(--space-sm);
   }
 
   .radioLabel {
-    gap: 3px;
+    gap: var(--space-2xs);
   }
 
   .radioInput {
@@ -452,17 +452,17 @@
   }
 
   .radioText {
-    font-size: 11px;
+    font-size: var(--font-2xs);
   }
 
   .filterDropdown {
     min-height: 28px;
-    padding: 3px 6px;
-    font-size: 11px;
+    padding: var(--space-2xs) var(--space-xs);
+    font-size: var(--font-2xs);
   }
 
   .filterDropdown .material-symbols-outlined {
-    font-size: 16px;
+    font-size: var(--icon-sm);
   }
 
   .filterBadge {
@@ -478,8 +478,8 @@
   .chip {
     min-height: 26px;
     min-width: 48px;
-    padding: 3px 6px;
-    font-size: 11px;
+    padding: var(--space-2xs) var(--space-xs);
+    font-size: var(--font-2xs);
   }
 
   .yearFilterContainer {
@@ -487,17 +487,17 @@
   }
 
   .yearFilterRow {
-    gap: 4px;
+    gap: var(--space-2xs);
   }
 
   .yearLabel {
-    font-size: 10px;
+    font-size: var(--font-2xs);
   }
 
   .categorySelect {
     min-height: 28px;
-    padding: 3px 6px;
-    font-size: 11px;
+    padding: var(--space-2xs) var(--space-xs);
+    font-size: var(--font-2xs);
   }
 
   .categoryDropdown {
@@ -505,8 +505,8 @@
   }
 
   .categoryOption {
-    padding: 6px 8px;
-    font-size: 11px;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-2xs);
   }
 
   .categoryCheckbox {
@@ -515,22 +515,22 @@
   }
 
   .categoryCheckbox .material-symbols-outlined {
-    font-size: 12px;
+    font-size: var(--font-xs);
   }
 
   .selectedChip {
     min-height: 22px;
-    padding: 2px 5px;
-    font-size: 10px;
+    padding: 2px var(--space-xs);
+    font-size: var(--font-2xs);
   }
 
   .selectedChip .material-symbols-outlined {
-    font-size: 10px;
+    font-size: var(--font-2xs);
   }
 
   .clearButton {
     min-height: 28px;
-    padding: 6px;
-    font-size: 11px;
+    padding: var(--space-xs);
+    font-size: var(--font-2xs);
   }
 }

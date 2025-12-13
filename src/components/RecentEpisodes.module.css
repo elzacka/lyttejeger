@@ -212,7 +212,7 @@
 }
 
 .completed .material-symbols-outlined {
-  font-size: 14px;
+  font-size: var(--icon-sm);
 }
 
 .inProgress {

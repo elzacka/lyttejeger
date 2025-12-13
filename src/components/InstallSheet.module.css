@@ -60,7 +60,7 @@
   height: 20px;
   background: var(--accent);
   color: white;
-  font-size: 11px;
+  font-size: var(--font-2xs);
   font-weight: 600;
   border-radius: 50%;
   flex-shrink: 0;
@@ -78,7 +78,7 @@
 }
 
 .stepIcon .material-symbols-outlined {
-  font-size: 18px;
+  font-size: var(--icon-md);
   color: var(--accent);
 }
 
@@ -103,7 +103,7 @@
 }
 
 .warning .material-symbols-outlined {
-  font-size: 20px;
+  font-size: var(--icon-md);
   color: var(--warning-color);
   flex-shrink: 0;
 }
@@ -130,7 +130,7 @@
 }
 
 .tip .material-symbols-outlined {
-  font-size: 18px;
+  font-size: var(--icon-md);
   color: var(--accent);
   flex-shrink: 0;
 }
@@ -155,13 +155,13 @@
 @media (max-width: 640px) {
   .steps li {
     padding: var(--space-xs);
-    font-size: 11px;
+    font-size: var(--font-2xs);
   }
 
   .steps li::before {
     min-width: 18px;
     height: 18px;
-    font-size: 10px;
+    font-size: var(--font-2xs);
   }
 
   .stepIcon {
@@ -170,7 +170,7 @@
   }
 
   .stepIcon .material-symbols-outlined {
-    font-size: 16px;
+    font-size: var(--icon-sm);
   }
 
   .warning {
@@ -178,6 +178,6 @@
   }
 
   .warning .material-symbols-outlined {
-    font-size: 18px;
+    font-size: var(--icon-md);
   }
 }
