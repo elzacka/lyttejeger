@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import type { EpisodeWithPodcast } from '../utils/search'
+import type { PlaybackProgress } from '../hooks/usePlaybackProgress'
 import { formatDuration, formatDateLong } from '../utils/search'
 import styles from './EpisodeCard.module.css'
 
@@ -10,6 +11,7 @@ interface EpisodeCardProps {
   onAddToQueue?: (episode: EpisodeWithPodcast) => void
   onPlayNext?: (episode: EpisodeWithPodcast) => void
   isInQueue?: boolean
+  progress?: PlaybackProgress | null
 }
 
 export function EpisodeCard({
@@ -19,6 +21,7 @@ export function EpisodeCard({
   onAddToQueue,
   onPlayNext,
   isInQueue = false,
+  progress,
 }: EpisodeCardProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [imageError, setImageError] = useState(false)
@@ -146,10 +149,30 @@ export function EpisodeCard({
           {formatDuration(episode.duration) && (
             <span>{formatDuration(episode.duration)}</span>
           )}
+          {progress?.completed && (
+            <span className={styles.completed}>
+              <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
+              Hørt
+            </span>
+          )}
+          {progress && !progress.completed && progress.progress > 1 && (
+            <span className={styles.inProgress}>
+              {Math.round(progress.progress)}%
+            </span>
+          )}
           {isInQueue && (
             <span className={styles.inQueue}>I kø</span>
           )}
         </div>
+        {progress && !progress.completed && progress.progress > 1 && (
+          <div className={styles.progressBar}>
+            <div
+              className={styles.progressFill}
+              style={{ width: `${progress.progress}%` }}
+              aria-label={`${Math.round(progress.progress)}% avspilt`}
+            />
+          </div>
+        )}
       </div>
 
       <div className={styles.actions}>

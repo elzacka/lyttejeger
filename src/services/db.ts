@@ -94,6 +94,11 @@ export async function getInProgressEpisodes(): Promise<PlaybackPosition[]> {
     .sortBy('updatedAt')
 }
 
+export async function getAllPlaybackPositions(): Promise<Map<string, PlaybackPosition>> {
+  const positions = await db.playbackPositions.toArray()
+  return new Map(positions.map((p) => [p.episodeId, p]))
+}
+
 // Queue helpers
 export async function addToQueue(item: Omit<QueueItem, 'id' | 'addedAt' | 'position'>): Promise<void> {
   const lastItem = await db.queue.orderBy('position').last()

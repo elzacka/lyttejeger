@@ -303,6 +303,7 @@ function App() {
                 onAddToQueue={handleAddEpisodeToQueue}
                 onPlayNext={handlePlayEpisodeNext}
                 isInQueue={isInQueue}
+                onNavigateToSearch={() => handleNavigation('search')}
               />
             )}
 

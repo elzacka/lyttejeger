@@ -16,6 +16,20 @@ interface AudioPlayerProps {
   onClose: () => void
 }
 
+// Available playback speeds
+const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] as const
+type PlaybackSpeed = (typeof PLAYBACK_SPEEDS)[number]
+
+// Sleep timer options (in minutes, 0 = off, -1 = end of episode)
+const SLEEP_TIMER_OPTIONS = [
+  { value: 0, label: 'Av' },
+  { value: 15, label: '15 min' },
+  { value: 30, label: '30 min' },
+  { value: 45, label: '45 min' },
+  { value: 60, label: '1 time' },
+  { value: -1, label: 'Slutten' },
+] as const
+
 export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -24,6 +38,9 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [audioError, setAudioError] = useState(false)
+  const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1)
+  const [sleepTimerMinutes, setSleepTimerMinutes] = useState(0)
+  const [sleepTimerEnd, setSleepTimerEnd] = useState<number | null>(null) // timestamp when timer expires
 
   // Track episode id for change detection
   const currentEpisodeIdRef = useRef<string | null>(null)
@@ -218,6 +235,56 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [episode])
 
+  // Apply playback speed to audio element
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackSpeed
+    }
+  }, [playbackSpeed])
+
+  // Update Media Session with current playback rate
+  useEffect(() => {
+    if (!('mediaSession' in navigator) || !duration) return
+
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: duration,
+        playbackRate: playbackSpeed,
+        position: currentTime,
+      })
+    } catch {
+      // setPositionState may not be supported
+    }
+  }, [currentTime, duration, playbackSpeed])
+
+  // Sleep timer logic
+  useEffect(() => {
+    if (!sleepTimerEnd || !isPlaying) return
+
+    const checkTimer = () => {
+      const now = Date.now()
+      if (now >= sleepTimerEnd) {
+        // Timer expired - pause playback
+        audioRef.current?.pause()
+        setSleepTimerEnd(null)
+        setSleepTimerMinutes(0)
+      }
+    }
+
+    const interval = setInterval(checkTimer, 1000)
+    return () => clearInterval(interval)
+  }, [sleepTimerEnd, isPlaying])
+
+  // Handle "end of episode" sleep timer
+  const handleEnded = useCallback(() => {
+    setIsPlaying(false)
+    setSleepTimerEnd(null)
+    setSleepTimerMinutes(0)
+    if (episode && audioRef.current) {
+      savePlaybackPosition(episode.id, audioRef.current.duration, audioRef.current.duration)
+    }
+  }, [episode])
+
   // Audio event handlers
   const handleLoadedMetadata = useCallback(() => {
     if (audioRef.current) {
@@ -244,13 +311,6 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       )
     }
   }, [episode, duration])
-
-  const handleEnded = useCallback(() => {
-    setIsPlaying(false)
-    if (episode && audioRef.current) {
-      savePlaybackPosition(episode.id, audioRef.current.duration, audioRef.current.duration)
-    }
-  }, [episode])
 
   const handleLoadStart = useCallback(() => {
     setIsLoading(true)
@@ -336,6 +396,46 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + 30)
     }
   }, [duration])
+
+  // Cycle through playback speeds
+  const cycleSpeed = useCallback(() => {
+    setPlaybackSpeed((current) => {
+      const currentIndex = PLAYBACK_SPEEDS.indexOf(current)
+      const nextIndex = (currentIndex + 1) % PLAYBACK_SPEEDS.length
+      return PLAYBACK_SPEEDS[nextIndex]
+    })
+  }, [])
+
+  // Cycle through sleep timer options
+  const cycleSleepTimer = useCallback(() => {
+    const currentIndex = SLEEP_TIMER_OPTIONS.findIndex((opt) => opt.value === sleepTimerMinutes)
+    const nextIndex = (currentIndex + 1) % SLEEP_TIMER_OPTIONS.length
+    const nextOption = SLEEP_TIMER_OPTIONS[nextIndex]
+
+    setSleepTimerMinutes(nextOption.value)
+
+    if (nextOption.value === 0) {
+      // Timer off
+      setSleepTimerEnd(null)
+    } else if (nextOption.value === -1) {
+      // End of episode - handled in handleEnded
+      setSleepTimerEnd(null)
+    } else {
+      // Set timer for X minutes from now
+      setSleepTimerEnd(Date.now() + nextOption.value * 60 * 1000)
+    }
+  }, [sleepTimerMinutes])
+
+  // Format remaining time for sleep timer display
+  const formatSleepTimerRemaining = useCallback(() => {
+    if (sleepTimerMinutes === 0) return null
+    if (sleepTimerMinutes === -1) return 'Slutten'
+    if (!sleepTimerEnd) return null
+
+    const remaining = Math.max(0, sleepTimerEnd - Date.now())
+    const mins = Math.ceil(remaining / 60000)
+    return `${mins} min`
+  }, [sleepTimerMinutes, sleepTimerEnd])
 
   const formatTime = (seconds: number): string => {
     if (!isFinite(seconds) || isNaN(seconds)) return '0:00'
@@ -424,6 +524,9 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       <div className={styles.container}>
         {/* Swipe handle indicator */}
         <div className={styles.swipeHandle} aria-hidden="true" />
+        {!isExpanded && (
+          <span className={styles.swipeHint} aria-hidden="true">sveip opp</span>
+        )}
 
         <div className={styles.contentRow}>
         {/* Episode info - on mobile collapsed: play/pause, otherwise: expand/collapse */}
@@ -545,6 +648,30 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               }}
             />
             <span className={styles.time}>{formatTime(duration)}</span>
+          </div>
+
+          {/* Speed and sleep timer controls */}
+          <div className={styles.secondaryControls}>
+            <button
+              className={styles.secondaryButton}
+              onClick={cycleSpeed}
+              aria-label={`Avspillingshastighet: ${playbackSpeed}x. Trykk for å endre.`}
+              title="Endre hastighet"
+            >
+              <span className={styles.speedLabel}>{playbackSpeed}x</span>
+            </button>
+
+            <button
+              className={`${styles.secondaryButton} ${sleepTimerMinutes !== 0 ? styles.active : ''}`}
+              onClick={cycleSleepTimer}
+              aria-label={sleepTimerMinutes === 0 ? 'Søvntimer av. Trykk for å stille inn.' : `Søvntimer: ${formatSleepTimerRemaining()}`}
+              title="Søvntimer"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">bedtime</span>
+              {sleepTimerMinutes !== 0 && (
+                <span className={styles.timerLabel}>{formatSleepTimerRemaining()}</span>
+              )}
+            </button>
           </div>
 
           {/* Error message */}

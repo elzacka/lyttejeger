@@ -76,11 +76,28 @@
 /* Swipe handle indicator */
 .swipeHandle {
   display: none;
-  width: 36px;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
+  width: 40px;
+  height: 5px;
+  background: var(--text-muted);
+  opacity: 0.4;
+  border-radius: 3px;
   margin: var(--space-xs) auto 0;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+}
+
+.swipeHandle:hover {
+  opacity: 0.6;
+}
+
+/* Hint text below handle in collapsed state */
+.swipeHint {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: var(--font-2xs);
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 2px;
+  opacity: 0.7;
 }
 
 /* Full controls wrapper */
@@ -289,6 +306,60 @@
   font-size: var(--icon-md);
 }
 
+/* Secondary controls (speed, sleep timer) */
+.secondaryControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+.secondaryButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: var(--touch-target-min);
+}
+
+.secondaryButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.secondaryButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.secondaryButton.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.secondaryButton .material-symbols-outlined {
+  font-size: var(--icon-sm);
+}
+
+.speedLabel {
+  font-weight: 500;
+  min-width: 32px;
+  text-align: center;
+}
+
+.timerLabel {
+  font-size: var(--font-2xs);
+}
+
 /* Error message */
 .errorMessage {
   font-family: var(--font-mono);
@@ -314,6 +385,11 @@
   }
 
   .player.collapsed .swipeHandle {
+    display: block;
+    order: -1;
+  }
+
+  .player.collapsed .swipeHint {
     display: block;
     order: -1;
   }

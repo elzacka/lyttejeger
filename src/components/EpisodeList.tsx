@@ -3,6 +3,7 @@ import type { EpisodeWithPodcast } from '../utils/search'
 import type { PlayingEpisode } from './AudioPlayer'
 import { EpisodeCard } from './EpisodeCard'
 import { EpisodeModal } from './EpisodeModal'
+import { usePlaybackProgress } from '../hooks/usePlaybackProgress'
 import styles from './EpisodeList.module.css'
 
 interface EpisodeListProps {
@@ -41,6 +42,7 @@ export function EpisodeList({
   onSelectPodcast,
 }: EpisodeListProps) {
   const [selectedEpisode, setSelectedEpisode] = useState<EpisodeWithPodcast | null>(null)
+  const { getProgress } = usePlaybackProgress()
 
   if (isLoading) {
     return (
@@ -86,6 +88,7 @@ export function EpisodeList({
             onAddToQueue={onAddToQueue}
             onPlayNext={onPlayNext}
             isInQueue={isInQueue?.(episode.id) ?? false}
+            progress={getProgress(episode.id)}
           />
         ))}
       </div>

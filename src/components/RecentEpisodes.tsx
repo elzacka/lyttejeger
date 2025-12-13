@@ -5,6 +5,7 @@ import type { PlayingEpisode } from './AudioPlayer'
 import { getEpisodesByFeedIds } from '../services/podcastIndex'
 import { transformEpisodes } from '../services/podcastTransform'
 import { formatDuration, formatDateLong, linkifyText } from '../utils/search'
+import { usePlaybackProgress } from '../hooks/usePlaybackProgress'
 import styles from './RecentEpisodes.module.css'
 
 interface RecentEpisodesProps {
@@ -13,6 +14,7 @@ interface RecentEpisodesProps {
   onAddToQueue: (episode: Episode, podcastTitle: string, podcastImage: string) => void
   onPlayNext: (episode: Episode, podcastTitle: string, podcastImage: string) => void
   isInQueue: (episodeId: string) => boolean
+  onNavigateToSearch?: () => void
 }
 
 interface EpisodeWithSubscription extends Episode {
@@ -25,12 +27,14 @@ export function RecentEpisodes({
   onAddToQueue,
   onPlayNext,
   isInQueue,
+  onNavigateToSearch,
 }: RecentEpisodesProps) {
   const [episodes, setEpisodes] = useState<EpisodeWithSubscription[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const [expandedEpisodeId, setExpandedEpisodeId] = useState<string | null>(null)
+  const { getProgress } = usePlaybackProgress()
 
   const toggleEpisodeExpand = useCallback((episodeId: string) => {
     setExpandedEpisodeId(prev => prev === episodeId ? null : episodeId)
@@ -118,8 +122,14 @@ export function RecentEpisodes({
             Ingen abonnementer enda
           </p>
           <p className={styles.emptyHint}>
-            Bruk Søk for å finne podkaster du liker
+            Finn podkaster du liker og abonner for å se nye episoder her
           </p>
+          {onNavigateToSearch && (
+            <button className={styles.ctaButton} onClick={onNavigateToSearch}>
+              <span className="material-symbols-outlined" aria-hidden="true">search</span>
+              Utforsk podkaster
+            </button>
+          )}
         </div>
       </section>
     )
@@ -128,7 +138,7 @@ export function RecentEpisodes({
   if (isLoading) {
     return (
       <section className={styles.container}>
-        <h2 className={styles.title}>Nye episoder</h2>
+        <h2 className={styles.title}>Siste 7 dager</h2>
         <div className={styles.loading}>
           <span className={`material-symbols-outlined ${styles.spinner}`}>
             progress_activity
@@ -142,7 +152,7 @@ export function RecentEpisodes({
   if (error) {
     return (
       <section className={styles.container}>
-        <h2 className={styles.title}>Nye episoder</h2>
+        <h2 className={styles.title}>Siste 7 dager</h2>
         <p className={styles.error}>{error}</p>
       </section>
     )
@@ -159,7 +169,7 @@ export function RecentEpisodes({
             Ingen nye episoder
           </p>
           <p className={styles.emptyHint}>
-            Siste 7 dager fra dine abonnementer
+            Dine abonnementer har ikke publisert noe de siste 7 dagene
           </p>
         </div>
       </section>
@@ -169,13 +179,14 @@ export function RecentEpisodes({
   return (
     <section className={styles.container}>
       <h2 className={styles.title}>
-        Nye episoder
+        Siste 7 dager
         <span className={styles.badge}>{episodes.length}</span>
       </h2>
       <ul className={styles.list}>
         {episodes.map((episode) => {
           const isMenuOpen = menuOpenId === episode.id
           const isExpanded = expandedEpisodeId === episode.id
+          const progress = getProgress(episode.id)
           return (
             <li
               key={episode.id}
@@ -211,7 +222,21 @@ export function RecentEpisodes({
                       {formatDuration(episode.duration) && (
                         <span>{formatDuration(episode.duration)}</span>
                       )}
+                      {progress?.completed && (
+                        <span className={styles.completed}>
+                          <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                          Hørt
+                        </span>
+                      )}
+                      {progress && !progress.completed && progress.progress > 1 && (
+                        <span className={styles.inProgress}>{Math.round(progress.progress)}%</span>
+                      )}
                     </div>
+                    {progress && !progress.completed && progress.progress > 1 && (
+                      <div className={styles.progressBar}>
+                        <div className={styles.progressFill} style={{ width: `${progress.progress}%` }} />
+                      </div>
+                    )}
                   </div>
                 </button>
                 <div className={styles.actions}>
