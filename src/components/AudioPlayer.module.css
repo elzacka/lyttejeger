@@ -615,4 +615,9 @@
   .info {
     cursor: default;
   }
+
+  /* Show speed/sleep controls on desktop */
+  .secondaryControls {
+    display: flex;
+  }
 }
