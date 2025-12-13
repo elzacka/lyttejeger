@@ -435,9 +435,12 @@ export function useSearch() {
     // Don't search when on queue or subscriptions tab
     if (activeTab === 'queue' || activeTab === 'subscriptions') return
 
-    const filtersChanged =
-      JSON.stringify(filtersRef.current.languages) !== JSON.stringify(filters.languages) ||
-      JSON.stringify(filtersRef.current.categories) !== JSON.stringify(filters.categories)
+    // Shallow array comparison (arrays are small, items are primitives)
+    const languagesChanged = filtersRef.current.languages.length !== filters.languages.length ||
+      filtersRef.current.languages.some((lang, i) => lang !== filters.languages[i])
+    const categoriesChanged = filtersRef.current.categories.length !== filters.categories.length ||
+      filtersRef.current.categories.some((cat, i) => cat !== filters.categories[i])
+    const filtersChanged = languagesChanged || categoriesChanged
 
     if (filtersChanged) {
       filtersRef.current = { languages: filters.languages, categories: filters.categories }

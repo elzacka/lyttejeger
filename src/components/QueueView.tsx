@@ -298,7 +298,11 @@ export function QueueView({
                           target.style.display = 'none'
                           const placeholder = document.createElement('div')
                           placeholder.className = `${styles.image} image-placeholder`
-                          placeholder.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">podcasts</span>'
+                          const icon = document.createElement('span')
+                          icon.className = 'material-symbols-outlined'
+                          icon.setAttribute('aria-hidden', 'true')
+                          icon.textContent = 'podcasts'
+                          placeholder.appendChild(icon)
                           target.parentNode?.appendChild(placeholder)
                         }}
                       />

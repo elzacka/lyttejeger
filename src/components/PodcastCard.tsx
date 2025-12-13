@@ -16,7 +16,7 @@ export function PodcastCard({ podcast, searchQuery, onSelect }: PodcastCardProps
     const parts = text.split(new RegExp(`(${query})`, 'gi'))
     return parts.map((part, index) =>
       part.toLowerCase() === query.toLowerCase() ? (
-        <mark key={index} className={styles.highlight}>
+        <mark key={`${part}-${index}`} className={styles.highlight}>
           {part}
         </mark>
       ) : (

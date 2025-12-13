@@ -130,11 +130,11 @@ export function TranscriptViewer({
         className={styles.segments}
         onScroll={handleScroll}
       >
-        {transcript.segments.map((segment, index) => {
+        {transcript.segments.map((segment) => {
           const active = isActive(segment)
           return (
             <button
-              key={index}
+              key={segment.startTime}
               ref={active ? activeRef : undefined}
               className={`${styles.segment} ${active ? styles.active : ''}`}
               onClick={() => handleSegmentClick(segment)}

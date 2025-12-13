@@ -74,8 +74,8 @@ export function SearchHelp() {
             <h2 className={styles.title}>Søketips</h2>
           </div>
           <ul className={styles.list} role="list">
-            {searchTips.map((tip, index) => (
-              <li key={index} className={styles.item}>
+            {searchTips.map((tip) => (
+              <li key={tip.example} className={styles.item}>
                 <span className={styles.example}>{tip.example}</span>
                 <span className={styles.description}>{tip.description}</span>
               </li>
