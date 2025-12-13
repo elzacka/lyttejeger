@@ -4,12 +4,22 @@ import styles from './InfoSheet.module.css'
 interface InfoSheetProps {
   isOpen: boolean
   onClose: () => void
+  showInstall?: boolean
+  onInstallClick?: () => void
 }
 
-export function InfoSheet({ isOpen, onClose }: InfoSheetProps) {
+export function InfoSheet({ isOpen, onClose, showInstall, onInstallClick }: InfoSheetProps) {
   return (
-    <Sheet isOpen={isOpen} onClose={onClose} title="Info">
+    <Sheet isOpen={isOpen} onClose={onClose} title="Mer">
       <div className={styles.links}>
+        {showInstall && onInstallClick && (
+          <button
+            className={styles.actionButton}
+            onClick={onInstallClick}
+          >
+            Installer app
+          </button>
+        )}
         <a
           href="https://podcastindex.org/"
           target="_blank"

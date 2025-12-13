@@ -25,33 +25,11 @@ export function BottomNav({
   const { hasOpenSheet } = useSheetContext()
 
   // Check if we should show install button (only in browser, not standalone)
-  // This is evaluated once on initial render - shouldShowInstallButton is synchronous
   const showInstall = shouldShowInstallButton()
-
-  const handleInfoClick = () => {
-    setInfoOpen(true)
-  }
-
-  const handleInstallClick = () => {
-    setInstallOpen(true)
-  }
 
   return (
     <>
       <nav className={`${styles.nav} ${hasOpenSheet ? styles.hidden : ''}`} aria-label="Hovednavigasjon">
-        {showInstall && (
-          <button
-            className={styles.navItem}
-            onClick={handleInstallClick}
-            aria-haspopup="dialog"
-          >
-            <span className={styles.iconWrapper}>
-              <span className="material-symbols-outlined" aria-hidden="true">download</span>
-            </span>
-            <span className={styles.label}>Installer</span>
-          </button>
-        )}
-
         <button
           className={`${styles.navItem} ${activeItem === 'search' ? styles.active : ''}`}
           onClick={() => onNavigate('search')}
@@ -61,17 +39,6 @@ export function BottomNav({
             <span className="material-symbols-outlined" aria-hidden="true">search</span>
           </span>
           <span className={styles.label}>Søk</span>
-        </button>
-
-        <button
-          className={`${styles.navItem} ${activeItem === 'home' ? styles.active : ''}`}
-          onClick={() => onNavigate('home')}
-          aria-current={activeItem === 'home' ? 'page' : undefined}
-        >
-          <span className={styles.iconWrapper}>
-            <span className="material-symbols-outlined" aria-hidden="true">schedule</span>
-          </span>
-          <span className={styles.label}>Siste</span>
         </button>
 
         <button
@@ -87,7 +54,18 @@ export function BottomNav({
               <span className={styles.badge}>{subscriptionCount}</span>
             )}
           </span>
-          <span className={styles.label}>Mine podder</span>
+          <span className={styles.label}>Podder</span>
+        </button>
+
+        <button
+          className={`${styles.navItem} ${activeItem === 'home' ? styles.active : ''}`}
+          onClick={() => onNavigate('home')}
+          aria-current={activeItem === 'home' ? 'page' : undefined}
+        >
+          <span className={styles.iconWrapper}>
+            <span className="material-symbols-outlined" aria-hidden="true">schedule</span>
+          </span>
+          <span className={styles.label}>Siste</span>
         </button>
 
         <button
@@ -108,18 +86,28 @@ export function BottomNav({
 
         <button
           className={styles.navItem}
-          onClick={handleInfoClick}
+          onClick={() => setInfoOpen(true)}
           aria-haspopup="dialog"
         >
           <span className={styles.iconWrapper}>
-            <span className="material-symbols-outlined" aria-hidden="true">info</span>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              {showInstall ? 'more_horiz' : 'info'}
+            </span>
           </span>
-          <span className={styles.label}>Info</span>
+          <span className={styles.label}>Mer</span>
         </button>
       </nav>
 
       <InstallSheet isOpen={installOpen} onClose={() => setInstallOpen(false)} />
-      <InfoSheet isOpen={infoOpen} onClose={() => setInfoOpen(false)} />
+      <InfoSheet
+        isOpen={infoOpen}
+        onClose={() => setInfoOpen(false)}
+        showInstall={showInstall}
+        onInstallClick={() => {
+          setInfoOpen(false)
+          setInstallOpen(true)
+        }}
+      />
     </>
   )
 }

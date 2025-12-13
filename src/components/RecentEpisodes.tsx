@@ -115,19 +115,12 @@ export function RecentEpisodes({
     return (
       <section className={styles.container}>
         <div className={styles.emptyState}>
-          <span className={`material-symbols-outlined ${styles.emptyIcon}`} aria-hidden="true">
-            subscriptions
-          </span>
           <p className={styles.emptyText}>
             Ingen abonnementer enda
           </p>
-          <p className={styles.emptyHint}>
-            Finn podkaster du liker og abonner for å se nye episoder her
-          </p>
           {onNavigateToSearch && (
             <button className={styles.ctaButton} onClick={onNavigateToSearch}>
-              <span className="material-symbols-outlined" aria-hidden="true">search</span>
-              Utforsk podkaster
+              Finn podkaster
             </button>
           )}
         </div>
@@ -162,14 +155,8 @@ export function RecentEpisodes({
     return (
       <section className={styles.container}>
         <div className={styles.emptyState}>
-          <span className={`material-symbols-outlined ${styles.emptyIcon}`} aria-hidden="true">
-            schedule
-          </span>
           <p className={styles.emptyText}>
-            Ingen nye episoder
-          </p>
-          <p className={styles.emptyHint}>
-            Dine abonnementer har ikke publisert noe de siste 7 dagene
+            Ingen nye episoder siste 7 dager
           </p>
         </div>
       </section>
