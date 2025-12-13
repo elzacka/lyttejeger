@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Sheet } from './Sheet'
+import { useState, useEffect, useRef } from 'react'
 import styles from './SearchHelp.module.css'
 
 const searchTips = [
@@ -27,14 +26,41 @@ const searchTips = [
 
 export function SearchHelp() {
   const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Click outside and escape handling
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isOpen])
 
   return (
-    <>
+    <div ref={containerRef} className={styles.container}>
       <button
         type="button"
         className={styles.trigger}
-        onClick={() => setIsOpen(true)}
+        onClick={() => setIsOpen(!isOpen)}
         aria-label="Vis søketips"
+        aria-expanded={isOpen}
         title="Søketips"
       >
         <span className="material-symbols-outlined" aria-hidden="true">
@@ -42,16 +68,21 @@ export function SearchHelp() {
         </span>
       </button>
 
-      <Sheet isOpen={isOpen} onClose={() => setIsOpen(false)} title="Søketips">
-        <ul className={styles.list} role="list">
-          {searchTips.map((tip, index) => (
-            <li key={index} className={styles.item}>
-              <span className={styles.example}>{tip.example}</span>
-              <span className={styles.description}>{tip.description}</span>
-            </li>
-          ))}
-        </ul>
-      </Sheet>
-    </>
+      {isOpen && (
+        <div className={styles.popover} role="dialog" aria-label="Søketips">
+          <div className={styles.header}>
+            <h2 className={styles.title}>Søketips</h2>
+          </div>
+          <ul className={styles.list} role="list">
+            {searchTips.map((tip, index) => (
+              <li key={index} className={styles.item}>
+                <span className={styles.example}>{tip.example}</span>
+                <span className={styles.description}>{tip.description}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   )
 }

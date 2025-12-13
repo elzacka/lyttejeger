@@ -31,7 +31,7 @@ export function FilterPanel({
   onClearFilters,
   activeFilterCount
 }: FilterPanelProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const categoryDropdownRef = useRef<HTMLDivElement>(null)
 
@@ -139,7 +139,7 @@ export function FilterPanel({
                   options={yearOptions}
                   value={selectedYear}
                   onChange={(v) => setYear(v as number | null)}
-                  placeholder="Alle"
+                  placeholder="Alle år"
                 />
               )}
             </div>

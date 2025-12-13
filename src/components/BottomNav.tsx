@@ -55,22 +55,6 @@ export function BottomNav({
         </button>
 
         <button
-          className={`${styles.navItem} ${activeItem === 'subscriptions' ? styles.active : ''}`}
-          onClick={() => onNavigate('subscriptions')}
-          aria-current={activeItem === 'subscriptions' ? 'page' : undefined}
-        >
-          <span className={styles.iconWrapper}>
-            <span className="material-symbols-outlined" aria-hidden="true">
-              {activeItem === 'subscriptions' ? 'bookmark' : 'bookmark_border'}
-            </span>
-            {subscriptionCount > 0 && (
-              <span className={styles.badge}>{subscriptionCount}</span>
-            )}
-          </span>
-          <span className={styles.label}>Podder</span>
-        </button>
-
-        <button
           className={`${styles.navItem} ${activeItem === 'home' ? styles.active : ''}`}
           onClick={() => onNavigate('home')}
           aria-current={activeItem === 'home' ? 'page' : undefined}
@@ -78,7 +62,21 @@ export function BottomNav({
           <span className={styles.iconWrapper}>
             <span className="material-symbols-outlined" aria-hidden="true">schedule</span>
           </span>
-          <span className={styles.label}>Siste</span>
+          <span className={styles.label}>Nyeste</span>
+        </button>
+
+        <button
+          className={`${styles.navItem} ${activeItem === 'subscriptions' ? styles.active : ''}`}
+          onClick={() => onNavigate('subscriptions')}
+          aria-current={activeItem === 'subscriptions' ? 'page' : undefined}
+        >
+          <span className={styles.iconWrapper}>
+            <span className="material-symbols-outlined" aria-hidden="true">heart_plus</span>
+            {subscriptionCount > 0 && (
+              <span className={styles.badge}>{subscriptionCount}</span>
+            )}
+          </span>
+          <span className={styles.label}>Mine podder</span>
         </button>
 
         <button
@@ -87,9 +85,7 @@ export function BottomNav({
           aria-current={activeItem === 'queue' ? 'page' : undefined}
         >
           <span className={styles.iconWrapper}>
-            <span className="material-symbols-outlined" aria-hidden="true">
-              queue_music
-            </span>
+            <span className="material-symbols-outlined" aria-hidden="true">playlist_play</span>
             {queueCount > 0 && (
               <span className={styles.badge}>{queueCount}</span>
             )}

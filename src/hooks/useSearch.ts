@@ -629,9 +629,9 @@ function normalizeText(text: string): string {
 }
 
 /**
- * Filter podcasts by query text - matches if ALL positive words are found as prefixes
+ * Filter podcasts by query text - matches if ALL positive words are found as substrings
  * and NONE of the excluded words are present.
- * "hele hi" matches "Hele historien" because "hele" matches "hele" and "hi" matches "historien"
+ * "burde væ" matches "Burde vært pensum" because both terms are found in the text
  * "takk -lov" matches podcasts with "takk" but NOT containing "lov"
  */
 function filterByQueryText(podcasts: Podcast[], query: string): Podcast[] {
@@ -649,7 +649,6 @@ function filterByQueryText(podcasts: Podcast[], query: string): Podcast[] {
 
   return podcasts.filter(podcast => {
     const searchText = normalizeText(`${podcast.title} ${podcast.author} ${podcast.description}`)
-    const searchWords = searchText.split(/\s+/)
 
     // Check exact phrases - must all be present
     for (const phrase of exactPhrases) {
@@ -661,21 +660,20 @@ function filterByQueryText(podcasts: Podcast[], query: string): Podcast[] {
       if (searchText.includes(normalizeText(term))) return false
     }
 
-    // Check positive terms - each must match as prefix of some word in text
+    // Check positive terms - each must be found as substring in text
     // For OR queries (shouldInclude), at least one must match
     if (parsed.shouldInclude.length > 0) {
       const hasOrMatch = parsed.shouldInclude.some(term => {
         const normalizedTerm = normalizeText(term)
-        return searchWords.some(textWord => textWord.startsWith(normalizedTerm))
+        return searchText.includes(normalizedTerm)
       })
       if (!hasOrMatch) return false
     }
 
-    // For AND queries (mustInclude), all must match
+    // For AND queries (mustInclude), all must match as substrings
     for (const term of parsed.mustInclude) {
       const normalizedTerm = normalizeText(term)
-      const found = searchWords.some(textWord => textWord.startsWith(normalizedTerm))
-      if (!found) return false
+      if (!searchText.includes(normalizedTerm)) return false
     }
 
     return true

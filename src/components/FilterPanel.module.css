@@ -187,7 +187,7 @@
 
 .chip {
   min-height: var(--button-sm);
-  min-width: 56px;
+  min-width: 68px;
   padding: var(--space-xs) var(--space-sm);
   background: var(--bg-primary);
   border: 1px solid var(--border);
@@ -477,7 +477,7 @@
 
   .chip {
     min-height: 26px;
-    min-width: 48px;
+    min-width: 60px;
     padding: var(--space-2xs) var(--space-xs);
     font-size: var(--font-2xs);
   }

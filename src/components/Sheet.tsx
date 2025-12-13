@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useId, type ReactNode } from 'react'
+import { useEffect, useRef, useCallback, useId, useState, type ReactNode } from 'react'
 import { useSheetContext } from '../hooks/useSheetContext'
 import styles from './Sheet.module.css'
 
@@ -12,6 +12,7 @@ interface SheetProps {
 
 const DRAG_THRESHOLD = 100
 const VELOCITY_THRESHOLD = 0.5
+const DESKTOP_BREAKPOINT = 641
 
 export function Sheet({
   isOpen,
@@ -23,6 +24,9 @@ export function Sheet({
   const sheetId = useId()
   const { registerSheet, unregisterSheet } = useSheetContext()
   const sheetRef = useRef<HTMLDivElement>(null)
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < DESKTOP_BREAKPOINT : true
+  )
   const dragRef = useRef({
     startY: 0,
     currentY: 0,
@@ -30,13 +34,22 @@ export function Sheet({
     isDragging: false,
   })
 
-  // Register/unregister sheet with context
+  // Track viewport size for mobile detection
   useEffect(() => {
-    if (isOpen) {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < DESKTOP_BREAKPOINT)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Register/unregister sheet with context (only on mobile)
+  useEffect(() => {
+    if (isOpen && isMobile) {
       registerSheet(sheetId)
       return () => unregisterSheet(sheetId)
     }
-  }, [isOpen, sheetId, registerSheet, unregisterSheet])
+  }, [isOpen, isMobile, sheetId, registerSheet, unregisterSheet])
 
   const handleDragStart = useCallback((clientY: number) => {
     dragRef.current = {
@@ -148,15 +161,15 @@ export function Sheet({
     }
   }, [isOpen, onClose])
 
-  // Lock body scroll when open
+  // Lock body scroll when open (only on mobile)
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && isMobile) {
       document.body.style.overflow = 'hidden'
     }
     return () => {
       document.body.style.overflow = ''
     }
-  }, [isOpen])
+  }, [isOpen, isMobile])
 
   if (!isOpen) return null
 

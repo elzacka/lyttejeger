@@ -60,17 +60,17 @@
 }
 
 .logoIcon {
-  font-size: var(--icon-lg);
-  font-weight: 200;
+  font-size: 26px;
+  font-weight: 300;
   color: var(--accent);
 }
 
 .logoText {
-  font-family: var(--font-mono);
-  font-size: var(--font-base);
-  font-weight: 500;
-  color: var(--text-primary);
-  letter-spacing: -0.5px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: var(--icon-lg);
+  font-weight: 400;
+  color: #2C2C2C;
+  letter-spacing: 0.5px;
 }
 
 .content {
@@ -380,9 +380,10 @@
 
 .episodeItem {
   position: relative;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  transition: background var(--transition-fast);
+  transition: border-color var(--transition-fast);
   z-index: 0;
 }
 
@@ -391,7 +392,7 @@
 }
 
 .episodeItem:hover {
-  background: var(--bg-hover);
+  border-color: var(--accent);
 }
 
 .episodeHeader {
@@ -457,9 +458,6 @@
   text-align: left;
 }
 
-.episodeToggle:hover {
-  background: var(--bg-hover);
-}
 
 .episodeToggle:focus-visible {
   outline: 2px solid var(--accent);

@@ -42,7 +42,7 @@
 
 /* Scrollable wheel container */
 .wheel {
-  width: 40px;
+  width: 55px;
   height: var(--button-sm);
   overflow-y: auto;
   scroll-snap-type: y mandatory;
@@ -66,6 +66,7 @@
   cursor: pointer;
   scroll-snap-align: start;
   user-select: none;
+  white-space: nowrap;
 }
 
 .itemSelected {
@@ -96,7 +97,7 @@
   }
 
   .wheel {
-    width: 35px;
+    width: 50px;
     height: 26px;
   }
 

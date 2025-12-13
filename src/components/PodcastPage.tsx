@@ -309,7 +309,7 @@ export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, 
                                   disabled={isInQueue?.(episode.id)}
                                   role="menuitem"
                                 >
-                                  <span className="material-symbols-outlined">queue_music</span>
+                                  <span className="material-symbols-outlined">playlist_add</span>
                                   {isInQueue?.(episode.id) ? 'I køen' : 'Legg til i kø'}
                                 </button>
                               </div>

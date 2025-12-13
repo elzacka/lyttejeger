@@ -55,6 +55,12 @@
   overflow: hidden;
   border-radius: var(--radius-md);
   background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  transition: border-color var(--transition-fast);
+}
+
+.item:hover {
+  border-color: var(--accent);
 }
 
 /* Swipe action - revealed on swipe left */
@@ -82,9 +88,6 @@
   z-index: 1;
 }
 
-.swipeContent:hover {
-  background: var(--bg-hover);
-}
 
 .podcastButton {
   flex: 1;

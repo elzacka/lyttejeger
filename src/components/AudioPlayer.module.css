@@ -30,10 +30,9 @@
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto auto;
-  gap: var(--space-md);
+  display: flex;
   align-items: center;
+  gap: var(--space-md);
   box-sizing: border-box;
   width: 100%;
   padding: var(--space-sm) var(--space-md);
@@ -45,6 +44,7 @@
   align-items: center;
   gap: var(--space-sm);
   min-width: 0;
+  flex: 1;
   overflow: hidden;
   background: transparent;
   border: none;
@@ -102,7 +102,10 @@
 
 /* Full controls wrapper */
 .fullControls {
-  display: contents;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-shrink: 0;
 }
 
 .image {
@@ -289,6 +292,7 @@
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   cursor: pointer;
+  flex-shrink: 0;
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
@@ -306,9 +310,39 @@
   font-size: var(--icon-md);
 }
 
-/* Secondary controls (speed, sleep timer) */
+/* Mobile close button - only visible on mobile collapsed */
+.mobileCloseButton {
+  display: none;
+  width: var(--button-sm);
+  height: var(--button-sm);
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.mobileCloseButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.mobileCloseButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mobileCloseButton .material-symbols-outlined {
+  font-size: var(--icon-sm);
+}
+
+/* Secondary controls (speed, sleep timer) - hidden on desktop, shown on mobile expanded */
 .secondaryControls {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   gap: var(--space-md);
@@ -397,12 +431,13 @@
   .player.collapsed .contentRow {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
     width: 100%;
   }
 
   .player.collapsed .info {
     flex: 1;
+    min-width: 0;
   }
 
   /* Hide expand icon in info area when collapsed - swipe to expand */
@@ -433,6 +468,10 @@
 
   .player.collapsed .closeButton {
     display: none;
+  }
+
+  .player.collapsed .mobileCloseButton {
+    display: flex;
   }
 
   /* Expanded state */
@@ -466,6 +505,10 @@
     display: none;
   }
 
+  .player.expanded .mobileCloseButton {
+    display: none;
+  }
+
   .player.expanded .fullControls {
     display: flex;
     flex-direction: column;
@@ -480,6 +523,10 @@
 
   .player.expanded .progress {
     width: 100%;
+  }
+
+  .player.expanded .secondaryControls {
+    display: flex;
   }
 
   .player.expanded .miniProgress {

@@ -86,36 +86,37 @@
   padding: var(--space-md);
 }
 
-/* Desktop: slide-in panel with blur backdrop */
+/* Desktop: popover attached to bottom nav */
 @media (min-width: 641px) {
   .backdrop {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: transparent;
   }
 
   .sheet {
-    top: 50%;
-    bottom: auto;
+    top: auto;
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    /* Position above Info icon in centered nav */
     left: 50%;
     right: auto;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    max-width: 420px;
-    max-height: 70vh;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.05);
-    animation: slideInFromTop 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    transform: translateX(125px);
+    width: auto;
+    min-width: 200px;
+    max-width: 280px;
+    max-height: none;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--border);
+    animation: slideUpFromNav 0.2s ease-out;
+    padding-bottom: 0;
   }
 
-  @keyframes slideInFromTop {
+  @keyframes slideUpFromNav {
     from {
       opacity: 0;
-      transform: translate(-50%, -60%);
+      transform: translateX(125px) translateY(8px);
     }
     to {
       opacity: 1;
-      transform: translate(-50%, -50%);
+      transform: translateX(125px) translateY(0);
     }
   }
 
@@ -124,16 +125,17 @@
   }
 
   .header {
-    padding-top: var(--space-md);
-    border-bottom: none;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border);
   }
 
   .title {
-    font-size: var(--font-lg);
+    font-size: var(--font-sm);
+    font-weight: 500;
   }
 
   .content {
-    padding: var(--space-sm) var(--space-lg) var(--space-lg);
+    padding: var(--space-sm);
   }
 }
 

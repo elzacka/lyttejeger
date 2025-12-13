@@ -275,7 +275,7 @@ export function RecentEpisodes({
                           disabled={isInQueue(episode.id)}
                         >
                           <span className="material-symbols-outlined">
-                            queue_music
+                            playlist_add
                           </span>
                           {isInQueue(episode.id) ? 'I køen' : 'Legg til i kø'}
                         </button>

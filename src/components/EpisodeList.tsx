@@ -1,8 +1,6 @@
-import { useState } from 'react'
 import type { EpisodeWithPodcast } from '../utils/search'
 import type { PlayingEpisode } from './AudioPlayer'
 import { EpisodeCard } from './EpisodeCard'
-import { EpisodeModal } from './EpisodeModal'
 import { usePlaybackProgress } from '../hooks/usePlaybackProgress'
 import styles from './EpisodeList.module.css'
 
@@ -41,7 +39,6 @@ export function EpisodeList({
   isInQueue,
   onSelectPodcast,
 }: EpisodeListProps) {
-  const [selectedEpisode, setSelectedEpisode] = useState<EpisodeWithPodcast | null>(null)
   const { getProgress } = usePlaybackProgress()
 
   if (isLoading) {
@@ -84,22 +81,14 @@ export function EpisodeList({
               podcastTitle: ep.podcast?.title,
               podcastImage: ep.podcast?.imageUrl
             })}
-            onShowDetails={setSelectedEpisode}
             onAddToQueue={onAddToQueue}
             onPlayNext={onPlayNext}
             isInQueue={isInQueue?.(episode.id) ?? false}
             progress={getProgress(episode.id)}
+            onSelectPodcast={onSelectPodcast}
           />
         ))}
       </div>
-      {selectedEpisode && (
-        <EpisodeModal
-          episode={selectedEpisode}
-          onClose={() => setSelectedEpisode(null)}
-          onPlayEpisode={onPlayEpisode}
-          onSelectPodcast={onSelectPodcast}
-        />
-      )}
     </div>
   )
 }
