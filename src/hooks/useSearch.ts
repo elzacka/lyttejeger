@@ -703,8 +703,8 @@ function applyLocalFilters(podcasts: Podcast[], filters: SearchFilters): Podcast
   // Filter by languages
   if (filters.languages.length > 0) {
     filtered = filtered.filter(p =>
-      filters.languages.some(l =>
-        p.language.toLowerCase().includes(l.toLowerCase())
+      filters.languages.some(filterLabel =>
+        matchesLanguageFilter(p.language, filterLabel)
       )
     )
   }
@@ -751,6 +751,28 @@ function applyLocalFilters(podcasts: Podcast[], filters: SearchFilters): Podcast
   return filtered
 }
 
+// Map UI filter labels to stored language values
+const LANGUAGE_FILTER_MAP: Record<string, string[]> = {
+  'Norsk': ['Norsk', 'Nynorsk', 'no', 'nb', 'nn'],
+  'Engelsk': ['English', 'en', 'en-us', 'en-gb'],
+  'Svensk': ['Svenska', 'sv'],
+  'Dansk': ['Dansk', 'da']
+}
+
+/**
+ * Check if a podcast language matches a UI filter label
+ */
+function matchesLanguageFilter(podcastLanguage: string, filterLabel: string): boolean {
+  const acceptedValues = LANGUAGE_FILTER_MAP[filterLabel]
+  if (!acceptedValues) return false
+
+  const normalizedPodcastLang = podcastLanguage.toLowerCase()
+  return acceptedValues.some(val =>
+    normalizedPodcastLang === val.toLowerCase() ||
+    normalizedPodcastLang.startsWith(val.toLowerCase())
+  )
+}
+
 /**
  * Apply local filters to episodes
  */
@@ -759,11 +781,12 @@ function applyLocalFiltersToEpisodes(episodes: EpisodeWithPodcast[], filters: Se
 
   // Filter by languages (using podcast language)
   if (filters.languages.length > 0) {
-    filtered = filtered.filter(ep =>
-      ep.podcast && filters.languages.some(l =>
-        ep.podcast!.language.toLowerCase().includes(l.toLowerCase())
+    filtered = filtered.filter(ep => {
+      if (!ep.podcast || !ep.podcast.language) return false
+      return filters.languages.some(filterLabel =>
+        matchesLanguageFilter(ep.podcast!.language, filterLabel)
       )
-    )
+    })
   }
 
   // Filter by date range (based on publishedAt)
