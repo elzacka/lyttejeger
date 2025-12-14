@@ -281,8 +281,12 @@
   outline-offset: 2px;
 }
 
-/* Close button */
+/* Close button - positioned at far right of player */
 .closeButton {
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
   width: var(--button-lg);
   height: var(--button-lg);
   display: flex;
@@ -471,6 +475,12 @@
     display: none;
   }
 
+  .player.expanded .closeButton {
+    display: flex;
+    top: var(--space-sm);
+    transform: none;
+  }
+
   .player.collapsed .mobileCloseButton {
     display: flex;
   }
@@ -480,7 +490,8 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
-    padding: var(--space-sm);
+    /* Add top padding to make room for close button: button-lg (44px) + space-sm (8px) + gap (8px) */
+    padding: calc(var(--button-lg) + var(--space-md)) var(--space-sm) var(--space-sm);
     position: relative;
   }
 
@@ -532,12 +543,6 @@
 
   .player.expanded .miniProgress {
     display: none;
-  }
-
-  .player.expanded .closeButton {
-    position: absolute;
-    top: var(--space-sm);
-    right: var(--space-sm);
   }
 
   .image {
@@ -626,4 +631,6 @@
   .secondaryControls {
     display: flex;
   }
+
+  /* Close button is already absolutely positioned relative to .player */
 }

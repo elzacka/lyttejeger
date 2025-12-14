@@ -36,7 +36,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
   const [audioError, setAudioError] = useState(false)
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1)
   const [sleepTimerMinutes, setSleepTimerMinutes] = useState(0)
@@ -360,6 +360,27 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
         // On iOS, we may need to load the audio first if it was suspended
         if (audio.readyState < 2) {
           audio.load()
+          // Wait for audio to be ready before playing
+          await new Promise<void>((resolve, reject) => {
+            const onCanPlay = () => {
+              audio.removeEventListener('canplay', onCanPlay)
+              audio.removeEventListener('error', onError)
+              resolve()
+            }
+            const onError = () => {
+              audio.removeEventListener('canplay', onCanPlay)
+              audio.removeEventListener('error', onError)
+              reject(new Error('Audio load failed'))
+            }
+            audio.addEventListener('canplay', onCanPlay)
+            audio.addEventListener('error', onError)
+            // Timeout after 10 seconds
+            setTimeout(() => {
+              audio.removeEventListener('canplay', onCanPlay)
+              audio.removeEventListener('error', onError)
+              resolve() // Try to play anyway
+            }, 10000)
+          })
         }
         await audio.play()
       } catch {
@@ -687,11 +708,12 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
           )}
         </div>
 
-        {/* Close button */}
-        <button className={styles.closeButton} onClick={onClose} aria-label="Lukk avspiller">
-          <span className="material-symbols-outlined">close</span>
-        </button>
       </div>
+
+      {/* Close button - positioned outside container for full-width positioning */}
+      <button className={styles.closeButton} onClick={onClose} aria-label="Lukk avspiller">
+        <span className="material-symbols-outlined">close</span>
+      </button>
     </div>
   )
 }
