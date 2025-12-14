@@ -95,16 +95,18 @@
   .nav {
     /* Keep fixed positioning on desktop too */
     justify-content: center;
-    gap: var(--space-md);
+    align-items: stretch;
+    gap: 0;
+    padding-bottom: 0;
   }
 
   .navItem {
     flex: 0 0 auto;
     flex-direction: row;
     gap: var(--space-xs);
-    min-height: var(--button-md);
-    padding: var(--space-xs) var(--space-md);
-    border-radius: var(--radius-md);
+    min-height: auto;
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: 0;
     font-size: var(--font-xs);
   }
 
