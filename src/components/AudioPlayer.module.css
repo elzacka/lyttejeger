@@ -2,8 +2,9 @@
 
 .player {
   position: fixed;
-  /* Position above the bottom nav (approx 56px + safe area) */
-  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  /* Position above the bottom nav - mobile: 56px touch target + 16px padding + 4px extra */
+  --nav-height: 76px;
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
   left: 0;
   right: 0;
   z-index: var(--z-player);
@@ -592,6 +593,11 @@
 
 /* Desktop - always show full controls, hide mini elements */
 @media (min-width: 641px) {
+  .player {
+    /* Desktop nav: 40px button + 8px padding + 4px extra = 52px */
+    --nav-height: 52px;
+  }
+
   .miniProgress {
     display: none;
   }

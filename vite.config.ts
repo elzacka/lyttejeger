@@ -16,7 +16,7 @@ export default defineConfig({
       },
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'icon-192x192.png', 'icon-512x512.png'],
       manifest: {
-        name: 'Lyttejeger - Podcast App',
+        name: 'Lyttejeger podcast-app',
         short_name: 'Lyttejeger',
         description: 'Finn og filtrer podcaster med verdens beste søkefunksjon',
         theme_color: '#F4F1EA',
