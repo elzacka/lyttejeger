@@ -16,13 +16,26 @@ export function usePlaybackProgress() {
     setPositions(data)
   }, [])
 
+  // Load initial data and set up periodic refresh
   useEffect(() => {
-    refresh()
+    let mounted = true
+
+    const loadData = async () => {
+      const data = await getAllPlaybackPositions()
+      if (mounted) {
+        setPositions(data)
+      }
+    }
+
+    loadData()
 
     // Refresh every 10 seconds to catch updates from playing
-    const interval = setInterval(refresh, 10000)
-    return () => clearInterval(interval)
-  }, [refresh])
+    const interval = setInterval(loadData, 10000)
+    return () => {
+      mounted = false
+      clearInterval(interval)
+    }
+  }, [])
 
   const getProgress = useCallback(
     (episodeId: string): PlaybackProgress | null => {

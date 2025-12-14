@@ -63,14 +63,12 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     // Update ref
     currentEpisodeIdRef.current = episodeId
 
-    if (episode && audioRef.current) {
+    if (episode) {
       // New episode - mark for auto-play when audio becomes ready
+      // The audio element is remounted with key={episode.id}, so it will auto-load
       shouldAutoPlayRef.current = true
 
-      // Explicitly load the new source - this triggers onLoadStart which sets loading state
-      audioRef.current.load()
-
-      // Load saved position asynchronously
+      // Load saved position asynchronously once audio is ready
       const loadPosition = async () => {
         try {
           const saved = await getPlaybackPosition(episode.id)
@@ -235,12 +233,12 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [episode])
 
-  // Apply playback speed to audio element
+  // Apply playback speed to audio element (also when episode changes since element remounts)
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.playbackRate = playbackSpeed
     }
-  }, [playbackSpeed])
+  }, [playbackSpeed, episode?.id])
 
   // Update Media Session with current playback rate
   useEffect(() => {
@@ -503,6 +501,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       {...swipeHandlers}
     >
       <audio
+        key={episode.id}
         ref={audioRef}
         src={episode.audioUrl}
         preload="auto"
