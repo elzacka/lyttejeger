@@ -90,7 +90,7 @@ export function BottomNav({
               <span className={styles.badge}>{queueCount}</span>
             )}
           </span>
-          <span className={styles.label}>Kø</span>
+          <span className={styles.label}> Min kø</span>
         </button>
 
         <button

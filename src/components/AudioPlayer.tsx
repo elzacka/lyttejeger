@@ -3,6 +3,54 @@ import type { Episode } from '../types/podcast'
 import { savePlaybackPosition, getPlaybackPosition } from '../services/db'
 import styles from './AudioPlayer.module.css'
 
+/**
+ * ============================================================================
+ * iOS SAFARI AUDIO PLAYBACK - CRITICAL REQUIREMENTS
+ * ============================================================================
+ *
+ * iOS Safari has strict requirements for audio playback. Violating ANY of these
+ * will cause silent playback failures that are difficult to debug.
+ *
+ * REQUIREMENT 1: User Gesture Chain
+ * ---------------------------------
+ * audio.play() MUST be called synchronously within a user gesture (tap) context.
+ * Adding ANY async operation between the tap and play() breaks this chain:
+ *   - NO Promises or await before play()
+ *   - NO setTimeout before play()
+ *   - NO event listener callbacks before play()
+ *
+ * REQUIREMENT 2: Explicit Audio Initialization
+ * --------------------------------------------
+ * When the episode/source changes, you MUST:
+ *   - Call audio.load() explicitly
+ *   - Reset all state (isPlaying, currentTime, duration, etc.)
+ *   - Do NOT rely solely on React's key={} remounting
+ *
+ * REQUIREMENT 3: Component Mounting
+ * ---------------------------------
+ * AudioPlayer MUST remain mounted at the same level in the component tree.
+ *   - Render at root level in App.tsx (sibling to BottomNav)
+ *   - NEVER move inside conditional renders or view-specific components
+ *   - Remounting the component loses the audio session
+ *
+ * KNOWN FAILURE PATTERNS (DO NOT DO THESE):
+ * -----------------------------------------
+ * 1. ❌ await somePromise(); audio.play()  // Breaks gesture chain
+ * 2. ❌ setTimeout(() => audio.play(), 0)  // Breaks gesture chain
+ * 3. ❌ Relying only on key={id} for source changes  // iOS needs load()
+ * 4. ❌ Moving AudioPlayer inside {view === 'x' && <AudioPlayer/>}
+ * 5. ❌ Wrapping play() in async function with awaits before it
+ *
+ * CORRECT PATTERNS:
+ * -----------------
+ * 1. ✅ audio.play().catch(handleError)  // Direct call with catch
+ * 2. ✅ if (audio.readyState < 2) audio.load(); audio.play()  // Sync load
+ * 3. ✅ Explicit state reset + load() on episode change
+ * 4. ✅ AudioPlayer as sibling to navigation at root level
+ *
+ * ============================================================================
+ */
+
 // Swipe detection threshold in pixels
 const SWIPE_THRESHOLD = 50
 

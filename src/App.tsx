@@ -355,7 +355,12 @@ function App() {
         </>
       )}
 
-      {/* Always render BottomNav and AudioPlayer at the same level to prevent remounting */}
+      {/*
+        CRITICAL: AudioPlayer and BottomNav must remain at this root level.
+        DO NOT move AudioPlayer inside conditional renders or view components.
+        iOS Safari requires stable component mounting for audio playback.
+        See CLAUDE.md "Audio Playback (iOS/Mobile)" and AudioPlayer.tsx header comments.
+      */}
       <BottomNav
         activeItem={activeNavItem}
         onNavigate={handleNavigation}

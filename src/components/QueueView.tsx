@@ -219,7 +219,7 @@ export function QueueView({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Kø</h2>
+        <h2 className={styles.title}>Min kø</h2>
         <button
           className={styles.clearButton}
           onClick={() => setShowClearConfirm(true)}
