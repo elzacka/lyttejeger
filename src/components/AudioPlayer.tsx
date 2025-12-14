@@ -348,6 +348,9 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     shouldAutoPlayRef.current = false
   }, [])
 
+  // CRITICAL: iOS requires play() to be called synchronously within user gesture context.
+  // DO NOT add async operations (Promises, awaits, setTimeout) between user tap and audio.play().
+  // Breaking this chain will cause silent playback failure on iOS Safari.
   const togglePlayPause = useCallback(async () => {
     if (!audioRef.current || audioError) return
 
@@ -358,29 +361,9 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     } else {
       try {
         // On iOS, we may need to load the audio first if it was suspended
+        // IMPORTANT: Do NOT await or use promises here - must stay in user gesture context
         if (audio.readyState < 2) {
           audio.load()
-          // Wait for audio to be ready before playing
-          await new Promise<void>((resolve, reject) => {
-            const onCanPlay = () => {
-              audio.removeEventListener('canplay', onCanPlay)
-              audio.removeEventListener('error', onError)
-              resolve()
-            }
-            const onError = () => {
-              audio.removeEventListener('canplay', onCanPlay)
-              audio.removeEventListener('error', onError)
-              reject(new Error('Audio load failed'))
-            }
-            audio.addEventListener('canplay', onCanPlay)
-            audio.addEventListener('error', onError)
-            // Timeout after 10 seconds
-            setTimeout(() => {
-              audio.removeEventListener('canplay', onCanPlay)
-              audio.removeEventListener('error', onError)
-              resolve() // Try to play anyway
-            }, 10000)
-          })
         }
         await audio.play()
       } catch {
