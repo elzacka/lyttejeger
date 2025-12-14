@@ -52,6 +52,7 @@
 
 .navItem.active {
   color: var(--accent, var(--color-accent));
+  background: var(--color-accent-alpha);
 }
 
 .iconWrapper {

@@ -6,9 +6,9 @@ import { getEpisodesByFeedIds } from '../services/podcastIndex'
 import { transformEpisodes } from '../services/podcastTransform'
 import { formatDuration, formatDateLong, linkifyText } from '../utils/search'
 import { usePlaybackProgress } from '../hooks/usePlaybackProgress'
-import styles from './RecentEpisodes.module.css'
+import styles from './HomeView.module.css'
 
-interface RecentEpisodesProps {
+interface HomeViewProps {
   subscriptions: Subscription[]
   onPlayEpisode: (episode: PlayingEpisode) => void
   onAddToQueue: (episode: Episode, podcastTitle: string, podcastImage: string) => void
@@ -21,14 +21,14 @@ interface EpisodeWithSubscription extends Episode {
   subscription: Subscription
 }
 
-export function RecentEpisodes({
+export function HomeView({
   subscriptions,
   onPlayEpisode,
   onAddToQueue,
   onPlayNext,
   isInQueue,
   onNavigateToSearch,
-}: RecentEpisodesProps) {
+}: HomeViewProps) {
   const [episodes, setEpisodes] = useState<EpisodeWithSubscription[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

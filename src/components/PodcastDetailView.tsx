@@ -5,9 +5,9 @@ import { getEpisodesByFeedId } from '../services/podcastIndex'
 import { transformEpisodes } from '../services/podcastTransform'
 import { formatDuration, formatDateShort, formatDateLong, linkifyText } from '../utils/search'
 import { translateCategory } from '../utils/categoryTranslations'
-import styles from './PodcastPage.module.css'
+import styles from './PodcastDetailView.module.css'
 
-interface PodcastPageProps {
+interface PodcastDetailViewProps {
   podcast: Podcast
   onPlayEpisode: (episode: PlayingEpisode) => void
   onAddToQueue?: (episode: Episode, podcastTitle: string, podcastImage: string) => void
@@ -19,7 +19,7 @@ interface PodcastPageProps {
   onBack?: () => void
 }
 
-export function PodcastPage({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, isInQueue, isSubscribed, onSubscribe, onUnsubscribe, onBack }: PodcastPageProps) {
+export function PodcastDetailView({ podcast, onPlayEpisode, onAddToQueue, onPlayNext, isInQueue, isSubscribed, onSubscribe, onUnsubscribe, onBack }: PodcastDetailViewProps) {
   const [episodes, setEpisodes] = useState<Episode[]>([])
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false)
   const [episodesError, setEpisodesError] = useState<string | null>(null)

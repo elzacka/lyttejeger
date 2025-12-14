@@ -1,13 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Header } from './components/Header'
-import { SearchBar } from './components/SearchBar'
-import { FilterPanel } from './components/FilterPanel'
-import { PodcastList } from './components/PodcastList'
-import { EpisodeList } from './components/EpisodeList'
-import { PodcastPage } from './components/PodcastPage'
+import { SearchView } from './components/SearchView'
+import { PodcastDetailView } from './components/PodcastDetailView'
 import { QueueView } from './components/QueueView'
 import { SubscriptionsView } from './components/SubscriptionsView'
-import { RecentEpisodes } from './components/RecentEpisodes'
+import { HomeView } from './components/HomeView'
 import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { BottomNav, type NavItem } from './components/BottomNav'
@@ -122,7 +119,7 @@ function App() {
     })
   }, [playNext])
 
-  // Handlers for PodcastPage episodes (simpler Episode type)
+  // Handlers for PodcastDetailView episodes (simpler Episode type)
   const handleAddEpisodeToQueue = useCallback((episode: Episode, podcastTitle: string, podcastImage: string) => {
     addToQueue({
       id: episode.id,
@@ -274,9 +271,9 @@ function App() {
   return (
     <SheetProvider>
     <div className="app">
-      {/* Show PodcastPage when selected, otherwise show main content */}
+      {/* Show PodcastDetailView when selected, otherwise show main content */}
       {selectedPodcast ? (
-        <PodcastPage
+        <PodcastDetailView
           podcast={selectedPodcast}
           onPlayEpisode={handlePlayEpisode}
           onAddToQueue={handleAddEpisodeToQueue}
@@ -295,9 +292,9 @@ function App() {
           <Header />
 
           <main className="main" id="main-content">
-            {/* Home view - only shows recent episodes */}
+            {/* Home view - shows recent episodes from subscriptions */}
             {currentView === 'home' && (
-              <RecentEpisodes
+              <HomeView
                 subscriptions={subscriptions}
                 onPlayEpisode={handlePlayEpisode}
                 onAddToQueue={handleAddEpisodeToQueue}
@@ -309,75 +306,30 @@ function App() {
 
             {/* Search view - search bar, filters, and results */}
             {currentView === 'search' && (
-              <>
-                <section className="search-section">
-                  <SearchBar
-                    value={filters.query}
-                    onChange={setQuery}
-                    isPending={isPending}
-                  />
-                </section>
-
-                {error && (
-                  <div className="error-banner" role="alert">
-                    <span className="material-symbols-outlined" aria-hidden="true">error</span>
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                <section className="filter-section">
-                  <FilterPanel
-                    filters={filters}
-                    categories={categories}
-                    languages={allLanguages}
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                    onToggleCategory={toggleCategory}
-                    onToggleLanguage={toggleLanguage}
-                    onSetDateFrom={setDateFrom}
-                    onSetDateTo={setDateTo}
-                    onClearFilters={clearFilters}
-                    activeFilterCount={activeFilterCount}
-                  />
-                </section>
-
-                <section className="results-section">
-                  {(activeTab === 'podcasts' || activeTab === 'episodes') && filters.query && (
-                    <div className="sort-bar">
-                      <select
-                        className="sort-select"
-                        value={filters.sortBy}
-                        onChange={(e) => setSortBy(e.target.value as typeof filters.sortBy)}
-                        aria-label="Sorter resultater"
-                      >
-                        <option value="relevance">Relevans</option>
-                        <option value="newest">Nyeste</option>
-                        <option value="oldest">Eldste</option>
-                        <option value="popular">Populære</option>
-                      </select>
-                    </div>
-                  )}
-                  {activeTab === 'podcasts' ? (
-                    <PodcastList
-                      podcasts={results.podcasts}
-                      searchQuery={filters.query}
-                      isLoading={isPending}
-                      onSelectPodcast={handleSelectPodcast}
-                    />
-                  ) : (
-                    <EpisodeList
-                      episodes={results.episodes}
-                      searchQuery={filters.query}
-                      isLoading={isPending}
-                      onPlayEpisode={handlePlayEpisode}
-                      onAddToQueue={handleAddToQueue}
-                      onPlayNext={handlePlayNext}
-                      isInQueue={isInQueue}
-                      onSelectPodcast={handleSelectPodcastById}
-                    />
-                  )}
-                </section>
-              </>
+              <SearchView
+                filters={filters}
+                results={results}
+                isPending={isPending}
+                error={error}
+                activeTab={activeTab}
+                categories={categories}
+                languages={allLanguages}
+                activeFilterCount={activeFilterCount}
+                onSetQuery={setQuery}
+                onTabChange={setActiveTab}
+                onToggleCategory={toggleCategory}
+                onToggleLanguage={toggleLanguage}
+                onSetDateFrom={setDateFrom}
+                onSetDateTo={setDateTo}
+                onSetSortBy={setSortBy}
+                onClearFilters={clearFilters}
+                onSelectPodcast={handleSelectPodcast}
+                onSelectPodcastById={handleSelectPodcastById}
+                onPlayEpisode={handlePlayEpisode}
+                onAddToQueue={handleAddToQueue}
+                onPlayNext={handlePlayNext}
+                isInQueue={isInQueue}
+              />
             )}
 
             {/* Subscriptions view */}

@@ -31,10 +31,9 @@
   letter-spacing: 0.5px;
 }
 
-/* Mobile */
+/* Mobile - hide header entirely */
 @media (max-width: 640px) {
   .header {
-    padding: var(--space-md) var(--space-sm);
-    padding-top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
+    display: none;
   }
 }

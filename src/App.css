@@ -23,6 +23,14 @@
   overflow-x: hidden;
 }
 
+/* Sticky search header - contains search bar and filters */
+.search-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: 100%;
+}
+
 /* Search section */
 .search-section {
   width: 100%;
@@ -98,5 +106,34 @@
     padding: var(--space-md);
     /* Account for bottom nav (56px) + player height + spacing */
     padding-bottom: calc(56px + var(--player-height-mobile) + var(--space-xl) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Sticky search header with scroll-to-hide on mobile */
+  .search-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    background: var(--bg-primary);
+    /* Ergonomic top padding - pushes search bar down for easier thumb reach */
+    padding-top: calc(var(--space-xl) + env(safe-area-inset-top, 0px));
+    padding-bottom: var(--space-sm);
+    margin: calc(-1 * var(--space-md)) calc(-1 * var(--space-md)) 0;
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+    /* Smooth transition for hide/show */
+    transition: transform 0.25s ease-out, opacity 0.2s ease-out;
+    will-change: transform;
+  }
+
+  .search-header--hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Add spacer to prevent content jump when header hides */
+  .results-section {
+    /* Offset for sticky header transition */
+    scroll-margin-top: 120px;
   }
 }
