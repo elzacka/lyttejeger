@@ -51,7 +51,9 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const lastSaveRef = useRef<number>(0)
   const saveIntervalRef = useRef<number | null>(null)
 
-  // Handle episode changes - set autoplay flag and load position
+  // Handle episode changes - reset state and load audio
+  // CRITICAL: This explicit initialization is required for iOS Safari.
+  // DO NOT rely solely on key={episode.id} remounting - iOS needs explicit load() call.
   useEffect(() => {
     const episodeId = episode?.id ?? null
 
@@ -63,17 +65,28 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     // Update ref
     currentEpisodeIdRef.current = episodeId
 
-    if (episode) {
+    if (episode && audioRef.current) {
+      // Reset state for new episode - REQUIRED for iOS
+      setIsLoading(true)
+      setAudioError(false)
+      setIsPlaying(false)
+      setCurrentTime(0)
+      setDuration(0)
+
       // New episode - mark for auto-play when audio becomes ready
-      // The audio element is remounted with key={episode.id}, so it will auto-load
       shouldAutoPlayRef.current = true
 
-      // Load saved position asynchronously once audio is ready
+      // Explicitly load the new source - REQUIRED for iOS
+      // The key={episode.id} remount is not sufficient on iOS Safari
+      audioRef.current.load()
+
+      // Load saved position asynchronously
       const loadPosition = async () => {
         try {
           const saved = await getPlaybackPosition(episode.id)
           if (saved && !saved.completed && audioRef.current) {
             audioRef.current.currentTime = saved.position
+            setCurrentTime(saved.position)
           }
         } catch {
           // Ignore position load errors
@@ -322,22 +335,16 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     setAudioError(false)
 
     // Auto-play if this is a new episode
+    // NOTE: This will likely fail on iOS without user gesture - that's expected
     if (shouldAutoPlayRef.current && audioRef.current) {
       shouldAutoPlayRef.current = false
-      const audio = audioRef.current
 
-      // Try to play - use a small delay to ensure audio is truly ready
-      const attemptPlay = async () => {
-        try {
-          await audio.play()
-        } catch {
-          // Autoplay blocked - this is expected on iOS/Safari without user gesture
-          // The user will need to tap play manually
-          setIsPlaying(false)
-        }
-      }
-
-      attemptPlay()
+      // Direct play attempt - no async wrapper to avoid iOS issues
+      audioRef.current.play().catch(() => {
+        // Autoplay blocked - this is expected on iOS/Safari without user gesture
+        // The user will need to tap play manually
+        setIsPlaying(false)
+      })
     }
   }, [])
 
