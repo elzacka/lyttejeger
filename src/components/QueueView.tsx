@@ -293,6 +293,7 @@ export function QueueView({
                         src={item.imageUrl || item.podcastImage}
                         alt=""
                         className={styles.image}
+                        loading="lazy"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
                           target.style.display = 'none'

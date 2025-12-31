@@ -137,3 +137,13 @@
     scroll-margin-top: 120px;
   }
 }
+
+/* Desktop: top nav means content starts below it */
+@media (min-width: 769px) {
+  .main {
+    /* Account for top nav height (~44px) */
+    padding-top: calc(var(--space-lg) + 44px);
+    /* No bottom nav on desktop, only player */
+    padding-bottom: calc(var(--player-height) + var(--space-xl));
+  }
+}

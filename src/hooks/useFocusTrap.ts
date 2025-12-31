@@ -1,7 +1,13 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, type RefObject } from 'react'
 
-export function useFocusTrap<T extends HTMLElement = HTMLElement>() {
-  const containerRef = useRef<T>(null)
+/**
+ * Focus trap hook that works with an existing ref
+ * Traps Tab/Shift+Tab navigation within a container
+ */
+export function useFocusTrap<T extends HTMLElement = HTMLElement>(
+  containerRef: RefObject<T | null>,
+  enabled: boolean = true
+) {
   const previousActiveElement = useRef<Element | null>(null)
 
   const getFocusableElements = useCallback(() => {
@@ -19,9 +25,11 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>() {
     return Array.from(
       containerRef.current.querySelectorAll<HTMLElement>(focusableSelectors)
     ).filter(el => el.offsetParent !== null)
-  }, [])
+  }, [containerRef])
 
   useEffect(() => {
+    if (!enabled) return
+
     previousActiveElement.current = document.activeElement
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -54,7 +62,5 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>() {
         previousActiveElement.current.focus()
       }
     }
-  }, [getFocusableElements])
-
-  return containerRef
+  }, [enabled, getFocusableElements])
 }

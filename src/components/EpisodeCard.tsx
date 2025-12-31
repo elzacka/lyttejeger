@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, memo } from 'react'
 import type { EpisodeWithPodcast } from '../utils/search'
 import type { PlaybackProgress } from '../hooks/usePlaybackProgress'
 import { formatDuration, formatDateLong, linkifyText } from '../utils/search'
@@ -14,7 +14,7 @@ interface EpisodeCardProps {
   onSelectPodcast?: (podcastId: string) => void
 }
 
-export function EpisodeCard({
+export const EpisodeCard = memo(function EpisodeCard({
   episode,
   onPlay,
   onAddToQueue,
@@ -26,8 +26,10 @@ export function EpisodeCard({
   const [menuOpen, setMenuOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const [menuPosition, setMenuPosition] = useState<'right' | 'left'>('right')
   const menuRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const imageUrl = episode.imageUrl || episode.podcast?.imageUrl
 
@@ -61,6 +63,7 @@ export function EpisodeCard({
     }
   }, [menuOpen])
 
+
   const playEpisode = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation()
     e.preventDefault()
@@ -78,6 +81,15 @@ export function EpisodeCard({
   const handleMenuClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation()
     e.preventDefault()
+
+    // Calculate menu position before opening
+    if (!menuOpen && containerRef.current) {
+      const containerRect = containerRef.current.getBoundingClientRect()
+      const menuWidth = 160 // min-width from CSS
+      const wouldOverflowRight = containerRect.right + menuWidth > window.innerWidth
+      setMenuPosition(wouldOverflowRight ? 'left' : 'right')
+    }
+
     setMenuOpen(!menuOpen)
   }
 
@@ -168,7 +180,7 @@ export function EpisodeCard({
 
         <div className={styles.actions}>
           {(onAddToQueue || onPlayNext) && (
-            <div className={styles.menuContainer}>
+            <div ref={containerRef} className={styles.menuContainer}>
               <button
                 ref={buttonRef}
                 className={styles.menuButton}
@@ -183,7 +195,7 @@ export function EpisodeCard({
               {menuOpen && (
                 <div
                   ref={menuRef}
-                  className={styles.menuDropdown}
+                  className={`${styles.menuDropdown} ${menuPosition === 'left' ? styles.menuDropdownLeft : ''}`}
                   role="menu"
                   onKeyDown={(e) => {
                     const items = menuRef.current?.querySelectorAll('[role="menuitem"]')
@@ -275,4 +287,4 @@ export function EpisodeCard({
       )}
     </article>
   )
-}
+})

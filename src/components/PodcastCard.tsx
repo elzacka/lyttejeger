@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import type { Podcast } from '../types/podcast'
+import { DESCRIPTION_TRUNCATE_LENGTH } from '../constants'
 import styles from './PodcastCard.module.css'
 
 interface PodcastCardProps {
@@ -8,7 +9,7 @@ interface PodcastCardProps {
   onSelect?: (podcast: Podcast) => void
 }
 
-export function PodcastCard({ podcast, searchQuery, onSelect }: PodcastCardProps) {
+export const PodcastCard = memo(function PodcastCard({ podcast, searchQuery, onSelect }: PodcastCardProps) {
   const [imageError, setImageError] = useState(false)
   const highlightText = (text: string, query: string) => {
     if (!query.trim()) return text
@@ -74,11 +75,11 @@ export function PodcastCard({ podcast, searchQuery, onSelect }: PodcastCardProps
         </p>
 
         <p className={styles.description}>
-          {podcast.description.length > 120
-            ? `${podcast.description.slice(0, 120)}...`
+          {podcast.description.length > DESCRIPTION_TRUNCATE_LENGTH
+            ? `${podcast.description.slice(0, DESCRIPTION_TRUNCATE_LENGTH)}...`
             : podcast.description}
         </p>
       </div>
     </article>
   )
-}
+})

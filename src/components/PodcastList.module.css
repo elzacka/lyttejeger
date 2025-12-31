@@ -20,6 +20,20 @@
   max-width: 100%;
 }
 
+/* Window-based virtualized list container */
+.virtualList {
+  position: relative;
+  width: 100%;
+}
+
+.virtualItem {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding-bottom: var(--space-sm);
+}
+
 .loading {
   display: flex;
   flex-direction: column;

@@ -36,6 +36,7 @@ export interface DateFilter {
 export interface SearchFilters {
   query: string
   categories: string[]
+  excludeCategories: string[]
   languages: string[]
   maxDuration: number | null
   sortBy: 'relevance' | 'newest' | 'oldest' | 'popular'

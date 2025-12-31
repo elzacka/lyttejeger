@@ -1,8 +1,13 @@
+import { useRef, useState, useLayoutEffect } from 'react'
+import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import type { EpisodeWithPodcast } from '../utils/search'
 import type { PlayingEpisode } from './AudioPlayer'
 import { EpisodeCard } from './EpisodeCard'
 import { usePlaybackProgress } from '../hooks/usePlaybackProgress'
 import styles from './EpisodeList.module.css'
+
+// Estimated height per episode card
+const ESTIMATED_ITEM_HEIGHT = 88
 
 interface EpisodeListProps {
   episodes: EpisodeWithPodcast[]
@@ -40,6 +45,26 @@ export function EpisodeList({
   onSelectPodcast,
 }: EpisodeListProps) {
   const { getProgress } = usePlaybackProgress()
+  const listRef = useRef<HTMLDivElement>(null)
+  const [scrollMargin, setScrollMargin] = useState(0)
+
+  // Use virtualization for lists with 20+ items
+  const useVirtual = episodes.length >= 20
+
+  // Compute scroll margin after layout
+  useLayoutEffect(() => {
+    if (listRef.current) {
+      setScrollMargin(listRef.current.offsetTop)
+    }
+  }, [])
+
+  const virtualizer = useWindowVirtualizer({
+    count: episodes.length,
+    estimateSize: () => ESTIMATED_ITEM_HEIGHT,
+    overscan: 5,
+    scrollMargin,
+    enabled: useVirtual,
+  })
 
   if (isLoading) {
     return (
@@ -66,28 +91,76 @@ export function EpisodeList({
     )
   }
 
+  // Non-virtualized render for small lists
+  if (!useVirtual) {
+    return (
+      <div className={styles.container}>
+        <p className={styles.resultCount} aria-live="polite">
+          {episodes.length} {episodes.length === 1 ? 'episode' : 'episoder'}
+        </p>
+        <div className={styles.list} role="list" aria-label="Søkeresultater for episoder">
+          {episodes.map((episode) => (
+            <EpisodeCard
+              key={episode.id}
+              episode={episode}
+              onPlay={(ep) => onPlayEpisode({
+                ...ep,
+                podcastTitle: ep.podcast?.title,
+                podcastImage: ep.podcast?.imageUrl
+              })}
+              onAddToQueue={onAddToQueue}
+              onPlayNext={onPlayNext}
+              isInQueue={isInQueue?.(episode.id) ?? false}
+              progress={getProgress(episode.id)}
+              onSelectPodcast={onSelectPodcast}
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Virtualized render for large lists - uses window scroll
+  const items = virtualizer.getVirtualItems()
+
   return (
     <div className={styles.container}>
       <p className={styles.resultCount} aria-live="polite">
         {episodes.length} {episodes.length === 1 ? 'episode' : 'episoder'}
       </p>
-      <div className={styles.list} role="list" aria-label="Søkeresultater for episoder">
-        {episodes.map((episode) => (
-          <EpisodeCard
-            key={episode.id}
-            episode={episode}
-            onPlay={(ep) => onPlayEpisode({
-              ...ep,
-              podcastTitle: ep.podcast?.title,
-              podcastImage: ep.podcast?.imageUrl
-            })}
-            onAddToQueue={onAddToQueue}
-            onPlayNext={onPlayNext}
-            isInQueue={isInQueue?.(episode.id) ?? false}
-            progress={getProgress(episode.id)}
-            onSelectPodcast={onSelectPodcast}
-          />
-        ))}
+      <div
+        ref={listRef}
+        className={styles.virtualList}
+        role="list"
+        aria-label="Søkeresultater for episoder"
+        style={{ height: `${virtualizer.getTotalSize()}px` }}
+      >
+        {items.map((virtualItem) => {
+          const episode = episodes[virtualItem.index]
+          return (
+            <div
+              key={episode.id}
+              className={styles.virtualItem}
+              style={{
+                transform: `translateY(${virtualItem.start - scrollMargin}px)`,
+              }}
+            >
+              <EpisodeCard
+                episode={episode}
+                onPlay={(ep) => onPlayEpisode({
+                  ...ep,
+                  podcastTitle: ep.podcast?.title,
+                  podcastImage: ep.podcast?.imageUrl
+                })}
+                onAddToQueue={onAddToQueue}
+                onPlayNext={onPlayNext}
+                isInQueue={isInQueue?.(episode.id) ?? false}
+                progress={getProgress(episode.id)}
+                onSelectPodcast={onSelectPodcast}
+              />
+            </div>
+          )
+        })}
       </div>
     </div>
   )

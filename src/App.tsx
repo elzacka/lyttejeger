@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Header } from './components/Header'
+import { useState, useCallback } from 'react'
+import { OfflineBanner } from './components/OfflineBanner'
 import { SearchView } from './components/SearchView'
 import { PodcastDetailView } from './components/PodcastDetailView'
 import { QueueView } from './components/QueueView'
@@ -13,53 +13,40 @@ import { useSearch } from './hooks/useSearch'
 import { useQueue } from './hooks/useQueue'
 import { useSubscriptions } from './hooks/useSubscriptions'
 import { allLanguages } from './data/languages'
-import { getCategories, isConfigured, getPodcastByFeedId } from './services/podcastIndex'
+import { allCategories } from './data/categories'
+import { getPodcastByFeedId } from './services/podcastIndex'
 import { transformFeed } from './services/podcastTransform'
-import { translateCategory } from './utils/categoryTranslations'
-import type { FilterOption, Podcast, Episode } from './types/podcast'
+import type { Podcast, Episode } from './types/podcast'
 import type { EpisodeWithPodcast } from './utils/search'
 import type { QueueItem } from './services/db'
 import './App.css'
 
-// Fallback categories if API fails
-const fallbackCategories: FilterOption[] = [
-  { value: 'Society & Culture', label: 'Samfunn og kultur' },
-  { value: 'News', label: 'Nyheter' },
-  { value: 'Comedy', label: 'Humor' },
-  { value: 'True Crime', label: 'Krim' },
-  { value: 'Sports', label: 'Sport' },
-  { value: 'Technology', label: 'Teknologi' },
-  { value: 'Business', label: 'Næringsliv' },
-  { value: 'Health & Fitness', label: 'Helse og trening' },
-  { value: 'Education', label: 'Utdanning' },
-  { value: 'Arts', label: 'Kunst' }
-]
+// Helper to map Episode/EpisodeWithPodcast to PlayingEpisode format for queue operations
+function toPlayingEpisode(
+  episode: Episode | EpisodeWithPodcast,
+  podcastTitle?: string,
+  podcastImage?: string
+): PlayingEpisode {
+  const podcast = 'podcast' in episode ? episode.podcast : undefined
+  return {
+    id: episode.id,
+    podcastId: episode.podcastId,
+    title: episode.title,
+    audioUrl: episode.audioUrl,
+    imageUrl: episode.imageUrl,
+    podcastTitle: podcastTitle ?? podcast?.title,
+    podcastImage: podcastImage ?? podcast?.imageUrl,
+    duration: episode.duration,
+    description: episode.description,
+    publishedAt: episode.publishedAt,
+  }
+}
 
 function App() {
-  const [categories, setCategories] = useState<FilterOption[]>(fallbackCategories)
   const [playingEpisode, setPlayingEpisode] = useState<PlayingEpisode | null>(null)
   const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null)
   const [previousActiveTab, setPreviousActiveTab] = useState<'home' | 'search' | 'subscriptions'>('search')
   const [currentView, setCurrentView] = useState<'home' | 'search' | 'subscriptions' | 'queue'>('search')
-
-  // Fetch categories from API on mount
-  useEffect(() => {
-    if (isConfigured()) {
-      getCategories()
-        .then(res => {
-          const apiCategories = res.feeds.map(cat => ({
-            value: cat.name,
-            label: translateCategory(cat.name)
-          }))
-          // Sort alphabetically by Norwegian label
-          apiCategories.sort((a, b) => a.label.localeCompare(b.label, 'nb'))
-          setCategories(apiCategories)
-        })
-        .catch(() => {
-          // Keep fallback categories on error
-        })
-    }
-  }, [])
 
   const {
     filters,
@@ -70,6 +57,7 @@ function App() {
     setActiveTab,
     setQuery,
     toggleCategory,
+    // toggleExcludeCategory available for future UI implementation
     toggleLanguage,
     setDateFrom,
     setDateTo,
@@ -90,64 +78,20 @@ function App() {
   }, [])
 
   const handleAddToQueue = useCallback((episode: EpisodeWithPodcast) => {
-    addToQueue({
-      id: episode.id,
-      podcastId: episode.podcastId,
-      title: episode.title,
-      audioUrl: episode.audioUrl,
-      imageUrl: episode.imageUrl,
-      podcastTitle: episode.podcast?.title,
-      podcastImage: episode.podcast?.imageUrl,
-      duration: episode.duration,
-      description: episode.description,
-      publishedAt: episode.publishedAt,
-    })
+    addToQueue(toPlayingEpisode(episode))
   }, [addToQueue])
 
   const handlePlayNext = useCallback((episode: EpisodeWithPodcast) => {
-    playNext({
-      id: episode.id,
-      podcastId: episode.podcastId,
-      title: episode.title,
-      audioUrl: episode.audioUrl,
-      imageUrl: episode.imageUrl,
-      podcastTitle: episode.podcast?.title,
-      podcastImage: episode.podcast?.imageUrl,
-      duration: episode.duration,
-      description: episode.description,
-      publishedAt: episode.publishedAt,
-    })
+    playNext(toPlayingEpisode(episode))
   }, [playNext])
 
-  // Handlers for PodcastDetailView episodes (simpler Episode type)
+  // Handlers for PodcastDetailView/HomeView episodes (simpler Episode type with explicit podcast info)
   const handleAddEpisodeToQueue = useCallback((episode: Episode, podcastTitle: string, podcastImage: string) => {
-    addToQueue({
-      id: episode.id,
-      podcastId: episode.podcastId,
-      title: episode.title,
-      audioUrl: episode.audioUrl,
-      imageUrl: episode.imageUrl,
-      podcastTitle,
-      podcastImage,
-      duration: episode.duration,
-      description: episode.description,
-      publishedAt: episode.publishedAt,
-    })
+    addToQueue(toPlayingEpisode(episode, podcastTitle, podcastImage))
   }, [addToQueue])
 
   const handlePlayEpisodeNext = useCallback((episode: Episode, podcastTitle: string, podcastImage: string) => {
-    playNext({
-      id: episode.id,
-      podcastId: episode.podcastId,
-      title: episode.title,
-      audioUrl: episode.audioUrl,
-      imageUrl: episode.imageUrl,
-      podcastTitle,
-      podcastImage,
-      duration: episode.duration,
-      description: episode.description,
-      publishedAt: episode.publishedAt,
-    })
+    playNext(toPlayingEpisode(episode, podcastTitle, podcastImage))
   }, [playNext])
 
   const handleSelectPodcast = useCallback((podcast: Podcast) => {
@@ -289,7 +233,7 @@ function App() {
           <a href="#main-content" className="skip-link">
             Hopp til hovedinnhold
           </a>
-          <Header />
+          <OfflineBanner />
 
           <main className="main" id="main-content">
             {/* Home view - shows recent episodes from subscriptions */}
@@ -312,7 +256,7 @@ function App() {
                 isPending={isPending}
                 error={error}
                 activeTab={activeTab}
-                categories={categories}
+                categories={allCategories}
                 languages={allLanguages}
                 activeFilterCount={activeFilterCount}
                 onSetQuery={setQuery}

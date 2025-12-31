@@ -53,7 +53,9 @@ export function parseSearchQuery(query: string): ParsedQuery {
 
   if (orParts.length > 1) {
     for (const part of orParts) {
-      const terms = part.trim().split(/\s+/).filter(t => t.length > 0)
+      const terms = part.trim().split(/\s+/)
+        .filter(t => t.length > 0)
+        .filter(t => t.toUpperCase() !== 'AND') // Filter out AND in OR context
       processTerms(terms, true)
     }
   } else {

@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import type { SearchFilters, FilterOption, DateFilter } from '../types/podcast'
 import type { TabType } from './TabBar'
-import { WheelPicker } from './WheelPicker'
+import { FilterSheet } from './FilterSheet'
 import styles from './FilterPanel.module.css'
+import sheetStyles from './FilterSheet.module.css'
 
 interface FilterPanelProps {
   filters: SearchFilters
@@ -18,6 +19,8 @@ interface FilterPanelProps {
   activeFilterCount: number
 }
 
+type SheetType = 'language' | 'year' | 'category' | null
+
 export function FilterPanel({
   filters,
   categories,
@@ -32,35 +35,35 @@ export function FilterPanel({
   activeFilterCount
 }: FilterPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true)
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false)
-  const categoryDropdownRef = useRef<HTMLDivElement>(null)
+  const [openSheet, setOpenSheet] = useState<SheetType>(null)
+  const [categorySearch, setCategorySearch] = useState('')
 
-  // Close category dropdown when clicking outside
-  useEffect(() => {
-    if (!isCategoryOpen) return
+  // Filter categories based on search
+  const filteredCategories = useMemo(() => {
+    if (!categorySearch.trim()) return categories
+    const search = categorySearch.toLowerCase()
+    return categories.filter(cat =>
+      cat.label.toLowerCase().includes(search) ||
+      cat.value.toLowerCase().includes(search)
+    )
+  }, [categories, categorySearch])
 
-    function handleClickOutside(event: MouseEvent) {
-      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
-        setIsCategoryOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isCategoryOpen])
+  // Reset category search when sheet closes
+  const handleCloseSheet = () => {
+    setOpenSheet(null)
+    setCategorySearch('')
+  }
 
   // Current year
   const currentYear = new Date().getFullYear()
 
   // Generate year options (2005 to current year)
-  const yearOptions = Array.from({ length: currentYear - 2004 }, (_, i) => {
-    const year = currentYear - i
-    return { value: year, label: String(year) }
-  })
+  const years = Array.from({ length: currentYear - 2004 }, (_, i) => currentYear - i)
 
   // Year filter handler - single year, sets both from and to
-  const setYear = (year: number | null) => {
-    if (year === null) {
+  const toggleYear = (year: number) => {
+    const isSelected = filters.dateFrom?.year === year
+    if (isSelected) {
       onSetDateFrom(null)
       onSetDateTo(null)
     } else {
@@ -72,10 +75,16 @@ export function FilterPanel({
   // Get selected year
   const selectedYear = filters.dateFrom?.year ?? null
 
+  // Count selected items for each filter
+  const languageCount = filters.languages.length
+  const yearCount = selectedYear ? 1 : 0
+  const categoryCount = filters.categories.length
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div className={styles.typeSelector} role="radiogroup" aria-label="Velg hva du vil søke etter">
+        <fieldset className={styles.typeSelector}>
+          <legend className={styles.visuallyHidden}>Velg hva du vil søke etter</legend>
           <label className={styles.radioLabel}>
             <input
               type="radio"
@@ -98,7 +107,7 @@ export function FilterPanel({
             />
             <span className={styles.radioText}>Episoder</span>
           </label>
-        </div>
+        </fieldset>
 
         <button
           className={styles.filterDropdown}
@@ -120,98 +129,44 @@ export function FilterPanel({
 
       {isExpanded && (
         <div className={styles.panel}>
-          {/* Språk og år */}
-          <div className={styles.section}>
-            <div className={styles.chipGrid}>
-              {languages.map((language) => (
-                <button
-                  key={language}
-                  className={`${styles.chip} ${
-                    filters.languages.includes(language) ? styles.chipActive : ''
-                  }`}
-                  onClick={() => onToggleLanguage(language)}
-                >
-                  {language}
-                </button>
-              ))}
-              {activeTab === 'episodes' && (
-                <WheelPicker
-                  options={yearOptions}
-                  value={selectedYear}
-                  onChange={(v) => setYear(v as number | null)}
-                  placeholder="Alle år"
-                />
+          <div className={styles.filterButtons}>
+            {/* Language filter button */}
+            <button
+              className={`${styles.filterButton} ${languageCount > 0 ? styles.filterButtonActive : ''}`}
+              onClick={() => setOpenSheet('language')}
+              type="button"
+            >
+              <span>Språk</span>
+              {languageCount > 0 && (
+                <span className={styles.filterButtonBadge}>{languageCount}</span>
               )}
-            </div>
-          </div>
+            </button>
 
-          {/* Kategorier */}
-          <div className={styles.section}>
-            <div className={styles.categoryContainer} ref={categoryDropdownRef}>
+            {/* Category filter button */}
+            <button
+              className={`${styles.filterButton} ${categoryCount > 0 ? styles.filterButtonActive : ''}`}
+              onClick={() => setOpenSheet('category')}
+              type="button"
+            >
+              <span>Kategorier</span>
+              {categoryCount > 0 && (
+                <span className={styles.filterButtonBadge}>{categoryCount}</span>
+              )}
+            </button>
+
+            {/* Year filter button - only for episodes */}
+            {activeTab === 'episodes' && (
               <button
-                className={styles.categorySelect}
-                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                aria-expanded={isCategoryOpen}
-                aria-haspopup="listbox"
-                aria-label="Velg kategori"
+                className={`${styles.filterButton} ${yearCount > 0 ? styles.filterButtonActive : ''}`}
+                onClick={() => setOpenSheet('year')}
                 type="button"
               >
-                <span>
-                  {filters.categories.length === 0
-                    ? 'Velg kategorier'
-                    : `${filters.categories.length} valgt`}
-                </span>
-                <span className="material-symbols-outlined" aria-hidden="true">
-                  {isCategoryOpen ? 'expand_less' : 'expand_more'}
-                </span>
+                <span>År</span>
+                {yearCount > 0 && (
+                  <span className={styles.filterButtonBadge}>{selectedYear}</span>
+                )}
               </button>
-
-              {isCategoryOpen && (
-                <div className={styles.categoryDropdown} role="listbox">
-                  {categories.map((category) => {
-                    const isSelected = filters.categories.includes(category.value)
-                    return (
-                      <button
-                        key={category.value}
-                        className={`${styles.categoryOption} ${isSelected ? styles.categoryOptionSelected : ''}`}
-                        onClick={() => onToggleCategory(category.value)}
-                        role="option"
-                        aria-selected={isSelected}
-                        type="button"
-                      >
-                        <span className={styles.categoryCheckbox}>
-                          {isSelected && (
-                            <span className="material-symbols-outlined" aria-hidden="true">check</span>
-                          )}
-                        </span>
-                        {category.label}
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-
-              {/* Show selected categories as chips below */}
-              {filters.categories.length > 0 && (
-                <div className={styles.selectedChips}>
-                  {filters.categories.map((catValue) => {
-                    const category = categories.find(c => c.value === catValue)
-                    return (
-                      <button
-                        key={catValue}
-                        className={styles.selectedChip}
-                        onClick={() => onToggleCategory(catValue)}
-                        aria-label={`Fjern ${category?.label || catValue}`}
-                        type="button"
-                      >
-                        {category?.label || catValue}
-                        <span className="material-symbols-outlined" aria-hidden="true">close</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
           {activeFilterCount > 0 && (
@@ -221,6 +176,82 @@ export function FilterPanel({
           )}
         </div>
       )}
+
+      {/* Language Sheet */}
+      <FilterSheet
+        isOpen={openSheet === 'language'}
+        onClose={handleCloseSheet}
+        title="Velg språk"
+      >
+        <div className={sheetStyles.optionGrid}>
+          {languages.map((language) => (
+            <button
+              key={language}
+              className={`${sheetStyles.option} ${
+                filters.languages.includes(language) ? sheetStyles.optionSelected : ''
+              }`}
+              onClick={() => onToggleLanguage(language)}
+              type="button"
+            >
+              {language}
+            </button>
+          ))}
+        </div>
+      </FilterSheet>
+
+      {/* Year Sheet */}
+      <FilterSheet
+        isOpen={openSheet === 'year'}
+        onClose={handleCloseSheet}
+        title="Velg år"
+      >
+        <div className={sheetStyles.yearGrid}>
+          {years.map((year) => (
+            <button
+              key={year}
+              className={`${sheetStyles.yearOption} ${
+                selectedYear === year ? sheetStyles.yearOptionSelected : ''
+              }`}
+              onClick={() => toggleYear(year)}
+              type="button"
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      </FilterSheet>
+
+      {/* Category Sheet with search */}
+      <FilterSheet
+        isOpen={openSheet === 'category'}
+        onClose={handleCloseSheet}
+        title="Velg kategorier"
+        searchable
+        searchPlaceholder="Søk i kategorier..."
+        searchValue={categorySearch}
+        onSearchChange={setCategorySearch}
+      >
+        <div className={sheetStyles.categoryList}>
+          {filteredCategories.length === 0 ? (
+            <p className={sheetStyles.noResults}>
+              Ingen kategorier funnet for "{categorySearch}"
+            </p>
+          ) : (
+            filteredCategories.map((category) => (
+              <button
+                key={category.value}
+                className={`${sheetStyles.categoryOption} ${
+                  filters.categories.includes(category.value) ? sheetStyles.categoryOptionSelected : ''
+                }`}
+                onClick={() => onToggleCategory(category.value)}
+                type="button"
+              >
+                {category.label}
+              </button>
+            ))
+          )}
+        </div>
+      </FilterSheet>
     </div>
   )
 }

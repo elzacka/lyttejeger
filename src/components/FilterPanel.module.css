@@ -11,26 +11,46 @@
   gap: var(--space-md);
 }
 
+/* Visually hidden but accessible to screen readers */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Type selector - radio buttons */
 .typeSelector {
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  border: none;
+  padding: 0;
+  margin: 0;
 }
 
 .radioLabel {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-sm);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
   color: var(--text-secondary);
   transition: color var(--transition-fast);
+  border-radius: var(--radius-md);
 }
 
 .radioLabel:hover {
   color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .radioInput {
@@ -97,14 +117,14 @@
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  min-height: var(--button-md);
-  padding: var(--space-xs) var(--space-sm);
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-md);
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
   margin-left: auto;
@@ -160,239 +180,80 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.section {
-  margin-bottom: var(--space-md);
-}
-
-.section:last-of-type {
-  margin-bottom: 0;
-}
-
-.sectionTitle {
-  margin: 0 0 var(--space-sm) 0;
-  font-family: var(--font-mono);
-  font-size: var(--font-xs);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted);
-}
-
-/* Chip grid for languages */
-.chipGrid {
+/* Filter buttons row */
+.filterButtons {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
 }
 
-.chip {
-  min-height: var(--button-sm);
-  min-width: 68px;
-  padding: var(--space-xs) var(--space-sm);
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+  padding: var(--space-sm) var(--space-md);
   background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
   font-family: var(--font-mono);
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
-  text-align: center;
 }
 
-.chip:hover {
+.filterButton:hover {
   border-color: var(--accent);
-  color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
-.chip:active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
+.filterButton:active {
+  transform: scale(0.98);
 }
 
-.chip:focus-visible {
+.filterButton:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.chipActive,
-.chipActive:hover,
-.chipActive:active {
+.filterButton .material-symbols-outlined {
+  font-size: 20px;
+  color: var(--text-muted);
+}
+
+.filterButtonActive {
   background: var(--accent);
   border-color: var(--accent);
   color: white;
 }
 
-.chipActive:hover {
+.filterButtonActive:hover {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
 }
 
-/* Category select - custom dropdown */
-.categoryContainer {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+.filterButtonActive .material-symbols-outlined {
+  color: white;
 }
 
-.categorySelect {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  min-height: var(--button-md);
-  padding: var(--space-xs) var(--space-sm);
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: var(--font-xs);
-  cursor: pointer;
-  transition: border-color var(--transition-fast);
-}
-
-.categorySelect:hover {
-  border-color: var(--accent);
-}
-
-.categorySelect:focus {
-  border-color: var(--accent);
-  outline: none;
-}
-
-.categorySelect .material-symbols-outlined {
-  font-size: var(--icon-sm);
-  color: var(--text-muted);
-}
-
-/* Category dropdown menu */
-.categoryDropdown {
-  position: absolute;
-  top: calc(100% + var(--space-xs));
-  left: 0;
-  right: 0;
-  z-index: var(--z-dropdown);
-  max-height: 360px;
-  overflow-y: auto;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-md);
-}
-
-.categoryOption {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  width: 100%;
-  padding: var(--space-sm);
-  background: transparent;
-  border: none;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: var(--font-xs);
-  text-align: left;
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.categoryOption:hover {
-  background: var(--bg-hover);
-}
-
-.categoryOption:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
-}
-
-.categoryOptionSelected {
-  background: var(--bg-secondary);
-  color: var(--accent);
-}
-
-.categoryOptionSelected:hover {
-  background: var(--bg-hover);
-}
-
-.categoryCheckbox {
+.filterButtonBadge {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-primary);
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: white;
+  color: var(--accent);
+  font-size: var(--font-2xs);
+  font-weight: 600;
+  border-radius: var(--radius-full);
 }
 
-.categoryOptionSelected .categoryCheckbox {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.categoryCheckbox .material-symbols-outlined {
-  font-size: var(--icon-sm);
-  color: white;
-}
-
-/* Selected category chips */
-.selectedChips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-  margin-top: var(--space-sm);
-}
-
-.selectedChip {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2xs);
-  min-height: 28px;
-  padding: var(--space-xs) var(--space-sm);
-  background: var(--accent);
-  border: none;
-  border-radius: var(--radius-sm);
-  color: white;
-  font-family: var(--font-mono);
-  font-size: var(--font-xs);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.selectedChip:hover {
-  background: var(--accent-hover);
-}
-
-.selectedChip:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.selectedChip .material-symbols-outlined {
-  font-size: var(--icon-sm);
-}
-
-/* Year filter */
-.yearFilterContainer {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
-
-.yearFilterRow {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-xs);
-}
-
-.yearLabel {
-  padding-top: 4px;
-  font-family: var(--font-mono);
-  font-size: var(--font-xs);
-  color: var(--text-muted);
+.filterButtonActive .filterButtonBadge {
+  background: white;
+  color: var(--accent);
 }
 
 /* Clear button */
@@ -422,43 +283,45 @@
   outline-offset: 2px;
 }
 
-/* Mobile */
+/* Mobile - maintain 44px touch targets */
 @media (max-width: 640px) {
   .header {
     gap: var(--space-xs);
   }
 
   .typeSelector {
-    gap: var(--space-sm);
+    gap: var(--space-2xs);
   }
 
   .radioLabel {
     gap: var(--space-2xs);
+    min-height: 44px;
+    padding: var(--space-xs);
   }
 
   .radioInput {
-    width: 14px;
-    height: 14px;
-    min-width: 14px;
-    min-height: 14px;
-    max-width: 14px;
-    max-height: 14px;
-    border-width: 1.5px;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    max-width: 18px;
+    max-height: 18px;
+    border-width: 2px;
   }
 
   .radioInput:checked::after {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   .radioText {
-    font-size: var(--font-2xs);
+    font-size: var(--font-xs);
   }
 
   .filterDropdown {
-    min-height: 28px;
-    padding: var(--space-2xs) var(--space-xs);
-    font-size: var(--font-2xs);
+    min-height: 44px;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-xs);
   }
 
   .filterDropdown .material-symbols-outlined {
@@ -466,71 +329,41 @@
   }
 
   .filterBadge {
-    min-width: 14px;
-    height: 14px;
-    font-size: 9px;
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
   }
 
   .panel {
     padding: var(--space-sm);
   }
 
-  .chip {
-    min-height: 26px;
-    min-width: 60px;
-    padding: var(--space-2xs) var(--space-xs);
-    font-size: var(--font-2xs);
+  .filterButtons {
+    gap: var(--space-xs);
   }
 
-  .yearFilterContainer {
-    gap: var(--space-sm);
+  .filterButton {
+    min-height: 44px;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-sm);
+    flex: 1;
+    justify-content: center;
   }
 
-  .yearFilterRow {
-    gap: var(--space-2xs);
+  .filterButton .material-symbols-outlined {
+    font-size: 20px;
   }
 
-  .yearLabel {
-    font-size: var(--font-2xs);
-  }
-
-  .categorySelect {
-    min-height: 28px;
-    padding: var(--space-2xs) var(--space-xs);
-    font-size: var(--font-2xs);
-  }
-
-  .categoryDropdown {
-    max-height: 300px;
-  }
-
-  .categoryOption {
-    padding: var(--space-xs) var(--space-sm);
-    font-size: var(--font-2xs);
-  }
-
-  .categoryCheckbox {
-    width: 14px;
-    height: 14px;
-  }
-
-  .categoryCheckbox .material-symbols-outlined {
-    font-size: var(--font-xs);
-  }
-
-  .selectedChip {
-    min-height: 22px;
-    padding: 2px var(--space-xs);
-    font-size: var(--font-2xs);
-  }
-
-  .selectedChip .material-symbols-outlined {
-    font-size: var(--font-2xs);
+  .filterButtonBadge {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 11px;
   }
 
   .clearButton {
-    min-height: 28px;
-    padding: var(--space-xs);
-    font-size: var(--font-2xs);
+    min-height: 44px;
+    padding: var(--space-sm);
+    font-size: var(--font-xs);
   }
 }

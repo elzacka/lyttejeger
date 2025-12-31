@@ -52,3 +52,6 @@ dev-dist
 dev_only/*
 .obsidian/
 CLAUDE.md
+brand-manual.md
+audio-player-critical-rules.md
+ios-pwa-audio-situation-report.md

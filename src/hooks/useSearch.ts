@@ -5,7 +5,7 @@ import type { TabType } from '../components/TabBar'
 import {
   searchPodcasts as apiSearchPodcasts,
   searchEpisodesByPerson,
-  getEpisodesByFeedId,
+  getEpisodesByFeedIds,
   getTrendingPodcasts,
   getRecentEpisodes,
   isConfigured,
@@ -17,6 +17,7 @@ import { parseSearchQuery } from '../utils/search'
 const initialFilters: SearchFilters = {
   query: '',
   categories: [],
+  excludeCategories: [],
   languages: [],
   maxDuration: null,
   sortBy: 'relevance',
@@ -41,6 +42,7 @@ export function useSearch() {
   const [apiEpisodes, setApiEpisodes] = useState<Episode[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [searchWarning, setSearchWarning] = useState<string | null>(null)
 
   // Always use API
   const shouldUseApi = isConfigured()
@@ -82,6 +84,7 @@ export function useSearch() {
 
     setIsLoading(true)
     setError(null)
+    setSearchWarning(null)
 
     try {
       // Parse query to extract only positive terms for API
@@ -136,6 +139,8 @@ export function useSearch() {
       if (searchType === 'episodes') {
         const allEpisodes: Episode[] = []
         const existingIds = new Set<string>()
+        let strategy1Failed = false
+        let strategy2Failed = false
 
         // Strategy 1: byperson API - searches person tags, title, description
         try {
@@ -165,58 +170,68 @@ export function useSearch() {
             existingIds.add(ep.id)
           }
         } catch {
+          strategy1Failed = true
           // Continue to strategy 2
         }
 
-        // Strategy 2: Fetch episodes from matching podcasts and filter by query
+        // Strategy 2: Fetch episodes from matching podcasts using batch API
         if (podcasts.length > 0) {
-          const topPodcasts = podcasts.slice(0, 10)
+          const topPodcasts = podcasts.slice(0, 20) // Can fetch more with batch
+          const feedIds = topPodcasts.map(p => parseInt(p.id))
 
           // Calculate since timestamp if year filter is active
           const sinceTimestamp = filters.dateFrom
             ? Math.floor(new Date(filters.dateFrom.year, filters.dateFrom.month - 1, filters.dateFrom.day).getTime() / 1000)
             : undefined
 
-          const episodePromises = topPodcasts.map(async (podcast) => {
-            try {
-              const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), { max: 50, since: sinceTimestamp })
-              const episodes = transformEpisodes(episodesRes.items || [])
-              return episodes.map(ep => ({
+          // Create a map of podcast info by feed ID for quick lookup
+          const podcastMap = new Map(topPodcasts.map(p => [p.id, p]))
+
+          try {
+            // Single batch API call instead of N parallel calls
+            const episodesRes = await getEpisodesByFeedIds(feedIds, {
+              max: 200, // More episodes with single call
+              since: sinceTimestamp
+            })
+
+            const episodes = transformEpisodes(episodesRes.items || [])
+            const podcastEpisodes = episodes.map((ep, idx) => {
+              const apiEp = episodesRes.items?.[idx]
+              const podcast = podcastMap.get(String(apiEp?.feedId))
+              return {
                 ...ep,
-                podcastTitle: podcast.title,
-                podcastAuthor: podcast.author,
-                podcastImage: podcast.imageUrl,
-                feedLanguage: podcast.language
-              }))
-            } catch {
-              return []
+                podcastTitle: podcast?.title || apiEp?.feedTitle || '',
+                podcastAuthor: podcast?.author || apiEp?.feedAuthor || '',
+                podcastImage: podcast?.imageUrl || apiEp?.feedImage || '',
+                feedLanguage: podcast?.language || apiEp?.feedLanguage || ''
+              }
+            })
+
+            // Parse query to get positive search terms
+            const parsed = parseSearchQuery(query)
+
+            // Only include episodes where search term appears in title or description
+            for (const ep of podcastEpisodes) {
+              if (existingIds.has(ep.id)) continue
+              const text = `${ep.title} ${ep.description}`.toLowerCase()
+
+              // For exact phrases, check exact match
+              const matchesPhrase = parsed.exactPhrases.length === 0 ||
+                parsed.exactPhrases.some(phrase => text.includes(phrase.toLowerCase()))
+
+              // For regular terms, at least one must appear in episode text
+              const matchesTerm = (parsed.mustInclude.length === 0 && parsed.shouldInclude.length === 0) ||
+                [...parsed.mustInclude, ...parsed.shouldInclude].some(term =>
+                  text.includes(term.toLowerCase())
+                )
+
+              if (matchesPhrase && matchesTerm) {
+                allEpisodes.push(ep as Episode)
+                existingIds.add(ep.id)
+              }
             }
-          })
-          const episodeResults = await Promise.all(episodePromises)
-          const podcastEpisodes = episodeResults.flat()
-
-          // Parse query to get positive search terms
-          const parsed = parseSearchQuery(query)
-
-          // Only include episodes where search term appears in title or description
-          for (const ep of podcastEpisodes) {
-            if (existingIds.has(ep.id)) continue
-            const text = `${ep.title} ${ep.description}`.toLowerCase()
-
-            // For exact phrases, check exact match
-            const matchesPhrase = parsed.exactPhrases.length === 0 ||
-              parsed.exactPhrases.some(phrase => text.includes(phrase.toLowerCase()))
-
-            // For regular terms, at least one must appear in episode text
-            const matchesTerm = (parsed.mustInclude.length === 0 && parsed.shouldInclude.length === 0) ||
-              [...parsed.mustInclude, ...parsed.shouldInclude].some(term =>
-                text.includes(term.toLowerCase())
-              )
-
-            if (matchesPhrase && matchesTerm) {
-              allEpisodes.push(ep as Episode)
-              existingIds.add(ep.id)
-            }
+          } catch {
+            strategy2Failed = true
           }
         }
 
@@ -242,6 +257,13 @@ export function useSearch() {
             const dateB = new Date(b.publishedAt).getTime()
             return filters.sortBy === 'oldest' ? dateA - dateB : dateB - dateA
           })
+        }
+
+        // Set warning if search was incomplete
+        if (strategy1Failed && strategy2Failed) {
+          setSearchWarning('Søket ga ufullstendige resultater. Prøv igjen senere.')
+        } else if (strategy1Failed || strategy2Failed) {
+          setSearchWarning('Noen episoder kan mangle fra resultatene.')
         }
 
         setApiEpisodes(finalEpisodes)
@@ -274,6 +296,7 @@ export function useSearch() {
         const trendingRes = await getTrendingPodcasts({
           max: 100,
           cat: filters.categories.length > 0 ? filters.categories.join(',') : undefined,
+          notcat: filters.excludeCategories.length > 0 ? filters.excludeCategories.join(',') : undefined,
           lang: filters.languages.length > 0 ? filters.languages[0] : undefined
         })
 
@@ -296,6 +319,7 @@ export function useSearch() {
           const trendingRes = await getTrendingPodcasts({
             max: 30,
             cat: filters.categories.join(','),
+            notcat: filters.excludeCategories.length > 0 ? filters.excludeCategories.join(',') : undefined,
             lang: filters.languages.length > 0 ? filters.languages[0] : undefined
           })
 
@@ -309,27 +333,32 @@ export function useSearch() {
             ? Math.floor(new Date(filters.dateFrom.year, filters.dateFrom.month - 1, filters.dateFrom.day).getTime() / 1000)
             : undefined
 
-          // Now fetch episodes from these podcasts
-          const allEpisodes: Episode[] = []
-          const episodePromises = podcasts.slice(0, 15).map(async (podcast) => {
-            try {
-              const episodesRes = await getEpisodesByFeedId(parseInt(podcast.id), { max: 20, since: sinceTimestamp })
-              const episodes = transformEpisodes(episodesRes.items || [])
-              return episodes.map(ep => ({
-                ...ep,
-                podcastTitle: podcast.title,
-                podcastAuthor: podcast.author,
-                podcastImage: podcast.imageUrl,
-                feedLanguage: podcast.language
-              }))
-            } catch {
-              return []
-            }
-          })
+          // Fetch episodes from these podcasts using batch API
+          const topPodcasts = podcasts.slice(0, 20)
+          const feedIds = topPodcasts.map(p => parseInt(p.id))
+          const podcastMap = new Map(topPodcasts.map(p => [p.id, p]))
 
-          const episodeResults = await Promise.all(episodePromises)
-          for (const eps of episodeResults) {
-            allEpisodes.push(...eps)
+          let allEpisodes: Episode[] = []
+          try {
+            const episodesRes = await getEpisodesByFeedIds(feedIds, {
+              max: 100,
+              since: sinceTimestamp
+            })
+
+            const episodes = transformEpisodes(episodesRes.items || [])
+            allEpisodes = episodes.map((ep, idx) => {
+              const apiEp = episodesRes.items?.[idx]
+              const podcast = podcastMap.get(String(apiEp?.feedId))
+              return {
+                ...ep,
+                podcastTitle: podcast?.title || apiEp?.feedTitle || '',
+                podcastAuthor: podcast?.author || apiEp?.feedAuthor || '',
+                podcastImage: podcast?.imageUrl || apiEp?.feedImage || '',
+                feedLanguage: podcast?.language || apiEp?.feedLanguage || ''
+              } as Episode
+            })
+          } catch {
+            // Silent fail - empty results
           }
 
           // Sort by publish date (newest first)
@@ -381,7 +410,7 @@ export function useSearch() {
   const filtersRef = useRef({ languages: filters.languages, categories: filters.categories })
 
   // Check if any browse-relevant filters are active
-  const hasActiveFilters = filters.categories.length > 0 || filters.languages.length > 0
+  const hasActiveFilters = filters.categories.length > 0 || filters.languages.length > 0 || filters.dateFrom !== null
 
   // Debounced API search or filter-only browse
   useEffect(() => {
@@ -429,11 +458,15 @@ export function useSearch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab])
 
-  // Re-search when language or category filters change (API supports these)
+  // Re-search when filters change (language, category, or date)
   useEffect(() => {
-    if (!shouldUseApi || filters.query.length < 2) return
+    if (!shouldUseApi) return
     // Don't search when on queue or subscriptions tab
     if (activeTab === 'queue' || activeTab === 'subscriptions') return
+
+    // For filter-only browsing (no query), changes are handled by the main useEffect above
+    // This effect only handles re-search when we have an active query
+    if (filters.query.length < 2) return
 
     // Shallow array comparison (arrays are small, items are primitives)
     const languagesChanged = filtersRef.current.languages.length !== filters.languages.length ||
@@ -549,6 +582,17 @@ export function useSearch() {
     })
   }, [])
 
+  const toggleExcludeCategory = useCallback((category: string) => {
+    startTransition(() => {
+      setFilters(prev => ({
+        ...prev,
+        excludeCategories: prev.excludeCategories.includes(category)
+          ? prev.excludeCategories.filter(c => c !== category)
+          : [...prev.excludeCategories, category]
+      }))
+    })
+  }, [])
+
   const toggleLanguage = useCallback((language: string) => {
     startTransition(() => {
       setFilters(prev => ({
@@ -594,6 +638,7 @@ export function useSearch() {
   const activeFilterCount = useMemo(() => {
     let count = 0
     if (filters.categories.length > 0) count++
+    if (filters.excludeCategories.length > 0) count++
     if (filters.languages.length > 0) count++
     if (filters.explicit !== null) count++
     if (filters.dateFrom !== null || filters.dateTo !== null) count++
@@ -606,10 +651,12 @@ export function useSearch() {
     isPending: isPending || isLoading,
     isLoading,
     error,
+    searchWarning,
     activeTab,
     setActiveTab,
     setQuery,
     toggleCategory,
+    toggleExcludeCategory,
     toggleLanguage,
     setDateFrom,
     setDateTo,
@@ -778,6 +825,20 @@ function matchesLanguageFilter(podcastLanguage: string, filterLabel: string): bo
  */
 function applyLocalFiltersToEpisodes(episodes: EpisodeWithPodcast[], filters: SearchFilters): EpisodeWithPodcast[] {
   let filtered = [...episodes]
+
+  // Apply exclusion filtering from query (e.g., -word)
+  if (filters.query) {
+    const parsed = parseSearchQuery(filters.query)
+    if (parsed.mustExclude.length > 0) {
+      filtered = filtered.filter(ep => {
+        const fullText = normalizeText(`${ep.title} ${ep.description}`)
+        for (const term of parsed.mustExclude) {
+          if (fullText.includes(normalizeText(term))) return false
+        }
+        return true
+      })
+    }
+  }
 
   // Filter by languages (using podcast language)
   if (filters.languages.length > 0) {

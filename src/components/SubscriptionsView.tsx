@@ -159,6 +159,7 @@ export function SubscriptionsView({
                   src={sub.imageUrl}
                   alt=""
                   className={styles.image}
+                  loading="lazy"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
                     target.style.display = 'none'

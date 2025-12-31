@@ -56,7 +56,7 @@ export default defineConfig({
         clientsClaim: true,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\.podcasters\..*\/.*/i,
+            urlPattern: /^https:\/\/api\.podcastindex\.org\/api\/1\.0\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'podcast-api-cache',

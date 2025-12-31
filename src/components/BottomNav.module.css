@@ -47,7 +47,7 @@
 
 .navItem:focus-visible {
   outline: 2px solid var(--accent, var(--color-accent));
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
 
 .navItem.active {
@@ -91,14 +91,90 @@
   background: var(--accent, var(--color-accent));
 }
 
-/* Desktop: keep fixed at bottom, more compact styling */
-@media (min-width: 641px) {
+/* Logo - hidden on mobile/tablet, visible on desktop */
+.logo {
+  display: none;
+}
+
+.logoIcon {
+  font-size: 20px;
+  color: var(--accent, var(--color-accent));
+}
+
+.logoText {
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: var(--font-weight-normal, 400);
+  color: var(--text-primary, var(--color-text-primary));
+  letter-spacing: -0.02em;
+}
+
+/* Nav items wrapper - centers buttons on desktop */
+.navItems {
+  display: contents;
+}
+
+/* Tablet: keep at bottom but show labels */
+@media (min-width: 641px) and (max-width: 768px) {
   .nav {
-    /* Keep fixed positioning on desktop too */
     justify-content: center;
-    align-items: stretch;
     gap: 0;
+  }
+
+  .navItem {
+    flex: 0 0 auto;
+    flex-direction: row;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .label {
+    display: block;
+    font-size: var(--font-2xs);
+  }
+
+  .badge {
+    position: static;
+    min-width: 14px;
+    height: 14px;
+    font-size: 8px;
+  }
+}
+
+/* Desktop: move navigation to top */
+@media (min-width: 769px) {
+  .nav {
+    /* Move to top on desktop */
+    position: fixed;
+    top: 0;
+    bottom: auto;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    padding: 0 var(--space-md);
     padding-bottom: 0;
+    border-top: none;
+    border-bottom: 1px solid var(--border, var(--color-border));
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) 0;
+    position: absolute;
+    left: var(--space-md);
+  }
+
+  .navItems {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+  }
+
+  .nav.hidden {
+    transform: translateY(-100%);
   }
 
   .navItem {

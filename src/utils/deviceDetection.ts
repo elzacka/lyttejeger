@@ -168,11 +168,3 @@ export function getDeviceInfo(): DeviceInfo {
     canInstall: canInstallPWA()
   }
 }
-
-/**
- * Check if install button should be shown
- * Only show when running in browser (not standalone)
- */
-export function shouldShowInstallButton(): boolean {
-  return !isStandalone()
-}

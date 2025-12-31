@@ -115,6 +115,8 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
 
     if (episode && audioRef.current) {
       // Reset state for new episode - REQUIRED for iOS
+      // See CLAUDE.md "Audio Playback (iOS/Mobile) - CRITICAL" section
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true)
       setAudioError(false)
       setIsPlaying(false)
@@ -454,6 +456,43 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     }
   }, [duration])
 
+  // Keyboard shortcuts for playback control
+  useEffect(() => {
+    if (!episode) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return
+      }
+
+      switch (e.code) {
+        case 'Space':
+          e.preventDefault()
+          togglePlayPause()
+          break
+        case 'ArrowLeft':
+          e.preventDefault()
+          skipBackward()
+          break
+        case 'ArrowRight':
+          e.preventDefault()
+          skipForward()
+          break
+        case 'KeyM':
+          // Mute/unmute (optional - could add volume control later)
+          if (audioRef.current) {
+            audioRef.current.muted = !audioRef.current.muted
+          }
+          break
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [episode, togglePlayPause, skipBackward, skipForward])
+
   // Cycle through playback speeds
   const cycleSpeed = useCallback(() => {
     setPlaybackSpeed((current) => {
@@ -599,6 +638,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               src={imageUrl}
               alt={episode.podcastTitle || episode.title}
               className={styles.image}
+              loading="eager"
               onError={(e) => {
                 const target = e.target as HTMLImageElement
                 target.style.display = 'none'
@@ -708,7 +748,10 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               onChange={handleSeek}
               className={styles.slider}
               aria-label="Avspillingsposisjon"
-              tabIndex={-1}
+              aria-valuemin={0}
+              aria-valuemax={duration || 0}
+              aria-valuenow={currentTime}
+              aria-valuetext={`${formatTime(currentTime)} av ${formatTime(duration)}`}
               style={{
                 background: `linear-gradient(to right, var(--accent) ${progress}%, var(--border) ${progress}%)`,
               }}

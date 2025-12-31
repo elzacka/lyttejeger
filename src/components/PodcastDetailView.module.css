@@ -198,7 +198,6 @@
 
 .descriptionText {
   margin: 0;
-  font-family: var(--font-mono);
   font-size: var(--font-sm);
   color: var(--text-secondary);
   line-height: 1.6;
@@ -612,7 +611,6 @@
 
 .episodeDescription {
   margin: 0;
-  font-family: var(--font-mono);
   font-size: var(--font-sm);
   color: var(--text-secondary);
   line-height: 1.6;

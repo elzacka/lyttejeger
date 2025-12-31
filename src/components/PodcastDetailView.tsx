@@ -127,6 +127,7 @@ export function PodcastDetailView({ podcast, onPlayEpisode, onAddToQueue, onPlay
                 src={podcast.imageUrl}
                 alt={`Omslagsbilde for ${podcast.title}`}
                 className={styles.image}
+                loading="eager"
                 onError={() => setImageError(true)}
               />
             )}

@@ -30,70 +30,90 @@ export function useQueue() {
 
   const addToQueue = useCallback(
     async (episode: PlayingEpisode) => {
-      await dbAddToQueue({
-        episodeId: episode.id,
-        podcastId: '',
-        title: episode.title,
-        podcastTitle: episode.podcastTitle || '',
-        audioUrl: episode.audioUrl,
-        imageUrl: episode.imageUrl,
-        podcastImage: episode.podcastImage,
-        duration: episode.duration,
-      })
-      const items = await getQueue()
-      setQueue(items)
+      try {
+        await dbAddToQueue({
+          episodeId: episode.id,
+          podcastId: '',
+          title: episode.title,
+          podcastTitle: episode.podcastTitle || '',
+          audioUrl: episode.audioUrl,
+          imageUrl: episode.imageUrl,
+          podcastImage: episode.podcastImage,
+          duration: episode.duration,
+        })
+        const items = await getQueue()
+        setQueue(items)
+      } catch {
+        // Database operation failed - queue state unchanged
+      }
     },
     []
   )
 
   const playNext = useCallback(
     async (episode: PlayingEpisode) => {
-      await dbPlayNext({
-        episodeId: episode.id,
-        podcastId: '',
-        title: episode.title,
-        podcastTitle: episode.podcastTitle || '',
-        audioUrl: episode.audioUrl,
-        imageUrl: episode.imageUrl,
-        podcastImage: episode.podcastImage,
-        duration: episode.duration,
-      })
-      const items = await getQueue()
-      setQueue(items)
+      try {
+        await dbPlayNext({
+          episodeId: episode.id,
+          podcastId: '',
+          title: episode.title,
+          podcastTitle: episode.podcastTitle || '',
+          audioUrl: episode.audioUrl,
+          imageUrl: episode.imageUrl,
+          podcastImage: episode.podcastImage,
+          duration: episode.duration,
+        })
+        const items = await getQueue()
+        setQueue(items)
+      } catch {
+        // Database operation failed - queue state unchanged
+      }
     },
     []
   )
 
   const removeFromQueue = useCallback(async (id: number) => {
-    await dbRemoveFromQueue(id)
-    const items = await getQueue()
-    setQueue(items)
+    try {
+      await dbRemoveFromQueue(id)
+      const items = await getQueue()
+      setQueue(items)
+    } catch {
+      // Database operation failed - queue state unchanged
+    }
   }, [])
 
   const clearQueue = useCallback(async () => {
-    await dbClearQueue()
-    setQueue([])
+    try {
+      await dbClearQueue()
+      setQueue([])
+    } catch {
+      // Database operation failed - queue state unchanged
+    }
   }, [])
 
   const getNextEpisode = useCallback(async (): Promise<PlayingEpisode | null> => {
-    const next = await popFromQueue()
-    if (!next) return null
+    try {
+      const next = await popFromQueue()
+      if (!next) return null
 
-    // Refresh queue state
-    const items = await getQueue()
-    setQueue(items)
+      // Refresh queue state
+      const items = await getQueue()
+      setQueue(items)
 
-    return {
-      id: next.episodeId,
-      title: next.title,
-      audioUrl: next.audioUrl,
-      imageUrl: next.imageUrl,
-      podcastTitle: next.podcastTitle,
-      podcastImage: next.podcastImage,
-      duration: next.duration ?? 0,
-      description: '',
-      publishedAt: '',
-      podcastId: next.podcastId,
+      return {
+        id: next.episodeId,
+        title: next.title,
+        audioUrl: next.audioUrl,
+        imageUrl: next.imageUrl,
+        podcastTitle: next.podcastTitle,
+        podcastImage: next.podcastImage,
+        duration: next.duration ?? 0,
+        description: '',
+        publishedAt: '',
+        podcastId: next.podcastId,
+      }
+    } catch {
+      return null
     }
   }, [])
 
@@ -109,8 +129,16 @@ export function useQueue() {
         position: index,
       }))
 
+      // Update UI optimistically
       setQueue(reordered)
-      await reorderQueue(reordered)
+
+      try {
+        await reorderQueue(reordered)
+      } catch {
+        // Revert on failure
+        const items = await getQueue()
+        setQueue(items)
+      }
     },
     [queue]
   )

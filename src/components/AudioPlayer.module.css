@@ -23,7 +23,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  height: 3px;
+  height: 4px;
   background: var(--accent);
   transition: width 0.1s linear;
 }
@@ -74,20 +74,21 @@
   gap: var(--space-xs);
 }
 
-/* Swipe handle indicator */
+/* Swipe handle indicator - more prominent for better affordance */
 .swipeHandle {
   display: none;
-  width: 40px;
-  height: 5px;
-  background: var(--text-muted);
-  opacity: 0.4;
+  width: 48px;
+  height: 6px;
+  background: var(--border);
+  opacity: 0.8;
   border-radius: 3px;
   margin: var(--space-xs) auto 0;
   transition: opacity var(--transition-fast), background var(--transition-fast);
 }
 
 .swipeHandle:hover {
-  opacity: 0.6;
+  opacity: 1;
+  background: var(--text-muted);
 }
 
 /* Hint text below handle in collapsed state */
@@ -95,10 +96,10 @@
   display: none;
   font-family: var(--font-mono);
   font-size: var(--font-2xs);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-align: center;
-  margin-top: 2px;
-  opacity: 0.7;
+  margin-top: 4px;
+  opacity: 0.9;
 }
 
 /* Full controls wrapper */
@@ -243,11 +244,11 @@
 
 .slider {
   flex: 1;
-  height: 6px;
+  height: 8px;
   -webkit-appearance: none;
   appearance: none;
   background: var(--border);
-  border-radius: 3px;
+  border-radius: 4px;
   cursor: pointer;
   outline: none;
 }
@@ -255,8 +256,8 @@
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   background: var(--accent);
   border-radius: 50%;
   cursor: pointer;
@@ -264,8 +265,8 @@
 }
 
 .slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   background: var(--accent);
   border: none;
   border-radius: 50%;
@@ -582,25 +583,61 @@
   }
 
   .slider {
-    height: 8px;
+    height: 10px;
   }
 
   .slider::-webkit-slider-thumb {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
 
   .slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
 }
 
-/* Desktop - always show full controls, hide mini elements */
-@media (min-width: 641px) {
+/* Tablet - show full controls, hide mini elements */
+@media (min-width: 641px) and (max-width: 768px) {
   .player {
-    /* Desktop nav: content height (~20px icon) + 16px vertical padding = ~36px */
+    /* Tablet: bottom nav still visible */
     --nav-height: 36px;
+  }
+
+  .miniProgress {
+    display: none;
+  }
+
+  .miniControls {
+    display: none;
+  }
+
+  .expandIcon {
+    display: none;
+  }
+
+  .swipeHandle {
+    display: none;
+  }
+
+  .contentRow {
+    display: contents;
+  }
+
+  .info {
+    cursor: default;
+  }
+
+  .secondaryControls {
+    display: flex;
+  }
+}
+
+/* Desktop - no bottom nav, player at true bottom */
+@media (min-width: 769px) {
+  .player {
+    /* No bottom nav on desktop - player sits directly at bottom */
+    --nav-height: 0px;
   }
 
   .miniProgress {
@@ -631,6 +668,4 @@
   .secondaryControls {
     display: flex;
   }
-
-  /* Close button is already absolutely positioned relative to .player */
 }
