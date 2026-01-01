@@ -6,12 +6,13 @@
   right: 0;
   z-index: var(--z-nav);
   display: flex;
-  justify-content: space-evenly;
+  /* flex: 1 on items handles equal distribution, no justify-content needed */
   align-items: stretch;
   background: var(--bg-primary, var(--color-bg-primary));
   border-top: 1px solid var(--border, var(--color-border));
-  /* Extra padding for iPhone home indicator */
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
+  /* Extra padding for iPhone home indicator, plus safe areas on sides */
+  padding: 0 env(safe-area-inset-right, 0px) calc(env(safe-area-inset-bottom, 0px) + 4px)
+    env(safe-area-inset-left, 0px);
   transition:
     transform var(--transition-base) ease-out,
     opacity var(--transition-base) ease-out;
@@ -24,6 +25,7 @@
 }
 
 .navItem {
+  /* Use flex: 1 to ensure all items have equal width */
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -31,7 +33,7 @@
   justify-content: center;
   gap: var(--space-2xs);
   min-height: var(--touch-target-large, 56px);
-  padding: var(--space-sm) var(--space-xs);
+  padding: var(--space-sm) 0;
   background: transparent;
   border: none;
   color: var(--text-muted, var(--color-text-muted));
