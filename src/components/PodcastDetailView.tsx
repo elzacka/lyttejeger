@@ -7,7 +7,7 @@ import {
   ListMusicIcon,
   ListPlusIcon,
   PlayIcon,
-} from '@designsystem/core';
+} from './icons';
 import type { Podcast, Episode } from '../types/podcast';
 import type { PlayingEpisode } from './AudioPlayer';
 import { getEpisodesByFeedId } from '../services/podcastIndex';

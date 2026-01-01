@@ -1,4 +1,4 @@
-import { SpinnerIcon, RefreshIcon, ChevronIcon } from '@designsystem/core';
+import { SpinnerIcon, RefreshIcon, ChevronIcon } from './icons';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import styles from './PullToRefresh.module.css';
 

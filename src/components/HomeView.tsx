@@ -6,7 +6,7 @@ import {
   ListMusicIcon,
   ListPlusIcon,
   PlayIcon,
-} from '@designsystem/core';
+} from './icons';
 import type { Subscription, PlaybackPosition } from '../services/db';
 import { getInProgressEpisodes } from '../services/db';
 import type { Episode } from '../types/podcast';

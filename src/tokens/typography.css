@@ -1,0 +1,49 @@
+/* Typography */
+:root {
+  /* Font families */
+  --font-mono: 'DM Mono', ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  --font-icon: 'Material Symbols Outlined';
+
+  /* Font sizes - optimized for readability */
+  --font-size-2xs: 0.6875rem;  /* 11px */
+  --font-size-xs: 0.8125rem;   /* 13px - increased from 11px */
+  --font-size-sm: 0.875rem;    /* 14px - increased from 12px */
+  --font-size-base: 1rem;      /* 16px - increased from 14px */
+  --font-size-md: 1.0625rem;   /* 17px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.5rem;     /* 24px */
+
+  /* Legacy aliases - map to new sizes */
+  --font-2xs: var(--font-size-2xs);
+  --font-xs: var(--font-size-xs);
+  --font-sm: var(--font-size-sm);
+  --font-base: var(--font-size-base);
+  --font-lg: var(--font-size-lg);
+  --font-xl: var(--font-size-xl);
+
+  /* Font weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Letter spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+}
+
+/* Mobile-first: Larger touch targets require readable text */
+@media (max-width: 640px) {
+  :root {
+    --font-size-xs: 0.875rem;   /* 14px on mobile */
+    --font-size-sm: 0.9375rem;  /* 15px on mobile */
+    --font-size-base: 1rem;     /* 16px minimum for inputs */
+  }
+}

@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback } from 'react';
-import { SpinnerIcon, CloseIcon } from '@designsystem/core';
+import { SpinnerIcon, CloseIcon } from './icons';
 import styles from './SearchBar.module.css';
 import { SearchHelp } from './SearchHelp';
 

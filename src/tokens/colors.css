@@ -1,0 +1,46 @@
+/* Colors - Warm, muted tones (Sporjeger-inspired) */
+:root {
+  /* Background colors */
+  --color-bg-primary: #F4F1EA;
+  --color-bg-secondary: #EBE7DE;
+  --color-bg-hover: #E2DED4;
+
+  /* Text colors - WCAG AA compliant (4.5:1 ratio) */
+  --color-text-primary: #1F1F1F;
+  --color-text-secondary: #3D3D3D;
+  --color-text-muted: #484848; /* Darkened from #545454 for better readability */
+  --color-text-tertiary: #6B6B6B; /* For placeholders and hints */
+  --color-text-inverse: #FFFFFF;
+
+  /* Accent colors */
+  --color-accent: #1a5f7a;
+  --color-accent-hover: #134a5f;
+  --color-accent-rgb: 26, 95, 122;
+  --color-accent-alpha: rgba(26, 95, 122, 0.15);
+  --color-accent-subtle: rgba(26, 95, 122, 0.08);
+  --color-accent-highlight: rgba(26, 95, 122, 0.2);
+
+  /* Border colors */
+  --color-border: #C8C4BA;
+  --color-border-light: #E8E4DA;
+
+  /* Semantic colors */
+  --color-error: #9B2915;
+  --color-error-rgb: 155, 41, 21;
+  --color-warning: #7B6D4D;
+  --color-success: #4A7C59;
+
+  /* Badge colors */
+  --color-badge-explicit: #9B2915;
+  --color-badge-clean: #4A7C59;
+
+  /* Overlay colors */
+  --color-overlay-strong: rgba(0, 0, 0, 0.3);
+  --color-overlay-soft: rgba(0, 0, 0, 0.08);
+  --color-shadow: rgba(0, 0, 0, 0.08);
+
+  /* Glass morphism */
+  --glass-blur: blur(12px);
+  --glass-bg: rgba(244, 241, 234, 0.85);
+  --glass-border: rgba(200, 196, 186, 0.5);
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { HelpCircleIcon } from '@designsystem/core';
+import { HelpCircleIcon } from './icons';
 import styles from './SearchHelp.module.css';
 
 const searchTips = [

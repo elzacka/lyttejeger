@@ -1,0 +1,37 @@
+/* Spacing - 4px base unit scale */
+:root {
+  /* Base spacing scale */
+  --space-0: 0;
+  --space-1: 0.125rem;   /* 2px */
+  --space-2: 0.25rem;    /* 4px */
+  --space-3: 0.5rem;     /* 8px */
+  --space-4: 0.75rem;    /* 12px */
+  --space-5: 1rem;       /* 16px */
+  --space-6: 1.5rem;     /* 24px */
+  --space-7: 2rem;       /* 32px */
+  --space-8: 3rem;       /* 48px */
+
+  /* Semantic spacing aliases */
+  --space-2xs: var(--space-1);
+  --space-xs: var(--space-2);
+  --space-sm: var(--space-3);
+  --space-md: var(--space-4);
+  --space-lg: var(--space-5);
+  --space-xl: var(--space-6);
+  --space-2xl: var(--space-7);
+
+  /* Component-specific spacing */
+  --space-icon-gap: var(--space-2);
+  --space-button-padding-x: var(--space-4);
+  --space-button-padding-y: var(--space-3);
+  --space-card-padding: var(--space-4);
+  --space-card-gap: var(--space-3);
+  --space-section-gap: var(--space-5);
+  --space-page-padding: var(--space-4);
+  --space-page-padding-desktop: var(--space-6);
+
+  /* Touch targets - WCAG 2.2 compliant */
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 48px;
+  --touch-target-large: 56px;
+}

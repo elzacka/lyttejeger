@@ -1,4 +1,4 @@
-import { ErrorIcon } from '@designsystem/core';
+import { ErrorIcon } from './icons';
 import { SearchBar } from './SearchBar';
 import { FilterPanel } from './FilterPanel';
 import { PodcastList } from './PodcastList';

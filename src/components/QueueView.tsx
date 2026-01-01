@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { TrashIcon, GripVerticalIcon, PodcastIcon, CloseIcon, PlayIcon } from '@designsystem/core';
+import { TrashIcon, GripVerticalIcon, PodcastIcon, CloseIcon, PlayIcon } from './icons';
 import type { QueueItem } from '../services/db';
 import { formatDuration } from '../utils/search';
 import { ConfirmDialog } from './ConfirmDialog';

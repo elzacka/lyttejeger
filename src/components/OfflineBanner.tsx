@@ -1,4 +1,4 @@
-import { WifiOffIcon } from '@designsystem/core';
+import { WifiOffIcon } from './icons';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import styles from './OfflineBanner.module.css';
 

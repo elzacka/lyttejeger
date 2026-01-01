@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { TrashIcon, CloseIcon } from '@designsystem/core';
+import { TrashIcon, CloseIcon } from './icons';
 import type { Subscription } from '../services/db';
 import styles from './SubscriptionsView.module.css';
 

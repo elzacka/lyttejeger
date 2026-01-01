@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { InfoIcon } from '@designsystem/core';
+import { InfoIcon } from './icons';
 import styles from './InfoPopover.module.css';
 
 interface InfoPopoverProps {

@@ -10,7 +10,7 @@ import {
   CloseIcon,
   ChevronIcon,
   MoonIcon,
-} from '@designsystem/core';
+} from './icons';
 import type { Episode } from '../types/podcast';
 import { savePlaybackPosition, getPlaybackPosition } from '../services/db';
 import styles from './AudioPlayer.module.css';

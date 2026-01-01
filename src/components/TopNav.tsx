@@ -4,7 +4,7 @@ import {
   HeartIcon,
   ListMusicIcon,
   HeadphonesIcon,
-} from '@designsystem/core';
+} from './icons';
 import { InfoPopover } from './InfoPopover';
 import { useSheetContext } from '../hooks/useSheetContext';
 import styles from './TopNav.module.css';

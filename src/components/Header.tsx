@@ -1,4 +1,4 @@
-import { HeadphonesIcon } from '@designsystem/core';
+import { HeadphonesIcon } from './icons';
 import styles from './Header.module.css';
 
 export function Header() {

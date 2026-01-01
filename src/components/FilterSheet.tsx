@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useId, useState, type ReactNode } from 'react';
-import { SearchIcon, CloseIcon } from '@designsystem/core';
+import { SearchIcon, CloseIcon } from './icons';
 import { useSheetContext } from '../hooks/useSheetContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import styles from './FilterSheet.module.css';

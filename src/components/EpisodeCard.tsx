@@ -6,7 +6,7 @@ import {
   ListMusicIcon,
   ListPlusIcon,
   PlayIcon,
-} from '@designsystem/core';
+} from './icons';
 import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlaybackProgress } from '../hooks/usePlaybackProgress';
 import { formatDuration, formatDateLong, linkifyText } from '../utils/search';
