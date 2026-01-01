@@ -2,6 +2,8 @@
 
 .container {
   position: relative;
+  /* Match flex: 1 from navItem so all nav buttons have equal width */
+  flex: 1;
 }
 
 .trigger {
@@ -10,8 +12,10 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2xs);
+  /* Take full width of container */
+  width: 100%;
   min-height: var(--touch-target-large, 56px);
-  padding: var(--space-sm) var(--space-xs);
+  padding: var(--space-sm) 0;
   background: transparent;
   border: none;
   color: var(--text-muted);
@@ -132,10 +136,16 @@
 
 /* Desktop: position below top nav */
 @media (min-width: 769px) {
+  .container {
+    /* Reset flex: 1 on desktop - navItems is a flex container */
+    flex: 0 0 auto;
+  }
+
   .trigger {
     flex-direction: row;
     gap: var(--space-xs);
     min-height: auto;
+    width: auto;
     padding: var(--space-sm) var(--space-lg);
     font-size: var(--font-xs);
   }

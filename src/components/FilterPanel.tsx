@@ -24,8 +24,8 @@ type SheetType = 'language' | 'year' | 'category' | 'discovery' | null;
 
 const discoveryModes: { value: DiscoveryMode; label: string; description: string }[] = [
   { value: 'all', label: 'Alle', description: 'Vis alle podcaster' },
-  { value: 'indie', label: 'Uavhengige', description: 'Podcaster utenfor Apple/Spotify' },
-  { value: 'value4value', label: 'Value4Value', description: 'Støtter Bitcoin/Lightning' },
+  { value: 'indie', label: 'Uavhengig', description: 'Podcaster utenfor Apple/Spotify' },
+  { value: 'value4value', label: 'V4V', description: 'Støtter Bitcoin/Lightning' },
 ];
 
 // Fixed width for filter chips to ensure consistent sizing
@@ -119,8 +119,6 @@ export function FilterPanel({
             <span className={styles.radioText}>Episoder</span>
           </label>
         </fieldset>
-
-        <div className={styles.divider} />
 
         <div className={styles.filterButtons}>
           <button

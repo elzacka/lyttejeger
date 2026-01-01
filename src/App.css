@@ -128,13 +128,19 @@
       transform var(--duration-normal) var(--ease-out),
       opacity var(--duration-fast) var(--ease-out);
     will-change: transform;
-    /* Center content */
+    /* Center children horizontally */
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  .search-header .search-section,
+  /* Search field: centered with max-width */
+  .search-header .search-section {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* Filters: full width of search-section, content left-aligned */
   .search-header .filter-section {
     width: 100%;
     max-width: 560px;

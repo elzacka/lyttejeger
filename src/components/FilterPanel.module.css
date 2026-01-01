@@ -8,16 +8,8 @@
 .header {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--space-2);
-}
-
-/* Vertical divider between type selector and filters */
-.divider {
-  width: 1px;
-  height: 24px;
-  background: var(--border);
-  margin: 0 var(--space-1);
 }
 
 /* Visually hidden but accessible to screen readers */
@@ -124,7 +116,7 @@
 .filterButtons {
   display: flex;
   align-items: center;
-  gap: var(--space-1-5);
+  gap: var(--space-1);
 }
 
 .filterChip {
@@ -132,7 +124,7 @@
   align-items: center;
   justify-content: center;
   height: 28px;
-  padding: 0 var(--space-2-5);
+  padding: 0 var(--space-2);
   background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
@@ -196,19 +188,16 @@
 @media (max-width: 640px) {
   .header {
     gap: var(--space-2);
-    /* Stack vertically on mobile and center content */
+    /* Stack vertically on mobile, left-align content */
     flex-direction: column;
-    align-items: center;
-  }
-
-  .divider {
-    display: none;
+    flex-wrap: wrap;
+    align-items: flex-start;
   }
 
   .typeSelector {
-    /* Don't take full width - only as wide as content */
+    /* Auto width, left-aligned */
     width: auto;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .radioLabel {
