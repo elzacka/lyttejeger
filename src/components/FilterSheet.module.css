@@ -52,6 +52,8 @@
   display: flex;
   flex-direction: column;
   touch-action: none;
+  /* Prevent flex children from growing beyond container */
+  overflow: hidden;
 }
 
 .sheetClosing {
@@ -196,6 +198,8 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--space-md);
+  /* Ensure content scrolls from top */
+  min-height: 0;
 }
 
 /* Option grid - multiselect chips */

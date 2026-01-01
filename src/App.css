@@ -116,7 +116,9 @@
     top: 0;
     z-index: var(--z-sticky);
     background: var(--bg-primary);
+    /* Full width on mobile */
     max-width: none;
+    width: calc(100% + 2 * var(--space-md));
     /* Ergonomic top padding - pushes search bar down for easier thumb reach */
     padding-top: calc(var(--space-lg) + env(safe-area-inset-top, 0px));
     padding-bottom: var(--space-sm);
@@ -128,22 +130,13 @@
       transform var(--duration-normal) var(--ease-out),
       opacity var(--duration-fast) var(--ease-out);
     will-change: transform;
-    /* Center children horizontally */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
 
-  /* Search field: centered with max-width */
-  .search-header .search-section {
-    width: 100%;
-    max-width: 560px;
-  }
-
-  /* Filters: full width of search-section, content left-aligned */
+  /* Search field and filters: full width on mobile */
+  .search-header .search-section,
   .search-header .filter-section {
     width: 100%;
-    max-width: 560px;
+    max-width: none;
   }
 
   .search-header--hidden {
