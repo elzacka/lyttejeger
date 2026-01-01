@@ -1,9 +1,10 @@
 import { useState, useMemo, useCallback, useTransition, useEffect, useRef } from 'react';
-import type { Podcast, Episode, SearchFilters, DateFilter } from '../types/podcast';
+import type { Podcast, Episode, SearchFilters, DateFilter, DiscoveryMode } from '../types/podcast';
 import { type EpisodeWithPodcast } from '../utils/search';
 import type { TabType } from '../components/TabBar';
 import {
   searchPodcasts as apiSearchPodcasts,
+  searchPodcastsByTitle,
   searchEpisodesByPerson,
   getEpisodesByFeedIds,
   getTrendingPodcasts,
@@ -24,6 +25,7 @@ const initialFilters: SearchFilters = {
   explicit: null,
   dateFrom: null,
   dateTo: null,
+  discoveryMode: 'all',
 };
 
 export interface SearchResultsState {
@@ -61,14 +63,14 @@ export function useSearch() {
     lastSearchResultsRef.current = [];
   }, []);
 
-  // Allowed language codes (Norwegian, Danish, Swedish, English)
-  const ALLOWED_LANGUAGES = ['no', 'nb', 'nn', 'da', 'sv', 'en'];
+  // Allowed language codes for API filter (Norwegian, Danish, Swedish, English)
+  const ALLOWED_LANGUAGES_API = 'no,nb,nn,da,sv,en';
 
-  // Check if a language code is allowed
+  // Check if a language code is allowed (for client-side filtering)
   const isAllowedLanguage = (langCode: string | undefined): boolean => {
     if (!langCode) return true;
     const code = langCode.toLowerCase().slice(0, 2);
-    return ALLOWED_LANGUAGES.includes(code);
+    return ['no', 'nb', 'nn', 'da', 'sv', 'en'].includes(code);
   };
 
   // Search via API with enhanced options
@@ -89,29 +91,40 @@ export function useSearch() {
       // Parse query to extract only positive terms for API
       // (exclusions like -word are handled client-side)
       const parsed = parseSearchQuery(query);
-      const positiveTerms = [
-        ...parsed.mustInclude,
-        ...parsed.shouldInclude,
+
+      // Only send complete words (2+ chars) to API - partial words won't match
+      // Filter out short terms that would cause API to return no results
+      const completeTerms = [
+        ...parsed.mustInclude.filter((t) => t.length >= 2),
+        ...parsed.shouldInclude.filter((t) => t.length >= 2),
         ...parsed.exactPhrases.map((p) => `"${p}"`),
       ];
 
-      // If only exclusions with no positive terms, we can't search the API
-      // Return empty results - user needs to provide something to search for
-      if (positiveTerms.length === 0) {
+      // If no complete terms to search, but we have partial terms,
+      // use cached results and filter locally
+      if (completeTerms.length === 0) {
+        // If we have cached results, filter them with current query
+        if (lastSearchResultsRef.current.length > 0) {
+          const filtered = filterByQueryText(lastSearchResultsRef.current, query);
+          setApiPodcasts(filtered);
+          setIsLoading(false);
+          return;
+        }
+        // No cached results and no complete terms - clear results
         setApiPodcasts([]);
         setApiEpisodes([]);
         setIsLoading(false);
         return;
       }
 
-      const apiQuery = positiveTerms.join(' ');
+      const apiQuery = completeTerms.join(' ');
 
       // Build search options based on current filters
       const searchOptions: SearchOptions = {
-        max: 100, // Fetch more to compensate for local filtering
-        similar: true, // Include similar matches for better results
+        max: 200, // Fetch more to ensure complete results
         fulltext: true, // Get full descriptions
         clean: filters.explicit === false ? true : undefined, // Only filter explicit if user chose "family-friendly"
+        lang: ALLOWED_LANGUAGES_API, // Send language filter to API
       };
 
       // Add category filter if selected
@@ -119,15 +132,51 @@ export function useSearch() {
         searchOptions.cat = filters.categories.join(',');
       }
 
-      // Search podcasts via Podcast Index API
-      const podcastIndexRes = await apiSearchPodcasts(apiQuery, searchOptions);
+      // Add discovery mode filter for finding hidden gems
+      if (filters.discoveryMode === 'value4value') {
+        searchOptions.val = 'any'; // Podcasts supporting value4value (Bitcoin/Lightning)
+      } else if (filters.discoveryMode === 'indie') {
+        searchOptions.aponly = false; // Not on Apple = more indie
+      }
+
+      // Hybrid search strategy:
+      // 1. First try exact title match for precision
+      // 2. Then broader term search for completeness
+      // 3. Merge and deduplicate results, prioritizing title matches
+      let allFeeds: typeof podcastIndexRes.feeds = [];
+      const seenIds = new Set<number>();
+
+      // Try exact title search first (more precise)
+      try {
+        const titleRes = await searchPodcastsByTitle(apiQuery, {
+          ...searchOptions,
+          max: 50, // Smaller batch for title search
+        });
+        for (const feed of titleRes.feeds || []) {
+          if (!seenIds.has(feed.id)) {
+            seenIds.add(feed.id);
+            allFeeds.push(feed);
+          }
+        }
+      } catch {
+        // Title search failed, continue with term search only
+      }
 
       if (currentSearchRef.current !== query) return;
 
-      // Transform and filter by allowed languages
-      const podcasts = transformFeeds(podcastIndexRes.feeds).filter((p) =>
-        isAllowedLanguage(p.language)
-      );
+      // Broader term search for completeness
+      const podcastIndexRes = await apiSearchPodcasts(apiQuery, searchOptions);
+      for (const feed of podcastIndexRes.feeds || []) {
+        if (!seenIds.has(feed.id)) {
+          seenIds.add(feed.id);
+          allFeeds.push(feed);
+        }
+      }
+
+      if (currentSearchRef.current !== query) return;
+
+      // Transform and filter: remove dead feeds, then language filter as backup
+      const podcasts = transformFeeds(allFeeds).filter((p) => isAllowedLanguage(p.language));
 
       // Store for incremental filtering
       lastSearchQueryRef.current = query;
@@ -427,7 +476,11 @@ export function useSearch() {
   };
 
   // Track filters for re-triggering API search
-  const filtersRef = useRef({ languages: filters.languages, categories: filters.categories });
+  const filtersRef = useRef({
+    languages: filters.languages,
+    categories: filters.categories,
+    discoveryMode: filters.discoveryMode,
+  });
 
   // Check if any browse-relevant filters are active
   const hasActiveFilters =
@@ -496,10 +549,15 @@ export function useSearch() {
     const categoriesChanged =
       filtersRef.current.categories.length !== filters.categories.length ||
       filtersRef.current.categories.some((cat, i) => cat !== filters.categories[i]);
-    const filtersChanged = languagesChanged || categoriesChanged;
+    const discoveryModeChanged = filtersRef.current.discoveryMode !== filters.discoveryMode;
+    const filtersChanged = languagesChanged || categoriesChanged || discoveryModeChanged;
 
     if (filtersChanged) {
-      filtersRef.current = { languages: filters.languages, categories: filters.categories };
+      filtersRef.current = {
+        languages: filters.languages,
+        categories: filters.categories,
+        discoveryMode: filters.discoveryMode,
+      };
       // Re-trigger API search with updated filters
       const searchTab = activeTab === 'episodes' ? 'episodes' : 'podcasts';
       const timer = setTimeout(() => {
@@ -508,7 +566,14 @@ export function useSearch() {
       return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.languages, filters.categories, filters.query, activeTab, shouldUseApi]);
+  }, [
+    filters.languages,
+    filters.categories,
+    filters.discoveryMode,
+    filters.query,
+    activeTab,
+    shouldUseApi,
+  ]);
 
   // Use API results
   const podcasts = apiPodcasts;
@@ -652,6 +717,12 @@ export function useSearch() {
     });
   }, []);
 
+  const setDiscoveryMode = useCallback((discoveryMode: DiscoveryMode) => {
+    startTransition(() => {
+      setFilters((prev) => ({ ...prev, discoveryMode }));
+    });
+  }, []);
+
   const clearFilters = useCallback(() => {
     startTransition(() => {
       setFilters(initialFilters);
@@ -666,6 +737,7 @@ export function useSearch() {
     if (filters.languages.length > 0) count++;
     if (filters.explicit !== null) count++;
     if (filters.dateFrom !== null || filters.dateTo !== null) count++;
+    if (filters.discoveryMode !== 'all') count++;
     return count;
   }, [filters]);
 
@@ -686,6 +758,7 @@ export function useSearch() {
     setDateTo,
     setSortBy,
     setExplicit,
+    setDiscoveryMode,
     clearFilters,
     activeFilterCount,
     isApiConfigured: shouldUseApi,

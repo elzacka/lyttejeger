@@ -41,7 +41,9 @@ export function PodcastDetailView({
 }: PodcastDetailViewProps) {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [episodesError, setEpisodesError] = useState<string | null>(null);
+  const [hasMoreEpisodes, setHasMoreEpisodes] = useState(false);
   const [expandedEpisodeId, setExpandedEpisodeId] = useState<string | null>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
@@ -76,10 +78,13 @@ export function PodcastDetailView({
     window.scrollTo(0, 0);
   }, []);
 
+  const EPISODES_PER_PAGE = 100;
+
   useEffect(() => {
     const fetchEpisodes = async () => {
       setIsLoadingEpisodes(true);
       setEpisodesError(null);
+      setHasMoreEpisodes(false);
 
       try {
         const feedId = parseInt(podcast.id);
@@ -87,9 +92,14 @@ export function PodcastDetailView({
           throw new Error('Invalid podcast ID');
         }
 
-        const res = await getEpisodesByFeedId(feedId, { max: 50 });
+        const res = await getEpisodesByFeedId(feedId, { max: EPISODES_PER_PAGE });
         const transformedEpisodes = transformEpisodes(res.items || []);
         setEpisodes(transformedEpisodes);
+        // Check if there might be more episodes
+        setHasMoreEpisodes(
+          transformedEpisodes.length >= EPISODES_PER_PAGE &&
+            podcast.episodeCount > transformedEpisodes.length
+        );
       } catch {
         setEpisodesError('Kunne ikke hente episodene. Prøv igjen.');
       } finally {
@@ -98,7 +108,35 @@ export function PodcastDetailView({
     };
 
     fetchEpisodes();
-  }, [podcast.id]);
+  }, [podcast.id, podcast.episodeCount]);
+
+  const loadMoreEpisodes = async () => {
+    if (isLoadingMore || !hasMoreEpisodes) return;
+
+    setIsLoadingMore(true);
+    try {
+      const feedId = parseInt(podcast.id);
+      // Fetch all episodes up to a higher limit
+      const newMax = episodes.length + EPISODES_PER_PAGE;
+      const res = await getEpisodesByFeedId(feedId, { max: newMax });
+      const allEpisodes = transformEpisodes(res.items || []);
+
+      // Filter to only include episodes we don't already have
+      const existingIds = new Set(episodes.map((e) => e.id));
+      const newEpisodes = allEpisodes.filter((e) => !existingIds.has(e.id));
+
+      if (newEpisodes.length > 0) {
+        setEpisodes((prev) => [...prev, ...newEpisodes]);
+      }
+
+      // Check if we've loaded all episodes
+      setHasMoreEpisodes(allEpisodes.length >= newMax && allEpisodes.length < podcast.episodeCount);
+    } catch {
+      // Silently fail - user can try again
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const handlePlayEpisode = (episode: Episode, e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -119,7 +157,7 @@ export function PodcastDetailView({
       {onBack && (
         <header className={styles.header}>
           <button className={styles.backButton} onClick={onBack} aria-label="Tilbake">
-            <ArrowLeftIcon size={24} />
+            <ArrowLeftIcon size={20} />
           </button>
         </header>
       )}
@@ -375,6 +413,22 @@ export function PodcastDetailView({
                 );
               })}
             </ul>
+          )}
+
+          {hasMoreEpisodes && (
+            <button
+              className={styles.loadMoreButton}
+              onClick={loadMoreEpisodes}
+              disabled={isLoadingMore}
+            >
+              {isLoadingMore ? 'Laster...' : `Last inn flere episoder`}
+            </button>
+          )}
+
+          {!isLoadingEpisodes && episodes.length > 0 && (
+            <p className={styles.episodeCount}>
+              Viser {episodes.length} av {podcast.episodeCount} episoder
+            </p>
           )}
         </section>
       </div>

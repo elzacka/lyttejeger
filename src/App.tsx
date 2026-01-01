@@ -66,6 +66,7 @@ function App() {
     setDateFrom,
     setDateTo,
     setSortBy,
+    setDiscoveryMode,
     clearFilters,
     activeFilterCount,
   } = useSearch();
@@ -308,6 +309,7 @@ function App() {
                   onSetDateFrom={setDateFrom}
                   onSetDateTo={setDateTo}
                   onSetSortBy={setSortBy}
+                  onSetDiscoveryMode={setDiscoveryMode}
                   onClearFilters={clearFilters}
                   onSelectPodcast={handleSelectPodcast}
                   onSelectPodcastById={handleSelectPodcastById}

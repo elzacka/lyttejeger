@@ -3,6 +3,14 @@
   max-width: 100%;
   box-sizing: border-box;
   overflow: hidden;
+  padding-bottom: calc(var(--player-height) + var(--space-xl));
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .container {
+    padding-bottom: calc(var(--nav-height) + var(--player-height-mobile) + var(--space-xl));
+  }
 }
 
 .resultCount {

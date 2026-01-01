@@ -6,8 +6,11 @@ import { EpisodeCard } from './EpisodeCard';
 import { usePlaybackProgress } from '../hooks/usePlaybackProgress';
 import styles from './EpisodeList.module.css';
 
-// Estimated height per episode card
-const ESTIMATED_ITEM_HEIGHT = 88;
+// Estimated height per episode card (header + padding + gap)
+// Header: 56px image + 12px padding top/bottom = 80px
+// Plus 12px gap between items = 92px minimum
+// Add buffer for 2-line titles and metadata
+const ESTIMATED_ITEM_HEIGHT = 110;
 
 interface EpisodeListProps {
   episodes: EpisodeWithPodcast[];
@@ -64,6 +67,11 @@ export function EpisodeList({
     overscan: 5,
     scrollMargin,
     enabled: useVirtual,
+    // Measure actual element height for accurate positioning
+    measureElement:
+      typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
+        ? (element) => element?.getBoundingClientRect().height ?? ESTIMATED_ITEM_HEIGHT
+        : undefined,
   });
 
   if (isLoading) {
@@ -140,6 +148,8 @@ export function EpisodeList({
           return (
             <div
               key={episode.id}
+              data-index={virtualItem.index}
+              ref={virtualizer.measureElement}
               className={styles.virtualItem}
               style={{
                 transform: `translateY(${virtualItem.start - scrollMargin}px)`,

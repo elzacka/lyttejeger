@@ -4,7 +4,13 @@ import { FilterPanel } from './FilterPanel';
 import { PodcastList } from './PodcastList';
 import { EpisodeList } from './EpisodeList';
 import { useScrollDirection } from '../hooks/useScrollDirection';
-import type { FilterOption, Podcast, SearchFilters, DateFilter } from '../types/podcast';
+import type {
+  FilterOption,
+  Podcast,
+  SearchFilters,
+  DateFilter,
+  DiscoveryMode,
+} from '../types/podcast';
 import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlayingEpisode } from './AudioPlayer';
 import type { TabType } from './TabBar';
@@ -28,6 +34,7 @@ interface SearchViewProps {
   onSetDateFrom: (date: DateFilter | null) => void;
   onSetDateTo: (date: DateFilter | null) => void;
   onSetSortBy: (sortBy: 'relevance' | 'newest' | 'oldest' | 'popular') => void;
+  onSetDiscoveryMode: (mode: DiscoveryMode) => void;
   onClearFilters: () => void;
   onSelectPodcast: (podcast: Podcast) => void;
   onSelectPodcastById: (podcastId: string) => void;
@@ -53,6 +60,7 @@ export function SearchView({
   onSetDateFrom,
   onSetDateTo,
   onSetSortBy,
+  onSetDiscoveryMode,
   onClearFilters,
   onSelectPodcast,
   onSelectPodcastById,
@@ -82,6 +90,7 @@ export function SearchView({
             onToggleLanguage={onToggleLanguage}
             onSetDateFrom={onSetDateFrom}
             onSetDateTo={onSetDateTo}
+            onSetDiscoveryMode={onSetDiscoveryMode}
             onClearFilters={onClearFilters}
             activeFilterCount={activeFilterCount}
           />

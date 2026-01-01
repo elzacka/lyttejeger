@@ -3,6 +3,7 @@
 .page {
   min-height: 100vh;
   padding-top: var(--nav-height);
+  padding-bottom: calc(var(--player-height) + var(--space-xl));
   background: var(--bg-primary);
   overflow-x: hidden;
   width: 100%;
@@ -71,7 +72,6 @@
   max-width: 800px;
   margin: 0 auto;
   padding: var(--space-md);
-  padding-bottom: calc(var(--space-xl) + var(--player-height) + var(--space-md));
   overflow-x: hidden;
 }
 
@@ -639,15 +639,61 @@
   font-style: italic;
 }
 
+/* Load more button */
+.loadMoreButton {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.loadMoreButton:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.loadMoreButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.loadMoreButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.episodeCount {
+  margin: var(--space-md) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  text-align: center;
+}
+
 /* Mobile */
 @media (max-width: 640px) {
+  .page {
+    padding-bottom: calc(var(--nav-height) + var(--player-height-mobile) + var(--space-xl));
+  }
+
   .header {
     padding: var(--space-sm);
   }
 
   .content {
     padding: var(--space-sm);
-    padding-bottom: calc(var(--space-lg) + var(--player-height-mobile) + var(--space-md));
   }
 
   .podcastInfo {

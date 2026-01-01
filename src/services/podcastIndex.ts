@@ -177,9 +177,15 @@ export interface SearchOptions {
   lang?: string;
   cat?: string;
   notcat?: string;
+  val?: 'any' | 'lightning' | 'hive' | 'webmonetization'; // Value4Value filter
+  aponly?: boolean; // Only podcasts with iTunes ID (false = indie podcasts)
 }
 
-export async function searchPodcasts(
+/**
+ * Search podcasts by title (exact match preferred)
+ * More precise than byterm - requires query to appear in title
+ */
+export async function searchPodcastsByTitle(
   query: string,
   options: SearchOptions = {}
 ): Promise<SearchResponse> {
@@ -190,10 +196,35 @@ export async function searchPodcasts(
 
   if (options.similar !== false) params.similar = '';
   if (options.fulltext !== false) params.fulltext = '';
-  if (options.clean !== false) params.clean = '';
+  if (options.clean) params.clean = '';
+  if (options.lang) params.lang = options.lang;
+  if (options.val) params.val = options.val;
+
+  return apiRequest<SearchResponse>('/search/bytitle', params);
+}
+
+/**
+ * Search podcasts by term (fuzzy search across title, author, description)
+ */
+export async function searchPodcasts(
+  query: string,
+  options: SearchOptions = {}
+): Promise<SearchResponse> {
+  const params: Record<string, string> = {
+    q: query,
+    max: (options.max || 30).toString(),
+  };
+
+  if (options.similar) params.similar = '';
+  if (options.fulltext !== false) params.fulltext = '';
+  if (options.clean) params.clean = '';
   if (options.lang) params.lang = options.lang;
   if (options.cat) params.cat = options.cat;
   if (options.notcat) params.notcat = options.notcat;
+  if (options.val) params.val = options.val;
+  if (options.aponly === false) {
+    // No direct param - handled by excluding results with itunesId
+  }
 
   return apiRequest<SearchResponse>('/search/byterm', params);
 }

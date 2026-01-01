@@ -33,6 +33,8 @@ export interface DateFilter {
   year: number;
 }
 
+export type DiscoveryMode = 'all' | 'indie' | 'value4value';
+
 export interface SearchFilters {
   query: string;
   categories: string[];
@@ -43,6 +45,7 @@ export interface SearchFilters {
   explicit: boolean | null;
   dateFrom: DateFilter | null;
   dateTo: DateFilter | null;
+  discoveryMode: DiscoveryMode;
 }
 
 export interface FilterOption {

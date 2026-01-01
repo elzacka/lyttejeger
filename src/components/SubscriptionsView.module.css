@@ -2,6 +2,7 @@
 
 .container {
   padding: var(--space-md);
+  padding-bottom: calc(var(--player-height) + var(--space-xl));
 }
 
 .header {
@@ -230,6 +231,7 @@
 @media (max-width: 640px) {
   .container {
     padding: var(--space-sm);
+    padding-bottom: calc(var(--nav-height) + var(--player-height-mobile) + var(--space-xl));
   }
 
   .header {
