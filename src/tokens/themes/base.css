@@ -1,0 +1,169 @@
+/**
+ * Base Theme - Felles visuell identitet
+ *
+ * Papir-beige bakgrunn, DM Mono + Inter fonter.
+ * Din signatur pa tvers av alle apper.
+ *
+ * @package @designsystem/tokens
+ */
+
+:root {
+  /* ========================================
+   * FONT FAMILIES
+   * Retro monospace-forst design
+   * ======================================== */
+
+  /* DM Mono: overskrifter, input, knapper, badges, kort */
+  --font-mono: 'DM Mono', 'Consolas', monospace;
+
+  /* Inter: brodtekst og lengre tekstinnhold */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* ========================================
+   * GRAY/BEIGE SCALE (papir-toner)
+   * ======================================== */
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --color-gray-50: #f4f1ea; /* bg-primary */
+  --color-gray-100: #ebe7de; /* bg-secondary */
+  --color-gray-200: #e2ded4; /* bg-hover */
+  --color-gray-300: #d4d0c6; /* border */
+  --color-gray-400: #8a8a8a; /* text-muted */
+  --color-gray-500: #5a5a5a; /* text-secondary */
+  --color-gray-600: #4a4a4a;
+  --color-gray-700: #3a3a3a;
+  --color-gray-800: #2c2c2c; /* text-primary */
+  --color-gray-900: #1c1c1c;
+  --color-gray-950: #0c0c0c;
+
+  /* ========================================
+   * STATUS COLORS (delt pa tvers av aksenter)
+   * ======================================== */
+
+  /* Success (Dempet gronn) */
+  --color-success-50: #eef5f0;
+  --color-success-100: #ddebe1;
+  --color-success-200: #bbd7c3;
+  --color-success-300: #99c3a5;
+  --color-success-400: #77af87;
+  --color-success-500: #4a7c59;
+  --color-success-600: #3b6347;
+  --color-success-700: #2c4a35;
+  --color-success-800: #1d3124;
+  --color-success-900: #0f1912;
+  --color-success-950: #070c09;
+
+  /* Warning (Dempet jordtone) */
+  --color-warning-50: #f5f2ed;
+  --color-warning-100: #ebe5db;
+  --color-warning-200: #d7cbb7;
+  --color-warning-300: #c3b193;
+  --color-warning-400: #af976f;
+  --color-warning-500: #7b6d4d;
+  --color-warning-600: #62573e;
+  --color-warning-700: #4a412e;
+  --color-warning-800: #312b1f;
+  --color-warning-900: #19150f;
+  --color-warning-950: #0c0b08;
+
+  /* Error (Dempet rust/rod) */
+  --color-error-50: #faf2f0;
+  --color-error-100: #f5e5e1;
+  --color-error-200: #ebcbc3;
+  --color-error-300: #e1b1a5;
+  --color-error-400: #d79787;
+  --color-error-500: #9b2915;
+  --color-error-600: #7c2111;
+  --color-error-700: #5d190d;
+  --color-error-800: #3e1008;
+  --color-error-900: #1f0804;
+  --color-error-950: #100402;
+
+  /* Info/Neutral (Dempet olivengronn) */
+  --color-info-50: #f2f3f0;
+  --color-info-100: #e5e7e1;
+  --color-info-200: #cbcfc3;
+  --color-info-300: #b1b7a5;
+  --color-info-400: #979f87;
+  --color-info-500: #6b705c;
+  --color-info-600: #565a4a;
+  --color-info-700: #404337;
+  --color-info-800: #2b2d25;
+  --color-info-900: #151612;
+  --color-info-950: #0b0b09;
+
+  /* ========================================
+   * SEMANTIC COLORS (Light Mode)
+   * Retro papir-tema med varme, dempede toner
+   * ======================================== */
+
+  --color-background: #f4f1ea; /* Varm beige/papir */
+  --color-foreground: #2c2c2c; /* Mork tekst */
+  --color-muted: #ebe7de; /* Sekundaer bakgrunn */
+  --color-muted-foreground: #5a5a5a; /* Sekundaer tekst */
+  --color-border: #d4d0c6;
+  --color-overlay: rgb(44 44 44 / 0.5);
+
+  /* Interactive states */
+  --color-hover: #e2ded4;
+  --color-active: #d4d0c6;
+  --color-disabled: #ebe7de;
+  --color-disabled-foreground: #8a8a8a;
+
+  /* Semantic color aliases for components */
+  --color-error: var(--color-error-500);
+  --color-success: var(--color-success-500);
+  --color-warning: var(--color-warning-500);
+  --color-info: var(--color-info-500);
+}
+
+/* ========================================
+ * DARK MODE
+ * ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #1c1c1c;
+    --color-foreground: #f4f1ea;
+    --color-muted: #2c2c2c;
+    --color-muted-foreground: #8a8a8a;
+    --color-border: #3a3a3a;
+    --color-overlay: rgb(0 0 0 / 0.8);
+
+    /* Interactive states */
+    --color-hover: #2c2c2c;
+    --color-active: #3a3a3a;
+    --color-disabled: #2c2c2c;
+    --color-disabled-foreground: #5a5a5a;
+  }
+}
+
+/* Manual dark mode class override */
+.dark {
+  --color-background: #1c1c1c;
+  --color-foreground: #f4f1ea;
+  --color-muted: #2c2c2c;
+  --color-muted-foreground: #8a8a8a;
+  --color-border: #3a3a3a;
+  --color-overlay: rgb(0 0 0 / 0.8);
+
+  --color-hover: #2c2c2c;
+  --color-active: #3a3a3a;
+  --color-disabled: #2c2c2c;
+  --color-disabled-foreground: #5a5a5a;
+}
+
+/* ========================================
+ * BODY STYLES
+ * ======================================== */
+
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}

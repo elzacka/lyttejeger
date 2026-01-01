@@ -1,5 +1,5 @@
+// Auto-generated from designsystem monorepo
 // Lyttejeger icons - self-hosted for GDPR compliance
-// SVG paths from Lucide (MIT license)
 
 // Core UI icons
 export { CloseIcon } from './CloseIcon';

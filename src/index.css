@@ -1,5 +1,6 @@
-/* Design Tokens - Modular imports */
+/* Design System Tokens and Components */
 @import './tokens/index.css';
+
 
 /* DM Mono - loaded locally for offline PWA support */
 /* latin-ext (includes Norwegian æøå) */
