@@ -5,10 +5,53 @@
   padding-bottom: calc(var(--player-height) + var(--space-xl));
 }
 
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
 .resultCount {
-  margin: 0 0 var(--space-sm) 0;
+  margin: 0;
   font-family: var(--font-mono);
   font-size: var(--font-xs);
+  color: var(--text-muted);
+}
+
+.sortWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sortSelect {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: var(--space-xs) var(--space-lg) var(--space-xs) var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.sortSelect:hover,
+.sortSelect:focus {
+  color: var(--text-primary);
+}
+
+.sortSelect:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.sortIcon {
+  position: absolute;
+  right: var(--space-xs);
+  pointer-events: none;
   color: var(--text-muted);
 }
 

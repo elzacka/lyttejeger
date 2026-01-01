@@ -1,5 +1,6 @@
 import { useRef, useState, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
+import { ChevronIcon } from './icons';
 import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlayingEpisode } from './AudioPlayer';
 import { EpisodeCard } from './EpisodeCard';
@@ -12,6 +13,15 @@ import styles from './EpisodeList.module.css';
 // Add buffer for 2-line titles and metadata
 const ESTIMATED_ITEM_HEIGHT = 110;
 
+type SortBy = 'relevance' | 'newest' | 'oldest' | 'popular';
+
+const SORT_LABELS: Record<SortBy, string> = {
+  relevance: 'Relevans',
+  newest: 'Nyeste',
+  oldest: 'Eldste',
+  popular: 'Populære',
+};
+
 interface EpisodeListProps {
   episodes: EpisodeWithPodcast[];
   searchQuery?: string;
@@ -21,6 +31,8 @@ interface EpisodeListProps {
   onPlayNext?: (episode: EpisodeWithPodcast) => void;
   isInQueue?: (episodeId: string) => boolean;
   onSelectPodcast?: (podcastId: string) => void;
+  sortBy?: SortBy;
+  onSetSortBy?: (sortBy: SortBy) => void;
 }
 
 function SkeletonCard() {
@@ -46,6 +58,8 @@ export function EpisodeList({
   onPlayNext,
   isInQueue,
   onSelectPodcast,
+  sortBy = 'relevance',
+  onSetSortBy,
 }: EpisodeListProps) {
   const { getProgress } = usePlaybackProgress();
   const listRef = useRef<HTMLDivElement>(null);
@@ -97,13 +111,36 @@ export function EpisodeList({
     );
   }
 
+  const headerContent = (
+    <div className={styles.listHeader}>
+      <p className={styles.resultCount} aria-live="polite">
+        {episodes.length} {episodes.length === 1 ? 'episode' : 'episoder'}
+      </p>
+      {onSetSortBy && searchQuery && (
+        <div className={styles.sortWrapper}>
+          <select
+            className={styles.sortSelect}
+            value={sortBy}
+            onChange={(e) => onSetSortBy(e.target.value as SortBy)}
+            aria-label="Sorter resultater"
+          >
+            {Object.entries(SORT_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <ChevronIcon size={14} className={styles.sortIcon} aria-hidden="true" />
+        </div>
+      )}
+    </div>
+  );
+
   // Non-virtualized render for small lists
   if (!useVirtual) {
     return (
       <div className={styles.container}>
-        <p className={styles.resultCount} aria-live="polite">
-          {episodes.length} {episodes.length === 1 ? 'episode' : 'episoder'}
-        </p>
+        {headerContent}
         <div className={styles.list} role="list" aria-label="Søkeresultater for episoder">
           {episodes.map((episode) => (
             <EpisodeCard
@@ -133,9 +170,7 @@ export function EpisodeList({
 
   return (
     <div className={styles.container}>
-      <p className={styles.resultCount} aria-live="polite">
-        {episodes.length} {episodes.length === 1 ? 'episode' : 'episoder'}
-      </p>
+      {headerContent}
       <div
         ref={listRef}
         className={styles.virtualList}

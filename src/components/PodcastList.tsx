@@ -1,5 +1,6 @@
 import { useRef, useState, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
+import { ChevronIcon } from './icons';
 import type { Podcast } from '../types/podcast';
 import { PodcastCard } from './PodcastCard';
 import styles from './PodcastList.module.css';
@@ -7,11 +8,22 @@ import styles from './PodcastList.module.css';
 // Estimated height per podcast card
 const ESTIMATED_ITEM_HEIGHT = 100;
 
+type SortBy = 'relevance' | 'newest' | 'oldest' | 'popular';
+
+const SORT_LABELS: Record<SortBy, string> = {
+  relevance: 'Relevans',
+  newest: 'Nyeste',
+  oldest: 'Eldste',
+  popular: 'Populære',
+};
+
 interface PodcastListProps {
   podcasts: Podcast[];
   searchQuery?: string;
   isLoading?: boolean;
   onSelectPodcast: (podcast: Podcast) => void;
+  sortBy?: SortBy;
+  onSetSortBy?: (sortBy: SortBy) => void;
 }
 
 function SkeletonCard() {
@@ -32,6 +44,8 @@ export function PodcastList({
   searchQuery,
   isLoading,
   onSelectPodcast,
+  sortBy = 'relevance',
+  onSetSortBy,
 }: PodcastListProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [scrollMargin, setScrollMargin] = useState(0);
@@ -78,13 +92,36 @@ export function PodcastList({
     );
   }
 
+  const headerContent = (
+    <div className={styles.listHeader}>
+      <p className={styles.resultCount} aria-live="polite">
+        {podcasts.length} {podcasts.length === 1 ? 'podcast' : 'podcaster'}
+      </p>
+      {onSetSortBy && searchQuery && (
+        <div className={styles.sortWrapper}>
+          <select
+            className={styles.sortSelect}
+            value={sortBy}
+            onChange={(e) => onSetSortBy(e.target.value as SortBy)}
+            aria-label="Sorter resultater"
+          >
+            {Object.entries(SORT_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <ChevronIcon size={14} className={styles.sortIcon} aria-hidden="true" />
+        </div>
+      )}
+    </div>
+  );
+
   // Non-virtualized render for small lists
   if (!useVirtual) {
     return (
       <div className={styles.container}>
-        <p className={styles.resultCount} aria-live="polite">
-          {podcasts.length} {podcasts.length === 1 ? 'podcast' : 'podcaster'}
-        </p>
+        {headerContent}
         <div className={styles.grid} role="list" aria-label="Søkeresultater for podcaster">
           {podcasts.map((podcast) => (
             <PodcastCard
@@ -104,9 +141,7 @@ export function PodcastList({
 
   return (
     <div className={styles.container}>
-      <p className={styles.resultCount} aria-live="polite">
-        {podcasts.length} {podcasts.length === 1 ? 'podcast' : 'podcaster'}
-      </p>
+      {headerContent}
       <div
         ref={listRef}
         className={styles.virtualList}

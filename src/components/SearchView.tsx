@@ -105,27 +105,14 @@ export function SearchView({
       )}
 
       <section className="results-section">
-        {(activeTab === 'podcasts' || activeTab === 'episodes') && filters.query && (
-          <div className="sort-bar">
-            <select
-              className="sort-select"
-              value={filters.sortBy}
-              onChange={(e) => onSetSortBy(e.target.value as typeof filters.sortBy)}
-              aria-label="Sorter resultater"
-            >
-              <option value="relevance">Relevans</option>
-              <option value="newest">Nyeste</option>
-              <option value="oldest">Eldste</option>
-              <option value="popular">Populære</option>
-            </select>
-          </div>
-        )}
         {activeTab === 'podcasts' ? (
           <PodcastList
             podcasts={results.podcasts}
             searchQuery={filters.query}
             isLoading={isPending}
             onSelectPodcast={onSelectPodcast}
+            sortBy={filters.sortBy}
+            onSetSortBy={onSetSortBy}
           />
         ) : (
           <EpisodeList
@@ -137,6 +124,8 @@ export function SearchView({
             onPlayNext={onPlayNext}
             isInQueue={isInQueue}
             onSelectPodcast={onSelectPodcastById}
+            sortBy={filters.sortBy}
+            onSetSortBy={onSetSortBy}
           />
         )}
       </section>
