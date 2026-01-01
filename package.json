@@ -1,5 +1,5 @@
 {
-  "name": "@designsystem/lyttejeger",
+  "name": "lyttejeger",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -10,8 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@designsystem/core": "workspace:*",
-    "@designsystem/tokens": "workspace:*",
     "@tanstack/react-virtual": "^3.13.13",
     "dexie": "^4.2.1",
     "react": "^19.2.3",
