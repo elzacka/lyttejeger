@@ -8,20 +8,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  margin-left: -22px;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  margin-left: calc(-1 * var(--touch-target) / 2);
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.1s ease-out;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-100) var(--ease-out);
 }
 
 .icon {
-  font-size: 24px;
+  font-size: var(--icon-md);
   color: var(--accent);
-  transition: transform 0.1s ease-out;
+  transition: transform var(--duration-100) var(--ease-out);
 }
 
 .spinning {

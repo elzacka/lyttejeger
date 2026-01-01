@@ -1,47 +1,47 @@
-import { useRef, useState, useCallback } from 'react'
-import styles from './SearchBar.module.css'
-import { SearchHelp } from './SearchHelp'
+import { useRef, useState, useCallback } from 'react';
+import { SpinnerIcon, CloseIcon } from '@designsystem/core';
+import styles from './SearchBar.module.css';
+import { SearchHelp } from './SearchHelp';
 
 interface SearchBarProps {
-  value: string
-  onChange: (value: string) => void
-  placeholder?: string
-  isPending?: boolean
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  isPending?: boolean;
 }
 
 export function SearchBar({
   value,
   onChange,
   placeholder = 'Søk...',
-  isPending = false
+  isPending = false,
 }: SearchBarProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const isIOS =
-    typeof navigator !== 'undefined' && /iP(ad|hone|od)/.test(navigator.userAgent)
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isIOS = typeof navigator !== 'undefined' && /iP(ad|hone|od)/.test(navigator.userAgent);
   // Use inputMode toggle to suppress iOS keyboard accessory bar
-  const initialInputMode: 'none' | 'search' = isIOS ? 'none' : 'search'
-  const [inputMode, setInputMode] = useState<'none' | 'search'>(initialInputMode)
+  const initialInputMode: 'none' | 'search' = isIOS ? 'none' : 'search';
+  const [inputMode, setInputMode] = useState<'none' | 'search'>(initialInputMode);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Blur input to dismiss keyboard on submit
-    inputRef.current?.blur()
-  }
+    inputRef.current?.blur();
+  };
 
   const handleFocus = useCallback(() => {
     if (!isIOS) {
-      setInputMode('search')
-      return
+      setInputMode('search');
+      return;
     }
 
-    setInputMode('none')
-    requestAnimationFrame(() => setInputMode('search'))
-  }, [isIOS])
+    setInputMode('none');
+    requestAnimationFrame(() => setInputMode('search'));
+  }, [isIOS]);
 
   const handleBlur = useCallback(() => {
     // Reset to the platform-appropriate default before next focus
-    setInputMode(initialInputMode)
-  }, [initialInputMode])
+    setInputMode(initialInputMode);
+  }, [initialInputMode]);
 
   return (
     <form
@@ -78,7 +78,7 @@ export function SearchBar({
         <div className={styles.actions}>
           {isPending && (
             <div className={styles.spinner} aria-label="Søker...">
-              <span className={`material-symbols-outlined ${styles.spinnerIcon}`}>progress_activity</span>
+              <SpinnerIcon size={20} className={styles.spinnerIcon} />
             </div>
           )}
           {value && !isPending && (
@@ -88,12 +88,12 @@ export function SearchBar({
               onClick={() => onChange('')}
               aria-label="Tøm søkefeltet"
             >
-              <span className="material-symbols-outlined">close</span>
+              <CloseIcon size={20} />
             </button>
           )}
           <SearchHelp />
         </div>
       </div>
     </form>
-  )
+  );
 }

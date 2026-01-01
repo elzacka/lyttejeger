@@ -1,31 +1,39 @@
-import { useState, useEffect, useCallback } from 'react'
-import type { Subscription, PlaybackPosition } from '../services/db'
-import { getInProgressEpisodes } from '../services/db'
-import type { Episode } from '../types/podcast'
-import type { PlayingEpisode } from './AudioPlayer'
-import { getEpisodesByFeedIds } from '../services/podcastIndex'
-import { transformEpisodes } from '../services/podcastTransform'
-import { formatDuration, formatDateLong, linkifyText } from '../utils/search'
-import { usePlaybackProgress } from '../hooks/usePlaybackProgress'
-import { PullToRefresh } from './PullToRefresh'
-import { RECENT_EPISODES_MS, MAX_EPISODES_PER_REQUEST, MS_PER_SECOND } from '../constants'
-import styles from './HomeView.module.css'
+import { useState, useEffect, useCallback } from 'react';
+import {
+  SpinnerIcon,
+  CheckIcon,
+  MoreVerticalIcon,
+  ListMusicIcon,
+  ListPlusIcon,
+  PlayIcon,
+} from '@designsystem/core';
+import type { Subscription, PlaybackPosition } from '../services/db';
+import { getInProgressEpisodes } from '../services/db';
+import type { Episode } from '../types/podcast';
+import type { PlayingEpisode } from './AudioPlayer';
+import { getEpisodesByFeedIds } from '../services/podcastIndex';
+import { transformEpisodes } from '../services/podcastTransform';
+import { formatDuration, formatDateLong, linkifyText } from '../utils/search';
+import { usePlaybackProgress } from '../hooks/usePlaybackProgress';
+import { PullToRefresh } from './PullToRefresh';
+import { RECENT_EPISODES_MS, MAX_EPISODES_PER_REQUEST, MS_PER_SECOND } from '../constants';
+import styles from './HomeView.module.css';
 
 interface HomeViewProps {
-  subscriptions: Subscription[]
-  onPlayEpisode: (episode: PlayingEpisode) => void
-  onAddToQueue: (episode: Episode, podcastTitle: string, podcastImage: string) => void
-  onPlayNext: (episode: Episode, podcastTitle: string, podcastImage: string) => void
-  isInQueue: (episodeId: string) => boolean
-  onNavigateToSearch?: () => void
+  subscriptions: Subscription[];
+  onPlayEpisode: (episode: PlayingEpisode) => void;
+  onAddToQueue: (episode: Episode, podcastTitle: string, podcastImage: string) => void;
+  onPlayNext: (episode: Episode, podcastTitle: string, podcastImage: string) => void;
+  isInQueue: (episodeId: string) => boolean;
+  onNavigateToSearch?: () => void;
 }
 
 interface EpisodeWithSubscription extends Episode {
-  subscription: Subscription
+  subscription: Subscription;
 }
 
 interface InProgressEpisode extends EpisodeWithSubscription {
-  playbackPosition: PlaybackPosition
+  playbackPosition: PlaybackPosition;
 }
 
 export function HomeView({
@@ -36,123 +44,124 @@ export function HomeView({
   isInQueue,
   onNavigateToSearch,
 }: HomeViewProps) {
-  const [episodes, setEpisodes] = useState<EpisodeWithSubscription[]>([])
-  const [inProgressEpisodes, setInProgressEpisodes] = useState<InProgressEpisode[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
-  const [expandedEpisodeId, setExpandedEpisodeId] = useState<string | null>(null)
-  const { getProgress } = usePlaybackProgress()
+  const [episodes, setEpisodes] = useState<EpisodeWithSubscription[]>([]);
+  const [inProgressEpisodes, setInProgressEpisodes] = useState<InProgressEpisode[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [expandedEpisodeId, setExpandedEpisodeId] = useState<string | null>(null);
+  const { getProgress } = usePlaybackProgress();
 
   const toggleEpisodeExpand = useCallback((episodeId: string) => {
-    setExpandedEpisodeId(prev => prev === episodeId ? null : episodeId)
-  }, [])
+    setExpandedEpisodeId((prev) => (prev === episodeId ? null : episodeId));
+  }, []);
 
   const fetchRecentEpisodes = useCallback(async () => {
     if (subscriptions.length === 0) {
-      setEpisodes([])
-      setInProgressEpisodes([])
-      return
+      setEpisodes([]);
+      setInProgressEpisodes([]);
+      return;
     }
 
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const recentCutoff = Date.now() - RECENT_EPISODES_MS
+      const recentCutoff = Date.now() - RECENT_EPISODES_MS;
 
       // Build subscription lookup map
-      const subMap = new Map<string, Subscription>()
-      const feedIds: number[] = []
+      const subMap = new Map<string, Subscription>();
+      const feedIds: number[] = [];
 
       for (const sub of subscriptions) {
-        const feedId = parseInt(sub.podcastId)
+        const feedId = parseInt(sub.podcastId);
         if (!isNaN(feedId)) {
-          feedIds.push(feedId)
-          subMap.set(sub.podcastId, sub)
+          feedIds.push(feedId);
+          subMap.set(sub.podcastId, sub);
         }
       }
 
       // Fetch episodes and in-progress positions in parallel
       const [res, inProgressPositions] = await Promise.all([
-        getEpisodesByFeedIds(feedIds, { max: MAX_EPISODES_PER_REQUEST, since: Math.floor(recentCutoff / MS_PER_SECOND) }),
-        getInProgressEpisodes()
-      ])
+        getEpisodesByFeedIds(feedIds, {
+          max: MAX_EPISODES_PER_REQUEST,
+          since: Math.floor(recentCutoff / MS_PER_SECOND),
+        }),
+        getInProgressEpisodes(),
+      ]);
 
-      const transformed = transformEpisodes(res.items || [])
+      const transformed = transformEpisodes(res.items || []);
 
       // Build episode lookup map for matching in-progress positions
-      const episodeMap = new Map<string, Episode>()
+      const episodeMap = new Map<string, Episode>();
       for (const ep of transformed) {
-        episodeMap.set(ep.id, ep)
+        episodeMap.set(ep.id, ep);
       }
 
       // Filter to recent episodes and attach subscription info
       const allEpisodes: EpisodeWithSubscription[] = transformed
         .filter((ep) => {
-          const pubDate = new Date(ep.publishedAt).getTime()
-          return pubDate >= recentCutoff
+          const pubDate = new Date(ep.publishedAt).getTime();
+          return pubDate >= recentCutoff;
         })
         .map((ep) => {
-          const subscription = subMap.get(ep.podcastId)!
-          return { ...ep, subscription }
+          const subscription = subMap.get(ep.podcastId)!;
+          return { ...ep, subscription };
         })
-        .filter((ep) => ep.subscription) // Safety check
+        .filter((ep) => ep.subscription); // Safety check
 
       // Sort by publish date, newest first
       allEpisodes.sort((a, b) => {
-        const dateA = new Date(a.publishedAt).getTime()
-        const dateB = new Date(b.publishedAt).getTime()
-        return dateB - dateA
-      })
+        const dateA = new Date(a.publishedAt).getTime();
+        const dateB = new Date(b.publishedAt).getTime();
+        return dateB - dateA;
+      });
 
       // Match in-progress positions with episode data
       // Only include episodes we have full data for (from current subscriptions)
-      const inProgress: InProgressEpisode[] = []
+      const inProgress: InProgressEpisode[] = [];
       for (const pos of inProgressPositions) {
-        const episode = episodeMap.get(pos.episodeId)
+        const episode = episodeMap.get(pos.episodeId);
         if (episode) {
-          const subscription = subMap.get(episode.podcastId)
+          const subscription = subMap.get(episode.podcastId);
           if (subscription) {
             inProgress.push({
               ...episode,
               subscription,
-              playbackPosition: pos
-            })
+              playbackPosition: pos,
+            });
           }
         }
       }
 
-      setEpisodes(allEpisodes)
-      setInProgressEpisodes(inProgress)
+      setEpisodes(allEpisodes);
+      setInProgressEpisodes(inProgress);
     } catch {
-      setError('Kunne ikke hente nye episoder')
+      setError('Kunne ikke hente nye episoder');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [subscriptions])
+  }, [subscriptions]);
 
   useEffect(() => {
-    fetchRecentEpisodes()
-  }, [fetchRecentEpisodes])
+    fetchRecentEpisodes();
+  }, [fetchRecentEpisodes]);
 
   const handlePlayEpisode = (episode: EpisodeWithSubscription, e?: React.MouseEvent) => {
-    e?.stopPropagation()
-    e?.preventDefault()
+    e?.stopPropagation();
+    e?.preventDefault();
     onPlayEpisode({
       ...episode,
       podcastTitle: episode.subscription.title,
       podcastImage: episode.subscription.imageUrl,
-    })
-  }
+    });
+  };
 
   if (subscriptions.length === 0) {
     return (
       <section className={styles.container}>
         <div className={styles.emptyState}>
-          <p className={styles.emptyText}>
-            Ingen abonnementer enda
-          </p>
+          <p className={styles.emptyText}>Ingen abonnementer enda</p>
           {onNavigateToSearch && (
             <button className={styles.ctaButton} onClick={onNavigateToSearch}>
               Finn podkaster
@@ -160,7 +169,7 @@ export function HomeView({
           )}
         </div>
       </section>
-    )
+    );
   }
 
   if (isLoading) {
@@ -168,13 +177,11 @@ export function HomeView({
       <section className={styles.container}>
         <h2 className={styles.title}>Siste 7 dager</h2>
         <div className={styles.loading}>
-          <span className={`material-symbols-outlined ${styles.spinner}`}>
-            progress_activity
-          </span>
+          <SpinnerIcon size={24} className={styles.spinner} />
           <span>Henter nye episoder...</span>
         </div>
       </section>
-    )
+    );
   }
 
   if (error) {
@@ -183,34 +190,35 @@ export function HomeView({
         <h2 className={styles.title}>Siste 7 dager</h2>
         <p className={styles.error}>{error}</p>
       </section>
-    )
+    );
   }
 
   if (episodes.length === 0 && inProgressEpisodes.length === 0) {
     return (
       <section className={styles.container}>
         <div className={styles.emptyState}>
-          <p className={styles.emptyText}>
-            Ingen nye episoder siste 7 dager
-          </p>
+          <p className={styles.emptyText}>Ingen nye episoder siste 7 dager</p>
         </div>
       </section>
-    )
+    );
   }
 
-  const renderEpisodeItem = (episode: EpisodeWithSubscription, showResumeProgress?: { position: number; duration: number }) => {
-    const isMenuOpen = menuOpenId === episode.id
-    const isExpanded = expandedEpisodeId === episode.id
-    const progress = getProgress(episode.id)
+  const renderEpisodeItem = (
+    episode: EpisodeWithSubscription,
+    showResumeProgress?: { position: number; duration: number }
+  ) => {
+    const isMenuOpen = menuOpenId === episode.id;
+    const isExpanded = expandedEpisodeId === episode.id;
+    const progress = getProgress(episode.id);
     const displayProgress = showResumeProgress
-      ? { progress: (showResumeProgress.position / showResumeProgress.duration) * 100, completed: false }
-      : progress
+      ? {
+          progress: (showResumeProgress.position / showResumeProgress.duration) * 100,
+          completed: false,
+        }
+      : progress;
 
     return (
-      <li
-        key={episode.id}
-        className={`${styles.item} ${isMenuOpen ? styles.menuOpen : ''}`}
-      >
+      <li key={episode.id} className={`${styles.item} ${isMenuOpen ? styles.menuOpen : ''}`}>
         <div className={styles.episodeHeader}>
           <button
             className={styles.episodeToggle}
@@ -224,22 +232,12 @@ export function HomeView({
               className={styles.image}
               loading="lazy"
               onError={(e) => {
-                const target = e.target as HTMLImageElement
-                target.style.display = 'none'
-                const placeholder = document.createElement('div')
-                placeholder.className = `${styles.image} image-placeholder`
-                const icon = document.createElement('span')
-                icon.className = 'material-symbols-outlined'
-                icon.setAttribute('aria-hidden', 'true')
-                icon.textContent = 'podcasts'
-                placeholder.appendChild(icon)
-                target.parentNode?.insertBefore(placeholder, target)
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
               }}
             />
             <div className={styles.info}>
-              <span className={styles.podcastName}>
-                {episode.subscription.title}
-              </span>
+              <span className={styles.podcastName}>{episode.subscription.title}</span>
               <span className={styles.episodeTitle}>{episode.title}</span>
               <div className={styles.meta}>
                 <span>{formatDateLong(episode.publishedAt)}</span>
@@ -248,7 +246,7 @@ export function HomeView({
                 )}
                 {displayProgress?.completed && (
                   <span className={styles.completed}>
-                    <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                    <CheckIcon size={14} aria-hidden="true" />
                     Hørt
                   </span>
                 )}
@@ -258,7 +256,10 @@ export function HomeView({
               </div>
               {displayProgress && !displayProgress.completed && displayProgress.progress > 1 && (
                 <div className={styles.progressBar}>
-                  <div className={styles.progressFill} style={{ width: `${displayProgress.progress}%` }} />
+                  <div
+                    className={styles.progressFill}
+                    style={{ width: `${displayProgress.progress}%` }}
+                  />
                 </div>
               )}
             </div>
@@ -268,52 +269,48 @@ export function HomeView({
               <button
                 className={styles.menuButton}
                 onClick={(e) => {
-                  e.stopPropagation()
-                  e.preventDefault()
-                  setMenuOpenId(menuOpenId === episode.id ? null : episode.id)
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setMenuOpenId(menuOpenId === episode.id ? null : episode.id);
                 }}
                 aria-label="Flere valg"
                 aria-expanded={isMenuOpen}
               >
-                <span className="material-symbols-outlined">more_vert</span>
+                <MoreVerticalIcon size={20} />
               </button>
               {isMenuOpen && (
                 <div className={styles.menuDropdown}>
                   <button
                     className={styles.menuItem}
                     onClick={(e) => {
-                      e.stopPropagation()
-                      e.preventDefault()
+                      e.stopPropagation();
+                      e.preventDefault();
                       onPlayNext(
                         episode,
                         episode.subscription.title,
                         episode.subscription.imageUrl
-                      )
-                      setMenuOpenId(null)
+                      );
+                      setMenuOpenId(null);
                     }}
                   >
-                    <span className="material-symbols-outlined">
-                      playlist_play
-                    </span>
+                    <ListMusicIcon size={18} />
                     Spill neste
                   </button>
                   <button
                     className={styles.menuItem}
                     onClick={(e) => {
-                      e.stopPropagation()
-                      e.preventDefault()
+                      e.stopPropagation();
+                      e.preventDefault();
                       onAddToQueue(
                         episode,
                         episode.subscription.title,
                         episode.subscription.imageUrl
-                      )
-                      setMenuOpenId(null)
+                      );
+                      setMenuOpenId(null);
                     }}
                     disabled={isInQueue(episode.id)}
                   >
-                    <span className="material-symbols-outlined">
-                      playlist_add
-                    </span>
+                    <ListPlusIcon size={18} />
                     {isInQueue(episode.id) ? 'I køen' : 'Legg til i kø'}
                   </button>
                 </div>
@@ -324,15 +321,12 @@ export function HomeView({
               onClick={(e) => handlePlayEpisode(episode, e)}
               aria-label={`Spill ${episode.title}`}
             >
-              <span className="material-symbols-outlined">play_arrow</span>
+              <PlayIcon size={20} />
             </button>
           </div>
         </div>
         {isExpanded && (
-          <div
-            id={`episode-details-${episode.id}`}
-            className={styles.episodeDetails}
-          >
+          <div id={`episode-details-${episode.id}`} className={styles.episodeDetails}>
             {episode.description ? (
               <p className={styles.episodeDescription}>
                 {linkifyText(episode.description).map((part, idx) =>
@@ -358,8 +352,8 @@ export function HomeView({
           </div>
         )}
       </li>
-    )
-  }
+    );
+  };
 
   return (
     <section className={styles.container}>
@@ -375,7 +369,7 @@ export function HomeView({
             {inProgressEpisodes.map((episode) =>
               renderEpisodeItem(episode, {
                 position: episode.playbackPosition.position,
-                duration: episode.playbackPosition.duration
+                duration: episode.playbackPosition.duration,
               })
             )}
           </ul>
@@ -384,15 +378,15 @@ export function HomeView({
 
       {episodes.length > 0 && (
         <>
-          <h2 className={`${styles.title} ${inProgressEpisodes.length > 0 ? styles.sectionDivider : ''}`}>
+          <h2
+            className={`${styles.title} ${inProgressEpisodes.length > 0 ? styles.sectionDivider : ''}`}
+          >
             Siste 7 dager
             <span className={styles.badge}>{episodes.length}</span>
           </h2>
-          <ul className={styles.list}>
-            {episodes.map((episode) => renderEpisodeItem(episode))}
-          </ul>
+          <ul className={styles.list}>{episodes.map((episode) => renderEpisodeItem(episode))}</ul>
         </>
       )}
     </section>
-  )
+  );
 }

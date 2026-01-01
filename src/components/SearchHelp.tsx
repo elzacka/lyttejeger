@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
-import styles from './SearchHelp.module.css'
+import { useState, useEffect, useRef } from 'react';
+import { HelpCircleIcon } from '@designsystem/core';
+import styles from './SearchHelp.module.css';
 
 const searchTips = [
   {
@@ -22,36 +23,36 @@ const searchTips = [
     example: '"true crime" -mord',
     description: 'Eksakt frase, men ikke der mord er nevnt',
   },
-]
+];
 
 export function SearchHelp() {
-  const [isOpen, setIsOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Click outside and escape handling
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) return;
 
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
-    }
+    };
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsOpen(false)
+        setIsOpen(false);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('keydown', handleEscape)
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [isOpen])
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
 
   return (
     <div ref={containerRef} className={styles.container}>
@@ -63,9 +64,7 @@ export function SearchHelp() {
         aria-expanded={isOpen}
         title="Søketips"
       >
-        <span className="material-symbols-outlined" aria-hidden="true">
-          help_outline
-        </span>
+        <HelpCircleIcon size={24} aria-hidden="true" />
       </button>
 
       {isOpen && (
@@ -84,5 +83,5 @@ export function SearchHelp() {
         </div>
       )}
     </div>
-  )
+  );
 }

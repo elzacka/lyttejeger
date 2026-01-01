@@ -1,14 +1,11 @@
-import styles from './ResultTypeSelector.module.css'
+import styles from './ResultTypeSelector.module.css';
 
 interface ResultTypeSelectorProps {
-  activeTab: 'podcasts' | 'episodes'
-  onTabChange: (tab: 'podcasts' | 'episodes') => void
+  activeTab: 'podcasts' | 'episodes';
+  onTabChange: (tab: 'podcasts' | 'episodes') => void;
 }
 
-export function ResultTypeSelector({
-  activeTab,
-  onTabChange
-}: ResultTypeSelectorProps) {
+export function ResultTypeSelector({ activeTab, onTabChange }: ResultTypeSelectorProps) {
   return (
     <div className={styles.container}>
       <label className={styles.option}>
@@ -32,5 +29,5 @@ export function ResultTypeSelector({
         <span className={styles.label}>Episoder</span>
       </label>
     </div>
-  )
+  );
 }

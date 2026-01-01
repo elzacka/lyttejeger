@@ -23,7 +23,7 @@
   height: var(--badge-size);
   padding: 0 var(--space-xs);
   background: var(--accent);
-  color: white;
+  color: var(--color-white);
   font-family: var(--font-mono);
   font-size: var(--font-xs);
   font-weight: 500;
@@ -103,7 +103,9 @@
   font-family: var(--font-mono);
   font-size: var(--font-xs);
   cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .ctaButton:hover {
@@ -132,7 +134,9 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
   position: relative;
   z-index: 0;
 }
@@ -213,7 +217,7 @@
 .completed {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-0-5);
   color: var(--success-color);
   font-weight: 500;
 }
@@ -229,9 +233,9 @@
 
 .progressBar {
   width: 100%;
-  height: 5px;
+  height: var(--progress-height);
   background: var(--border);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   margin-top: var(--space-2xs);
 }
@@ -239,7 +243,7 @@
 .progressFill {
   height: 100%;
   background: var(--accent);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .actions {
@@ -264,7 +268,9 @@
   border-radius: var(--radius-md);
   color: var(--text-muted);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .menuButton:hover {
@@ -289,7 +295,7 @@
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-dropdown);
   z-index: var(--z-dropdown);
   animation: fadeIn 0.15s ease;
 }
@@ -319,7 +325,9 @@
   font-size: var(--font-xs);
   text-align: left;
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .menuItem:first-child {
@@ -368,7 +376,7 @@
 .playButton:hover {
   background: var(--accent);
   border-color: var(--accent);
-  color: white;
+  color: var(--color-white);
 }
 
 .playButton:active {

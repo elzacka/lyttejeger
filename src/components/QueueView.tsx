@@ -1,144 +1,162 @@
-import { useState, useRef, useCallback } from 'react'
-import type { QueueItem } from '../services/db'
-import { formatDuration } from '../utils/search'
-import { ConfirmDialog } from './ConfirmDialog'
-import styles from './QueueView.module.css'
+import { useState, useRef, useCallback } from 'react';
+import { TrashIcon, GripVerticalIcon, PodcastIcon, CloseIcon, PlayIcon } from '@designsystem/core';
+import type { QueueItem } from '../services/db';
+import { formatDuration } from '../utils/search';
+import { ConfirmDialog } from './ConfirmDialog';
+import styles from './QueueView.module.css';
 
 interface QueueViewProps {
-  queue: QueueItem[]
-  onPlay: (item: QueueItem) => void
-  onRemove: (id: number) => void
-  onClear: () => void
-  onReorder: (fromIndex: number, toIndex: number) => void
+  queue: QueueItem[];
+  onPlay: (item: QueueItem) => void;
+  onRemove: (id: number) => void;
+  onClear: () => void;
+  onReorder: (fromIndex: number, toIndex: number) => void;
 }
 
 interface SwipeState {
-  itemId: number | undefined
-  startX: number
-  currentX: number
-  isSwiping: boolean
+  itemId: number | undefined;
+  startX: number;
+  currentX: number;
+  isSwiping: boolean;
 }
 
 interface DragState {
-  isDragging: boolean
-  dragIndex: number | null
-  dragOverIndex: number | null
-  startY: number
-  currentY: number
+  isDragging: boolean;
+  dragIndex: number | null;
+  dragOverIndex: number | null;
+  startY: number;
+  currentY: number;
 }
 
-export function QueueView({
-  queue,
-  onPlay,
-  onRemove,
-  onClear,
-  onReorder,
-}: QueueViewProps) {
-  const [showClearConfirm, setShowClearConfirm] = useState(false)
-  const [swipedItemId, setSwipedItemId] = useState<number | null>(null)
-  const swipeRef = useRef<SwipeState>({ itemId: undefined, startX: 0, currentX: 0, isSwiping: false })
-  const dragRef = useRef<DragState>({ isDragging: false, dragIndex: null, dragOverIndex: null, startY: 0, currentY: 0 })
-  const [dragState, setDragState] = useState<{ dragIndex: number | null; dragOverIndex: number | null }>({ dragIndex: null, dragOverIndex: null })
-  const itemRefs = useRef<Map<number, HTMLLIElement>>(new Map())
-  const listRef = useRef<HTMLUListElement>(null)
+export function QueueView({ queue, onPlay, onRemove, onClear, onReorder }: QueueViewProps) {
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [swipedItemId, setSwipedItemId] = useState<number | null>(null);
+  const swipeRef = useRef<SwipeState>({
+    itemId: undefined,
+    startX: 0,
+    currentX: 0,
+    isSwiping: false,
+  });
+  const dragRef = useRef<DragState>({
+    isDragging: false,
+    dragIndex: null,
+    dragOverIndex: null,
+    startY: 0,
+    currentY: 0,
+  });
+  const [dragState, setDragState] = useState<{
+    dragIndex: number | null;
+    dragOverIndex: number | null;
+  }>({ dragIndex: null, dragOverIndex: null });
+  const itemRefs = useRef<Map<number, HTMLLIElement>>(new Map());
+  const listRef = useRef<HTMLUListElement>(null);
 
-  const SWIPE_THRESHOLD = 80
+  const SWIPE_THRESHOLD = 80;
 
-  const handleTouchStart = useCallback((e: React.TouchEvent, itemId: number | undefined) => {
-    // Reset any other swiped items
-    if (swipedItemId && swipedItemId !== itemId) {
-      const prevElement = itemRefs.current.get(swipedItemId)
-      const prevContent = prevElement?.querySelector(`.${styles.swipeContent}`) as HTMLElement
-      if (prevContent) {
-        prevContent.style.transform = 'translateX(0)'
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent, itemId: number | undefined) => {
+      // Reset any other swiped items
+      if (swipedItemId && swipedItemId !== itemId) {
+        const prevElement = itemRefs.current.get(swipedItemId);
+        const prevContent = prevElement?.querySelector(`.${styles.swipeContent}`) as HTMLElement;
+        if (prevContent) {
+          prevContent.style.transform = 'translateX(0)';
+        }
+        setSwipedItemId(null);
       }
-      setSwipedItemId(null)
-    }
 
-    swipeRef.current = {
-      itemId,
-      startX: e.touches[0].clientX,
-      currentX: e.touches[0].clientX,
-      isSwiping: false
-    }
-  }, [swipedItemId])
+      swipeRef.current = {
+        itemId,
+        startX: e.touches[0].clientX,
+        currentX: e.touches[0].clientX,
+        isSwiping: false,
+      };
+    },
+    [swipedItemId]
+  );
 
   const handleTouchMove = useCallback((e: React.TouchEvent, itemId: number | undefined) => {
-    if (!itemId) return
+    if (!itemId) return;
 
-    const touch = e.touches[0]
-    const deltaX = swipeRef.current.startX - touch.clientX
-    swipeRef.current.currentX = touch.clientX
+    const touch = e.touches[0];
+    const deltaX = swipeRef.current.startX - touch.clientX;
+    swipeRef.current.currentX = touch.clientX;
 
     // Only start swiping if horizontal movement is significant
     if (Math.abs(deltaX) > 10) {
-      swipeRef.current.isSwiping = true
+      swipeRef.current.isSwiping = true;
     }
 
     if (swipeRef.current.isSwiping) {
-      const element = itemRefs.current.get(itemId)
+      const element = itemRefs.current.get(itemId);
       if (element) {
-        const translateX = Math.max(0, Math.min(deltaX, SWIPE_THRESHOLD + 20))
-        const content = element.querySelector(`.${styles.swipeContent}`) as HTMLElement
+        const translateX = Math.max(0, Math.min(deltaX, SWIPE_THRESHOLD + 20));
+        const content = element.querySelector(`.${styles.swipeContent}`) as HTMLElement;
         if (content) {
-          content.style.transform = `translateX(-${translateX}px)`
+          content.style.transform = `translateX(-${translateX}px)`;
         }
       }
     }
-  }, [])
+  }, []);
 
-  const handleTouchEnd = useCallback((itemId: number | undefined) => {
-    if (!itemId) return
+  const handleTouchEnd = useCallback(
+    (itemId: number | undefined) => {
+      if (!itemId) return;
 
-    const deltaX = swipeRef.current.startX - swipeRef.current.currentX
-    const element = itemRefs.current.get(itemId)
-    const content = element?.querySelector(`.${styles.swipeContent}`) as HTMLElement
+      const deltaX = swipeRef.current.startX - swipeRef.current.currentX;
+      const element = itemRefs.current.get(itemId);
+      const content = element?.querySelector(`.${styles.swipeContent}`) as HTMLElement;
 
-    if (deltaX > SWIPE_THRESHOLD) {
-      // Reveal delete button
-      if (content) {
-        content.style.transform = `translateX(-${SWIPE_THRESHOLD}px)`
+      if (deltaX > SWIPE_THRESHOLD) {
+        // Reveal delete button
+        if (content) {
+          content.style.transform = `translateX(-${SWIPE_THRESHOLD}px)`;
+        }
+        setSwipedItemId(itemId);
+      } else {
+        // Reset position
+        if (content) {
+          content.style.transform = 'translateX(0)';
+        }
+        if (swipedItemId === itemId) {
+          setSwipedItemId(null);
+        }
       }
-      setSwipedItemId(itemId)
-    } else {
-      // Reset position
-      if (content) {
-        content.style.transform = 'translateX(0)'
-      }
-      if (swipedItemId === itemId) {
-        setSwipedItemId(null)
-      }
-    }
 
-    swipeRef.current.isSwiping = false
-  }, [swipedItemId])
+      swipeRef.current.isSwiping = false;
+    },
+    [swipedItemId]
+  );
 
-  const handleRemove = useCallback((itemId: number | undefined) => {
-    if (!itemId) return
-    onRemove(itemId)
-    setSwipedItemId(null)
-  }, [onRemove])
+  const handleRemove = useCallback(
+    (itemId: number | undefined) => {
+      if (!itemId) return;
+      onRemove(itemId);
+      setSwipedItemId(null);
+    },
+    [onRemove]
+  );
 
   // Drag-to-reorder handlers
   const getItemIndexFromY = useCallback((y: number): number | null => {
-    if (!listRef.current) return null
-    const items = Array.from(listRef.current.children) as HTMLElement[]
+    if (!listRef.current) return null;
+    const items = Array.from(listRef.current.children) as HTMLElement[];
     for (let i = 0; i < items.length; i++) {
-      const rect = items[i].getBoundingClientRect()
+      const rect = items[i].getBoundingClientRect();
       if (y >= rect.top && y <= rect.bottom) {
-        return i
+        return i;
       }
     }
     // If above first item
     if (items.length > 0 && y < items[0].getBoundingClientRect().top) {
-      return 0
+      return 0;
     }
     // If below last item
     if (items.length > 0 && y > items[items.length - 1].getBoundingClientRect().bottom) {
-      return items.length - 1
+      return items.length - 1;
     }
-    return null
-  }, [])
+    return null;
+  }, []);
 
   const handleDragStart = useCallback((index: number, clientY: number) => {
     dragRef.current = {
@@ -146,66 +164,84 @@ export function QueueView({
       dragIndex: index,
       dragOverIndex: index,
       startY: clientY,
-      currentY: clientY
-    }
-    setDragState({ dragIndex: index, dragOverIndex: index })
-  }, [])
+      currentY: clientY,
+    };
+    setDragState({ dragIndex: index, dragOverIndex: index });
+  }, []);
 
-  const handleDragMove = useCallback((clientY: number) => {
-    if (!dragRef.current.isDragging) return
-    dragRef.current.currentY = clientY
-    const overIndex = getItemIndexFromY(clientY)
-    if (overIndex !== null && overIndex !== dragRef.current.dragOverIndex) {
-      dragRef.current.dragOverIndex = overIndex
-      setDragState(prev => ({ ...prev, dragOverIndex: overIndex }))
-    }
-  }, [getItemIndexFromY])
+  const handleDragMove = useCallback(
+    (clientY: number) => {
+      if (!dragRef.current.isDragging) return;
+      dragRef.current.currentY = clientY;
+      const overIndex = getItemIndexFromY(clientY);
+      if (overIndex !== null && overIndex !== dragRef.current.dragOverIndex) {
+        dragRef.current.dragOverIndex = overIndex;
+        setDragState((prev) => ({ ...prev, dragOverIndex: overIndex }));
+      }
+    },
+    [getItemIndexFromY]
+  );
 
   const handleDragEnd = useCallback(() => {
-    if (!dragRef.current.isDragging) return
-    const { dragIndex, dragOverIndex } = dragRef.current
+    if (!dragRef.current.isDragging) return;
+    const { dragIndex, dragOverIndex } = dragRef.current;
     if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
-      onReorder(dragIndex, dragOverIndex)
+      onReorder(dragIndex, dragOverIndex);
     }
-    dragRef.current = { isDragging: false, dragIndex: null, dragOverIndex: null, startY: 0, currentY: 0 }
-    setDragState({ dragIndex: null, dragOverIndex: null })
-  }, [onReorder])
+    dragRef.current = {
+      isDragging: false,
+      dragIndex: null,
+      dragOverIndex: null,
+      startY: 0,
+      currentY: 0,
+    };
+    setDragState({ dragIndex: null, dragOverIndex: null });
+  }, [onReorder]);
 
   // Touch drag handlers for the drag handle
-  const handleDragTouchStart = useCallback((e: React.TouchEvent, index: number) => {
-    e.stopPropagation() // Prevent swipe-to-delete from triggering
-    handleDragStart(index, e.touches[0].clientY)
-  }, [handleDragStart])
+  const handleDragTouchStart = useCallback(
+    (e: React.TouchEvent, index: number) => {
+      e.stopPropagation(); // Prevent swipe-to-delete from triggering
+      handleDragStart(index, e.touches[0].clientY);
+    },
+    [handleDragStart]
+  );
 
-  const handleDragTouchMove = useCallback((e: React.TouchEvent) => {
-    if (dragRef.current.isDragging) {
-      e.preventDefault() // Prevent scrolling while dragging
-      handleDragMove(e.touches[0].clientY)
-    }
-  }, [handleDragMove])
+  const handleDragTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (dragRef.current.isDragging) {
+        e.preventDefault(); // Prevent scrolling while dragging
+        handleDragMove(e.touches[0].clientY);
+      }
+    },
+    [handleDragMove]
+  );
 
   const handleDragTouchEnd = useCallback(() => {
-    handleDragEnd()
-  }, [handleDragEnd])
+    handleDragEnd();
+  }, [handleDragEnd]);
 
   // Mouse drag handlers for desktop
-  const handleDragMouseDown = useCallback((e: React.MouseEvent, index: number) => {
-    e.preventDefault()
-    handleDragStart(index, e.clientY)
+  const handleDragMouseDown = useCallback(
+    (e: React.MouseEvent, index: number) => {
+      e.preventDefault();
+      handleDragStart(index, e.clientY);
 
-    const handleMouseMove = (e: MouseEvent) => {
-      handleDragMove(e.clientY)
-    }
+      const handleMouseMove = (e: MouseEvent) => {
+        handleDragMove(e.clientY);
+      };
 
-    const handleMouseUp = () => {
-      handleDragEnd()
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
+      const handleMouseUp = () => {
+        handleDragEnd();
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
-  }, [handleDragStart, handleDragMove, handleDragEnd])
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    },
+    [handleDragStart, handleDragMove, handleDragEnd]
+  );
 
   if (queue.length === 0) {
     return (
@@ -213,7 +249,7 @@ export function QueueView({
         <h3>Køen er tom</h3>
         <p>Legg til episoder fra søkeresultatene eller en podcast-side</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -225,7 +261,7 @@ export function QueueView({
           onClick={() => setShowClearConfirm(true)}
           aria-label="Tøm køen"
         >
-          <span className="material-symbols-outlined">delete_sweep</span>
+          <TrashIcon size={18} />
           Tøm
         </button>
       </div>
@@ -248,14 +284,14 @@ export function QueueView({
 
       <ul className={styles.list} role="list" ref={listRef}>
         {queue.map((item, index) => {
-          const isDragging = dragState.dragIndex === index
-          const isDragOver = dragState.dragOverIndex === index && dragState.dragIndex !== index
+          const isDragging = dragState.dragIndex === index;
+          const isDragOver = dragState.dragOverIndex === index && dragState.dragIndex !== index;
           return (
             <li
               key={item.id}
               className={`${styles.item} ${isDragging ? styles.dragging : ''} ${isDragOver ? styles.dragOver : ''}`}
               ref={(el) => {
-                if (el && item.id) itemRefs.current.set(item.id, el)
+                if (el && item.id) itemRefs.current.set(item.id, el);
               }}
               onTouchStart={(e) => handleTouchStart(e, item.id)}
               onTouchMove={(e) => handleTouchMove(e, item.id)}
@@ -268,7 +304,7 @@ export function QueueView({
                   onClick={() => handleRemove(item.id)}
                   aria-label="Fjern fra kø"
                 >
-                  <span className="material-symbols-outlined">delete</span>
+                  <TrashIcon size={20} />
                 </button>
               </div>
 
@@ -284,32 +320,24 @@ export function QueueView({
                     onTouchEnd={handleDragTouchEnd}
                     aria-label="Dra for å sortere"
                   >
-                    <span className="material-symbols-outlined">drag_indicator</span>
+                    <GripVerticalIcon size={20} />
                   </button>
 
                   <div className={styles.imageContainer}>
-                    {(item.imageUrl || item.podcastImage) ? (
+                    {item.imageUrl || item.podcastImage ? (
                       <img
                         src={item.imageUrl || item.podcastImage}
                         alt=""
                         className={styles.image}
                         loading="lazy"
                         onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.style.display = 'none'
-                          const placeholder = document.createElement('div')
-                          placeholder.className = `${styles.image} image-placeholder`
-                          const icon = document.createElement('span')
-                          icon.className = 'material-symbols-outlined'
-                          icon.setAttribute('aria-hidden', 'true')
-                          icon.textContent = 'podcasts'
-                          placeholder.appendChild(icon)
-                          target.parentNode?.appendChild(placeholder)
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
                         }}
                       />
                     ) : (
                       <div className={`${styles.image} image-placeholder`}>
-                        <span className="material-symbols-outlined" aria-hidden="true">podcasts</span>
+                        <PodcastIcon size={24} aria-hidden="true" />
                       </div>
                     )}
                   </div>
@@ -329,7 +357,7 @@ export function QueueView({
                       onClick={() => item.id && onRemove(item.id)}
                       aria-label="Fjern fra kø"
                     >
-                      <span className="material-symbols-outlined">close</span>
+                      <CloseIcon size={18} />
                     </button>
 
                     <button
@@ -337,15 +365,15 @@ export function QueueView({
                       onClick={() => onPlay(item)}
                       aria-label={`Spill ${item.title}`}
                     >
-                      <span className="material-symbols-outlined">play_arrow</span>
+                      <PlayIcon size={20} />
                     </button>
                   </div>
                 </div>
               </div>
             </li>
-          )
+          );
         })}
       </ul>
     </div>
-  )
+  );
 }

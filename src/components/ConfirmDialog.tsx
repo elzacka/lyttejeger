@@ -1,14 +1,14 @@
-import styles from './ConfirmDialog.module.css'
+import styles from './ConfirmDialog.module.css';
 
 interface ConfirmDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void
-  title: string
-  message: string
-  confirmText?: string
-  cancelText?: string
-  variant?: 'danger' | 'default'
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: 'danger' | 'default';
 }
 
 export function ConfirmDialog({
@@ -21,12 +21,12 @@ export function ConfirmDialog({
   cancelText = 'Avbryt',
   variant = 'default',
 }: ConfirmDialogProps) {
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const handleConfirm = () => {
-    onConfirm()
-    onClose()
-  }
+    onConfirm();
+    onClose();
+  };
 
   return (
     <>
@@ -38,13 +38,14 @@ export function ConfirmDialog({
         aria-labelledby="confirm-title"
         aria-describedby="confirm-message"
       >
-        <h2 id="confirm-title" className={styles.title}>{title}</h2>
-        <p id="confirm-message" className={styles.message}>{message}</p>
+        <h2 id="confirm-title" className={styles.title}>
+          {title}
+        </h2>
+        <p id="confirm-message" className={styles.message}>
+          {message}
+        </p>
         <div className={styles.actions}>
-          <button
-            className={styles.cancelButton}
-            onClick={onClose}
-          >
+          <button className={styles.cancelButton} onClick={onClose}>
             {cancelText}
           </button>
           <button
@@ -57,5 +58,5 @@ export function ConfirmDialog({
         </div>
       </div>
     </>
-  )
+  );
 }

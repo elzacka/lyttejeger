@@ -1,21 +1,22 @@
-import { useEffect, useRef, useCallback, useId, useState, type ReactNode } from 'react'
-import { useSheetContext } from '../hooks/useSheetContext'
-import { useFocusTrap } from '../hooks/useFocusTrap'
-import styles from './FilterSheet.module.css'
+import { useEffect, useRef, useCallback, useId, useState, type ReactNode } from 'react';
+import { SearchIcon, CloseIcon } from '@designsystem/core';
+import { useSheetContext } from '../hooks/useSheetContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
+import styles from './FilterSheet.module.css';
 
 interface FilterSheetProps {
-  isOpen: boolean
-  onClose: () => void
-  title: string
-  children: ReactNode
-  searchable?: boolean
-  searchPlaceholder?: string
-  searchValue?: string
-  onSearchChange?: (value: string) => void
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 }
 
-const DRAG_THRESHOLD = 100
-const VELOCITY_THRESHOLD = 0.5
+const DRAG_THRESHOLD = 100;
+const VELOCITY_THRESHOLD = 0.5;
 
 export function FilterSheet({
   isOpen,
@@ -27,37 +28,37 @@ export function FilterSheet({
   searchValue = '',
   onSearchChange,
 }: FilterSheetProps) {
-  const sheetId = useId()
-  const titleId = useId()
-  const { registerSheet, unregisterSheet } = useSheetContext()
-  const sheetRef = useRef<HTMLDivElement>(null)
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  const [isClosing, setIsClosing] = useState(false)
+  const sheetId = useId();
+  const titleId = useId();
+  const { registerSheet, unregisterSheet } = useSheetContext();
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   // Apply focus trap to sheet when open
-  useFocusTrap(sheetRef, isOpen && !isClosing)
+  useFocusTrap(sheetRef, isOpen && !isClosing);
   const dragRef = useRef({
     startY: 0,
     currentY: 0,
     startTime: 0,
     isDragging: false,
-  })
+  });
 
   // Register/unregister sheet with context
   useEffect(() => {
     if (isOpen) {
-      registerSheet(sheetId)
-      return () => unregisterSheet(sheetId)
+      registerSheet(sheetId);
+      return () => unregisterSheet(sheetId);
     }
-  }, [isOpen, sheetId, registerSheet, unregisterSheet])
+  }, [isOpen, sheetId, registerSheet, unregisterSheet]);
 
   const handleClose = useCallback(() => {
-    setIsClosing(true)
+    setIsClosing(true);
     setTimeout(() => {
-      setIsClosing(false)
-      onClose()
-    }, 200)
-  }, [onClose])
+      setIsClosing(false);
+      onClose();
+    }, 200);
+  }, [onClose]);
 
   const handleDragStart = useCallback((clientY: number) => {
     dragRef.current = {
@@ -65,124 +66,124 @@ export function FilterSheet({
       currentY: clientY,
       startTime: Date.now(),
       isDragging: true,
-    }
-  }, [])
+    };
+  }, []);
 
   const handleDragMove = useCallback((clientY: number) => {
-    if (!dragRef.current.isDragging || !sheetRef.current) return
+    if (!dragRef.current.isDragging || !sheetRef.current) return;
 
-    const deltaY = clientY - dragRef.current.startY
-    dragRef.current.currentY = clientY
+    const deltaY = clientY - dragRef.current.startY;
+    dragRef.current.currentY = clientY;
 
     if (deltaY > 0) {
-      sheetRef.current.style.transform = `translateY(${deltaY}px)`
-      sheetRef.current.style.transition = 'none'
+      sheetRef.current.style.transform = `translateY(${deltaY}px)`;
+      sheetRef.current.style.transition = 'none';
     }
-  }, [])
+  }, []);
 
   const handleDragEnd = useCallback(() => {
-    if (!dragRef.current.isDragging || !sheetRef.current) return
+    if (!dragRef.current.isDragging || !sheetRef.current) return;
 
-    const deltaY = dragRef.current.currentY - dragRef.current.startY
-    const deltaTime = Date.now() - dragRef.current.startTime
-    const velocity = deltaY / deltaTime
+    const deltaY = dragRef.current.currentY - dragRef.current.startY;
+    const deltaTime = Date.now() - dragRef.current.startTime;
+    const velocity = deltaY / deltaTime;
 
-    sheetRef.current.style.transition = ''
-    sheetRef.current.style.transform = ''
+    sheetRef.current.style.transition = '';
+    sheetRef.current.style.transform = '';
 
     if (deltaY > DRAG_THRESHOLD || velocity > VELOCITY_THRESHOLD) {
-      handleClose()
+      handleClose();
     }
 
-    dragRef.current.isDragging = false
-  }, [handleClose])
+    dragRef.current.isDragging = false;
+  }, [handleClose]);
 
   // Touch events
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
-      handleDragStart(e.touches[0].clientY)
+      handleDragStart(e.touches[0].clientY);
     },
     [handleDragStart]
-  )
+  );
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
-      handleDragMove(e.touches[0].clientY)
+      handleDragMove(e.touches[0].clientY);
     },
     [handleDragMove]
-  )
+  );
 
   const handleTouchEnd = useCallback(() => {
-    handleDragEnd()
-  }, [handleDragEnd])
+    handleDragEnd();
+  }, [handleDragEnd]);
 
   // Mouse events for desktop testing
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      handleDragStart(e.clientY)
+      handleDragStart(e.clientY);
     },
     [handleDragStart]
-  )
+  );
 
   useEffect(() => {
-    if (!dragRef.current.isDragging) return
+    if (!dragRef.current.isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      handleDragMove(e.clientY)
-    }
+      handleDragMove(e.clientY);
+    };
 
     const handleMouseUp = () => {
-      handleDragEnd()
-    }
+      handleDragEnd();
+    };
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [handleDragMove, handleDragEnd])
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleDragMove, handleDragEnd]);
 
   // Click outside and escape handling
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) return;
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        handleClose()
+        handleClose();
       }
-    }
+    };
 
-    document.addEventListener('keydown', handleEscape)
+    document.addEventListener('keydown', handleEscape);
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [isOpen, handleClose])
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, handleClose]);
 
   // Lock body scroll when open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden';
     }
     return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   // Focus search input when sheet opens
   useEffect(() => {
     if (isOpen && searchable && searchInputRef.current) {
       // Small delay to ensure sheet animation completes
       const timer = setTimeout(() => {
-        searchInputRef.current?.focus()
-      }, 100)
-      return () => clearTimeout(timer)
+        searchInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, searchable])
+  }, [isOpen, searchable]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <>
@@ -210,21 +211,17 @@ export function FilterSheet({
         </div>
 
         <div className={styles.header}>
-          <h2 id={titleId} className={styles.title}>{title}</h2>
-          <button
-            className={styles.doneButton}
-            onClick={handleClose}
-            type="button"
-          >
+          <h2 id={titleId} className={styles.title}>
+            {title}
+          </h2>
+          <button className={styles.doneButton} onClick={handleClose} type="button">
             Ferdig
           </button>
         </div>
 
         {searchable && (
           <div className={styles.searchContainer}>
-            <span className={`material-symbols-outlined ${styles.searchIcon}`} aria-hidden="true">
-              search
-            </span>
+            <SearchIcon size={18} className={styles.searchIcon} aria-hidden="true" />
             <input
               ref={searchInputRef}
               type="search"
@@ -241,7 +238,7 @@ export function FilterSheet({
                 onClick={() => onSearchChange?.('')}
                 aria-label="Tøm søk"
               >
-                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                <CloseIcon size={18} aria-hidden="true" />
               </button>
             )}
           </div>
@@ -250,5 +247,5 @@ export function FilterSheet({
         <div className={styles.content}>{children}</div>
       </div>
     </>
-  )
+  );
 }

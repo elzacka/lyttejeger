@@ -1,28 +1,28 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react';
 import {
   getSubscriptions,
   subscribe as dbSubscribe,
   unsubscribe as dbUnsubscribe,
   type Subscription,
-} from '../services/db'
-import type { Podcast } from '../types/podcast'
+} from '../services/db';
+import type { Podcast } from '../types/podcast';
 
 export function useSubscriptions() {
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load subscriptions on mount
   useEffect(() => {
     const loadSubscriptions = async () => {
       try {
-        const items = await getSubscriptions()
-        setSubscriptions(items)
+        const items = await getSubscriptions();
+        setSubscriptions(items);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
-    loadSubscriptions()
-  }, [])
+    };
+    loadSubscriptions();
+  }, []);
 
   const subscribe = useCallback(async (podcast: Podcast) => {
     await dbSubscribe({
@@ -31,23 +31,23 @@ export function useSubscriptions() {
       author: podcast.author,
       imageUrl: podcast.imageUrl,
       feedUrl: podcast.feedUrl,
-    })
-    const items = await getSubscriptions()
-    setSubscriptions(items)
-  }, [])
+    });
+    const items = await getSubscriptions();
+    setSubscriptions(items);
+  }, []);
 
   const unsubscribe = useCallback(async (podcastId: string) => {
-    await dbUnsubscribe(podcastId)
-    const items = await getSubscriptions()
-    setSubscriptions(items)
-  }, [])
+    await dbUnsubscribe(podcastId);
+    const items = await getSubscriptions();
+    setSubscriptions(items);
+  }, []);
 
   const isSubscribed = useCallback(
     (podcastId: string) => {
-      return subscriptions.some((sub) => sub.podcastId === podcastId)
+      return subscriptions.some((sub) => sub.podcastId === podcastId);
     },
     [subscriptions]
-  )
+  );
 
   return {
     subscriptions,
@@ -56,5 +56,5 @@ export function useSubscriptions() {
     unsubscribe,
     isSubscribed,
     subscriptionCount: subscriptions.length,
-  }
+  };
 }

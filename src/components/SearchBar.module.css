@@ -14,13 +14,14 @@
   flex: 1;
   min-width: 0;
   min-height: var(--touch-target);
-  padding: 0 var(--space-md);
+  padding: 0 var(--space-4);
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-sizing: border-box;
-  transition: border-color var(--transition-fast),
-              background var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .inputWrapper:focus-within {
@@ -31,18 +32,18 @@
 .prefix {
   color: var(--accent);
   font-family: var(--font-mono);
-  font-size: var(--font-xs);
-  font-weight: 500;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
   user-select: none;
-  margin-right: var(--space-xs);
+  margin-right: var(--space-2);
 }
 
 .input {
   flex: 1;
   min-width: 0;
-  padding: var(--space-sm) 0;
+  padding: var(--space-3) 0;
   font-family: var(--font-mono);
-  font-size: var(--font-xs);
+  font-size: var(--text-sm);
   background: transparent;
   border: none;
   color: var(--text-primary);
@@ -90,16 +91,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: var(--icon-md);
+  height: var(--icon-md);
   padding: 0;
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
   border-radius: var(--radius-sm);
-  transition: color var(--transition-fast),
-              background var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .clearButton .material-symbols-outlined {
@@ -117,7 +119,7 @@
 }
 
 .shortcut kbd {
-  padding: 2px 6px;
+  padding: var(--space-0-5) var(--space-1-5);
   font-family: var(--font-mono);
   font-size: var(--font-xs);
   background: var(--bg-hover);

@@ -1,18 +1,19 @@
-import { useState, useRef, useCallback } from 'react'
-import type { Subscription } from '../services/db'
-import styles from './SubscriptionsView.module.css'
+import { useState, useRef, useCallback } from 'react';
+import { TrashIcon, CloseIcon } from '@designsystem/core';
+import type { Subscription } from '../services/db';
+import styles from './SubscriptionsView.module.css';
 
 interface SubscriptionsViewProps {
-  subscriptions: Subscription[]
-  onUnsubscribe: (podcastId: string) => void
-  onSelectPodcast: (podcastId: string) => void
+  subscriptions: Subscription[];
+  onUnsubscribe: (podcastId: string) => void;
+  onSelectPodcast: (podcastId: string) => void;
 }
 
 interface SwipeState {
-  itemId: string | null
-  startX: number
-  currentX: number
-  isSwiping: boolean
+  itemId: string | null;
+  startX: number;
+  currentX: number;
+  isSwiping: boolean;
 }
 
 export function SubscriptionsView({
@@ -20,27 +21,27 @@ export function SubscriptionsView({
   onUnsubscribe,
   onSelectPodcast,
 }: SubscriptionsViewProps) {
-  const [swipedItemId, setSwipedItemId] = useState<string | null>(null)
+  const [swipedItemId, setSwipedItemId] = useState<string | null>(null);
   const swipeRef = useRef<SwipeState>({
     itemId: null,
     startX: 0,
     currentX: 0,
     isSwiping: false,
-  })
-  const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map())
+  });
+  const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
-  const SWIPE_THRESHOLD = 80
+  const SWIPE_THRESHOLD = 80;
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent, itemId: string) => {
       // Reset any other swiped items
       if (swipedItemId && swipedItemId !== itemId) {
-        const prevElement = itemRefs.current.get(swipedItemId)
-        const prevContent = prevElement?.querySelector(`.${styles.swipeContent}`) as HTMLElement
+        const prevElement = itemRefs.current.get(swipedItemId);
+        const prevContent = prevElement?.querySelector(`.${styles.swipeContent}`) as HTMLElement;
         if (prevContent) {
-          prevContent.style.transform = 'translateX(0)'
+          prevContent.style.transform = 'translateX(0)';
         }
-        setSwipedItemId(null)
+        setSwipedItemId(null);
       }
 
       swipeRef.current = {
@@ -48,67 +49,67 @@ export function SubscriptionsView({
         startX: e.touches[0].clientX,
         currentX: e.touches[0].clientX,
         isSwiping: false,
-      }
+      };
     },
     [swipedItemId]
-  )
+  );
 
   const handleTouchMove = useCallback((e: React.TouchEvent, itemId: string) => {
-    const touch = e.touches[0]
-    const deltaX = swipeRef.current.startX - touch.clientX
-    swipeRef.current.currentX = touch.clientX
+    const touch = e.touches[0];
+    const deltaX = swipeRef.current.startX - touch.clientX;
+    swipeRef.current.currentX = touch.clientX;
 
     // Only start swiping if horizontal movement is significant
     if (Math.abs(deltaX) > 10) {
-      swipeRef.current.isSwiping = true
+      swipeRef.current.isSwiping = true;
     }
 
     if (swipeRef.current.isSwiping) {
-      const element = itemRefs.current.get(itemId)
+      const element = itemRefs.current.get(itemId);
       if (element) {
-        const translateX = Math.max(0, Math.min(deltaX, SWIPE_THRESHOLD + 20))
-        const content = element.querySelector(`.${styles.swipeContent}`) as HTMLElement
+        const translateX = Math.max(0, Math.min(deltaX, SWIPE_THRESHOLD + 20));
+        const content = element.querySelector(`.${styles.swipeContent}`) as HTMLElement;
         if (content) {
-          content.style.transform = `translateX(-${translateX}px)`
+          content.style.transform = `translateX(-${translateX}px)`;
         }
       }
     }
-  }, [])
+  }, []);
 
   const handleTouchEnd = useCallback(
     (itemId: string) => {
-      const deltaX = swipeRef.current.startX - swipeRef.current.currentX
-      const element = itemRefs.current.get(itemId)
-      const content = element?.querySelector(`.${styles.swipeContent}`) as HTMLElement
+      const deltaX = swipeRef.current.startX - swipeRef.current.currentX;
+      const element = itemRefs.current.get(itemId);
+      const content = element?.querySelector(`.${styles.swipeContent}`) as HTMLElement;
 
       if (deltaX > SWIPE_THRESHOLD) {
         // Reveal unsubscribe button
         if (content) {
-          content.style.transform = `translateX(-${SWIPE_THRESHOLD}px)`
+          content.style.transform = `translateX(-${SWIPE_THRESHOLD}px)`;
         }
-        setSwipedItemId(itemId)
+        setSwipedItemId(itemId);
       } else {
         // Reset position
         if (content) {
-          content.style.transform = 'translateX(0)'
+          content.style.transform = 'translateX(0)';
         }
         if (swipedItemId === itemId) {
-          setSwipedItemId(null)
+          setSwipedItemId(null);
         }
       }
 
-      swipeRef.current.isSwiping = false
+      swipeRef.current.isSwiping = false;
     },
     [swipedItemId]
-  )
+  );
 
   const handleUnsubscribe = useCallback(
     (podcastId: string) => {
-      onUnsubscribe(podcastId)
-      setSwipedItemId(null)
+      onUnsubscribe(podcastId);
+      setSwipedItemId(null);
     },
     [onUnsubscribe]
-  )
+  );
 
   if (subscriptions.length === 0) {
     return (
@@ -116,7 +117,7 @@ export function SubscriptionsView({
         <h3>Du følger ingen podcaster ennå</h3>
         <p>Søk etter podcaster og trykk på Følg for å abonnere</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -132,7 +133,7 @@ export function SubscriptionsView({
             key={sub.podcastId}
             className={styles.item}
             ref={(el) => {
-              if (el) itemRefs.current.set(sub.podcastId, el)
+              if (el) itemRefs.current.set(sub.podcastId, el);
             }}
             onTouchStart={(e) => handleTouchStart(e, sub.podcastId)}
             onTouchMove={(e) => handleTouchMove(e, sub.podcastId)}
@@ -145,7 +146,7 @@ export function SubscriptionsView({
                 onClick={() => handleUnsubscribe(sub.podcastId)}
                 aria-label={`Avslutt abonnement på ${sub.title}`}
               >
-                <span className="material-symbols-outlined">delete</span>
+                <TrashIcon size={20} />
               </button>
             </div>
 
@@ -161,16 +162,8 @@ export function SubscriptionsView({
                   className={styles.image}
                   loading="lazy"
                   onError={(e) => {
-                    const target = e.target as HTMLImageElement
-                    target.style.display = 'none'
-                    const placeholder = document.createElement('div')
-                    placeholder.className = `${styles.image} image-placeholder`
-                    const icon = document.createElement('span')
-                    icon.className = 'material-symbols-outlined'
-                    icon.setAttribute('aria-hidden', 'true')
-                    icon.textContent = 'podcasts'
-                    placeholder.appendChild(icon)
-                    target.parentNode?.insertBefore(placeholder, target)
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
                   }}
                 />
                 <div className={styles.info}>
@@ -184,12 +177,12 @@ export function SubscriptionsView({
                 onClick={() => handleUnsubscribe(sub.podcastId)}
                 aria-label={`Avslutt abonnement på ${sub.title}`}
               >
-                <span className="material-symbols-outlined">close</span>
+                <CloseIcon size={18} />
               </button>
             </div>
           </li>
         ))}
       </ul>
     </div>
-  )
+  );
 }

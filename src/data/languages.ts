@@ -1,2 +1,2 @@
 // Available language filters for the UI
-export const allLanguages = ['Norsk', 'Engelsk', 'Svensk', 'Dansk']
+export const allLanguages = ['Norsk', 'Engelsk', 'Svensk', 'Dansk'];

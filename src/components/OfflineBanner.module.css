@@ -13,7 +13,7 @@
   padding: var(--space-sm) var(--space-md);
   padding-top: calc(var(--space-sm) + env(safe-area-inset-top, 0px));
   background: var(--color-warning);
-  color: white;
+  color: var(--color-white);
   font-family: var(--font-mono);
   font-size: var(--font-sm);
   font-weight: 500;

@@ -1,22 +1,22 @@
 /**
  * Transform Podcast Index API responses to app types
  */
-import type { Podcast, Episode } from '../types/podcast'
-import type { PodcastIndexFeed, PodcastIndexEpisode } from './podcastIndex'
+import type { Podcast, Episode } from '../types/podcast';
+import type { PodcastIndexFeed, PodcastIndexEpisode } from './podcastIndex';
 
 /**
  * Safely convert unix timestamp to ISO string
  */
 function safeTimestampToISO(timestamp: number | undefined | null): string {
   if (!timestamp || timestamp <= 0) {
-    return new Date().toISOString() // Default to now
+    return new Date().toISOString(); // Default to now
   }
-  const date = new Date(timestamp * 1000)
+  const date = new Date(timestamp * 1000);
   // Check if date is valid
   if (isNaN(date.getTime())) {
-    return new Date().toISOString()
+    return new Date().toISOString();
   }
-  return date.toISOString()
+  return date.toISOString();
 }
 
 /**
@@ -36,8 +36,8 @@ export function transformFeed(feed: PodcastIndexFeed): Podcast {
     episodeCount: feed.episodeCount || 0,
     lastUpdated: safeTimestampToISO(feed.lastUpdateTime),
     rating: calculateRating(feed),
-    explicit: feed.explicit || false
-  }
+    explicit: feed.explicit || false,
+  };
 }
 
 /**
@@ -55,7 +55,7 @@ export function transformEpisode(episode: PodcastIndexEpisode): Episode {
     imageUrl: episode.image || episode.feedImage || undefined,
     transcriptUrl: episode.transcriptUrl || undefined,
     chaptersUrl: episode.chaptersUrl || undefined,
-  }
+  };
 }
 
 /**
@@ -63,41 +63,41 @@ export function transformEpisode(episode: PodcastIndexEpisode): Episode {
  */
 export function transformFeeds(feeds: PodcastIndexFeed[]): Podcast[] {
   return feeds
-    .filter(feed => !feed.dead) // Filter out dead feeds
-    .map(transformFeed)
+    .filter((feed) => !feed.dead) // Filter out dead feeds
+    .map(transformFeed);
 }
 
 /**
  * Transform multiple episodes
  */
 export function transformEpisodes(episodes: PodcastIndexEpisode[]): Episode[] {
-  return episodes.map(ep => transformEpisode(ep))
+  return episodes.map((ep) => transformEpisode(ep));
 }
 
 /**
  * Normalize language codes to display format
  */
 function normalizeLanguage(lang: string): string {
-  if (!lang) return 'Unknown'
+  if (!lang) return 'Unknown';
 
   const langMap: Record<string, string> = {
-    'no': 'Norsk',
-    'nb': 'Norsk',
-    'nn': 'Nynorsk',
-    'en': 'English',
+    no: 'Norsk',
+    nb: 'Norsk',
+    nn: 'Nynorsk',
+    en: 'English',
     'en-us': 'English',
     'en-gb': 'English',
-    'sv': 'Svenska',
-    'da': 'Dansk',
-    'de': 'Deutsch',
-    'fr': 'Français',
-    'es': 'Español',
-    'fi': 'Suomi',
-    'is': 'Íslenska'
-  }
+    sv: 'Svenska',
+    da: 'Dansk',
+    de: 'Deutsch',
+    fr: 'Français',
+    es: 'Español',
+    fi: 'Suomi',
+    is: 'Íslenska',
+  };
 
-  const normalized = lang.toLowerCase().split('-')[0]
-  return langMap[lang.toLowerCase()] || langMap[normalized] || lang.toUpperCase()
+  const normalized = lang.toLowerCase().split('-')[0];
+  return langMap[lang.toLowerCase()] || langMap[normalized] || lang.toUpperCase();
 }
 
 /**
@@ -105,24 +105,24 @@ function normalizeLanguage(lang: string): string {
  * (Podcast Index doesn't provide ratings, so we estimate based on activity)
  */
 function calculateRating(feed: PodcastIndexFeed): number {
-  let score = 3.0 // Base score
+  let score = 3.0; // Base score
 
   // Boost for episode count
-  if (feed.episodeCount > 100) score += 0.5
-  else if (feed.episodeCount > 50) score += 0.3
-  else if (feed.episodeCount > 20) score += 0.1
+  if (feed.episodeCount > 100) score += 0.5;
+  else if (feed.episodeCount > 50) score += 0.3;
+  else if (feed.episodeCount > 20) score += 0.1;
 
   // Boost for recent updates
-  const daysSinceUpdate = (Date.now() / 1000 - feed.lastUpdateTime) / 86400
-  if (daysSinceUpdate < 7) score += 0.5
-  else if (daysSinceUpdate < 30) score += 0.3
-  else if (daysSinceUpdate < 90) score += 0.1
+  const daysSinceUpdate = (Date.now() / 1000 - feed.lastUpdateTime) / 86400;
+  if (daysSinceUpdate < 7) score += 0.5;
+  else if (daysSinceUpdate < 30) score += 0.3;
+  else if (daysSinceUpdate < 90) score += 0.1;
 
   // Penalty for errors
-  if (feed.crawlErrors > 0 || feed.parseErrors > 0) score -= 0.3
+  if (feed.crawlErrors > 0 || feed.parseErrors > 0) score -= 0.3;
 
   // Clamp between 1 and 5
-  return Math.max(1, Math.min(5, Math.round(score * 10) / 10))
+  return Math.max(1, Math.min(5, Math.round(score * 10) / 10));
 }
 
 /**
@@ -137,5 +137,5 @@ function stripHtml(html: string): string {
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .trim()
+    .trim();
 }

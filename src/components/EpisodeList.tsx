@@ -1,23 +1,23 @@
-import { useRef, useState, useLayoutEffect } from 'react'
-import { useWindowVirtualizer } from '@tanstack/react-virtual'
-import type { EpisodeWithPodcast } from '../utils/search'
-import type { PlayingEpisode } from './AudioPlayer'
-import { EpisodeCard } from './EpisodeCard'
-import { usePlaybackProgress } from '../hooks/usePlaybackProgress'
-import styles from './EpisodeList.module.css'
+import { useRef, useState, useLayoutEffect } from 'react';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
+import type { EpisodeWithPodcast } from '../utils/search';
+import type { PlayingEpisode } from './AudioPlayer';
+import { EpisodeCard } from './EpisodeCard';
+import { usePlaybackProgress } from '../hooks/usePlaybackProgress';
+import styles from './EpisodeList.module.css';
 
 // Estimated height per episode card
-const ESTIMATED_ITEM_HEIGHT = 88
+const ESTIMATED_ITEM_HEIGHT = 88;
 
 interface EpisodeListProps {
-  episodes: EpisodeWithPodcast[]
-  searchQuery?: string
-  isLoading?: boolean
-  onPlayEpisode: (episode: PlayingEpisode) => void
-  onAddToQueue?: (episode: EpisodeWithPodcast) => void
-  onPlayNext?: (episode: EpisodeWithPodcast) => void
-  isInQueue?: (episodeId: string) => boolean
-  onSelectPodcast?: (podcastId: string) => void
+  episodes: EpisodeWithPodcast[];
+  searchQuery?: string;
+  isLoading?: boolean;
+  onPlayEpisode: (episode: PlayingEpisode) => void;
+  onAddToQueue?: (episode: EpisodeWithPodcast) => void;
+  onPlayNext?: (episode: EpisodeWithPodcast) => void;
+  isInQueue?: (episodeId: string) => boolean;
+  onSelectPodcast?: (podcastId: string) => void;
 }
 
 function SkeletonCard() {
@@ -31,7 +31,7 @@ function SkeletonCard() {
         <div className={`${styles.skeletonMeta} skeleton`} />
       </div>
     </div>
-  )
+  );
 }
 
 export function EpisodeList({
@@ -44,19 +44,19 @@ export function EpisodeList({
   isInQueue,
   onSelectPodcast,
 }: EpisodeListProps) {
-  const { getProgress } = usePlaybackProgress()
-  const listRef = useRef<HTMLDivElement>(null)
-  const [scrollMargin, setScrollMargin] = useState(0)
+  const { getProgress } = usePlaybackProgress();
+  const listRef = useRef<HTMLDivElement>(null);
+  const [scrollMargin, setScrollMargin] = useState(0);
 
   // Use virtualization for lists with 20+ items
-  const useVirtual = episodes.length >= 20
+  const useVirtual = episodes.length >= 20;
 
   // Compute scroll margin after layout
   useLayoutEffect(() => {
     if (listRef.current) {
-      setScrollMargin(listRef.current.offsetTop)
+      setScrollMargin(listRef.current.offsetTop);
     }
-  }, [])
+  }, []);
 
   const virtualizer = useWindowVirtualizer({
     count: episodes.length,
@@ -64,7 +64,7 @@ export function EpisodeList({
     overscan: 5,
     scrollMargin,
     enabled: useVirtual,
-  })
+  });
 
   if (isLoading) {
     return (
@@ -77,18 +77,16 @@ export function EpisodeList({
           <SkeletonCard />
         </div>
       </div>
-    )
+    );
   }
 
   if (episodes.length === 0) {
-    if (!searchQuery) return null
+    if (!searchQuery) return null;
     return (
       <div className={styles.container}>
-        <p className={styles.emptyState}>
-          Ingen episoder funnet for "{searchQuery}"
-        </p>
+        <p className={styles.emptyState}>Ingen episoder funnet for "{searchQuery}"</p>
       </div>
-    )
+    );
   }
 
   // Non-virtualized render for small lists
@@ -103,11 +101,13 @@ export function EpisodeList({
             <EpisodeCard
               key={episode.id}
               episode={episode}
-              onPlay={(ep) => onPlayEpisode({
-                ...ep,
-                podcastTitle: ep.podcast?.title,
-                podcastImage: ep.podcast?.imageUrl
-              })}
+              onPlay={(ep) =>
+                onPlayEpisode({
+                  ...ep,
+                  podcastTitle: ep.podcast?.title,
+                  podcastImage: ep.podcast?.imageUrl,
+                })
+              }
               onAddToQueue={onAddToQueue}
               onPlayNext={onPlayNext}
               isInQueue={isInQueue?.(episode.id) ?? false}
@@ -117,11 +117,11 @@ export function EpisodeList({
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   // Virtualized render for large lists - uses window scroll
-  const items = virtualizer.getVirtualItems()
+  const items = virtualizer.getVirtualItems();
 
   return (
     <div className={styles.container}>
@@ -136,7 +136,7 @@ export function EpisodeList({
         style={{ height: `${virtualizer.getTotalSize()}px` }}
       >
         {items.map((virtualItem) => {
-          const episode = episodes[virtualItem.index]
+          const episode = episodes[virtualItem.index];
           return (
             <div
               key={episode.id}
@@ -147,11 +147,13 @@ export function EpisodeList({
             >
               <EpisodeCard
                 episode={episode}
-                onPlay={(ep) => onPlayEpisode({
-                  ...ep,
-                  podcastTitle: ep.podcast?.title,
-                  podcastImage: ep.podcast?.imageUrl
-                })}
+                onPlay={(ep) =>
+                  onPlayEpisode({
+                    ...ep,
+                    podcastTitle: ep.podcast?.title,
+                    podcastImage: ep.podcast?.imageUrl,
+                  })
+                }
                 onAddToQueue={onAddToQueue}
                 onPlayNext={onPlayNext}
                 isInQueue={isInQueue?.(episode.id) ?? false}
@@ -159,9 +161,9 @@ export function EpisodeList({
                 onSelectPodcast={onSelectPodcast}
               />
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

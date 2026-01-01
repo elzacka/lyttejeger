@@ -1,4 +1,4 @@
-import type { Podcast, Episode } from '../types/podcast'
+import type { Podcast, Episode } from '../types/podcast';
 
 // ============================================================================
 // SEARCH QUERY PARSER
@@ -10,10 +10,10 @@ import type { Podcast, Episode } from '../types/podcast'
 // ============================================================================
 
 export interface ParsedQuery {
-  mustInclude: string[]
-  exactPhrases: string[]
-  shouldInclude: string[]
-  mustExclude: string[]
+  mustInclude: string[];
+  exactPhrases: string[];
+  shouldInclude: string[];
+  mustExclude: string[];
 }
 
 export function parseSearchQuery(query: string): ParsedQuery {
@@ -21,49 +21,54 @@ export function parseSearchQuery(query: string): ParsedQuery {
     mustInclude: [],
     exactPhrases: [],
     shouldInclude: [],
-    mustExclude: []
-  }
+    mustExclude: [],
+  };
 
-  if (!query.trim()) return result
+  if (!query.trim()) return result;
 
   // Extract exact phrases (quoted)
-  const phraseRegex = /"([^"]+)"/g
-  let match
+  const phraseRegex = /"([^"]+)"/g;
+  let match;
   while ((match = phraseRegex.exec(query)) !== null) {
-    result.exactPhrases.push(match[1].toLowerCase())
+    result.exactPhrases.push(match[1].toLowerCase());
   }
 
   // Remove quoted phrases from query for further processing
-  const remaining = query.replace(/"[^"]+"/g, ' ')
+  const remaining = query.replace(/"[^"]+"/g, ' ');
 
   // Split by OR operator
-  const orParts = remaining.split(/\s+OR\s+/i)
+  const orParts = remaining.split(/\s+OR\s+/i);
 
   const processTerms = (terms: string[], isOr: boolean) => {
     for (const term of terms) {
       if (term.startsWith('-') && term.length > 1) {
-        result.mustExclude.push(term.slice(1).toLowerCase())
+        result.mustExclude.push(term.slice(1).toLowerCase());
       } else if (isOr) {
-        result.shouldInclude.push(term.toLowerCase())
+        result.shouldInclude.push(term.toLowerCase());
       } else if (term.toUpperCase() !== 'AND') {
-        result.mustInclude.push(term.toLowerCase())
+        result.mustInclude.push(term.toLowerCase());
       }
     }
-  }
+  };
 
   if (orParts.length > 1) {
     for (const part of orParts) {
-      const terms = part.trim().split(/\s+/)
-        .filter(t => t.length > 0)
-        .filter(t => t.toUpperCase() !== 'AND') // Filter out AND in OR context
-      processTerms(terms, true)
+      const terms = part
+        .trim()
+        .split(/\s+/)
+        .filter((t) => t.length > 0)
+        .filter((t) => t.toUpperCase() !== 'AND'); // Filter out AND in OR context
+      processTerms(terms, true);
     }
   } else {
-    const terms = remaining.trim().split(/\s+/).filter(t => t.length > 0)
-    processTerms(terms, false)
+    const terms = remaining
+      .trim()
+      .split(/\s+/)
+      .filter((t) => t.length > 0);
+    processTerms(terms, false);
   }
 
-  return result
+  return result;
 }
 
 // ============================================================================
@@ -71,7 +76,7 @@ export function parseSearchQuery(query: string): ParsedQuery {
 // ============================================================================
 
 export interface EpisodeWithPodcast extends Episode {
-  podcast?: Podcast
+  podcast?: Podcast;
 }
 
 // ============================================================================
@@ -80,71 +85,69 @@ export interface EpisodeWithPodcast extends Episode {
 
 export function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) {
-    return ''
+    return '';
   }
 
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
 
   if (hours > 0) {
-    return `${hours}t ${minutes}m`
+    return `${hours}t ${minutes}m`;
   }
-  return `${minutes} min`
+  return `${minutes} min`;
 }
 
 export function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffDays = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-  )
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'I dag'
-  if (diffDays === 1) return 'I går'
-  if (diffDays < 7) return `${diffDays} dager siden`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} uker siden`
+  if (diffDays === 0) return 'I dag';
+  if (diffDays === 1) return 'I går';
+  if (diffDays < 7) return `${diffDays} dager siden`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} uker siden`;
   return date.toLocaleDateString('nb-NO', {
     day: 'numeric',
     month: 'short',
-    year: diffDays > 365 ? 'numeric' : undefined
-  })
+    year: diffDays > 365 ? 'numeric' : undefined,
+  });
 }
 
 export function formatDateLong(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
   // Same day - show hours ago
   if (diffDays === 0 && diffHours >= 1) {
-    return `${diffHours} ${diffHours === 1 ? 'time' : 'timer'} siden`
+    return `${diffHours} ${diffHours === 1 ? 'time' : 'timer'} siden`;
   }
-  if (diffDays === 0) return 'Nettopp'
-  if (diffDays === 1) return 'I går'
-  if (diffDays < 7) return `${diffDays} dager siden`
+  if (diffDays === 0) return 'Nettopp';
+  if (diffDays === 1) return 'I går';
+  if (diffDays < 7) return `${diffDays} dager siden`;
 
   // Same week - show day name
-  const dayNames = ['søn', 'man', 'tir', 'ons', 'tor', 'fre', 'lør']
+  const dayNames = ['søn', 'man', 'tir', 'ons', 'tor', 'fre', 'lør'];
   if (diffDays < 14) {
-    return dayNames[date.getDay()]
+    return dayNames[date.getDay()];
   }
 
   // Older - show full date
   return date.toLocaleDateString('nb-NO', {
     day: 'numeric',
     month: 'long',
-    year: diffDays > 365 ? 'numeric' : undefined
-  })
+    year: diffDays > 365 ? 'numeric' : undefined,
+  });
 }
 
 export function formatDateShort(dateString: string): string {
   return new Date(dateString).toLocaleDateString('nb-NO', {
     day: 'numeric',
     month: 'short',
-    year: 'numeric'
-  })
+    year: 'numeric',
+  });
 }
 
 // ============================================================================
@@ -152,28 +155,28 @@ export function formatDateShort(dateString: string): string {
 // ============================================================================
 
 export interface TextPart {
-  type: 'text' | 'link'
-  content: string
-  url?: string
+  type: 'text' | 'link';
+  content: string;
+  url?: string;
 }
 
 export function linkifyText(text: string): TextPart[] {
-  const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]+)/gi
-  const parts: TextPart[] = []
-  let lastIndex = 0
-  let match
+  const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]+)/gi;
+  const parts: TextPart[] = [];
+  let lastIndex = 0;
+  let match;
 
   while ((match = urlRegex.exec(text)) !== null) {
     if (match.index > lastIndex) {
-      parts.push({ type: 'text', content: text.slice(lastIndex, match.index) })
+      parts.push({ type: 'text', content: text.slice(lastIndex, match.index) });
     }
-    parts.push({ type: 'link', content: match[1], url: match[1] })
-    lastIndex = match.index + match[1].length
+    parts.push({ type: 'link', content: match[1], url: match[1] });
+    lastIndex = match.index + match[1].length;
   }
 
   if (lastIndex < text.length) {
-    parts.push({ type: 'text', content: text.slice(lastIndex) })
+    parts.push({ type: 'text', content: text.slice(lastIndex) });
   }
 
-  return parts.length > 0 ? parts : [{ type: 'text', content: text }]
+  return parts.length > 0 ? parts : [{ type: 'text', content: text }];
 }

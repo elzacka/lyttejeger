@@ -98,7 +98,7 @@
 .completed {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-0-5);
   color: var(--success-color);
   font-weight: 500;
 }
@@ -115,9 +115,9 @@
 /* Progress bar */
 .progressBar {
   width: 100%;
-  height: 5px;
+  height: var(--progress-height);
   background: var(--border);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   margin-top: var(--space-2xs);
 }
@@ -125,8 +125,8 @@
 .progressFill {
   height: 100%;
   background: var(--accent);
-  border-radius: 3px;
-  transition: width 0.2s ease;
+  border-radius: var(--radius-sm);
+  transition: width var(--duration-fast) var(--ease-out);
 }
 
 .actions {
@@ -151,7 +151,9 @@
   border-radius: var(--radius-md);
   color: var(--text-muted);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .menuButton:hover {
@@ -176,7 +178,7 @@
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-dropdown);
   z-index: var(--z-dropdown);
   animation: fadeIn 0.15s ease;
 }
@@ -212,7 +214,9 @@
   font-size: var(--font-xs);
   text-align: left;
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .menuItem:first-child {
@@ -261,7 +265,7 @@
 .playButton:hover {
   background: var(--accent);
   border-color: var(--accent);
-  color: white;
+  color: var(--color-white);
 }
 
 .playButton:active {

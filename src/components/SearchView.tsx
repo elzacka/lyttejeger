@@ -1,39 +1,40 @@
-import { SearchBar } from './SearchBar'
-import { FilterPanel } from './FilterPanel'
-import { PodcastList } from './PodcastList'
-import { EpisodeList } from './EpisodeList'
-import { useScrollDirection } from '../hooks/useScrollDirection'
-import type { FilterOption, Podcast, SearchFilters, DateFilter } from '../types/podcast'
-import type { EpisodeWithPodcast } from '../utils/search'
-import type { PlayingEpisode } from './AudioPlayer'
-import type { TabType } from './TabBar'
+import { ErrorIcon } from '@designsystem/core';
+import { SearchBar } from './SearchBar';
+import { FilterPanel } from './FilterPanel';
+import { PodcastList } from './PodcastList';
+import { EpisodeList } from './EpisodeList';
+import { useScrollDirection } from '../hooks/useScrollDirection';
+import type { FilterOption, Podcast, SearchFilters, DateFilter } from '../types/podcast';
+import type { EpisodeWithPodcast } from '../utils/search';
+import type { PlayingEpisode } from './AudioPlayer';
+import type { TabType } from './TabBar';
 
 interface SearchViewProps {
-  filters: SearchFilters
+  filters: SearchFilters;
   results: {
-    podcasts: Podcast[]
-    episodes: EpisodeWithPodcast[]
-  }
-  isPending: boolean
-  error: string | null
-  activeTab: TabType
-  categories: FilterOption[]
-  languages: string[]
-  activeFilterCount: number
-  onSetQuery: (query: string) => void
-  onTabChange: (tab: TabType) => void
-  onToggleCategory: (category: string) => void
-  onToggleLanguage: (language: string) => void
-  onSetDateFrom: (date: DateFilter | null) => void
-  onSetDateTo: (date: DateFilter | null) => void
-  onSetSortBy: (sortBy: 'relevance' | 'newest' | 'oldest' | 'popular') => void
-  onClearFilters: () => void
-  onSelectPodcast: (podcast: Podcast) => void
-  onSelectPodcastById: (podcastId: string) => void
-  onPlayEpisode: (episode: PlayingEpisode) => void
-  onAddToQueue: (episode: EpisodeWithPodcast) => void
-  onPlayNext: (episode: EpisodeWithPodcast) => void
-  isInQueue: (episodeId: string) => boolean
+    podcasts: Podcast[];
+    episodes: EpisodeWithPodcast[];
+  };
+  isPending: boolean;
+  error: string | null;
+  activeTab: TabType;
+  categories: FilterOption[];
+  languages: string[];
+  activeFilterCount: number;
+  onSetQuery: (query: string) => void;
+  onTabChange: (tab: TabType) => void;
+  onToggleCategory: (category: string) => void;
+  onToggleLanguage: (language: string) => void;
+  onSetDateFrom: (date: DateFilter | null) => void;
+  onSetDateTo: (date: DateFilter | null) => void;
+  onSetSortBy: (sortBy: 'relevance' | 'newest' | 'oldest' | 'popular') => void;
+  onClearFilters: () => void;
+  onSelectPodcast: (podcast: Podcast) => void;
+  onSelectPodcastById: (podcastId: string) => void;
+  onPlayEpisode: (episode: PlayingEpisode) => void;
+  onAddToQueue: (episode: EpisodeWithPodcast) => void;
+  onPlayNext: (episode: EpisodeWithPodcast) => void;
+  isInQueue: (episodeId: string) => boolean;
 }
 
 export function SearchView({
@@ -60,18 +61,14 @@ export function SearchView({
   onPlayNext,
   isInQueue,
 }: SearchViewProps) {
-  const scrollDirection = useScrollDirection()
+  const scrollDirection = useScrollDirection();
 
   return (
     <>
       {/* Sticky search header - hides on scroll down, shows on scroll up */}
       <div className={`search-header ${scrollDirection === 'down' ? 'search-header--hidden' : ''}`}>
         <section className="search-section">
-          <SearchBar
-            value={filters.query}
-            onChange={onSetQuery}
-            isPending={isPending}
-          />
+          <SearchBar value={filters.query} onChange={onSetQuery} isPending={isPending} />
         </section>
 
         <section className="filter-section">
@@ -93,7 +90,7 @@ export function SearchView({
 
       {error && (
         <div className="error-banner" role="alert">
-          <span className="material-symbols-outlined" aria-hidden="true">error</span>
+          <ErrorIcon size={20} aria-hidden="true" />
           <span>{error}</span>
         </div>
       )}
@@ -135,5 +132,5 @@ export function SearchView({
         )}
       </section>
     </>
-  )
+  );
 }

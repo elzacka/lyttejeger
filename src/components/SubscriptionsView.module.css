@@ -27,7 +27,7 @@
   height: var(--badge-size);
   padding: 0 var(--space-xs);
   background: var(--accent);
-  color: white;
+  color: var(--color-white);
   font-family: var(--font-mono);
   font-size: var(--font-xs);
   font-weight: 500;
@@ -69,7 +69,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 80px;
+  width: var(--swipe-action-width);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,11 +83,10 @@
   gap: var(--space-sm);
   padding: var(--space-sm);
   background: var(--bg-secondary);
-  transition: transform 0.15s ease-out;
+  transition: transform var(--duration-fast) var(--ease-out);
   position: relative;
   z-index: 1;
 }
-
 
 .podcastButton {
   flex: 1;
@@ -151,12 +150,12 @@
   justify-content: center;
   background: transparent;
   border: none;
-  color: white;
+  color: var(--color-white);
   cursor: pointer;
 }
 
 .unsubscribeButton:focus-visible {
-  outline: 2px solid white;
+  outline: 2px solid var(--color-white);
   outline-offset: -4px;
 }
 
@@ -177,7 +176,9 @@
   color: var(--text-muted);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .desktopUnsubscribe:hover {
@@ -206,7 +207,7 @@
 }
 
 .empty .material-symbols-outlined {
-  font-size: 48px;
+  font-size: var(--text-4xl);
   margin-bottom: var(--space-md);
   opacity: 0.5;
 }

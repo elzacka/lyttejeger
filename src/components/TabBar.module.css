@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  min-height: 36px;
+  min-height: var(--touch-target, 44px);
   padding: var(--space-xs) var(--space-sm);
   background: transparent;
   border: none;
@@ -24,8 +24,9 @@
   font-size: var(--font-xs);
   font-weight: 500;
   cursor: pointer;
-  transition: color var(--transition-fast),
-              background var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .tab:hover {
@@ -35,7 +36,7 @@
 
 .tab.active {
   background: var(--accent);
-  color: white;
+  color: var(--color-white);
 }
 
 .tab.active:hover {
@@ -43,12 +44,12 @@
 }
 
 .tab.active .count {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: var(--color-white-20);
+  color: var(--color-white);
 }
 
 .count {
-  padding: 2px var(--space-xs);
+  padding: var(--space-0-5) var(--space-xs);
   background: var(--bg-hover);
   border-radius: var(--radius-sm);
   font-size: var(--font-xs);

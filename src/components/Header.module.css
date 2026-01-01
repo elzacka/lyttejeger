@@ -24,10 +24,10 @@
 }
 
 .logoText {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-mono);
   font-size: var(--icon-lg);
   font-weight: 400;
-  color: #2C2C2C;
+  color: var(--text-primary);
   letter-spacing: 0.5px;
 }
 

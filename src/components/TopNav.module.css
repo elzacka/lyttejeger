@@ -1,4 +1,4 @@
-/* Bottom navigation bar - fixed at bottom on mobile, integrated on desktop */
+/* Top navigation bar - fixed at bottom on mobile, moves to top on desktop */
 .nav {
   position: fixed;
   bottom: 0;
@@ -12,8 +12,9 @@
   border-top: 1px solid var(--border, var(--color-border));
   /* Extra padding for iPhone home indicator */
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
-  transition: transform var(--transition-base) ease-out,
-              opacity var(--transition-base) ease-out;
+  transition:
+    transform var(--transition-base) ease-out,
+    opacity var(--transition-base) ease-out;
 }
 
 .nav.hidden {
@@ -37,7 +38,9 @@
   font-family: var(--font-mono);
   font-size: var(--font-size-2xs, 10px);
   cursor: pointer;
-  transition: color var(--transition-fast), background var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .navItem:hover {
@@ -193,6 +196,11 @@
 
   .iconWrapper .material-symbols-outlined {
     font-size: var(--icon-sm);
+  }
+
+  .iconWrapper svg {
+    width: 18px;
+    height: 18px;
   }
 
   .label {

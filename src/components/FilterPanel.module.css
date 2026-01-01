@@ -1,14 +1,23 @@
-/* FilterPanel - Mobile-first design */
+/* FilterPanel - Inline filter chips design */
 
 .container {
   width: 100%;
 }
 
-/* Header with radio buttons and filter dropdown */
+/* Header - single row with radio buttons and filter chips */
 .header {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Vertical divider between type selector and filters */
+.divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  margin: 0 var(--space-1);
 }
 
 /* Visually hidden but accessible to screen readers */
@@ -28,7 +37,7 @@
 .typeSelector {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: 0;
   border: none;
   padding: 0;
   margin: 0;
@@ -37,32 +46,31 @@
 .radioLabel {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  min-height: 44px;
-  padding: var(--space-xs) var(--space-sm);
+  gap: var(--space-1-5);
+  min-height: 32px;
+  padding: var(--space-1) var(--space-2);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
   transition: color var(--transition-fast);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
 }
 
 .radioLabel:hover {
   color: var(--text-primary);
-  background: var(--bg-hover);
 }
 
 .radioInput {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
-  min-width: 16px;
-  min-height: 16px;
-  max-width: 16px;
-  max-height: 16px;
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  max-width: 14px;
+  max-height: 14px;
   border: 1.5px solid var(--border);
   border-radius: 50%;
   background: var(--bg-primary);
@@ -80,7 +88,7 @@
 
 .radioInput:checked {
   border-color: var(--accent);
-  background: var(--bg-primary);
+  background: var(--accent);
 }
 
 .radioInput:checked::after {
@@ -89,10 +97,10 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 7px;
-  height: 7px;
+  width: var(--radio-dot-size);
+  height: var(--radio-dot-size);
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--color-white);
 }
 
 .radioInput:focus-visible {
@@ -112,173 +120,71 @@
   font-weight: 500;
 }
 
-/* Filter dropdown */
-.filterDropdown {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  min-height: 44px;
-  padding: var(--space-xs) var(--space-md);
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: var(--font-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  margin-left: auto;
-}
-
-.filterDropdown:hover {
-  border-color: var(--accent);
-  color: var(--text-primary);
-}
-
-.filterDropdown:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.filterDropdown .material-symbols-outlined {
-  font-size: var(--icon-sm);
-  color: var(--text-muted);
-}
-
-.filterDropdownText {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.filterBadge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  background: var(--accent);
-  color: white;
-  font-size: var(--font-2xs);
-  font-weight: 600;
-  border-radius: var(--radius-full);
-}
-
-/* Expandable filter panel */
-.panel {
-  margin-top: var(--space-md);
-  padding: var(--space-md);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  animation: fadeIn 0.15s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Filter buttons row */
+/* Filter chips - inline buttons */
 .filterButtons {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-sm);
+  align-items: center;
+  gap: var(--space-1-5);
 }
 
-.filterButton {
+.filterChip {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  min-height: 44px;
-  padding: var(--space-sm) var(--space-md);
-  background: var(--bg-primary);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
+  min-height: 28px;
+  padding: var(--space-1) var(--space-2-5);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: var(--text-xs);
   cursor: pointer;
   transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
-.filterButton:hover {
+.filterChip:hover {
   border-color: var(--accent);
-  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
-.filterButton:active {
-  transform: scale(0.98);
-}
-
-.filterButton:focus-visible {
+.filterChip:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.filterButton .material-symbols-outlined {
-  font-size: 20px;
-  color: var(--text-muted);
-}
-
-.filterButtonActive {
+.filterChipActive {
   background: var(--accent);
   border-color: var(--accent);
-  color: white;
+  color: var(--color-white);
 }
 
-.filterButtonActive:hover {
+.filterChipActive:hover {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
 }
 
-.filterButtonActive .material-symbols-outlined {
-  color: white;
-}
-
-.filterButtonBadge {
+/* Clear/reset chip */
+.clearChip {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  background: white;
-  color: var(--accent);
-  font-size: var(--font-2xs);
-  font-weight: 600;
-  border-radius: var(--radius-full);
-}
-
-.filterButtonActive .filterButtonBadge {
-  background: white;
-  color: var(--accent);
-}
-
-/* Clear button */
-.clearButton {
-  display: block;
-  width: 100%;
-  min-height: var(--button-sm);
-  margin-top: var(--space-md);
-  padding: var(--space-sm);
+  min-height: 28px;
+  padding: var(--space-1) var(--space-2-5);
   background: transparent;
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-md);
+  border: none;
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: var(--font-xs);
+  font-size: var(--text-xs);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: color var(--transition-fast);
+  white-space: nowrap;
 }
 
-.clearButton:hover {
-  border-color: var(--error-color);
+.clearChip:hover {
   color: var(--error-color);
 }
 
-.clearButton:focus-visible {
+.clearChip:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -286,17 +192,21 @@
 /* Mobile - maintain 44px touch targets */
 @media (max-width: 640px) {
   .header {
-    gap: var(--space-xs);
+    gap: var(--space-2);
+  }
+
+  .divider {
+    display: none;
   }
 
   .typeSelector {
-    gap: var(--space-2xs);
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .radioLabel {
-    gap: var(--space-2xs);
     min-height: 44px;
-    padding: var(--space-xs);
+    padding: var(--space-2) var(--space-3);
   }
 
   .radioInput {
@@ -306,64 +216,25 @@
     min-height: 18px;
     max-width: 18px;
     max-height: 18px;
-    border-width: 2px;
   }
 
   .radioInput:checked::after {
-    width: 8px;
-    height: 8px;
-  }
-
-  .radioText {
-    font-size: var(--font-xs);
-  }
-
-  .filterDropdown {
-    min-height: 44px;
-    padding: var(--space-xs) var(--space-sm);
-    font-size: var(--font-xs);
-  }
-
-  .filterDropdown .material-symbols-outlined {
-    font-size: var(--icon-sm);
-  }
-
-  .filterBadge {
-    min-width: 18px;
-    height: 18px;
-    font-size: 10px;
-  }
-
-  .panel {
-    padding: var(--space-sm);
+    width: 6px;
+    height: 6px;
   }
 
   .filterButtons {
-    gap: var(--space-xs);
+    width: 100%;
+    gap: var(--space-2);
   }
 
-  .filterButton {
+  .filterChip {
     min-height: 44px;
-    padding: var(--space-sm) var(--space-md);
-    font-size: var(--font-sm);
-    flex: 1;
-    justify-content: center;
+    padding: var(--space-2) var(--space-3);
   }
 
-  .filterButton .material-symbols-outlined {
-    font-size: 20px;
-  }
-
-  .filterButtonBadge {
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    font-size: 11px;
-  }
-
-  .clearButton {
+  .clearChip {
     min-height: 44px;
-    padding: var(--space-sm);
-    font-size: var(--font-xs);
+    padding: var(--space-2) var(--space-3);
   }
 }

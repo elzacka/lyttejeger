@@ -1,4 +1,4 @@
-import type { FilterOption } from '../types/podcast'
+import type { FilterOption } from '../types/podcast';
 
 // Static categories pre-generated from Podcast Index API
 // Sorted alphabetically by Norwegian label
@@ -122,5 +122,5 @@ export const allCategories: FilterOption[] = [
   { value: 'Hockey', label: 'Hockey' },
   { value: 'Rugby', label: 'Rugby' },
   { value: 'Tennis', label: 'Tennis' },
-  { value: 'Volleyball', label: 'Volleyball' }
-]
+  { value: 'Volleyball', label: 'Volleyball' },
+];
