@@ -90,11 +90,15 @@ export const EpisodeCard = memo(function EpisodeCard({
     e.preventDefault();
 
     // Calculate menu position before opening
+    // Menu is positioned with right: var(--space-sm) from .item's right edge
+    // Check if menu would overflow viewport
     if (!menuOpen && containerRef.current) {
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const menuWidth = 160; // min-width from CSS
-      const wouldOverflowRight = containerRect.right + menuWidth > window.innerWidth;
-      setMenuPosition(wouldOverflowRight ? 'left' : 'right');
+      const itemRect = containerRef.current.closest('article')?.getBoundingClientRect();
+      if (itemRect) {
+        const menuWidth = 160; // min-width from CSS
+        const spaceOnRight = window.innerWidth - itemRect.right + 8; // 8 = space-sm offset
+        setMenuPosition(spaceOnRight < menuWidth ? 'left' : 'right');
+      }
     }
 
     setMenuOpen(!menuOpen);
@@ -123,7 +127,11 @@ export const EpisodeCard = memo(function EpisodeCard({
   };
 
   return (
-    <article className={`${styles.item} ${menuOpen ? styles.menuOpen : ''}`} role="listitem">
+    <article
+      className={`${styles.item} ${menuOpen ? styles.menuOpen : ''}`}
+      role="listitem"
+      data-menu-open={menuOpen ? 'true' : undefined}
+    >
       <div className={styles.episodeHeader}>
         <button
           className={styles.episodeToggle}

@@ -36,6 +36,11 @@
   box-sizing: border-box;
 }
 
+/* Lift virtualItem when its child menu is open (using data attribute) */
+.virtualItem:has([data-menu-open='true']) {
+  z-index: calc(var(--z-dropdown) + 1);
+}
+
 .loading {
   display: flex;
   flex-direction: column;
