@@ -129,18 +129,6 @@
   color: var(--text-secondary);
 }
 
-.explicitBadge {
-  display: inline-block;
-  padding: var(--space-0-5) var(--space-xs);
-  background: var(--badge-explicit);
-  color: var(--color-white);
-  font-family: var(--font-mono);
-  font-size: var(--font-xs);
-  font-weight: 500;
-  border-radius: var(--radius-sm);
-  width: fit-content;
-}
-
 .subscribeButton {
   display: inline-flex;
   align-items: center;

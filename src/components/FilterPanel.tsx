@@ -28,6 +28,9 @@ const discoveryModes: { value: DiscoveryMode; label: string; description: string
   { value: 'value4value', label: 'Value4Value', description: 'Støtter Bitcoin/Lightning' },
 ];
 
+// Fixed width for filter chips to ensure consistent sizing
+const FILTER_CHIP_WIDTH = '5.5rem'; // Based on "Kategori" width
+
 export function FilterPanel({
   filters,
   categories,
@@ -124,6 +127,7 @@ export function FilterPanel({
             className={`${styles.filterChip} ${languageCount > 0 ? styles.filterChipActive : ''}`}
             onClick={() => setOpenSheet('language')}
             type="button"
+            style={{ minWidth: FILTER_CHIP_WIDTH }}
           >
             Språk{languageCount > 0 && ` (${languageCount})`}
           </button>
@@ -132,6 +136,7 @@ export function FilterPanel({
             className={`${styles.filterChip} ${categoryCount > 0 ? styles.filterChipActive : ''}`}
             onClick={() => setOpenSheet('category')}
             type="button"
+            style={{ minWidth: FILTER_CHIP_WIDTH }}
           >
             Kategori{categoryCount > 0 && ` (${categoryCount})`}
           </button>
@@ -141,8 +146,9 @@ export function FilterPanel({
               className={`${styles.filterChip} ${filters.discoveryMode !== 'all' ? styles.filterChipActive : ''}`}
               onClick={() => setOpenSheet('discovery')}
               type="button"
+              style={{ minWidth: FILTER_CHIP_WIDTH }}
             >
-              {filters.discoveryMode !== 'all' ? discoveryLabel : 'Oppdagelse'}
+              {filters.discoveryMode !== 'all' ? discoveryLabel : 'Oppdage'}
             </button>
           )}
 
@@ -151,6 +157,7 @@ export function FilterPanel({
               className={`${styles.filterChip} ${yearCount > 0 ? styles.filterChipActive : ''}`}
               onClick={() => setOpenSheet('year')}
               type="button"
+              style={{ minWidth: FILTER_CHIP_WIDTH }}
             >
               {yearCount > 0 ? selectedYear : 'År'}
             </button>

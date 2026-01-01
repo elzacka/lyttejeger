@@ -130,8 +130,9 @@
 .filterChip {
   display: flex;
   align-items: center;
-  min-height: 28px;
-  padding: var(--space-1) var(--space-2-5);
+  justify-content: center;
+  height: 28px;
+  padding: 0 var(--space-2-5);
   background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
@@ -141,6 +142,7 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .filterChip:hover {
@@ -229,8 +231,8 @@
   }
 
   .filterChip {
-    min-height: 44px;
-    padding: var(--space-2) var(--space-3);
+    height: 44px;
+    padding: 0 var(--space-3);
   }
 
   .clearChip {

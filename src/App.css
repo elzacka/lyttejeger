@@ -128,6 +128,16 @@
       transform var(--duration-normal) var(--ease-out),
       opacity var(--duration-fast) var(--ease-out);
     will-change: transform;
+    /* Center content */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .search-header .search-section,
+  .search-header .filter-section {
+    width: 100%;
+    max-width: 560px;
   }
 
   .search-header--hidden {

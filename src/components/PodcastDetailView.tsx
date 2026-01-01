@@ -195,7 +195,6 @@ export function PodcastDetailView({
               <StarIcon size={16} style={{ color: 'var(--color-warning)' }} />
               <span>{podcast.rating.toFixed(1)}</span>
             </div>
-            {podcast.explicit && <span className={styles.explicitBadge}>Eksplisitt</span>}
           </div>
         </section>
 
