@@ -90,15 +90,14 @@ export const EpisodeCard = memo(function EpisodeCard({
     e.preventDefault();
 
     // Calculate menu position before opening
-    // Menu is positioned with right: var(--space-sm) from .item's right edge
-    // Check if menu would overflow viewport
+    // Menu is positioned relative to menuContainer (right: 0)
+    // Check if menu would overflow viewport on the right
     if (!menuOpen && containerRef.current) {
-      const itemRect = containerRef.current.closest('article')?.getBoundingClientRect();
-      if (itemRect) {
-        const menuWidth = 160; // min-width from CSS
-        const spaceOnRight = window.innerWidth - itemRect.right + 8; // 8 = space-sm offset
-        setMenuPosition(spaceOnRight < menuWidth ? 'left' : 'right');
-      }
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const menuWidth = 160; // min-width from CSS
+      const wouldOverflowRight =
+        containerRect.right > window.innerWidth - menuWidth + containerRect.width;
+      setMenuPosition(wouldOverflowRight ? 'left' : 'right');
     }
 
     setMenuOpen(!menuOpen);

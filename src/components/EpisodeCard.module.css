@@ -136,7 +136,8 @@
 }
 
 .menuContainer {
-  position: static;
+  position: relative;
+  z-index: 1;
 }
 
 .menuButton {
@@ -171,10 +172,10 @@
 
 .menuDropdown {
   position: absolute;
-  top: calc(var(--space-sm) + var(--button-lg));
-  right: var(--space-sm);
+  top: 100%;
+  right: 0;
   min-width: 160px;
-  max-width: calc(100% - var(--space-md));
+  max-width: min(200px, calc(100vw - var(--space-lg)));
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -186,7 +187,7 @@
 /* Position dropdown to the left if it would overflow right edge */
 .menuDropdownLeft {
   right: auto;
-  left: var(--space-sm);
+  left: 0;
 }
 
 @keyframes fadeIn {
