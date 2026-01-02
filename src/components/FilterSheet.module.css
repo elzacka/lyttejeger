@@ -49,16 +49,20 @@
   animation: slideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   /* iOS safe area: account for home indicator at bottom */
   padding-bottom: var(--safe-area-bottom, env(safe-area-inset-bottom, 0px));
-  /* iOS: Use top constraint to prevent sheet from going behind notch/Dynamic Island
-     This is more reliable than max-height on iOS Safari */
-  top: calc(var(--safe-area-top, env(safe-area-inset-top, 0px)) + var(--space-lg));
-  /* Max height is now controlled by top + bottom positioning */
-  max-height: none;
+  /* iOS: Limit max-height to viewport minus safe area and spacing */
+  max-height: calc(100vh - var(--safe-area-top, 0px) - 24px);
   display: flex;
   flex-direction: column;
   touch-action: none;
   /* Prevent flex children from growing beyond container */
   overflow: hidden;
+}
+
+/* Use dynamic viewport height on browsers that support it (better iOS Safari support) */
+@supports (height: 100dvh) {
+  .sheet {
+    max-height: calc(100dvh - var(--safe-area-top, 0px) - 24px);
+  }
 }
 
 .sheetClosing {
@@ -397,8 +401,15 @@
 /* Mobile - maintain 44px touch targets */
 @media (max-width: 640px) {
   .sheet {
-    /* iOS mobile: tighter spacing to safe area */
-    top: calc(var(--safe-area-top, env(safe-area-inset-top, 0px)) + var(--space-md));
+    /* iOS mobile: slightly smaller max-height to ensure content visibility */
+    max-height: calc(100vh - var(--safe-area-top, 0px) - 16px);
+  }
+
+  /* dvh override for mobile */
+  @supports (height: 100dvh) {
+    .sheet {
+      max-height: calc(100dvh - var(--safe-area-top, 0px) - 16px);
+    }
   }
 
   .title {
