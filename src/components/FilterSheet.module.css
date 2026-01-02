@@ -33,11 +33,12 @@
 .sheet {
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   z-index: var(--z-modal);
   width: 100%;
   max-width: 480px;
+  margin: 0 auto;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -49,9 +50,9 @@
   animation: slideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   /* iOS safe area: account for home indicator at bottom */
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  /* iOS: Use max-height with direct env() - NOT via CSS custom properties */
-  max-height: calc(100vh - env(safe-area-inset-top, 0px) - 24px);
-  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+  /* Limit height to 80% of viewport - reliable across all devices */
+  max-height: 80vh;
+  max-height: 80dvh;
   display: flex;
   flex-direction: column;
   touch-action: none;
@@ -66,22 +67,22 @@
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(100%);
+    transform: translateY(100%);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
   }
 }
 
 @keyframes slideDown {
   from {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
   }
   to {
     opacity: 0;
-    transform: translateX(-50%) translateY(100%);
+    transform: translateY(100%);
   }
 }
 
@@ -395,9 +396,9 @@
 /* Mobile - maintain 44px touch targets */
 @media (max-width: 640px) {
   .sheet {
-    /* iOS mobile: Use direct env() for safe-area calculations */
-    max-height: calc(100vh - env(safe-area-inset-top, 0px) - 16px);
-    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 16px);
+    /* Mobile: slightly taller sheet */
+    max-height: 85vh;
+    max-height: 85dvh;
   }
 
   .title {
