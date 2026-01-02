@@ -51,6 +51,12 @@
 }
 
 :root {
+  /* iOS Safe Area Insets - for consistent usage across components */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+
   /* Lyttejeger-specific tokens */
   --player-height: 80px;
   --player-height-mobile: 140px;
@@ -334,9 +340,11 @@ a:hover {
   scrollbar-color: var(--color-border) transparent;
 }
 
-/* PWA safe area support */
+/* PWA safe area support - iOS notch/Dynamic Island */
 @supports (padding: max(0px)) {
   body {
+    /* Note: top padding handled by individual views/components to allow
+       fixed elements (TopNav, FilterSheet) to control their own positioning */
     padding-left: max(0px, env(safe-area-inset-left));
     padding-right: max(0px, env(safe-area-inset-right));
     padding-bottom: max(0px, env(safe-area-inset-bottom));
