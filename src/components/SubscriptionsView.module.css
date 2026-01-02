@@ -231,6 +231,8 @@
 @media (max-width: 640px) {
   .container {
     padding: var(--space-sm);
+    /* iOS safe area: prevent overlap with status bar/notch/dynamic island */
+    padding-top: calc(var(--space-lg) + env(safe-area-inset-top, 0px));
     padding-bottom: calc(var(--nav-height) + var(--player-height-mobile) + var(--space-xl));
   }
 
