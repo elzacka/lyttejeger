@@ -1,15 +1,28 @@
 /* FilterSheet - Bottom sheet for filter selection */
+/* Uses container pattern from Tråkke designsystem for reliable iOS support */
 
-.backdrop {
+.container {
   position: fixed;
   inset: 0;
-  z-index: var(--z-modal-backdrop);
-  background: var(--color-overlay-strong, rgba(0, 0, 0, 0.3));
-  animation: fadeIn 0.2s ease-out;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
-.backdropClosing {
+.containerClosing .backdrop {
   animation: fadeOut 0.2s ease-out forwards;
+}
+
+.containerClosing .sheet {
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--color-overlay-strong, rgba(0, 0, 0, 0.3));
+  animation: fadeIn 0.2s ease-out;
 }
 
 @keyframes fadeIn {
@@ -31,14 +44,11 @@
 }
 
 .sheet {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: var(--z-modal);
+  position: relative;
   width: 100%;
   max-width: 480px;
-  margin: 0 auto;
+  max-height: 90vh;
+  max-height: 90dvh;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -50,18 +60,10 @@
   animation: slideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   /* iOS safe area: account for home indicator at bottom */
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  /* Limit height to 80% of viewport - reliable across all devices */
-  max-height: 80vh;
-  max-height: 80dvh;
   display: flex;
   flex-direction: column;
   touch-action: none;
-  /* Prevent flex children from growing beyond container */
   overflow: hidden;
-}
-
-.sheetClosing {
-  animation: slideDown 0.2s ease-out forwards;
 }
 
 @keyframes slideUp {
@@ -395,12 +397,6 @@
 
 /* Mobile - maintain 44px touch targets */
 @media (max-width: 640px) {
-  .sheet {
-    /* Mobile: slightly taller sheet */
-    max-height: 85vh;
-    max-height: 85dvh;
-  }
-
   .title {
     font-size: var(--font-base);
   }

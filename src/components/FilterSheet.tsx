@@ -186,15 +186,11 @@ export function FilterSheet({
   if (!isOpen) return null;
 
   return (
-    <>
-      <div
-        className={`${styles.backdrop} ${isClosing ? styles.backdropClosing : ''}`}
-        onClick={handleClose}
-        aria-hidden="true"
-      />
+    <div className={`${styles.container} ${isClosing ? styles.containerClosing : ''}`}>
+      <div className={styles.backdrop} onClick={handleClose} aria-hidden="true" />
       <div
         ref={sheetRef}
-        className={`${styles.sheet} ${isClosing ? styles.sheetClosing : ''}`}
+        className={styles.sheet}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -246,6 +242,6 @@ export function FilterSheet({
 
         <div className={styles.content}>{children}</div>
       </div>
-    </>
+    </div>
   );
 }
