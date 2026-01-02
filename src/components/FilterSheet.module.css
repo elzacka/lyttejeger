@@ -53,11 +53,10 @@
   max-width: 480px;
   /* Sheet fills available space in container (which has padding-top for safe area) */
   max-height: 100%;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  /* Use solid background instead of glass effect for iOS compatibility */
+  background: var(--color-background);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  border-top: 1px solid var(--glass-border);
+  border-top: 1px solid var(--border);
   box-shadow:
     0 -4px 24px rgba(0, 0, 0, 0.12),
     0 -1px 3px rgba(0, 0, 0, 0.08);
@@ -204,11 +203,12 @@
 }
 
 .content {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   padding: var(--space-md);
-  /* Ensure content scrolls from top */
+  /* iOS Safari fix: explicit min-height for flex child scrolling */
   min-height: 0;
 }
 
