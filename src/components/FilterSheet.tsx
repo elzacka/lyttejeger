@@ -55,7 +55,6 @@ export function FilterSheet({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isClosing, setIsClosing] = useState(false);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [, setSheetHeight] = useState<number | null>(null);
 
   useFocusTrap(sheetRef, isOpen && !isClosing);
 
@@ -67,10 +66,12 @@ export function FilterSheet({
     startHeight: 0,
   });
 
-  // Reset height when sheet opens
+  // Reset inline styles when sheet opens (clear any drag-set heights)
   useEffect(() => {
-    if (isOpen) {
-      setSheetHeight(null);
+    if (isOpen && sheetRef.current) {
+      sheetRef.current.style.height = '';
+      sheetRef.current.style.maxHeight = '';
+      sheetRef.current.style.transition = '';
     }
   }, [isOpen]);
 
@@ -159,7 +160,6 @@ export function FilterSheet({
       sheetRef.current.style.transition = 'height 0.2s ease-out, max-height 0.2s ease-out';
       sheetRef.current.style.height = `${snapHeight}px`;
       sheetRef.current.style.maxHeight = `${snapHeight}px`;
-      setSheetHeight(snapHeight);
 
       // Clear transition after animation
       setTimeout(() => {
