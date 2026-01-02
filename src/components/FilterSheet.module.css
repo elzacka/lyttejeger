@@ -73,22 +73,28 @@
 }
 
 /* Sheet sizes - height variants */
+/* Språk: 50vh */
 .sizeSmall {
   max-height: 50dvh;
   max-height: 50vh;
 }
 
+/* Oppdage: 75vh */
 .sizeMedium {
   max-height: 75dvh;
   max-height: 75vh;
 }
 
+/* År: full height (100%) */
 .sizeLarge {
-  max-height: 100%;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - 24px);
 }
 
+/* Kategori: full height med scroll */
 .sizeFull {
-  max-height: 100%;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - 24px);
 }
 
 @keyframes slideUp {
@@ -246,7 +252,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--space-md, 16px);
-  min-height: 0;
+  min-height: 100px; /* Sikre minimum høyde for innhold */
   /* iOS Safari scrolling */
   -webkit-overflow-scrolling: touch;
   /* Tillat normal touch i content */
