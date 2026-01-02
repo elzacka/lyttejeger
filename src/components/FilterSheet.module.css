@@ -74,18 +74,17 @@
 
 /* Sheet sizes - height variants */
 .sizeSmall {
-  max-height: 30dvh;
-  max-height: 30vh;
-}
-
-.sizeMedium {
   max-height: 50dvh;
   max-height: 50vh;
 }
 
-.sizeLarge {
+.sizeMedium {
   max-height: 75dvh;
   max-height: 75vh;
+}
+
+.sizeLarge {
+  max-height: 100%;
 }
 
 .sizeFull {
