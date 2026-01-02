@@ -18,8 +18,23 @@ interface FilterSheetProps {
   onSearchChange?: (value: string) => void;
 }
 
-const DRAG_THRESHOLD = 100;
 const VELOCITY_THRESHOLD = 0.5;
+
+// Snap points for sheet heights (percentage of viewport)
+const SNAP_POINTS = [0.25, 0.5, 0.75, 1.0]; // 25%, 50%, 75%, 100%
+
+function findNearestSnapPoint(heightPercent: number): number {
+  let nearest = SNAP_POINTS[0];
+  let minDiff = Math.abs(heightPercent - nearest);
+  for (const point of SNAP_POINTS) {
+    const diff = Math.abs(heightPercent - point);
+    if (diff < minDiff) {
+      minDiff = diff;
+      nearest = point;
+    }
+  }
+  return nearest;
+}
 
 export function FilterSheet({
   isOpen,
@@ -40,6 +55,7 @@ export function FilterSheet({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isClosing, setIsClosing] = useState(false);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [, setSheetHeight] = useState<number | null>(null);
 
   useFocusTrap(sheetRef, isOpen && !isClosing);
 
@@ -48,7 +64,15 @@ export function FilterSheet({
     currentY: 0,
     startTime: 0,
     isDragging: false,
+    startHeight: 0,
   });
+
+  // Reset height when sheet opens
+  useEffect(() => {
+    if (isOpen) {
+      setSheetHeight(null);
+    }
+  }, [isOpen]);
 
   // Register/unregister sheet with context
   useEffect(() => {
@@ -81,11 +105,13 @@ export function FilterSheet({
     if (contentRef.current && contentRef.current.scrollTop > 0) {
       return;
     }
+    const currentHeight = sheetRef.current?.offsetHeight || window.innerHeight * 0.75;
     dragRef.current = {
       startY: clientY,
       currentY: clientY,
       startTime: Date.now(),
       isDragging: true,
+      startHeight: currentHeight,
     };
   }, []);
 
@@ -95,11 +121,18 @@ export function FilterSheet({
     const deltaY = clientY - dragRef.current.startY;
     dragRef.current.currentY = clientY;
 
-    // Only allow downward drag
-    if (deltaY > 0) {
-      sheetRef.current.style.transform = `translateY(${deltaY}px)`;
-      sheetRef.current.style.transition = 'none';
-    }
+    // Calculate new height (dragging up = negative deltaY = increase height)
+    const newHeight = dragRef.current.startHeight - deltaY;
+    const viewportHeight = window.innerHeight;
+    const minHeight = viewportHeight * 0.25;
+    const maxHeight = viewportHeight;
+
+    // Clamp height between min and max
+    const clampedHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+
+    sheetRef.current.style.height = `${clampedHeight}px`;
+    sheetRef.current.style.maxHeight = `${clampedHeight}px`;
+    sheetRef.current.style.transition = 'none';
   }, []);
 
   const handleDragEnd = useCallback(() => {
@@ -108,12 +141,32 @@ export function FilterSheet({
     const deltaY = dragRef.current.currentY - dragRef.current.startY;
     const deltaTime = Date.now() - dragRef.current.startTime;
     const velocity = deltaTime > 0 ? deltaY / deltaTime : 0;
+    const viewportHeight = window.innerHeight;
 
-    sheetRef.current.style.transition = '';
-    sheetRef.current.style.transform = '';
-
-    if (deltaY > DRAG_THRESHOLD || velocity > VELOCITY_THRESHOLD) {
+    // If dragged down fast or far, close
+    if (deltaY > 150 || velocity > VELOCITY_THRESHOLD) {
+      sheetRef.current.style.height = '';
+      sheetRef.current.style.maxHeight = '';
+      sheetRef.current.style.transition = '';
       handleClose();
+    } else {
+      // Snap to nearest snap point
+      const currentHeight = sheetRef.current.offsetHeight;
+      const heightPercent = currentHeight / viewportHeight;
+      const snapPoint = findNearestSnapPoint(heightPercent);
+      const snapHeight = snapPoint * viewportHeight;
+
+      sheetRef.current.style.transition = 'height 0.2s ease-out, max-height 0.2s ease-out';
+      sheetRef.current.style.height = `${snapHeight}px`;
+      sheetRef.current.style.maxHeight = `${snapHeight}px`;
+      setSheetHeight(snapHeight);
+
+      // Clear transition after animation
+      setTimeout(() => {
+        if (sheetRef.current) {
+          sheetRef.current.style.transition = '';
+        }
+      }, 200);
     }
 
     dragRef.current.isDragging = false;

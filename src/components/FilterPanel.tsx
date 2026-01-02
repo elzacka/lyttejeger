@@ -192,12 +192,12 @@ export function FilterPanel({
         </div>
       </FilterSheet>
 
-      {/* Year Sheet - large, many year options */}
+      {/* Year Sheet - full, many year options */}
       <FilterSheet
         isOpen={openSheet === 'year'}
         onClose={handleCloseSheet}
         title="Velg år"
-        size="large"
+        size="full"
       >
         <div className={sheetStyles.yearGrid}>
           {years.map((year) => (
