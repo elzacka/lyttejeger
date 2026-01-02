@@ -8,6 +8,10 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  /* iOS safe area: ensure sheet doesn't go under notch/Dynamic Island */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 24px);
+  box-sizing: border-box;
 }
 
 .containerClosing .backdrop {
@@ -47,8 +51,8 @@
   position: relative;
   width: 100%;
   max-width: 480px;
-  max-height: 90vh;
-  max-height: 90dvh;
+  /* Sheet fills available space in container (which has padding-top for safe area) */
+  max-height: 100%;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
