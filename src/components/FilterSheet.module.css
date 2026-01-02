@@ -72,6 +72,26 @@
   transform: translateZ(0);
 }
 
+/* Sheet sizes - height variants */
+.sizeSmall {
+  max-height: 30dvh;
+  max-height: 30vh;
+}
+
+.sizeMedium {
+  max-height: 50dvh;
+  max-height: 50vh;
+}
+
+.sizeLarge {
+  max-height: 75dvh;
+  max-height: 75vh;
+}
+
+.sizeFull {
+  max-height: 100%;
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;

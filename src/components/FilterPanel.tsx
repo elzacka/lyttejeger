@@ -169,8 +169,13 @@ export function FilterPanel({
         </div>
       </div>
 
-      {/* Language Sheet */}
-      <FilterSheet isOpen={openSheet === 'language'} onClose={handleCloseSheet} title="Velg språk">
+      {/* Language Sheet - small, only a few options */}
+      <FilterSheet
+        isOpen={openSheet === 'language'}
+        onClose={handleCloseSheet}
+        title="Velg språk"
+        size="small"
+      >
         <div className={sheetStyles.optionGrid}>
           {languages.map((language) => (
             <button
@@ -187,8 +192,13 @@ export function FilterPanel({
         </div>
       </FilterSheet>
 
-      {/* Year Sheet */}
-      <FilterSheet isOpen={openSheet === 'year'} onClose={handleCloseSheet} title="Velg år">
+      {/* Year Sheet - large, many year options */}
+      <FilterSheet
+        isOpen={openSheet === 'year'}
+        onClose={handleCloseSheet}
+        title="Velg år"
+        size="large"
+      >
         <div className={sheetStyles.yearGrid}>
           {years.map((year) => (
             <button
@@ -205,11 +215,12 @@ export function FilterPanel({
         </div>
       </FilterSheet>
 
-      {/* Category Sheet with search */}
+      {/* Category Sheet with search - full height for many categories */}
       <FilterSheet
         isOpen={openSheet === 'category'}
         onClose={handleCloseSheet}
         title="Velg kategorier"
+        size="full"
         searchable
         searchPlaceholder="Søk i kategorier..."
         searchValue={categorySearch}
@@ -237,11 +248,12 @@ export function FilterPanel({
         </div>
       </FilterSheet>
 
-      {/* Discovery Mode Sheet */}
+      {/* Discovery Mode Sheet - medium, 3 options with descriptions */}
       <FilterSheet
         isOpen={openSheet === 'discovery'}
         onClose={handleCloseSheet}
         title="Oppdagelsesmodus"
+        size="medium"
       >
         <div className={sheetStyles.optionGrid}>
           {discoveryModes.map((mode) => (

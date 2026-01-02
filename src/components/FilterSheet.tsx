@@ -4,11 +4,14 @@ import { useSheetContext } from '../hooks/useSheetContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import styles from './FilterSheet.module.css';
 
+type SheetSize = 'small' | 'medium' | 'large' | 'full';
+
 interface FilterSheetProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
+  size?: SheetSize;
   searchable?: boolean;
   searchPlaceholder?: string;
   searchValue?: string;
@@ -23,6 +26,7 @@ export function FilterSheet({
   onClose,
   title,
   children,
+  size = 'full',
   searchable = false,
   searchPlaceholder = 'Søk...',
   searchValue = '',
@@ -222,15 +226,10 @@ export function FilterSheet({
       className={`${styles.container} ${isClosing ? styles.containerClosing : ''}`}
       role="presentation"
     >
-      <div
-        className={styles.backdrop}
-        onClick={handleClose}
-        onTouchEnd={handleClose}
-        aria-hidden="true"
-      />
+      <div className={styles.backdrop} onClick={handleClose} aria-hidden="true" />
       <div
         ref={sheetRef}
-        className={styles.sheet}
+        className={`${styles.sheet} ${styles[`size${size.charAt(0).toUpperCase()}${size.slice(1)}`]}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
