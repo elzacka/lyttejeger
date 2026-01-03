@@ -389,29 +389,76 @@ export function useSearch() {
 
     try {
       if (browseType === 'podcasts') {
-        // Fetch trending podcasts with category/discovery filters
-        // NOTE: Don't send lang to API when cat is set - Podcast Index API returns 0 results
-        // for cat+lang combinations. Language filtering is done client-side instead.
         const hasCategory = filters.categories.length > 0;
-        const trendingRes = await getTrendingPodcasts({
-          max: hasCategory ? 200 : 100, // Fetch more when filtering client-side
-          cat: hasCategory ? filters.categories.join(',') : undefined,
-          notcat:
-            filters.excludeCategories.length > 0 ? filters.excludeCategories.join(',') : undefined,
-          lang: hasCategory ? undefined : getApiLanguageCodes(filters.languages),
-          val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
-        });
+        const hasLanguage = filters.languages.length > 0;
 
-        if (currentSearchRef.current !== '__browse__') return;
+        let podcasts: Podcast[] = [];
 
-        let podcasts = transformFeeds(trendingRes.feeds);
-        // Apply language filter: user's selection or default allowed languages
-        if (filters.languages.length > 0) {
+        // Strategy depends on filter combination:
+        // - Category + Language: Use search API with language, filter category client-side
+        //   (Trending API returns almost no non-English podcasts for most categories)
+        // - Category only: Use trending API with category
+        // - Language only: Use trending API with language
+        // - Neither: Use trending API
+        if (hasCategory && hasLanguage) {
+          // Search with language filter, then filter by category client-side
+          // Use category name as search term to get relevant podcasts
+          const categorySearchTerms = filters.categories
+            .map((cat) => getCategorySearchTerm(cat))
+            .join(' OR ');
+
+          const searchRes = await apiSearchPodcasts(categorySearchTerms, {
+            max: 200,
+            lang: getApiLanguageCodes(filters.languages),
+            val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
+          });
+
+          if (currentSearchRef.current !== '__browse__') return;
+
+          podcasts = transformFeeds(searchRes.feeds);
+
+          // Filter by category on client-side (check if podcast has any of selected categories)
+          podcasts = podcasts.filter((p) =>
+            p.categories.some((podcastCat) =>
+              filters.categories.some(
+                (filterCat) =>
+                  podcastCat.toLowerCase().includes(filterCat.toLowerCase()) ||
+                  filterCat.toLowerCase().includes(podcastCat.toLowerCase())
+              )
+            )
+          );
+
+          // Apply language filter client-side too (API might not filter perfectly)
           podcasts = podcasts.filter((p) =>
             filters.languages.some((filterLabel) => matchesLanguageFilter(p.language, filterLabel))
           );
         } else {
-          podcasts = podcasts.filter((p) => isAllowedLanguage(p.language));
+          // Use trending API for other combinations
+          const trendingRes = await getTrendingPodcasts({
+            max: hasCategory ? 200 : 100,
+            cat: hasCategory ? filters.categories.join(',') : undefined,
+            notcat:
+              filters.excludeCategories.length > 0
+                ? filters.excludeCategories.join(',')
+                : undefined,
+            lang: hasCategory ? undefined : getApiLanguageCodes(filters.languages),
+            val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
+          });
+
+          if (currentSearchRef.current !== '__browse__') return;
+
+          podcasts = transformFeeds(trendingRes.feeds);
+
+          // Apply language filter: user's selection or default allowed languages
+          if (hasLanguage) {
+            podcasts = podcasts.filter((p) =>
+              filters.languages.some((filterLabel) =>
+                matchesLanguageFilter(p.language, filterLabel)
+              )
+            );
+          } else {
+            podcasts = podcasts.filter((p) => isAllowedLanguage(p.language));
+          }
         }
 
         // Filter for indie podcasts (no iTunes ID) if discovery mode is 'indie'
@@ -434,32 +481,71 @@ export function useSearch() {
           filters.dateFrom !== null;
 
         if (needsAdvancedEpisodeFetch) {
-          // First get trending podcasts with selected filters
-          // NOTE: Don't send lang to API when cat is set - see podcast browsing comment
           const hasCategory = filters.categories.length > 0;
-          const trendingRes = await getTrendingPodcasts({
-            max: hasCategory ? 100 : 30, // Fetch more when filtering client-side
-            cat: hasCategory ? filters.categories.join(',') : undefined,
-            notcat:
-              filters.excludeCategories.length > 0
-                ? filters.excludeCategories.join(',')
-                : undefined,
-            lang: hasCategory ? undefined : getApiLanguageCodes(filters.languages),
-            val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
-          });
+          const hasLanguage = filters.languages.length > 0;
 
-          if (currentSearchRef.current !== '__browse__') return;
+          let podcasts: Podcast[] = [];
 
-          let podcasts = transformFeeds(trendingRes.feeds);
-          // Apply language filter: user's selection or default allowed languages
-          if (filters.languages.length > 0) {
+          // Same strategy as podcast browsing: use search API for category+language
+          if (hasCategory && hasLanguage) {
+            const categorySearchTerms = filters.categories
+              .map((cat) => getCategorySearchTerm(cat))
+              .join(' OR ');
+
+            const searchRes = await apiSearchPodcasts(categorySearchTerms, {
+              max: 100,
+              lang: getApiLanguageCodes(filters.languages),
+              val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
+            });
+
+            if (currentSearchRef.current !== '__browse__') return;
+
+            podcasts = transformFeeds(searchRes.feeds);
+
+            // Filter by category on client-side
+            podcasts = podcasts.filter((p) =>
+              p.categories.some((podcastCat) =>
+                filters.categories.some(
+                  (filterCat) =>
+                    podcastCat.toLowerCase().includes(filterCat.toLowerCase()) ||
+                    filterCat.toLowerCase().includes(podcastCat.toLowerCase())
+                )
+              )
+            );
+
+            // Apply language filter client-side too
             podcasts = podcasts.filter((p) =>
               filters.languages.some((filterLabel) =>
                 matchesLanguageFilter(p.language, filterLabel)
               )
             );
           } else {
-            podcasts = podcasts.filter((p) => isAllowedLanguage(p.language));
+            // Use trending API for other combinations
+            const trendingRes = await getTrendingPodcasts({
+              max: hasCategory ? 100 : 30,
+              cat: hasCategory ? filters.categories.join(',') : undefined,
+              notcat:
+                filters.excludeCategories.length > 0
+                  ? filters.excludeCategories.join(',')
+                  : undefined,
+              lang: hasCategory ? undefined : getApiLanguageCodes(filters.languages),
+              val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
+            });
+
+            if (currentSearchRef.current !== '__browse__') return;
+
+            podcasts = transformFeeds(trendingRes.feeds);
+
+            // Apply language filter: user's selection or default allowed languages
+            if (hasLanguage) {
+              podcasts = podcasts.filter((p) =>
+                filters.languages.some((filterLabel) =>
+                  matchesLanguageFilter(p.language, filterLabel)
+                )
+              );
+            } else {
+              podcasts = podcasts.filter((p) => isAllowedLanguage(p.language));
+            }
           }
 
           // Filter for indie podcasts (no iTunes ID) if discovery mode is 'indie'
@@ -1105,6 +1191,37 @@ function matchesLanguageFilter(podcastLanguage: string, filterLabel: string): bo
       normalizedPodcastLang === val.toLowerCase() ||
       normalizedPodcastLang.startsWith(val.toLowerCase())
   );
+}
+
+/**
+ * Convert category name to search terms for finding podcasts in that category
+ * Maps UI category names to Norwegian/English search terms
+ */
+function getCategorySearchTerm(category: string): string {
+  const categoryTerms: Record<string, string> = {
+    // Map English category names to both English and Norwegian search terms
+    Technology: 'teknologi OR technology OR tech OR IT',
+    Business: 'business OR næringsliv OR økonomi',
+    News: 'nyheter OR news OR aktuelt',
+    'Society & Culture': 'samfunn OR kultur OR society OR culture',
+    Education: 'utdanning OR education OR læring',
+    'Health & Fitness': 'helse OR health OR trening OR fitness',
+    Arts: 'kunst OR art OR kultur',
+    Comedy: 'humor OR comedy OR komedie',
+    Sports: 'sport OR idrett OR fotball',
+    Music: 'musikk OR music',
+    Science: 'vitenskap OR science OR forskning',
+    'True Crime': 'krim OR true crime OR mord',
+    History: 'historie OR history',
+    Religion: 'religion OR tro OR spiritualitet',
+    Kids: 'barn OR kids OR familie',
+    Fiction: 'fiksjon OR fiction OR drama',
+    Government: 'politikk OR government OR offentlig',
+    Leisure: 'fritid OR hobby OR leisure',
+    TV: 'tv OR film OR serie',
+  };
+
+  return categoryTerms[category] || category.toLowerCase();
 }
 
 /**
