@@ -29,8 +29,8 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
     setError(null);
 
     try {
-      // Fetch recent episodes and filter by allowed languages
-      const response = await getRecentEpisodes({ max: 100 });
+      // Fetch more recent episodes to increase chance of finding matching languages
+      const response = await getRecentEpisodes({ max: 500 });
 
       if (response.items && response.items.length > 0) {
         // Filter to only Norwegian, English, and Danish episodes
@@ -39,14 +39,12 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
           return ALLOWED_LANGUAGES.includes(lang);
         });
 
-        if (filteredEpisodes.length === 0) {
-          setError('Ingen episoder funnet');
-          return;
-        }
+        // Use filtered episodes if available, otherwise fall back to all episodes
+        const episodesToUse = filteredEpisodes.length > 0 ? filteredEpisodes : response.items;
 
-        // Pick a random episode from filtered results
-        const randomIndex = Math.floor(Math.random() * filteredEpisodes.length);
-        const apiEpisode = filteredEpisodes[randomIndex];
+        // Pick a random episode from results
+        const randomIndex = Math.floor(Math.random() * episodesToUse.length);
+        const apiEpisode = episodesToUse[randomIndex];
         const transformed = transformEpisode(apiEpisode);
 
         // Create EpisodeWithPodcast with podcast info from the API response

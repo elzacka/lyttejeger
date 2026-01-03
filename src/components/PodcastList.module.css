@@ -2,7 +2,8 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   padding-bottom: calc(var(--player-height) + var(--space-xl));
 }
 
@@ -72,6 +73,13 @@
   gap: var(--space-sm);
   width: 100%;
   max-width: 100%;
+  position: relative;
+}
+
+/* Non-virtualized: raise z-index when card is expanded */
+.grid > article:has([aria-expanded='true']) {
+  z-index: 10;
+  position: relative;
 }
 
 /* Window-based virtualized list container */

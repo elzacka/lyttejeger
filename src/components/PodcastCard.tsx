@@ -7,14 +7,21 @@ import styles from './PodcastCard.module.css';
 interface PodcastCardProps {
   podcast: Podcast;
   onSelect?: (podcast: Podcast) => void;
+  onExpandChange?: (expanded: boolean) => void;
 }
 
-export const PodcastCard = memo(function PodcastCard({ podcast, onSelect }: PodcastCardProps) {
+export const PodcastCard = memo(function PodcastCard({
+  podcast,
+  onSelect,
+  onExpandChange,
+}: PodcastCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   const handleToggleExpand = () => {
-    setIsExpanded((prev) => !prev);
+    const newExpanded = !isExpanded;
+    setIsExpanded(newExpanded);
+    onExpandChange?.(newExpanded);
   };
 
   const handleSelect = (e: React.MouseEvent) => {

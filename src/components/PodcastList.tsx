@@ -1,11 +1,11 @@
-import { useRef, useState, useLayoutEffect } from 'react';
+import { useRef, useState, useLayoutEffect, useCallback } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { ChevronIcon } from './icons';
 import type { Podcast } from '../types/podcast';
 import { PodcastCard } from './PodcastCard';
 import styles from './PodcastList.module.css';
 
-// Estimated height per podcast card
+// Estimated height per podcast card (collapsed state)
 const ESTIMATED_ITEM_HEIGHT = 100;
 
 type SortBy = 'relevance' | 'newest' | 'oldest' | 'popular';
@@ -134,6 +134,19 @@ export function PodcastList({
   // Virtualized render for large lists - uses window scroll
   const items = virtualizer.getVirtualItems();
 
+  // Callback to re-measure item when expanded/collapsed
+  const handleExpandChange = useCallback(
+    (index: number) => () => {
+      // Small delay to let DOM update before measuring
+      requestAnimationFrame(() => {
+        virtualizer.measureElement(
+          document.querySelector(`[data-index="${index}"]`) as HTMLElement
+        );
+      });
+    },
+    [virtualizer]
+  );
+
   return (
     <div className={styles.container}>
       {headerContent}
@@ -149,12 +162,18 @@ export function PodcastList({
           return (
             <div
               key={podcast.id}
+              data-index={virtualItem.index}
+              ref={virtualizer.measureElement}
               className={styles.virtualItem}
               style={{
                 transform: `translateY(${virtualItem.start - scrollMargin}px)`,
               }}
             >
-              <PodcastCard podcast={podcast} onSelect={onSelectPodcast} />
+              <PodcastCard
+                podcast={podcast}
+                onSelect={onSelectPodcast}
+                onExpandChange={handleExpandChange(virtualItem.index)}
+              />
             </div>
           );
         })}
