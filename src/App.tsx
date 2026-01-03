@@ -260,17 +260,19 @@ function App() {
       <div className="app">
         {/* Show PodcastDetailView when selected, otherwise show main content */}
         {selectedPodcast ? (
-          <PodcastDetailView
-            podcast={selectedPodcast}
-            onPlayEpisode={handlePlayEpisode}
-            onAddToQueue={handleAddEpisodeToQueue}
-            onPlayNext={handlePlayEpisodeNext}
-            isInQueue={isInQueue}
-            isSubscribed={isSubscribed(selectedPodcast.id)}
-            onSubscribe={handleSubscribe}
-            onUnsubscribe={handleUnsubscribe}
-            onBack={handleBackFromPodcast}
-          />
+          <ErrorBoundary viewName="podcast-visningen">
+            <PodcastDetailView
+              podcast={selectedPodcast}
+              onPlayEpisode={handlePlayEpisode}
+              onAddToQueue={handleAddEpisodeToQueue}
+              onPlayNext={handlePlayEpisodeNext}
+              isInQueue={isInQueue}
+              isSubscribed={isSubscribed(selectedPodcast.id)}
+              onSubscribe={handleSubscribe}
+              onUnsubscribe={handleUnsubscribe}
+              onBack={handleBackFromPodcast}
+            />
+          </ErrorBoundary>
         ) : (
           <>
             <a href="#main-content" className="skip-link">
@@ -281,63 +283,71 @@ function App() {
             <main className="main" id="main-content">
               {/* Home view - shows recent episodes from subscriptions */}
               {currentView === 'home' && (
-                <HomeView
-                  subscriptions={subscriptions}
-                  onPlayEpisode={handlePlayEpisode}
-                  onAddToQueue={handleAddEpisodeToQueue}
-                  onPlayNext={handlePlayEpisodeNext}
-                  isInQueue={isInQueue}
-                  onNavigateToSearch={() => handleNavigation('search')}
-                />
+                <ErrorBoundary viewName="hjem-visningen">
+                  <HomeView
+                    subscriptions={subscriptions}
+                    onPlayEpisode={handlePlayEpisode}
+                    onAddToQueue={handleAddEpisodeToQueue}
+                    onPlayNext={handlePlayEpisodeNext}
+                    isInQueue={isInQueue}
+                    onNavigateToSearch={() => handleNavigation('search')}
+                  />
+                </ErrorBoundary>
               )}
 
               {/* Search view - search bar, filters, and results */}
               {currentView === 'search' && (
-                <SearchView
-                  filters={filters}
-                  results={results}
-                  isPending={isPending}
-                  error={error}
-                  activeTab={activeTab}
-                  categories={allCategories}
-                  languages={allLanguages}
-                  activeFilterCount={activeFilterCount}
-                  onSetQuery={setQuery}
-                  onTabChange={setActiveTab}
-                  onToggleCategory={toggleCategory}
-                  onToggleLanguage={toggleLanguage}
-                  onSetDateFrom={setDateFrom}
-                  onSetDateTo={setDateTo}
-                  onSetSortBy={setSortBy}
-                  onSetDiscoveryMode={setDiscoveryMode}
-                  onClearFilters={clearFilters}
-                  onSelectPodcast={handleSelectPodcast}
-                  onSelectPodcastById={handleSelectPodcastById}
-                  onPlayEpisode={handlePlayEpisode}
-                  onAddToQueue={handleAddToQueue}
-                  onPlayNext={handlePlayNext}
-                  isInQueue={isInQueue}
-                />
+                <ErrorBoundary viewName="søkevisningen">
+                  <SearchView
+                    filters={filters}
+                    results={results}
+                    isPending={isPending}
+                    error={error}
+                    activeTab={activeTab}
+                    categories={allCategories}
+                    languages={allLanguages}
+                    activeFilterCount={activeFilterCount}
+                    onSetQuery={setQuery}
+                    onTabChange={setActiveTab}
+                    onToggleCategory={toggleCategory}
+                    onToggleLanguage={toggleLanguage}
+                    onSetDateFrom={setDateFrom}
+                    onSetDateTo={setDateTo}
+                    onSetSortBy={setSortBy}
+                    onSetDiscoveryMode={setDiscoveryMode}
+                    onClearFilters={clearFilters}
+                    onSelectPodcast={handleSelectPodcast}
+                    onSelectPodcastById={handleSelectPodcastById}
+                    onPlayEpisode={handlePlayEpisode}
+                    onAddToQueue={handleAddToQueue}
+                    onPlayNext={handlePlayNext}
+                    isInQueue={isInQueue}
+                  />
+                </ErrorBoundary>
               )}
 
               {/* Subscriptions view */}
               {currentView === 'subscriptions' && (
-                <SubscriptionsView
-                  subscriptions={subscriptions}
-                  onUnsubscribe={unsubscribe}
-                  onSelectPodcast={handleSelectSubscribedPodcast}
-                />
+                <ErrorBoundary viewName="abonnementene">
+                  <SubscriptionsView
+                    subscriptions={subscriptions}
+                    onUnsubscribe={unsubscribe}
+                    onSelectPodcast={handleSelectSubscribedPodcast}
+                  />
+                </ErrorBoundary>
               )}
 
               {/* Queue view */}
               {currentView === 'queue' && (
-                <QueueView
-                  queue={queue}
-                  onPlay={handlePlayFromQueue}
-                  onRemove={removeFromQueue}
-                  onClear={clearQueue}
-                  onReorder={handleReorder}
-                />
+                <ErrorBoundary viewName="spillekøen">
+                  <QueueView
+                    queue={queue}
+                    onPlay={handlePlayFromQueue}
+                    onRemove={removeFromQueue}
+                    onClear={clearQueue}
+                    onReorder={handleReorder}
+                  />
+                </ErrorBoundary>
               )}
             </main>
           </>

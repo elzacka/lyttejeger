@@ -1,8 +1,12 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react';
+import { WarningIcon, RefreshIcon } from './icons';
+import styles from './ErrorBoundary.module.css';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  /** Name shown in error message, e.g. "søkevisningen" */
+  viewName?: string;
 }
 
 interface State {
@@ -27,13 +31,32 @@ export class ErrorBoundary extends Component<Props, State> {
     }
   }
 
+  handleRetry = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
       }
-      // Default fallback - simple error message
-      return null;
+
+      // Default fallback with retry button
+      return (
+        <div className={styles.container} role="alert">
+          <WarningIcon size={48} className={styles.icon} aria-hidden="true" />
+          <h2 className={styles.title}>Noe gikk galt</h2>
+          <p className={styles.message}>
+            {this.props.viewName
+              ? `Det oppstod en feil i ${this.props.viewName}.`
+              : 'Det oppstod en uventet feil.'}
+          </p>
+          <button className={styles.retryButton} onClick={this.handleRetry}>
+            <RefreshIcon size={18} aria-hidden="true" />
+            Prøv igjen
+          </button>
+        </div>
+      );
     }
 
     return this.props.children;

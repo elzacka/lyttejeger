@@ -3,19 +3,13 @@ import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { ChevronIcon } from './icons';
 import type { Podcast } from '../types/podcast';
 import { PodcastCard } from './PodcastCard';
+import {
+  ESTIMATED_LIST_ITEM_HEIGHT_PX,
+  VIRTUALIZATION_MIN_ITEMS,
+  SORT_LABELS,
+  type SortBy,
+} from '../constants';
 import styles from './PodcastList.module.css';
-
-// Estimated height per podcast card (collapsed state)
-const ESTIMATED_ITEM_HEIGHT = 100;
-
-type SortBy = 'relevance' | 'newest' | 'oldest' | 'popular';
-
-const SORT_LABELS: Record<SortBy, string> = {
-  relevance: 'Relevans',
-  newest: 'Nyeste',
-  oldest: 'Eldste',
-  popular: 'Populære',
-};
 
 interface PodcastListProps {
   podcasts: Podcast[];
@@ -52,8 +46,8 @@ export function PodcastList({
   // Store refs to virtual items for re-measuring - must be at top level for hooks rules
   const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
-  // Use virtualization for lists with 20+ items
-  const useVirtual = podcasts.length >= 20;
+  // Use virtualization for large lists
+  const useVirtual = podcasts.length >= VIRTUALIZATION_MIN_ITEMS;
 
   // Compute scroll margin after layout
   useLayoutEffect(() => {
@@ -64,7 +58,7 @@ export function PodcastList({
 
   const virtualizer = useWindowVirtualizer({
     count: podcasts.length,
-    estimateSize: () => ESTIMATED_ITEM_HEIGHT,
+    estimateSize: () => ESTIMATED_LIST_ITEM_HEIGHT_PX,
     overscan: 5,
     scrollMargin,
     enabled: useVirtual,

@@ -5,22 +5,11 @@ import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlayingEpisode } from './AudioPlayer';
 import { EpisodeCard } from './EpisodeCard';
 import { usePlaybackProgress } from '../hooks/usePlaybackProgress';
+import { VIRTUALIZATION_MIN_ITEMS, SORT_LABELS, type SortBy } from '../constants';
 import styles from './EpisodeList.module.css';
 
-// Estimated height per episode card (header + padding + gap)
-// Header: 56px image + 12px padding top/bottom = 80px
-// Plus 12px gap between items = 92px minimum
-// Add buffer for 2-line titles and metadata
-const ESTIMATED_ITEM_HEIGHT = 110;
-
-type SortBy = 'relevance' | 'newest' | 'oldest' | 'popular';
-
-const SORT_LABELS: Record<SortBy, string> = {
-  relevance: 'Relevans',
-  newest: 'Nyeste',
-  oldest: 'Eldste',
-  popular: 'Populære',
-};
+// Episode cards are slightly taller due to extra metadata line
+const ESTIMATED_EPISODE_HEIGHT = 110;
 
 interface EpisodeListProps {
   episodes: EpisodeWithPodcast[];
@@ -65,8 +54,8 @@ export function EpisodeList({
   const listRef = useRef<HTMLDivElement>(null);
   const [scrollMargin, setScrollMargin] = useState(0);
 
-  // Use virtualization for lists with 20+ items
-  const useVirtual = episodes.length >= 20;
+  // Use virtualization for large lists
+  const useVirtual = episodes.length >= VIRTUALIZATION_MIN_ITEMS;
 
   // Compute scroll margin after layout
   useLayoutEffect(() => {
@@ -77,14 +66,14 @@ export function EpisodeList({
 
   const virtualizer = useWindowVirtualizer({
     count: episodes.length,
-    estimateSize: () => ESTIMATED_ITEM_HEIGHT,
+    estimateSize: () => ESTIMATED_EPISODE_HEIGHT,
     overscan: 5,
     scrollMargin,
     enabled: useVirtual,
     // Measure actual element height for accurate positioning
     measureElement:
       typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
-        ? (element) => element?.getBoundingClientRect().height ?? ESTIMATED_ITEM_HEIGHT
+        ? (element) => element?.getBoundingClientRect().height ?? ESTIMATED_EPISODE_HEIGHT
         : undefined,
   });
 

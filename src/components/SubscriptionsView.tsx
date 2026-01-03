@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { TrashIcon, CloseIcon } from './icons';
 import type { Subscription } from '../services/db';
+import { SWIPE_THRESHOLD_PX } from '../constants';
 import styles from './SubscriptionsView.module.css';
 
 interface SubscriptionsViewProps {
@@ -29,8 +30,6 @@ export function SubscriptionsView({
     isSwiping: false,
   });
   const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
-
-  const SWIPE_THRESHOLD = 80;
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent, itemId: string) => {
@@ -67,7 +66,7 @@ export function SubscriptionsView({
     if (swipeRef.current.isSwiping) {
       const element = itemRefs.current.get(itemId);
       if (element) {
-        const translateX = Math.max(0, Math.min(deltaX, SWIPE_THRESHOLD + 20));
+        const translateX = Math.max(0, Math.min(deltaX, SWIPE_THRESHOLD_PX + 20));
         const content = element.querySelector(`.${styles.swipeContent}`) as HTMLElement;
         if (content) {
           content.style.transform = `translateX(-${translateX}px)`;
@@ -82,10 +81,10 @@ export function SubscriptionsView({
       const element = itemRefs.current.get(itemId);
       const content = element?.querySelector(`.${styles.swipeContent}`) as HTMLElement;
 
-      if (deltaX > SWIPE_THRESHOLD) {
+      if (deltaX > SWIPE_THRESHOLD_PX) {
         // Reveal unsubscribe button
         if (content) {
-          content.style.transform = `translateX(-${SWIPE_THRESHOLD}px)`;
+          content.style.transform = `translateX(-${SWIPE_THRESHOLD_PX}px)`;
         }
         setSwipedItemId(itemId);
       } else {

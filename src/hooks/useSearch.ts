@@ -697,6 +697,8 @@ export function useSearch() {
     }, 400); // Slightly longer debounce to wait for typing to finish
 
     return () => clearTimeout(timer);
+    // Intentionally omit searchViaApi and browseByFilters - they are stable callbacks
+    // and including them would cause unnecessary re-renders on every filter change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.query, filters.dateFrom, shouldUseApi, clearResults, activeTab, hasActiveFilters]);
 
@@ -708,6 +710,7 @@ export function useSearch() {
 
     // Trigger new search with current query for the new tab
     searchViaApi(filters.query, activeTab);
+    // Only re-search when tab changes - query changes are handled by the main effect above
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
@@ -747,6 +750,7 @@ export function useSearch() {
       }, 200);
       return () => clearTimeout(timer);
     }
+    // Uses refs to compare filter changes - including searchViaApi would cause infinite loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     filters.languages,
