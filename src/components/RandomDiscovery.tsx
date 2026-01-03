@@ -7,8 +7,19 @@ import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlayingEpisode } from './AudioPlayer';
 import styles from './RandomDiscovery.module.css';
 
-// Allowed languages for random discovery (Norwegian, English, Danish)
-const ALLOWED_LANGUAGES = ['no', 'nb', 'nn', 'en', 'da'];
+// Allowed language prefixes for random discovery (Nordic + English)
+const ALLOWED_LANG_PREFIXES = ['no', 'nb', 'nn', 'en', 'da', 'sv'];
+
+/**
+ * Check if a language code is in our allowed list
+ * Handles various formats: "en", "en-US", "en_US", etc.
+ */
+function isAllowedLanguage(lang: string | undefined | null): boolean {
+  if (!lang) return false;
+  // Normalize: lowercase, take first part before - or _
+  const normalized = lang.toLowerCase().split(/[-_]/)[0];
+  return ALLOWED_LANG_PREFIXES.includes(normalized);
+}
 
 interface RandomDiscoveryProps {
   onPlayEpisode: (episode: PlayingEpisode) => void;
@@ -29,22 +40,21 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
     setError(null);
 
     try {
-      // Fetch more recent episodes to increase chance of finding matching languages
-      const response = await getRecentEpisodes({ max: 500 });
+      // Fetch recent episodes - request more to ensure we get enough after filtering
+      const response = await getRecentEpisodes({ max: 1000 });
 
       if (response.items && response.items.length > 0) {
-        // Filter to only Norwegian, English, and Danish episodes
-        const filteredEpisodes = response.items.filter((ep) => {
-          const lang = (ep.feedLanguage || '').toLowerCase().split('-')[0];
-          return ALLOWED_LANGUAGES.includes(lang);
-        });
+        // Strictly filter to only allowed languages - NO fallback to unfiltered
+        const filteredEpisodes = response.items.filter((ep) => isAllowedLanguage(ep.feedLanguage));
 
-        // Use filtered episodes if available, otherwise fall back to all episodes
-        const episodesToUse = filteredEpisodes.length > 0 ? filteredEpisodes : response.items;
+        if (filteredEpisodes.length === 0) {
+          setError('Ingen episoder på norsk, svensk, dansk eller engelsk funnet');
+          return;
+        }
 
-        // Pick a random episode from results
-        const randomIndex = Math.floor(Math.random() * episodesToUse.length);
-        const apiEpisode = episodesToUse[randomIndex];
+        // Pick a random episode from filtered results only
+        const randomIndex = Math.floor(Math.random() * filteredEpisodes.length);
+        const apiEpisode = filteredEpisodes[randomIndex];
         const transformed = transformEpisode(apiEpisode);
 
         // Create EpisodeWithPodcast with podcast info from the API response

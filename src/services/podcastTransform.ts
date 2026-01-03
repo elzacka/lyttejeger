@@ -38,6 +38,7 @@ export function transformFeed(feed: PodcastIndexFeed): Podcast {
     lastUpdated: safeTimestampToISO(feed.lastUpdateTime),
     rating: calculateRating(feed),
     explicit: feed.explicit || false,
+    itunesId: feed.itunesId ?? null,
   };
 }
 

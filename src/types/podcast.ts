@@ -14,6 +14,8 @@ export interface Podcast {
   lastUpdated: string;
   rating: number;
   explicit: boolean;
+  /** iTunes/Apple Podcasts ID - null for indie podcasts */
+  itunesId?: number | null;
 }
 
 /**

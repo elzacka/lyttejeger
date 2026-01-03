@@ -366,6 +366,8 @@ export interface TrendingOptions {
   lang?: string; // Language code (e.g., 'no', 'en')
   cat?: string; // Category ID
   notcat?: string; // Exclude category ID
+  val?: 'any' | 'lightning' | 'hive' | 'webmonetization'; // Value4Value filter
+  aponly?: boolean; // Only podcasts with iTunes ID (false = indie podcasts)
 }
 
 export async function getTrendingPodcasts(options: TrendingOptions = {}): Promise<SearchResponse> {
@@ -377,6 +379,8 @@ export async function getTrendingPodcasts(options: TrendingOptions = {}): Promis
   if (options.lang) params.lang = options.lang;
   if (options.cat) params.cat = options.cat;
   if (options.notcat) params.notcat = options.notcat;
+  if (options.val) params.val = options.val;
+  // aponly is handled client-side by filtering results
 
   return apiRequest<SearchResponse>('/podcasts/trending', params);
 }
@@ -386,6 +390,7 @@ export interface RecentEpisodesOptions {
   excludeString?: string; // Exclude episodes with this string in title
   before?: number; // Only return episodes before this episode ID
   fulltext?: boolean;
+  lang?: string; // Language code filter (e.g., 'no', 'en', 'da')
 }
 
 export async function getRecentEpisodes(
@@ -398,6 +403,7 @@ export async function getRecentEpisodes(
   if (options.excludeString) params.excludeString = options.excludeString;
   if (options.before) params.before = options.before.toString();
   if (options.fulltext !== false) params.fulltext = '';
+  if (options.lang) params.lang = options.lang;
 
   return apiRequest<EpisodesResponse>('/recent/episodes', params);
 }

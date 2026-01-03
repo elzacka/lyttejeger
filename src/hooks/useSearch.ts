@@ -361,19 +361,25 @@ export function useSearch() {
 
     try {
       if (browseType === 'podcasts') {
-        // Fetch trending podcasts with category/language filters
+        // Fetch trending podcasts with category/language/discovery filters
         const trendingRes = await getTrendingPodcasts({
           max: 100,
           cat: filters.categories.length > 0 ? filters.categories.join(',') : undefined,
           notcat:
             filters.excludeCategories.length > 0 ? filters.excludeCategories.join(',') : undefined,
           lang: filters.languages.length > 0 ? filters.languages[0] : undefined,
+          val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
         });
 
         if (currentSearchRef.current !== '__browse__') return;
 
         let podcasts = transformFeeds(trendingRes.feeds);
         podcasts = podcasts.filter((p) => isAllowedLanguage(p.language));
+
+        // Filter for indie podcasts (no iTunes ID) if discovery mode is 'indie'
+        if (filters.discoveryMode === 'indie') {
+          podcasts = podcasts.filter((p) => !p.itunesId);
+        }
 
         lastSearchQueryRef.current = '';
         lastSearchResultsRef.current = podcasts;
@@ -384,23 +390,29 @@ export function useSearch() {
         // 1. Get podcasts in the selected categories
         // 2. Fetch episodes from those podcasts
         // The /recent/episodes endpoint doesn't support category filtering
-        if (filters.categories.length > 0) {
-          // First get trending podcasts in the selected categories
+        if (filters.categories.length > 0 || filters.discoveryMode !== 'all') {
+          // First get trending podcasts with selected filters
           const trendingRes = await getTrendingPodcasts({
             max: 30,
-            cat: filters.categories.join(','),
+            cat: filters.categories.length > 0 ? filters.categories.join(',') : undefined,
             notcat:
               filters.excludeCategories.length > 0
                 ? filters.excludeCategories.join(',')
                 : undefined,
             lang: filters.languages.length > 0 ? filters.languages[0] : undefined,
+            val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
           });
 
           if (currentSearchRef.current !== '__browse__') return;
 
-          const podcasts = transformFeeds(trendingRes.feeds).filter((p) =>
+          let podcasts = transformFeeds(trendingRes.feeds).filter((p) =>
             isAllowedLanguage(p.language)
           );
+
+          // Filter for indie podcasts (no iTunes ID) if discovery mode is 'indie'
+          if (filters.discoveryMode === 'indie') {
+            podcasts = podcasts.filter((p) => !p.itunesId);
+          }
 
           // Calculate since timestamp if year filter is active
           const sinceTimestamp = filters.dateFrom
@@ -498,7 +510,10 @@ export function useSearch() {
 
   // Check if any browse-relevant filters are active
   const hasActiveFilters =
-    filters.categories.length > 0 || filters.languages.length > 0 || filters.dateFrom !== null;
+    filters.categories.length > 0 ||
+    filters.languages.length > 0 ||
+    filters.dateFrom !== null ||
+    filters.discoveryMode !== 'all';
 
   // Debounced API search or filter-only browse
   useEffect(() => {
