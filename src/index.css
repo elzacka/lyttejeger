@@ -138,9 +138,8 @@
   --z-nav: var(--z-sticky);
   --z-header: var(--z-sticky);
   --z-overlay: var(--z-modal-backdrop);
-  --z-sheet: var(--z-sheet);
-  /* Player z-index: above fixed elements (300) but below modal-backdrop (400) and modal (500) */
-  --z-player: var(--z-fixed);
+  /* Player z-index: above sticky (200) but below modal-backdrop (400) and modal (500) */
+  --z-player: 300;
 
   /* Legacy icon sizes */
   --icon-xs: 14px;

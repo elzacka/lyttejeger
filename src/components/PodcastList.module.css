@@ -88,6 +88,11 @@
   padding-bottom: var(--space-sm);
 }
 
+/* Raise z-index when card inside is expanded (using :has selector) */
+.virtualItem:has([aria-expanded='true']) {
+  z-index: 10;
+}
+
 .loading {
   display: flex;
   flex-direction: column;
