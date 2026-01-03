@@ -120,17 +120,23 @@ export function useSearch() {
 
       const apiQuery = completeTerms.join(' ');
 
+      // Check if category filter is active - API lang filter doesn't work well with cat
+      const hasCategory = filters.categories.length > 0;
+
       // Build search options based on current filters
+      // NOTE: Don't send lang to API when cat is set - Podcast Index API ignores lang
+      // when cat is specified. Language filtering is done client-side instead.
       const searchOptions: SearchOptions = {
-        max: 200, // Fetch more to ensure complete results
+        max: hasCategory ? 400 : 200, // Fetch more when filtering client-side
         fulltext: true, // Get full descriptions
         clean: filters.explicit === false ? true : undefined, // Only filter explicit if user chose "family-friendly"
-        // Use user's language filter if set, otherwise default to all allowed languages
-        lang: getApiLanguageCodes(filters.languages) || ALLOWED_LANGUAGES_API,
+        lang: hasCategory
+          ? undefined
+          : getApiLanguageCodes(filters.languages) || ALLOWED_LANGUAGES_API,
       };
 
       // Add category filter if selected
-      if (filters.categories.length > 0) {
+      if (hasCategory) {
         searchOptions.cat = filters.categories.join(',');
       }
 
@@ -383,13 +389,16 @@ export function useSearch() {
 
     try {
       if (browseType === 'podcasts') {
-        // Fetch trending podcasts with category/language/discovery filters
+        // Fetch trending podcasts with category/discovery filters
+        // NOTE: Don't send lang to API when cat is set - Podcast Index API returns 0 results
+        // for cat+lang combinations. Language filtering is done client-side instead.
+        const hasCategory = filters.categories.length > 0;
         const trendingRes = await getTrendingPodcasts({
-          max: 100,
-          cat: filters.categories.length > 0 ? filters.categories.join(',') : undefined,
+          max: hasCategory ? 200 : 100, // Fetch more when filtering client-side
+          cat: hasCategory ? filters.categories.join(',') : undefined,
           notcat:
             filters.excludeCategories.length > 0 ? filters.excludeCategories.join(',') : undefined,
-          lang: getApiLanguageCodes(filters.languages),
+          lang: hasCategory ? undefined : getApiLanguageCodes(filters.languages),
           val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
         });
 
@@ -426,14 +435,16 @@ export function useSearch() {
 
         if (needsAdvancedEpisodeFetch) {
           // First get trending podcasts with selected filters
+          // NOTE: Don't send lang to API when cat is set - see podcast browsing comment
+          const hasCategory = filters.categories.length > 0;
           const trendingRes = await getTrendingPodcasts({
-            max: 30,
-            cat: filters.categories.length > 0 ? filters.categories.join(',') : undefined,
+            max: hasCategory ? 100 : 30, // Fetch more when filtering client-side
+            cat: hasCategory ? filters.categories.join(',') : undefined,
             notcat:
               filters.excludeCategories.length > 0
                 ? filters.excludeCategories.join(',')
                 : undefined,
-            lang: getApiLanguageCodes(filters.languages),
+            lang: hasCategory ? undefined : getApiLanguageCodes(filters.languages),
             val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
           });
 
@@ -1056,11 +1067,12 @@ function applyLocalFilters(podcasts: Podcast[], filters: SearchFilters): Podcast
 }
 
 // Map UI filter labels to stored language values
+// Note: Norwegian podcasts use various codes: 'no', 'nb' (bokmål), 'nn' (nynorsk)
 const LANGUAGE_FILTER_MAP: Record<string, string[]> = {
-  Norsk: ['Norsk', 'Nynorsk', 'no', 'nb', 'nn'],
-  Engelsk: ['English', 'en', 'en-us', 'en-gb'],
-  Svensk: ['Svenska', 'sv'],
-  Dansk: ['Dansk', 'da'],
+  Norsk: ['Norsk', 'Nynorsk', 'no', 'nb', 'nn', 'no-no', 'nb-no', 'nn-no'],
+  Engelsk: ['English', 'en', 'en-us', 'en-gb', 'en-au', 'en-ca'],
+  Svensk: ['Svenska', 'sv', 'sv-se'],
+  Dansk: ['Dansk', 'da', 'da-dk'],
 };
 
 // Map UI filter labels to API language codes
