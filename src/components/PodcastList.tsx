@@ -49,6 +49,8 @@ export function PodcastList({
 }: PodcastListProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [scrollMargin, setScrollMargin] = useState(0);
+  // Store refs to virtual items for re-measuring - must be at top level for hooks rules
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   // Use virtualization for lists with 20+ items
   const useVirtual = podcasts.length >= 20;
@@ -67,6 +69,16 @@ export function PodcastList({
     scrollMargin,
     enabled: useVirtual,
   });
+
+  // Re-measure a specific item after DOM update
+  const remeasureItem = (index: number) => {
+    requestAnimationFrame(() => {
+      const element = itemRefs.current.get(index);
+      if (element) {
+        virtualizer.measureElement(element);
+      }
+    });
+  };
 
   if (isLoading) {
     return (
@@ -133,19 +145,6 @@ export function PodcastList({
 
   // Virtualized render for large lists - uses window scroll
   const items = virtualizer.getVirtualItems();
-
-  // Store refs to virtual items for re-measuring
-  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-
-  // Re-measure a specific item after DOM update
-  const remeasureItem = (index: number) => {
-    requestAnimationFrame(() => {
-      const element = itemRefs.current.get(index);
-      if (element) {
-        virtualizer.measureElement(element);
-      }
-    });
-  };
 
   return (
     <div className={styles.container}>

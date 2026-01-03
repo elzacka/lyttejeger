@@ -16,8 +16,11 @@
   z-index: var(--z-sticky);
   display: flex;
   align-items: center;
+  /* Match content max-width (800px) and center */
+  max-width: 800px;
+  margin: 0 auto;
   padding: var(--space-sm) var(--space-md);
-  background: var(--bg-primary);
+  background: transparent;
 }
 
 .backButton {
@@ -734,7 +737,7 @@
   }
 
   .content {
-    padding: var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
   }
 
   .podcastInfo {

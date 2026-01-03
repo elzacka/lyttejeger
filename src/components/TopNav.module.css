@@ -153,11 +153,11 @@
     position: fixed;
     top: 0;
     bottom: auto;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     gap: 0;
-    padding: 0 var(--space-md);
-    padding-bottom: 0;
+    /* Match content max-width (800px) - align nav with content edges */
+    padding: 0 max(var(--space-md), calc((100% - 800px) / 2));
     border-top: none;
     border-bottom: 1px solid var(--border, var(--color-border));
   }
@@ -167,15 +167,14 @@
     align-items: center;
     gap: var(--space-xs);
     padding: var(--space-sm) 0;
-    position: absolute;
-    left: var(--space-md);
+    flex-shrink: 0;
   }
 
   .navItems {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
-    flex: 1;
+    gap: var(--space-xs);
   }
 
   .nav.hidden {
@@ -184,11 +183,11 @@
 
   .navItem {
     flex: 0 0 auto;
-    flex-direction: row;
-    gap: var(--space-xs);
+    flex-direction: column;
+    gap: var(--space-2xs);
     min-height: auto;
-    padding: var(--space-sm) var(--space-lg);
-    border-radius: 0;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
     font-size: var(--font-xs);
   }
 
@@ -201,15 +200,13 @@
   }
 
   .iconWrapper svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
 
+  /* Hide labels on desktop - icons only */
   .label {
-    display: block;
-    font-size: var(--font-xs);
-    font-weight: var(--font-weight-medium, 500);
-    letter-spacing: 0.02em;
+    display: none;
   }
 
   .navItem.active {
@@ -227,11 +224,11 @@
   }
 
   .badge {
-    position: static;
-    top: auto;
-    right: auto;
-    min-width: 14px;
-    height: 14px;
-    font-size: 8px;
+    position: absolute;
+    top: -4px;
+    right: -8px;
+    min-width: 16px;
+    height: 16px;
+    font-size: 9px;
   }
 }
