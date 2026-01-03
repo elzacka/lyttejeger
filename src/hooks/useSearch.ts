@@ -125,7 +125,8 @@ export function useSearch() {
         max: 200, // Fetch more to ensure complete results
         fulltext: true, // Get full descriptions
         clean: filters.explicit === false ? true : undefined, // Only filter explicit if user chose "family-friendly"
-        lang: ALLOWED_LANGUAGES_API, // Send language filter to API
+        // Use user's language filter if set, otherwise default to all allowed languages
+        lang: getApiLanguageCodes(filters.languages) || ALLOWED_LANGUAGES_API,
       };
 
       // Add category filter if selected
@@ -176,8 +177,17 @@ export function useSearch() {
 
       if (currentSearchRef.current !== query) return;
 
-      // Transform and filter: remove dead feeds, then language filter as backup
-      let podcasts = transformFeeds(allFeeds).filter((p) => isAllowedLanguage(p.language));
+      // Transform and filter: remove dead feeds, then apply language filter
+      let podcasts = transformFeeds(allFeeds);
+      if (filters.languages.length > 0) {
+        // User selected specific languages - use those
+        podcasts = podcasts.filter((p) =>
+          filters.languages.some((filterLabel) => matchesLanguageFilter(p.language, filterLabel))
+        );
+      } else {
+        // No user filter - use default allowed languages
+        podcasts = podcasts.filter((p) => isAllowedLanguage(p.language));
+      }
 
       // Apply title boost if enabled
       if (FEATURES.TITLE_BOOST) {
@@ -216,16 +226,28 @@ export function useSearch() {
             const ep = episodes[idx];
             const apiEp = episodesRes.items?.[idx];
 
-            // Skip if already have this episode or wrong language
+            // Skip if already have this episode
             if (existingIds.has(ep.id)) continue;
-            if (!isAllowedLanguage(apiEp?.feedLanguage)) continue;
+
+            // Check language filter
+            const epLang = apiEp?.feedLanguage || '';
+            if (filters.languages.length > 0) {
+              // User selected specific languages - use those
+              const matchesUserLang = filters.languages.some((filterLabel) =>
+                matchesLanguageFilter(epLang, filterLabel)
+              );
+              if (!matchesUserLang) continue;
+            } else {
+              // No user filter - use default allowed languages
+              if (!isAllowedLanguage(epLang)) continue;
+            }
 
             allEpisodes.push({
               ...ep,
               podcastTitle: apiEp?.feedTitle || '',
               podcastAuthor: apiEp?.feedAuthor || '',
               podcastImage: apiEp?.feedImage || '',
-              feedLanguage: apiEp?.feedLanguage || '',
+              feedLanguage: epLang,
             } as Episode);
             existingIds.add(ep.id);
           }
@@ -367,14 +389,21 @@ export function useSearch() {
           cat: filters.categories.length > 0 ? filters.categories.join(',') : undefined,
           notcat:
             filters.excludeCategories.length > 0 ? filters.excludeCategories.join(',') : undefined,
-          lang: filters.languages.length > 0 ? filters.languages[0] : undefined,
+          lang: getApiLanguageCodes(filters.languages),
           val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
         });
 
         if (currentSearchRef.current !== '__browse__') return;
 
         let podcasts = transformFeeds(trendingRes.feeds);
-        podcasts = podcasts.filter((p) => isAllowedLanguage(p.language));
+        // Apply language filter: user's selection or default allowed languages
+        if (filters.languages.length > 0) {
+          podcasts = podcasts.filter((p) =>
+            filters.languages.some((filterLabel) => matchesLanguageFilter(p.language, filterLabel))
+          );
+        } else {
+          podcasts = podcasts.filter((p) => isAllowedLanguage(p.language));
+        }
 
         // Filter for indie podcasts (no iTunes ID) if discovery mode is 'indie'
         if (filters.discoveryMode === 'indie') {
@@ -386,11 +415,16 @@ export function useSearch() {
         setApiPodcasts(podcasts);
         setApiEpisodes([]);
       } else {
-        // For episodes with category filter, we need to:
+        // For episodes with category/discovery/date filter, we need to:
         // 1. Get podcasts in the selected categories
         // 2. Fetch episodes from those podcasts
-        // The /recent/episodes endpoint doesn't support category filtering
-        if (filters.categories.length > 0 || filters.discoveryMode !== 'all') {
+        // The /recent/episodes endpoint doesn't support category or date filtering
+        const needsAdvancedEpisodeFetch =
+          filters.categories.length > 0 ||
+          filters.discoveryMode !== 'all' ||
+          filters.dateFrom !== null;
+
+        if (needsAdvancedEpisodeFetch) {
           // First get trending podcasts with selected filters
           const trendingRes = await getTrendingPodcasts({
             max: 30,
@@ -399,15 +433,23 @@ export function useSearch() {
               filters.excludeCategories.length > 0
                 ? filters.excludeCategories.join(',')
                 : undefined,
-            lang: filters.languages.length > 0 ? filters.languages[0] : undefined,
+            lang: getApiLanguageCodes(filters.languages),
             val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
           });
 
           if (currentSearchRef.current !== '__browse__') return;
 
-          let podcasts = transformFeeds(trendingRes.feeds).filter((p) =>
-            isAllowedLanguage(p.language)
-          );
+          let podcasts = transformFeeds(trendingRes.feeds);
+          // Apply language filter: user's selection or default allowed languages
+          if (filters.languages.length > 0) {
+            podcasts = podcasts.filter((p) =>
+              filters.languages.some((filterLabel) =>
+                matchesLanguageFilter(p.language, filterLabel)
+              )
+            );
+          } else {
+            podcasts = podcasts.filter((p) => isAllowedLanguage(p.language));
+          }
 
           // Filter for indie podcasts (no iTunes ID) if discovery mode is 'indie'
           if (filters.discoveryMode === 'indie') {
@@ -464,10 +506,11 @@ export function useSearch() {
           setApiPodcasts([]);
           setApiEpisodes(allEpisodes.slice(0, 100) as Episode[]);
         } else {
-          // No category filter - fetch recent episodes
+          // No category/discovery/date filter - fetch recent episodes
           const recentRes = await getRecentEpisodes({
             max: 100,
             fulltext: true,
+            lang: getApiLanguageCodes(filters.languages),
           });
 
           if (currentSearchRef.current !== '__browse__') return;
@@ -484,7 +527,16 @@ export function useSearch() {
                 feedLanguage: apiEp?.feedLanguage || '',
               };
             })
-            .filter((ep) => isAllowedLanguage(ep.feedLanguage));
+            .filter((ep) => {
+              // If user selected specific languages, filter by those
+              if (filters.languages.length > 0) {
+                return filters.languages.some((filterLabel) =>
+                  matchesLanguageFilter(ep.feedLanguage, filterLabel)
+                );
+              }
+              // Otherwise, use default allowed languages
+              return isAllowedLanguage(ep.feedLanguage);
+            });
 
           setApiPodcasts([]);
           setApiEpisodes(episodesWithMeta as Episode[]);
@@ -506,6 +558,7 @@ export function useSearch() {
     languages: filters.languages,
     categories: filters.categories,
     discoveryMode: filters.discoveryMode,
+    dateFrom: filters.dateFrom,
   });
 
   // Check if any browse-relevant filters are active
@@ -548,7 +601,7 @@ export function useSearch() {
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.query, shouldUseApi, clearResults, activeTab, hasActiveFilters]);
+  }, [filters.query, filters.dateFrom, shouldUseApi, clearResults, activeTab, hasActiveFilters]);
 
   // Re-search when tab changes (if we have a query)
   useEffect(() => {
@@ -579,13 +632,16 @@ export function useSearch() {
       filtersRef.current.categories.length !== filters.categories.length ||
       filtersRef.current.categories.some((cat, i) => cat !== filters.categories[i]);
     const discoveryModeChanged = filtersRef.current.discoveryMode !== filters.discoveryMode;
-    const filtersChanged = languagesChanged || categoriesChanged || discoveryModeChanged;
+    const dateFromChanged = filtersRef.current.dateFrom?.year !== filters.dateFrom?.year;
+    const filtersChanged =
+      languagesChanged || categoriesChanged || discoveryModeChanged || dateFromChanged;
 
     if (filtersChanged) {
       filtersRef.current = {
         languages: filters.languages,
         categories: filters.categories,
         discoveryMode: filters.discoveryMode,
+        dateFrom: filters.dateFrom,
       };
       // Re-trigger API search with updated filters
       const searchTab = activeTab === 'episodes' ? 'episodes' : 'podcasts';
@@ -599,6 +655,7 @@ export function useSearch() {
     filters.languages,
     filters.categories,
     filters.discoveryMode,
+    filters.dateFrom,
     filters.query,
     activeTab,
     shouldUseApi,
@@ -1005,6 +1062,23 @@ const LANGUAGE_FILTER_MAP: Record<string, string[]> = {
   Svensk: ['Svenska', 'sv'],
   Dansk: ['Dansk', 'da'],
 };
+
+// Map UI filter labels to API language codes
+const LANGUAGE_TO_API_CODE: Record<string, string> = {
+  Norsk: 'no',
+  Engelsk: 'en',
+  Svensk: 'sv',
+  Dansk: 'da',
+};
+
+/**
+ * Convert UI language labels to API codes for the lang parameter
+ */
+function getApiLanguageCodes(filterLabels: string[]): string | undefined {
+  if (filterLabels.length === 0) return undefined;
+  const codes = filterLabels.map((label) => LANGUAGE_TO_API_CODE[label]).filter(Boolean);
+  return codes.length > 0 ? codes.join(',') : undefined;
+}
 
 /**
  * Check if a podcast language matches a UI filter label
