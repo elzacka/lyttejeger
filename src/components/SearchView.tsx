@@ -104,6 +104,15 @@ export function SearchView({
         </div>
       )}
 
+      {/* Mobile-only reset button - positioned above results */}
+      {activeFilterCount > 0 && (
+        <div className="mobile-reset-row">
+          <button className="mobile-reset-button" onClick={onClearFilters} type="button">
+            Nullstill filtre
+          </button>
+        </div>
+      )}
+
       <section className="results-section">
         {activeTab === 'podcasts' ? (
           <PodcastList

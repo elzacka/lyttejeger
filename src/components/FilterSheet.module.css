@@ -62,6 +62,7 @@
     0 -4px 24px rgba(0, 0, 0, 0.12),
     0 -1px 3px rgba(0, 0, 0, 0.08);
   animation: slideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  /* Safe area padding only - no extra audio player padding needed */
   padding-bottom: env(safe-area-inset-bottom, 0px);
   display: flex;
   flex-direction: column;
@@ -251,11 +252,13 @@
   flex: 1 1 auto;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: var(--space-md, 16px);
-  min-height: 100px; /* Sikre minimum høyde for innhold */
-  /* iOS Safari scrolling */
+  /* Minimal padding - safe-area handled by .sheet */
+  padding: var(--space-sm, 8px) var(--space-md, 16px);
+  padding-bottom: 0;
+  min-height: 100px;
+  /* iOS Safari momentum scrolling */
   -webkit-overflow-scrolling: touch;
-  /* Tillat normal touch i content */
+  /* Allow normal touch scrolling */
   touch-action: pan-y;
 }
 
@@ -476,6 +479,7 @@
 
   .content {
     padding: var(--space-sm, 8px);
+    padding-bottom: 0;
   }
 }
 

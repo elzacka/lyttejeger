@@ -14,6 +14,7 @@ import {
 } from '../services/podcastIndex';
 import { transformFeeds, transformEpisodes } from '../services/podcastTransform';
 import { parseSearchQuery } from '../utils/search';
+import { FEATURES } from '../config/features';
 
 const initialFilters: SearchFilters = {
   query: '',
@@ -176,7 +177,17 @@ export function useSearch() {
       if (currentSearchRef.current !== query) return;
 
       // Transform and filter: remove dead feeds, then language filter as backup
-      const podcasts = transformFeeds(allFeeds).filter((p) => isAllowedLanguage(p.language));
+      let podcasts = transformFeeds(allFeeds).filter((p) => isAllowedLanguage(p.language));
+
+      // Apply title boost if enabled
+      if (FEATURES.TITLE_BOOST) {
+        podcasts = boostTitleMatches(podcasts, apiQuery);
+      }
+
+      // Apply freshness signal if enabled
+      if (FEATURES.FRESHNESS_SIGNAL) {
+        podcasts = applyFreshnessSignal(podcasts);
+      }
 
       // Store for incremental filtering
       lastSearchQueryRef.current = query;
@@ -225,7 +236,9 @@ export function useSearch() {
 
         // Strategy 2: Fetch episodes from matching podcasts using batch API
         if (podcasts.length > 0) {
-          const topPodcasts = podcasts.slice(0, 20); // Can fetch more with batch
+          // Expand coverage: fetch from more podcasts when feature enabled
+          const podcastLimit = FEATURES.EXPANDED_EPISODE_SEARCH ? 50 : 20;
+          const topPodcasts = podcasts.slice(0, podcastLimit);
           const feedIds = topPodcasts.map((p) => parseInt(p.id));
 
           // Calculate since timestamp if year filter is active
@@ -401,7 +414,8 @@ export function useSearch() {
             : undefined;
 
           // Fetch episodes from these podcasts using batch API
-          const topPodcasts = podcasts.slice(0, 20);
+          const podcastLimit = FEATURES.EXPANDED_EPISODE_SEARCH ? 50 : 20;
+          const topPodcasts = podcasts.slice(0, podcastLimit);
           const feedIds = topPodcasts.map((p) => parseInt(p.id));
           const podcastMap = new Map(topPodcasts.map((p) => [p.id, p]));
 
@@ -773,6 +787,72 @@ function normalizeText(text: string): string {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Boost podcasts where query matches title more closely
+ * Priority: exact match > starts with > contains > other
+ */
+function boostTitleMatches(podcasts: Podcast[], query: string): Podcast[] {
+  if (!query.trim()) return podcasts;
+
+  const queryNorm = normalizeText(query);
+
+  return [...podcasts].sort((a, b) => {
+    const aTitle = normalizeText(a.title);
+    const bTitle = normalizeText(b.title);
+
+    // Score: 3 = exact, 2 = starts with, 1 = contains, 0 = other
+    const scoreA =
+      aTitle === queryNorm
+        ? 3
+        : aTitle.startsWith(queryNorm)
+          ? 2
+          : aTitle.includes(queryNorm)
+            ? 1
+            : 0;
+    const scoreB =
+      bTitle === queryNorm
+        ? 3
+        : bTitle.startsWith(queryNorm)
+          ? 2
+          : bTitle.includes(queryNorm)
+            ? 1
+            : 0;
+
+    // Higher score first, preserve order for equal scores
+    return scoreB - scoreA;
+  });
+}
+
+/**
+ * Apply freshness signal to podcast ranking
+ * Boosts recently updated podcasts, penalizes stale ones
+ */
+function applyFreshnessSignal(podcasts: Podcast[]): Podcast[] {
+  const now = Date.now();
+  const DAY_MS = 24 * 60 * 60 * 1000;
+
+  return [...podcasts].sort((a, b) => {
+    const aUpdated = new Date(a.lastUpdated).getTime();
+    const bUpdated = new Date(b.lastUpdated).getTime();
+    const aDays = (now - aUpdated) / DAY_MS;
+    const bDays = (now - bUpdated) / DAY_MS;
+
+    // Score: 2 = <30 days, 1 = 30-180 days, 0 = 180-365 days, -1 = >365 days
+    const getScore = (days: number) => {
+      if (days < 30) return 2;
+      if (days < 180) return 1;
+      if (days < 365) return 0;
+      return -1;
+    };
+
+    const scoreA = getScore(aDays);
+    const scoreB = getScore(bDays);
+
+    // Only reorder if scores differ significantly
+    return scoreB - scoreA;
+  });
 }
 
 /**

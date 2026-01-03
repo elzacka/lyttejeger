@@ -234,4 +234,9 @@
     min-height: 44px;
     padding: var(--space-2) var(--space-3);
   }
+
+  /* Hide in filter panel on mobile - shown in results section instead */
+  .clearChip {
+    display: none;
+  }
 }

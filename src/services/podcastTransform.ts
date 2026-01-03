@@ -55,7 +55,22 @@ export function transformEpisode(episode: PodcastIndexEpisode): Episode {
     imageUrl: episode.image || episode.feedImage || undefined,
     transcriptUrl: episode.transcriptUrl || undefined,
     chaptersUrl: episode.chaptersUrl || undefined,
+    season: episode.season > 0 ? episode.season : undefined,
+    episode: episode.episode !== null && episode.episode > 0 ? episode.episode : undefined,
+    episodeType: normalizeEpisodeType(episode.episodeType),
   };
+}
+
+/**
+ * Normalize episode type to typed values
+ */
+function normalizeEpisodeType(type: string | undefined): 'full' | 'trailer' | 'bonus' | undefined {
+  if (!type) return undefined;
+  const normalized = type.toLowerCase();
+  if (normalized === 'trailer') return 'trailer';
+  if (normalized === 'bonus') return 'bonus';
+  if (normalized === 'full') return 'full';
+  return undefined;
 }
 
 /**

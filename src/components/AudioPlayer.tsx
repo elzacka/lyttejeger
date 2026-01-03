@@ -10,9 +10,19 @@ import {
   CloseIcon,
   ChevronIcon,
   MoonIcon,
+  ListMusicIcon,
+  TranscriptIcon,
 } from './icons';
-import type { Episode } from '../types/podcast';
+import type { Episode, Chapter } from '../types/podcast';
 import { savePlaybackPosition, getPlaybackPosition } from '../services/db';
+import { fetchChapters, formatChapterTime, getCurrentChapter } from '../services/chapters';
+import {
+  fetchTranscript,
+  formatTranscriptTime,
+  getCurrentSegment,
+  type Transcript,
+} from '../services/transcripts';
+import { FEATURES } from '../config/features';
 import styles from './AudioPlayer.module.css';
 
 /**
@@ -87,6 +97,14 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const [sleepTimerMinutes, setSleepTimerMinutes] = useState(0);
   const [sleepTimerEnd, setSleepTimerEnd] = useState<number | null>(null); // timestamp when timer expires
 
+  // Chapter state
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [showChapters, setShowChapters] = useState(false);
+
+  // Transcript state
+  const [transcript, setTranscript] = useState<Transcript | null>(null);
+  const [showTranscript, setShowTranscript] = useState(false);
+
   // Track episode id for change detection
   const currentEpisodeIdRef = useRef<string | null>(null);
   // Track if we should auto-play when audio becomes ready
@@ -144,7 +162,53 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     } else {
       shouldAutoPlayRef.current = false;
     }
+
+    // Reset chapter and transcript state for new episode
+    setChapters([]);
+    setShowChapters(false);
+    setTranscript(null);
+    setShowTranscript(false);
   }, [episode]);
+
+  // Fetch chapters when episode has chaptersUrl
+  useEffect(() => {
+    if (!FEATURES.CHAPTERS || !episode?.chaptersUrl) {
+      setChapters([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    fetchChapters(episode.chaptersUrl).then((result) => {
+      if (!cancelled) {
+        setChapters(result);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [episode?.chaptersUrl]);
+
+  // Fetch transcript when episode has transcriptUrl
+  useEffect(() => {
+    if (!FEATURES.TRANSCRIPTS || !episode?.transcriptUrl) {
+      setTranscript(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    fetchTranscript(episode.transcriptUrl).then((result) => {
+      if (!cancelled) {
+        setTranscript(result);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [episode?.transcriptUrl]);
 
   // Save playback position every 5 seconds while playing
   useEffect(() => {
@@ -499,6 +563,43 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     });
   }, []);
 
+  // Toggle chapter list visibility
+  const toggleChapters = useCallback(() => {
+    setShowChapters((prev) => !prev);
+  }, []);
+
+  // Seek to a specific chapter
+  const seekToChapter = useCallback((chapter: Chapter) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = chapter.startTime;
+      setCurrentTime(chapter.startTime);
+    }
+  }, []);
+
+  // Get current chapter based on playback position
+  const currentChapter = useMemo(() => {
+    return getCurrentChapter(chapters, currentTime);
+  }, [chapters, currentTime]);
+
+  // Toggle transcript visibility
+  const toggleTranscript = useCallback(() => {
+    setShowTranscript((prev) => !prev);
+  }, []);
+
+  // Seek to a specific transcript segment
+  const seekToSegment = useCallback((startTime: number) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = startTime;
+      setCurrentTime(startTime);
+    }
+  }, []);
+
+  // Get current transcript segment based on playback position
+  const currentSegment = useMemo(() => {
+    if (!transcript) return null;
+    return getCurrentSegment(transcript, currentTime);
+  }, [transcript, currentTime]);
+
   // Cycle through sleep timer options
   const cycleSleepTimer = useCallback(() => {
     const currentIndex = SLEEP_TIMER_OPTIONS.findIndex((opt) => opt.value === sleepTimerMinutes);
@@ -760,7 +861,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
             <span className={styles.time}>{formatTime(duration)}</span>
           </div>
 
-          {/* Speed and sleep timer controls */}
+          {/* Speed, chapters, and sleep timer controls */}
           <div className={styles.secondaryControls}>
             <button
               className={styles.secondaryButton}
@@ -770,6 +871,33 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
             >
               <span className={styles.speedLabel}>{playbackSpeed}x</span>
             </button>
+
+            {/* Chapter toggle - only show if episode has chapters */}
+            {FEATURES.CHAPTERS && chapters.length > 0 && (
+              <button
+                className={`${styles.secondaryButton} ${showChapters ? styles.active : ''}`}
+                onClick={toggleChapters}
+                aria-label={showChapters ? 'Skjul kapitler' : 'Vis kapitler'}
+                aria-expanded={showChapters}
+                title="Kapitler"
+              >
+                <ListMusicIcon size={20} aria-hidden="true" />
+                <span className={styles.chapterCount}>{chapters.length}</span>
+              </button>
+            )}
+
+            {/* Transcript toggle - only show if episode has transcript */}
+            {FEATURES.TRANSCRIPTS && transcript && transcript.segments.length > 0 && (
+              <button
+                className={`${styles.secondaryButton} ${showTranscript ? styles.active : ''}`}
+                onClick={toggleTranscript}
+                aria-label={showTranscript ? 'Skjul transkripsjon' : 'Vis transkripsjon'}
+                aria-expanded={showTranscript}
+                title="Transkripsjon"
+              >
+                <TranscriptIcon size={20} aria-hidden="true" />
+              </button>
+            )}
 
             <button
               className={`${styles.secondaryButton} ${sleepTimerMinutes !== 0 ? styles.active : ''}`}
@@ -787,6 +915,55 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               )}
             </button>
           </div>
+
+          {/* Chapter list - collapsible */}
+          {FEATURES.CHAPTERS && showChapters && chapters.length > 0 && (
+            <div className={styles.chapterList} role="list" aria-label="Kapitler">
+              {chapters.map((chapter, index) => {
+                const isCurrent = currentChapter === chapter;
+                return (
+                  <button
+                    key={`${chapter.startTime}-${index}`}
+                    className={`${styles.chapterItem} ${isCurrent ? styles.chapterItemActive : ''}`}
+                    onClick={() => seekToChapter(chapter)}
+                    role="listitem"
+                    aria-current={isCurrent ? 'true' : undefined}
+                  >
+                    <span className={styles.chapterTime}>
+                      {formatChapterTime(chapter.startTime)}
+                    </span>
+                    <span className={styles.chapterTitle}>{chapter.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Transcript - collapsible */}
+          {FEATURES.TRANSCRIPTS &&
+            showTranscript &&
+            transcript &&
+            transcript.segments.length > 0 && (
+              <div className={styles.transcriptList} role="list" aria-label="Transkripsjon">
+                {transcript.segments.map((segment, index) => {
+                  const isCurrent = currentSegment === segment;
+                  return (
+                    <button
+                      key={`${segment.startTime}-${index}`}
+                      className={`${styles.transcriptItem} ${isCurrent ? styles.transcriptItemActive : ''}`}
+                      onClick={() => seekToSegment(segment.startTime)}
+                      role="listitem"
+                      aria-current={isCurrent ? 'true' : undefined}
+                    >
+                      <span className={styles.transcriptTime}>
+                        {formatTranscriptTime(segment.startTime)}
+                      </span>
+                      <span className={styles.transcriptText}>{segment.text}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
           {/* Error message */}
           {audioError && (

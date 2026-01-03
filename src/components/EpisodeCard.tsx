@@ -10,7 +10,19 @@ import {
 import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlaybackProgress } from '../hooks/usePlaybackProgress';
 import { formatDuration, formatDateLong, linkifyText } from '../utils/search';
+import { FEATURES } from '../config/features';
 import styles from './EpisodeCard.module.css';
+
+/**
+ * Format season/episode number as "S1 E5" style
+ */
+function formatSeasonEpisode(season?: number, episodeNum?: number): string | null {
+  if (!season && !episodeNum) return null;
+  const parts: string[] = [];
+  if (season) parts.push(`S${season}`);
+  if (episodeNum) parts.push(`E${episodeNum}`);
+  return parts.join(' ');
+}
 
 interface EpisodeCardProps {
   episode: EpisodeWithPodcast;
@@ -158,6 +170,17 @@ export const EpisodeCard = memo(function EpisodeCard({
             <div className={styles.meta}>
               <span>{formatDateLong(episode.publishedAt)}</span>
               {formatDuration(episode.duration) && <span>{formatDuration(episode.duration)}</span>}
+              {FEATURES.SEASON_EPISODE_METADATA &&
+                formatSeasonEpisode(episode.season, episode.episode) && (
+                  <span className={styles.seasonEpisode}>
+                    {formatSeasonEpisode(episode.season, episode.episode)}
+                  </span>
+                )}
+              {FEATURES.SEASON_EPISODE_METADATA &&
+                episode.episodeType &&
+                episode.episodeType !== 'full' && (
+                  <span className={styles.episodeTypeBadge}>{episode.episodeType}</span>
+                )}
               {progress?.completed && (
                 <span className={styles.completed}>
                   <CheckIcon size={14} aria-hidden="true" />

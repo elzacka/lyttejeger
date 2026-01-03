@@ -111,6 +111,20 @@
   font-weight: 500;
 }
 
+.seasonEpisode {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.episodeTypeBadge {
+  padding: 0 var(--space-2xs);
+  background: var(--bg-hover);
+  border-radius: var(--radius-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
 /* Progress bar */
 .progressBar {
   width: 100%;
