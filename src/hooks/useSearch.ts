@@ -1195,30 +1195,30 @@ function matchesLanguageFilter(podcastLanguage: string, filterLabel: string): bo
 
 /**
  * Convert category name to search terms for finding podcasts in that category
- * Maps UI category names to Norwegian/English search terms
+ * Maps UI category names to Nordic (NO/SV/DA) and English search terms
  */
 function getCategorySearchTerm(category: string): string {
   const categoryTerms: Record<string, string> = {
-    // Map English category names to both English and Norwegian search terms
-    Technology: 'teknologi OR technology OR tech OR IT',
-    Business: 'business OR næringsliv OR økonomi',
-    News: 'nyheter OR news OR aktuelt',
-    'Society & Culture': 'samfunn OR kultur OR society OR culture',
-    Education: 'utdanning OR education OR læring',
-    'Health & Fitness': 'helse OR health OR trening OR fitness',
-    Arts: 'kunst OR art OR kultur',
-    Comedy: 'humor OR comedy OR komedie',
-    Sports: 'sport OR idrett OR fotball',
-    Music: 'musikk OR music',
-    Science: 'vitenskap OR science OR forskning',
-    'True Crime': 'krim OR true crime OR mord',
-    History: 'historie OR history',
-    Religion: 'religion OR tro OR spiritualitet',
-    Kids: 'barn OR kids OR familie',
-    Fiction: 'fiksjon OR fiction OR drama',
-    Government: 'politikk OR government OR offentlig',
-    Leisure: 'fritid OR hobby OR leisure',
-    TV: 'tv OR film OR serie',
+    // Map English category names to Norwegian, Swedish, Danish, and English terms
+    Technology: 'teknologi OR technology OR teknik OR tech OR IT',
+    Business: 'business OR næringsliv OR økonomi OR ekonomi OR erhverv OR företag',
+    News: 'nyheter OR news OR aktuelt OR nyheder OR podcast',
+    'Society & Culture': 'samfunn OR kultur OR society OR culture OR samhälle',
+    Education: 'utdanning OR education OR læring OR uddannelse OR utbildning',
+    'Health & Fitness': 'helse OR health OR trening OR fitness OR hälsa OR sundhed',
+    Arts: 'kunst OR art OR kultur OR konst',
+    Comedy: 'humor OR comedy OR komedie OR komedi',
+    Sports: 'sport OR idrett OR fotball OR fodbold OR idrott',
+    Music: 'musikk OR music OR musik',
+    Science: 'vitenskap OR science OR forskning OR vetenskap OR videnskab',
+    'True Crime': 'krim OR true crime OR mord OR krimi OR brott',
+    History: 'historie OR history OR historia',
+    Religion: 'religion OR tro OR spiritualitet OR andlighet',
+    Kids: 'barn OR kids OR familie OR familj OR børn',
+    Fiction: 'fiksjon OR fiction OR drama OR berättelse',
+    Government: 'politikk OR government OR offentlig OR politik OR regering',
+    Leisure: 'fritid OR hobby OR leisure OR hobbyer',
+    TV: 'tv OR film OR serie OR serier',
   };
 
   return categoryTerms[category] || category.toLowerCase();
