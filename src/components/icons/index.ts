@@ -29,10 +29,13 @@ export { RotateCwIcon } from './RotateCwIcon';
 export { Volume2Icon } from './Volume2Icon';
 export { VolumeXIcon } from './VolumeXIcon';
 
-// Queue
+// Queue and chapters
 export { ListMusicIcon } from './ListMusicIcon';
 export { ListPlusIcon } from './ListPlusIcon';
 export { GripVerticalIcon } from './GripVerticalIcon';
+export { ChapterListIcon } from './ChapterListIcon';
+export { FileTextIcon } from './FileTextIcon';
+export { FileTextIcon as TranscriptIcon } from './FileTextIcon';
 
 // Podcast
 export { PodcastIcon } from './PodcastIcon';
