@@ -24,7 +24,6 @@ interface PodcastListProps {
   onSelectPodcast: (podcast: Podcast) => void;
   sortBy?: SortBy;
   onSetSortBy?: (sortBy: SortBy) => void;
-  isLive?: (feedId: string) => boolean;
 }
 
 function SkeletonCard() {
@@ -47,7 +46,6 @@ export function PodcastList({
   onSelectPodcast,
   sortBy = 'relevance',
   onSetSortBy,
-  isLive,
 }: PodcastListProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [scrollMargin, setScrollMargin] = useState(0);
@@ -126,13 +124,7 @@ export function PodcastList({
         {headerContent}
         <div className={styles.grid} role="list" aria-label="Søkeresultater for podcaster">
           {podcasts.map((podcast) => (
-            <PodcastCard
-              key={podcast.id}
-              podcast={podcast}
-              searchQuery={searchQuery}
-              onSelect={onSelectPodcast}
-              isLive={isLive?.(podcast.id)}
-            />
+            <PodcastCard key={podcast.id} podcast={podcast} onSelect={onSelectPodcast} />
           ))}
         </div>
       </div>
@@ -162,12 +154,7 @@ export function PodcastList({
                 transform: `translateY(${virtualItem.start - scrollMargin}px)`,
               }}
             >
-              <PodcastCard
-                podcast={podcast}
-                searchQuery={searchQuery}
-                onSelect={onSelectPodcast}
-                isLive={isLive?.(podcast.id)}
-              />
+              <PodcastCard podcast={podcast} onSelect={onSelectPodcast} />
             </div>
           );
         })}

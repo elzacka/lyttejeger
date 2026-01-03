@@ -54,7 +54,14 @@ async function enforceRateLimit(): Promise<void> {
   lastRequestTime = Date.now();
 }
 
-async function apiRequest<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+// Max retries for rate limit handling
+const MAX_RETRIES = 3;
+
+async function apiRequest<T>(
+  endpoint: string,
+  params: Record<string, string> = {},
+  retryCount = 0
+): Promise<T> {
   const queryString = new URLSearchParams(params).toString();
   const url = `${API_BASE}${endpoint}${queryString ? `?${queryString}` : ''}`;
 
@@ -69,10 +76,13 @@ async function apiRequest<T>(endpoint: string, params: Record<string, string> = 
   const headers = await getAuthHeaders();
   const response = await fetch(url, { headers });
 
-  // Handle rate limit exceeded (429) - retry after delay
+  // Handle rate limit exceeded (429) - retry with bounded attempts
   if (response.status === 429) {
+    if (retryCount >= MAX_RETRIES) {
+      throw new Error('API rate limit exceeded - max retries reached');
+    }
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    return apiRequest<T>(endpoint, params);
+    return apiRequest<T>(endpoint, params, retryCount + 1);
   }
 
   if (!response.ok) {

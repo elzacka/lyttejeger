@@ -57,19 +57,6 @@ export const FEATURES = {
    * Useful for cross-platform sync and share links
    */
   PODCAST_GUID: true,
-
-  /**
-   * Enable soundbite discovery
-   * Shows highlighted audio clips in AudioPlayer when episode has soundbites
-   */
-  SOUNDBITES: true,
-
-  /**
-   * Enable live episode indicator
-   * Shows "Live" badge on episodes that are currently streaming
-   * Also enables fetching live episode status
-   */
-  LIVE_EPISODES: true,
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURES;

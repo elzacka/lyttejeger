@@ -42,7 +42,6 @@ interface SearchViewProps {
   onAddToQueue: (episode: EpisodeWithPodcast) => void;
   onPlayNext: (episode: EpisodeWithPodcast) => void;
   isInQueue: (episodeId: string) => boolean;
-  isLive?: (feedId: string) => boolean;
 }
 
 export function SearchView({
@@ -69,7 +68,6 @@ export function SearchView({
   onAddToQueue,
   onPlayNext,
   isInQueue,
-  isLive,
 }: SearchViewProps) {
   const scrollDirection = useScrollDirection();
 
@@ -124,7 +122,6 @@ export function SearchView({
             onSelectPodcast={onSelectPodcast}
             sortBy={filters.sortBy}
             onSetSortBy={onSetSortBy}
-            isLive={isLive}
           />
         ) : (
           <EpisodeList

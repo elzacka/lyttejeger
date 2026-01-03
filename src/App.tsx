@@ -12,7 +12,6 @@ import { SheetProvider } from './components/SheetProvider';
 import { useSearch } from './hooks/useSearch';
 import { useQueue } from './hooks/useQueue';
 import { useSubscriptions } from './hooks/useSubscriptions';
-import { useLiveEpisodes } from './hooks/useLiveEpisodes';
 import { allLanguages } from './data/languages';
 import { allCategories } from './data/categories';
 import { getPodcastByFeedId } from './services/podcastIndex';
@@ -84,8 +83,6 @@ function App() {
   } = useQueue();
   const { subscriptions, subscribe, unsubscribe, isSubscribed, subscriptionCount } =
     useSubscriptions();
-
-  const { isLive } = useLiveEpisodes();
 
   const handlePlayEpisode = useCallback((episode: PlayingEpisode) => {
     setPlayingEpisode(episode);
@@ -320,7 +317,6 @@ function App() {
                   onAddToQueue={handleAddToQueue}
                   onPlayNext={handlePlayNext}
                   isInQueue={isInQueue}
-                  isLive={isLive}
                 />
               )}
 
