@@ -7,6 +7,9 @@ import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlayingEpisode } from './AudioPlayer';
 import styles from './RandomDiscovery.module.css';
 
+// Allowed languages for random discovery (Norwegian, English, Danish)
+const ALLOWED_LANGUAGES = ['no', 'nb', 'nn', 'en', 'da'];
+
 interface RandomDiscoveryProps {
   onPlayEpisode: (episode: PlayingEpisode) => void;
 }
@@ -26,13 +29,24 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
     setError(null);
 
     try {
-      // Fetch recent episodes and pick one randomly
-      const response = await getRecentEpisodes({ max: 40 });
+      // Fetch recent episodes and filter by allowed languages
+      const response = await getRecentEpisodes({ max: 100 });
 
       if (response.items && response.items.length > 0) {
-        // Pick a random episode from the results
-        const randomIndex = Math.floor(Math.random() * response.items.length);
-        const apiEpisode = response.items[randomIndex];
+        // Filter to only Norwegian, English, and Danish episodes
+        const filteredEpisodes = response.items.filter((ep) => {
+          const lang = (ep.feedLanguage || '').toLowerCase().split('-')[0];
+          return ALLOWED_LANGUAGES.includes(lang);
+        });
+
+        if (filteredEpisodes.length === 0) {
+          setError('Ingen episoder funnet');
+          return;
+        }
+
+        // Pick a random episode from filtered results
+        const randomIndex = Math.floor(Math.random() * filteredEpisodes.length);
+        const apiEpisode = filteredEpisodes[randomIndex];
         const transformed = transformEpisode(apiEpisode);
 
         // Create EpisodeWithPodcast with podcast info from the API response
@@ -127,9 +141,7 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <PodcastIcon size={32} className={styles.icon} />
-        <h2 className={styles.title}>Tilfeldig oppdagelse</h2>
-        <p className={styles.subtitle}>Kanskje noe for deg?</p>
+        <h2 className={styles.title}>Tilfeldig utvalgt</h2>
       </div>
 
       <article className={styles.episodeCard}>
