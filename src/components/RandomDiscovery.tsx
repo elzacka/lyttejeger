@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PodcastIcon, PlayIcon, RefreshIcon, SpinnerIcon } from './icons';
-import { getRandomEpisodes } from '../services/podcastIndex';
+import { getRecentEpisodes } from '../services/podcastIndex';
 import { transformEpisode } from '../services/podcastTransform';
 import { formatDuration, formatDateLong } from '../utils/search';
 import type { EpisodeWithPodcast } from '../utils/search';
@@ -26,10 +26,13 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
     setError(null);
 
     try {
-      const response = await getRandomEpisodes({ max: 1 });
+      // Fetch recent episodes and pick one randomly
+      const response = await getRecentEpisodes({ max: 40 });
 
       if (response.items && response.items.length > 0) {
-        const apiEpisode = response.items[0];
+        // Pick a random episode from the results
+        const randomIndex = Math.floor(Math.random() * response.items.length);
+        const apiEpisode = response.items[randomIndex];
         const transformed = transformEpisode(apiEpisode);
 
         // Create EpisodeWithPodcast with podcast info from the API response
