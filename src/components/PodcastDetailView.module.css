@@ -16,10 +16,10 @@
   z-index: var(--z-sticky);
   display: flex;
   align-items: center;
-  /* Match content max-width (800px) and center */
-  max-width: 800px;
-  margin: 0 auto;
-  padding: var(--space-sm) var(--space-md);
+  /* Match content max-width (800px) and center - use same padding formula as TopNav */
+  width: 100%;
+  max-width: 100%;
+  padding: var(--space-sm) max(var(--space-md), calc((100% - 800px) / 2));
   background: transparent;
 }
 
@@ -72,9 +72,10 @@
 }
 
 .content {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: var(--space-md);
+  /* Match header padding formula for consistent alignment */
+  width: 100%;
+  max-width: 100%;
+  padding: var(--space-md) max(var(--space-md), calc((100% - 800px) / 2));
   overflow-x: hidden;
 }
 
@@ -733,11 +734,11 @@
 /* Desktop */
 @media (min-width: 768px) {
   .header {
-    padding: var(--space-md) var(--space-lg);
+    padding: var(--space-md) max(var(--space-lg), calc((100% - 800px) / 2));
   }
 
   .content {
-    padding: var(--space-md) var(--space-lg);
+    padding: var(--space-md) max(var(--space-lg), calc((100% - 800px) / 2));
   }
 
   .podcastInfo {

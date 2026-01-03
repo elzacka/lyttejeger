@@ -142,24 +142,23 @@
   }
 
   .trigger {
-    flex-direction: row;
-    gap: var(--space-xs);
+    flex-direction: column;
+    gap: var(--space-2xs);
     min-height: auto;
     width: auto;
-    padding: var(--space-sm) var(--space-lg);
+    padding: var(--space-sm) var(--space-md);
     font-size: var(--font-xs);
+    border-radius: var(--radius-sm);
   }
 
   .iconWrapper svg {
-    width: var(--icon-sm);
-    height: var(--icon-sm);
+    width: 20px;
+    height: 20px;
   }
 
+  /* Hide label on desktop - icons only */
   .label {
-    display: block;
-    font-size: var(--font-xs);
-    font-weight: 500;
-    letter-spacing: 0.02em;
+    display: none;
   }
 
   .popover {
