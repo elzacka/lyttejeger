@@ -1,4 +1,4 @@
-import { useRef, useState, useLayoutEffect, useCallback } from 'react';
+import { useRef, useState, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { ChevronIcon } from './icons';
 import type { Podcast } from '../types/podcast';
@@ -134,18 +134,18 @@ export function PodcastList({
   // Virtualized render for large lists - uses window scroll
   const items = virtualizer.getVirtualItems();
 
-  // Callback to re-measure item when expanded/collapsed
-  const handleExpandChange = useCallback(
-    (index: number) => () => {
-      // Small delay to let DOM update before measuring
-      requestAnimationFrame(() => {
-        virtualizer.measureElement(
-          document.querySelector(`[data-index="${index}"]`) as HTMLElement
-        );
-      });
-    },
-    [virtualizer]
-  );
+  // Store refs to virtual items for re-measuring
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  // Re-measure a specific item after DOM update
+  const remeasureItem = (index: number) => {
+    requestAnimationFrame(() => {
+      const element = itemRefs.current.get(index);
+      if (element) {
+        virtualizer.measureElement(element);
+      }
+    });
+  };
 
   return (
     <div className={styles.container}>
@@ -163,7 +163,14 @@ export function PodcastList({
             <div
               key={podcast.id}
               data-index={virtualItem.index}
-              ref={virtualizer.measureElement}
+              ref={(el) => {
+                if (el) {
+                  itemRefs.current.set(virtualItem.index, el);
+                  virtualizer.measureElement(el);
+                } else {
+                  itemRefs.current.delete(virtualItem.index);
+                }
+              }}
               className={styles.virtualItem}
               style={{
                 transform: `translateY(${virtualItem.start - scrollMargin}px)`,
@@ -172,7 +179,7 @@ export function PodcastList({
               <PodcastCard
                 podcast={podcast}
                 onSelect={onSelectPodcast}
-                onExpandChange={handleExpandChange(virtualItem.index)}
+                onExpandChange={() => remeasureItem(virtualItem.index)}
               />
             </div>
           );
