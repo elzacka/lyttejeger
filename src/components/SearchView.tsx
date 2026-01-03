@@ -3,6 +3,7 @@ import { SearchBar } from './SearchBar';
 import { FilterPanel } from './FilterPanel';
 import { PodcastList } from './PodcastList';
 import { EpisodeList } from './EpisodeList';
+import { RandomDiscovery } from './RandomDiscovery';
 import { useScrollDirection } from '../hooks/useScrollDirection';
 import type {
   FilterOption,
@@ -114,7 +115,10 @@ export function SearchView({
       )}
 
       <section className="results-section">
-        {activeTab === 'podcasts' ? (
+        {/* Show random discovery when search is empty */}
+        {!filters.query.trim() && !isPending ? (
+          <RandomDiscovery onPlayEpisode={onPlayEpisode} />
+        ) : activeTab === 'podcasts' ? (
           <PodcastList
             podcasts={results.podcasts}
             searchQuery={filters.query}

@@ -102,14 +102,30 @@ export const EpisodeCard = memo(function EpisodeCard({
     e.preventDefault();
 
     // Calculate menu position before opening
-    // Menu is positioned relative to menuContainer (right: 0)
-    // Check if menu would overflow viewport on the right
+    // When positioned right:0, the dropdown extends left from the container's right edge
+    // When positioned left:0, the dropdown extends right from the container's left edge
     if (!menuOpen && containerRef.current) {
       const containerRect = containerRef.current.getBoundingClientRect();
       const menuWidth = 160; // min-width from CSS
-      const wouldOverflowRight =
-        containerRect.right > window.innerWidth - menuWidth + containerRect.width;
-      setMenuPosition(wouldOverflowRight ? 'left' : 'right');
+      const viewportWidth = window.innerWidth;
+
+      // Check if dropdown would overflow left when using right:0 positioning
+      // Dropdown left edge = container.right - menuWidth
+      const dropdownLeftEdgeIfRight = containerRect.right - menuWidth;
+      const wouldOverflowLeft = dropdownLeftEdgeIfRight < 0;
+
+      // Check if dropdown would overflow right when using left:0 positioning
+      // Dropdown right edge = container.left + menuWidth
+      const dropdownRightEdgeIfLeft = containerRect.left + menuWidth;
+      const wouldOverflowRight = dropdownRightEdgeIfLeft > viewportWidth;
+
+      // Default to right alignment, but use left if that would overflow
+      // If both would overflow, prefer left (more common on right-aligned cards)
+      if (wouldOverflowLeft && !wouldOverflowRight) {
+        setMenuPosition('left');
+      } else {
+        setMenuPosition('right');
+      }
     }
 
     setMenuOpen(!menuOpen);

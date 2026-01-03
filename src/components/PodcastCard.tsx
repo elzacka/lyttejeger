@@ -28,7 +28,7 @@ export const PodcastCard = memo(function PodcastCard({ podcast, onSelect }: Podc
     : undefined;
 
   return (
-    <article className={styles.item} role="listitem">
+    <article className={`${styles.item} ${isExpanded ? styles.expanded : ''}`} role="listitem">
       <div className={styles.podcastHeader}>
         <button
           className={styles.podcastToggle}

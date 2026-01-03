@@ -495,3 +495,30 @@ export async function getLiveEpisodes(
 
   return apiRequest<LiveEpisodesResponse>('/episodes/live', params);
 }
+
+// Random Episodes API
+
+export interface RandomEpisodesOptions {
+  max?: number;
+  lang?: string;
+  cat?: string;
+  notcat?: string;
+}
+
+/**
+ * Get random episodes from across the podcast index
+ * Great for discovery - shows a random selection of episodes
+ */
+export async function getRandomEpisodes(
+  options: RandomEpisodesOptions = {}
+): Promise<EpisodesResponse> {
+  const params: Record<string, string> = {
+    max: (options.max || 1).toString(),
+  };
+
+  if (options.lang) params.lang = options.lang;
+  if (options.cat) params.cat = options.cat;
+  if (options.notcat) params.notcat = options.notcat;
+
+  return apiRequest<EpisodesResponse>('/episodes/random', params);
+}

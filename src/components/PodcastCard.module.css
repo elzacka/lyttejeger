@@ -8,7 +8,10 @@
   border-radius: var(--radius-md);
   transition: border-color var(--transition-fast);
   position: relative;
-  z-index: 0;
+}
+
+.item.expanded {
+  z-index: 1;
 }
 
 .item:hover {
