@@ -1,5 +1,7 @@
 export interface Podcast {
   id: string;
+  /** Podcast GUID - stable identifier that survives feed URL changes */
+  guid?: string;
   title: string;
   author: string;
   description: string;
@@ -12,6 +14,16 @@ export interface Podcast {
   lastUpdated: string;
   rating: number;
   explicit: boolean;
+}
+
+/**
+ * Soundbite from Podcasting 2.0 spec
+ * @see https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#soundbite
+ */
+export interface Soundbite {
+  startTime: number;
+  duration: number;
+  title: string;
 }
 
 export interface Episode {
@@ -31,6 +43,8 @@ export interface Episode {
   episode?: number;
   /** Episode type: full, trailer, bonus */
   episodeType?: 'full' | 'trailer' | 'bonus';
+  /** Soundbites - highlighted audio clips from the episode */
+  soundbites?: Soundbite[];
 }
 
 /**

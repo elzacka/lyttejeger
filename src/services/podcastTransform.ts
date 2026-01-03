@@ -1,8 +1,8 @@
 /**
  * Transform Podcast Index API responses to app types
  */
-import type { Podcast, Episode } from '../types/podcast';
-import type { PodcastIndexFeed, PodcastIndexEpisode } from './podcastIndex';
+import type { Podcast, Episode, Soundbite } from '../types/podcast';
+import type { PodcastIndexFeed, PodcastIndexEpisode, PodcastIndexSoundbite } from './podcastIndex';
 
 /**
  * Safely convert unix timestamp to ISO string
@@ -25,6 +25,7 @@ function safeTimestampToISO(timestamp: number | undefined | null): string {
 export function transformFeed(feed: PodcastIndexFeed): Podcast {
   return {
     id: feed.id.toString(),
+    guid: feed.podcastGuid || undefined,
     title: feed.title || 'Untitled',
     author: feed.author || feed.ownerName || 'Unknown',
     description: stripHtml(feed.description || ''),
@@ -38,6 +39,46 @@ export function transformFeed(feed: PodcastIndexFeed): Podcast {
     rating: calculateRating(feed),
     explicit: feed.explicit || false,
   };
+}
+
+/**
+ * Transform API soundbites to app Soundbite type
+ */
+function transformSoundbites(
+  soundbite: PodcastIndexSoundbite | null,
+  soundbites: PodcastIndexSoundbite[]
+): Soundbite[] | undefined {
+  const result: Soundbite[] = [];
+
+  // Add primary soundbite if present
+  if (soundbite && soundbite.startTime >= 0 && soundbite.duration > 0) {
+    result.push({
+      startTime: soundbite.startTime,
+      duration: soundbite.duration,
+      title: soundbite.title || 'Høydepunkt',
+    });
+  }
+
+  // Add array soundbites
+  if (soundbites && Array.isArray(soundbites)) {
+    for (const sb of soundbites) {
+      if (sb && sb.startTime >= 0 && sb.duration > 0) {
+        // Avoid duplicates
+        const isDuplicate = result.some(
+          (existing) => existing.startTime === sb.startTime && existing.duration === sb.duration
+        );
+        if (!isDuplicate) {
+          result.push({
+            startTime: sb.startTime,
+            duration: sb.duration,
+            title: sb.title || 'Høydepunkt',
+          });
+        }
+      }
+    }
+  }
+
+  return result.length > 0 ? result : undefined;
 }
 
 /**
@@ -58,6 +99,7 @@ export function transformEpisode(episode: PodcastIndexEpisode): Episode {
     season: episode.season > 0 ? episode.season : undefined,
     episode: episode.episode !== null && episode.episode > 0 ? episode.episode : undefined,
     episodeType: normalizeEpisodeType(episode.episodeType),
+    soundbites: transformSoundbites(episode.soundbite, episode.soundbites),
   };
 }
 

@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import { PodcastIcon, ChevronIcon } from './icons';
+import { PodcastIcon, ChevronIcon, RadioIcon } from './icons';
 import type { Podcast } from '../types/podcast';
 import { formatDateLong, linkifyText } from '../utils/search';
 import styles from './PodcastCard.module.css';
@@ -8,9 +8,14 @@ interface PodcastCardProps {
   podcast: Podcast;
   searchQuery?: string;
   onSelect?: (podcast: Podcast) => void;
+  isLive?: boolean;
 }
 
-export const PodcastCard = memo(function PodcastCard({ podcast, onSelect }: PodcastCardProps) {
+export const PodcastCard = memo(function PodcastCard({
+  podcast,
+  onSelect,
+  isLive = false,
+}: PodcastCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -55,6 +60,12 @@ export const PodcastCard = memo(function PodcastCard({ podcast, onSelect }: Podc
             <span className={styles.podcastTitle}>{podcast.title}</span>
             <span className={styles.author}>{podcast.author}</span>
             <div className={styles.meta}>
+              {isLive && (
+                <span className={styles.liveBadge}>
+                  <RadioIcon size={12} aria-hidden="true" />
+                  Live
+                </span>
+              )}
               {lastUpdatedText && <span>{lastUpdatedText}</span>}
               {podcast.explicit && <span className={styles.explicitBadge}>E</span>}
             </div>

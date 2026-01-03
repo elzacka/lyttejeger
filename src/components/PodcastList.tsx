@@ -24,6 +24,7 @@ interface PodcastListProps {
   onSelectPodcast: (podcast: Podcast) => void;
   sortBy?: SortBy;
   onSetSortBy?: (sortBy: SortBy) => void;
+  isLive?: (feedId: string) => boolean;
 }
 
 function SkeletonCard() {
@@ -46,6 +47,7 @@ export function PodcastList({
   onSelectPodcast,
   sortBy = 'relevance',
   onSetSortBy,
+  isLive,
 }: PodcastListProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [scrollMargin, setScrollMargin] = useState(0);
@@ -129,6 +131,7 @@ export function PodcastList({
               podcast={podcast}
               searchQuery={searchQuery}
               onSelect={onSelectPodcast}
+              isLive={isLive?.(podcast.id)}
             />
           ))}
         </div>
@@ -159,7 +162,12 @@ export function PodcastList({
                 transform: `translateY(${virtualItem.start - scrollMargin}px)`,
               }}
             >
-              <PodcastCard podcast={podcast} searchQuery={searchQuery} onSelect={onSelectPodcast} />
+              <PodcastCard
+                podcast={podcast}
+                searchQuery={searchQuery}
+                onSelect={onSelectPodcast}
+                isLive={isLive?.(podcast.id)}
+              />
             </div>
           );
         })}

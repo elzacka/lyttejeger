@@ -118,6 +118,16 @@ export interface PodcastIndexFeed {
   imageUrlHash: number;
 }
 
+/**
+ * Soundbite from Podcasting 2.0 spec
+ * @see https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#soundbite
+ */
+export interface PodcastIndexSoundbite {
+  startTime: number;
+  duration: number;
+  title: string;
+}
+
 export interface PodcastIndexEpisode {
   id: number;
   title: string;
@@ -144,8 +154,8 @@ export interface PodcastIndexEpisode {
   feedDuplicateOf: number | null;
   chaptersUrl: string | null;
   transcriptUrl: string | null;
-  soundbite: unknown | null;
-  soundbites: unknown[];
+  soundbite: PodcastIndexSoundbite | null;
+  soundbites: PodcastIndexSoundbite[];
   persons: unknown[];
   socialInteract: unknown[];
   value: unknown | null;
@@ -380,4 +390,98 @@ export async function getRecentEpisodes(
   if (options.fulltext !== false) params.fulltext = '';
 
   return apiRequest<EpisodesResponse>('/recent/episodes', params);
+}
+
+// Soundbite API types and functions
+
+export interface SoundbiteItem {
+  enclosureUrl: string;
+  title: string;
+  startTime: number;
+  duration: number;
+  episodeId: number;
+  episodeTitle: string;
+  feedTitle: string;
+  feedUrl: string;
+  feedId: number;
+  feedImage: string;
+}
+
+export interface SoundbitesResponse {
+  status: string;
+  items: SoundbiteItem[];
+  count: number;
+  description: string;
+}
+
+export interface RecentSoundbitesOptions {
+  max?: number;
+}
+
+/**
+ * Get recent soundbites from across the podcast index
+ * Great for discovery - shows highlighted clips from various podcasts
+ */
+export async function getRecentSoundbites(
+  options: RecentSoundbitesOptions = {}
+): Promise<SoundbitesResponse> {
+  const params: Record<string, string> = {
+    max: (options.max || 20).toString(),
+  };
+
+  return apiRequest<SoundbitesResponse>('/recent/soundbites', params);
+}
+
+// Live Episodes API types and functions
+
+export interface LiveEpisode {
+  id: number;
+  title: string;
+  link: string;
+  description: string;
+  guid: string;
+  datePublished: number;
+  datePublishedPretty: string;
+  enclosureUrl: string;
+  enclosureType: string;
+  enclosureLength: number;
+  duration: number;
+  explicit: number;
+  image: string;
+  feedId: number;
+  feedTitle: string;
+  feedImage: string;
+  feedLanguage: string;
+  categories: Record<string, string>;
+  /** Live status: 0 = not live, 1 = live */
+  status: 'live' | 'pending' | 'ended';
+  /** Start time of live episode (unix timestamp) */
+  start: number;
+  /** End time of live episode (unix timestamp) */
+  end: number;
+}
+
+export interface LiveEpisodesResponse {
+  status: string;
+  items: LiveEpisode[];
+  count: number;
+  description: string;
+}
+
+export interface LiveEpisodesOptions {
+  max?: number;
+}
+
+/**
+ * Get currently live or upcoming live episodes
+ * Returns episodes that are currently streaming or scheduled to go live soon
+ */
+export async function getLiveEpisodes(
+  options: LiveEpisodesOptions = {}
+): Promise<LiveEpisodesResponse> {
+  const params: Record<string, string> = {
+    max: (options.max || 20).toString(),
+  };
+
+  return apiRequest<LiveEpisodesResponse>('/episodes/live', params);
 }

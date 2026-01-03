@@ -50,6 +50,26 @@ export const FEATURES = {
    * Shows transcript button when episode has transcriptUrl
    */
   TRANSCRIPTS: true,
+
+  /**
+   * Store and expose podcast GUID
+   * GUIDs are stable identifiers that survive feed URL changes
+   * Useful for cross-platform sync and share links
+   */
+  PODCAST_GUID: true,
+
+  /**
+   * Enable soundbite discovery
+   * Shows highlighted audio clips in AudioPlayer when episode has soundbites
+   */
+  SOUNDBITES: true,
+
+  /**
+   * Enable live episode indicator
+   * Shows "Live" badge on episodes that are currently streaming
+   * Also enables fetching live episode status
+   */
+  LIVE_EPISODES: true,
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURES;

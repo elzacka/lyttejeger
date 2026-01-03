@@ -12,8 +12,9 @@ import {
   MoonIcon,
   ListMusicIcon,
   TranscriptIcon,
+  AudioLinesIcon,
 } from './icons';
-import type { Episode, Chapter } from '../types/podcast';
+import type { Episode, Chapter, Soundbite } from '../types/podcast';
 import { savePlaybackPosition, getPlaybackPosition } from '../services/db';
 import { fetchChapters, formatChapterTime, getCurrentChapter } from '../services/chapters';
 import {
@@ -105,6 +106,9 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const [transcript, setTranscript] = useState<Transcript | null>(null);
   const [showTranscript, setShowTranscript] = useState(false);
 
+  // Soundbite state
+  const [showSoundbites, setShowSoundbites] = useState(false);
+
   // Track episode id for change detection
   const currentEpisodeIdRef = useRef<string | null>(null);
   // Track if we should auto-play when audio becomes ready
@@ -163,11 +167,12 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       shouldAutoPlayRef.current = false;
     }
 
-    // Reset chapter and transcript state for new episode
+    // Reset chapter, transcript, and soundbite state for new episode
     setChapters([]);
     setShowChapters(false);
     setTranscript(null);
     setShowTranscript(false);
+    setShowSoundbites(false);
   }, [episode]);
 
   // Fetch chapters when episode has chaptersUrl
@@ -600,6 +605,27 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     return getCurrentSegment(transcript, currentTime);
   }, [transcript, currentTime]);
 
+  // Toggle soundbites visibility
+  const toggleSoundbites = useCallback(() => {
+    setShowSoundbites((prev) => !prev);
+  }, []);
+
+  // Seek to and play a soundbite segment
+  const playSoundbite = useCallback((soundbite: Soundbite) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = soundbite.startTime;
+      setCurrentTime(soundbite.startTime);
+      audioRef.current.play().catch(() => {});
+    }
+  }, []);
+
+  // Format soundbite duration
+  const formatSoundbiteRange = useCallback((soundbite: Soundbite) => {
+    const start = formatTime(soundbite.startTime);
+    const end = formatTime(soundbite.startTime + soundbite.duration);
+    return `${start} - ${end}`;
+  }, []);
+
   // Cycle through sleep timer options
   const cycleSleepTimer = useCallback(() => {
     const currentIndex = SLEEP_TIMER_OPTIONS.findIndex((opt) => opt.value === sleepTimerMinutes);
@@ -899,6 +925,20 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               </button>
             )}
 
+            {/* Soundbite toggle - only show if episode has soundbites */}
+            {FEATURES.SOUNDBITES && episode.soundbites && episode.soundbites.length > 0 && (
+              <button
+                className={`${styles.secondaryButton} ${showSoundbites ? styles.active : ''}`}
+                onClick={toggleSoundbites}
+                aria-label={showSoundbites ? 'Skjul høydepunkter' : 'Vis høydepunkter'}
+                aria-expanded={showSoundbites}
+                title="Høydepunkter"
+              >
+                <AudioLinesIcon size={20} aria-hidden="true" />
+                <span className={styles.soundbiteCount}>{episode.soundbites.length}</span>
+              </button>
+            )}
+
             <button
               className={`${styles.secondaryButton} ${sleepTimerMinutes !== 0 ? styles.active : ''}`}
               onClick={cycleSleepTimer}
@@ -962,6 +1002,26 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
                     </button>
                   );
                 })}
+              </div>
+            )}
+
+          {/* Soundbites - collapsible */}
+          {FEATURES.SOUNDBITES &&
+            showSoundbites &&
+            episode.soundbites &&
+            episode.soundbites.length > 0 && (
+              <div className={styles.soundbiteList} role="list" aria-label="Høydepunkter">
+                {episode.soundbites.map((soundbite, index) => (
+                  <button
+                    key={`${soundbite.startTime}-${index}`}
+                    className={styles.soundbiteItem}
+                    onClick={() => playSoundbite(soundbite)}
+                    role="listitem"
+                  >
+                    <span className={styles.soundbiteTime}>{formatSoundbiteRange(soundbite)}</span>
+                    <span className={styles.soundbiteTitle}>{soundbite.title}</span>
+                  </button>
+                ))}
               </div>
             )}
 
