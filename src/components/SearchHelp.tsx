@@ -5,11 +5,11 @@ import styles from './SearchHelp.module.css';
 const searchTips = [
   {
     example: 'fotball vålerenga',
-    description: 'Treff der både fotball og Vålerenga er nevnt',
+    description: 'Begge ordene må finnes',
   },
   {
-    example: 'krim OR true crime',
-    description: 'Krim eller True Crime',
+    example: 'krim OR horror',
+    description: 'Minst ett av ordene må finnes',
   },
   {
     example: '"true crime"',
@@ -17,11 +17,11 @@ const searchTips = [
   },
   {
     example: 'politikk -nyheter',
-    description: 'Treff på politikk, men ikke der nyheter er nevnt',
+    description: 'Politikk, men ikke nyheter',
   },
   {
     example: '"true crime" -mord',
-    description: 'Eksakt frase, men ikke der mord er nevnt',
+    description: 'Eksakt frase uten mord',
   },
 ];
 
