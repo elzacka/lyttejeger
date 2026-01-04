@@ -63,6 +63,7 @@ function App() {
     setActiveTab,
     setQuery,
     toggleCategory,
+    // toggleExcludeCategory available for future UI implementation
     toggleLanguage,
     setDateFrom,
     setDateTo,
@@ -173,6 +174,13 @@ function App() {
       chaptersUrl: item.chaptersUrl,
     });
   }, []);
+
+  const handleReorder = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      moveItem(fromIndex, toIndex);
+    },
+    [moveItem]
+  );
 
   // Subscription handlers
   const handleSubscribe = useCallback(() => {
@@ -341,7 +349,7 @@ function App() {
                     onPlay={handlePlayFromQueue}
                     onRemove={removeFromQueue}
                     onClear={clearQueue}
-                    onReorder={moveItem}
+                    onReorder={handleReorder}
                   />
                 </ErrorBoundary>
               )}

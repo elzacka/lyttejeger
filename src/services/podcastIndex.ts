@@ -242,6 +242,9 @@ export async function searchPodcasts(
   if (options.cat) params.cat = options.cat;
   if (options.notcat) params.notcat = options.notcat;
   if (options.val) params.val = options.val;
+  if (options.aponly === false) {
+    // No direct param - handled by excluding results with itunesId
+  }
 
   return apiRequest<SearchResponse>('/search/byterm', params);
 }

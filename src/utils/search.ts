@@ -97,6 +97,22 @@ export function formatDuration(seconds: number): string {
   return `${minutes} min`;
 }
 
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'I dag';
+  if (diffDays === 1) return 'I går';
+  if (diffDays < 7) return `${diffDays} dager siden`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} uker siden`;
+  return date.toLocaleDateString('nb-NO', {
+    day: 'numeric',
+    month: 'short',
+    year: diffDays > 365 ? 'numeric' : undefined,
+  });
+}
+
 export function formatDateLong(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
@@ -163,25 +179,4 @@ export function linkifyText(text: string): TextPart[] {
   }
 
   return parts.length > 0 ? parts : [{ type: 'text', content: text }];
-}
-
-// ============================================================================
-// LANGUAGE UTILITIES
-// ============================================================================
-
-/** Allowed language codes for filtering (Norwegian, Danish, Swedish, English) */
-const ALLOWED_LANG_CODES = ['no', 'nb', 'nn', 'da', 'sv', 'en'];
-
-/**
- * Check if a language code is in the allowed list (Nordic + English)
- * @param lang - Language code (e.g., "en", "en-US", "nb-NO")
- * @param strict - If true, undefined/null returns false. If false, returns true.
- */
-export function isAllowedLanguage(
-  lang: string | undefined | null,
-  strict: boolean = false
-): boolean {
-  if (!lang) return !strict;
-  const normalized = lang.toLowerCase().split(/[-_]/)[0];
-  return ALLOWED_LANG_CODES.includes(normalized);
 }
