@@ -95,10 +95,11 @@ export function useSearch() {
 
       // Only send complete words (2+ chars) to API - partial words won't match
       // Filter out short terms that would cause API to return no results
+      // Note: API doesn't support exact phrase with quotes, so send without them
       const completeTerms = [
         ...parsed.mustInclude.filter((t) => t.length >= 2),
         ...parsed.shouldInclude.filter((t) => t.length >= 2),
-        ...parsed.exactPhrases.map((p) => `"${p}"`),
+        ...parsed.exactPhrases, // Without quotes - API ignores them anyway
       ];
 
       // If no complete terms to search, but we have partial terms,
@@ -211,6 +212,14 @@ export function useSearch() {
         );
       }
 
+      // Apply exact phrase filter (API doesn't support quoted phrases)
+      if (parsed.exactPhrases.length > 0) {
+        podcasts = podcasts.filter((p) => {
+          const text = `${p.title} ${p.author} ${p.description}`.toLowerCase();
+          return parsed.exactPhrases.every((phrase) => text.includes(phrase.toLowerCase()));
+        });
+      }
+
       // Apply title boost if enabled
       if (FEATURES.TITLE_BOOST) {
         podcasts = boostTitleMatches(podcasts, apiQuery);
@@ -236,7 +245,17 @@ export function useSearch() {
 
         // Strategy 1: byperson API - searches person tags, title, description
         try {
-          const episodesRes = await searchEpisodesByPerson(apiQuery, { max: 50, fulltext: true });
+          // Send query without quotes - API doesn't support exact phrase
+          const apiQueryForEpisodes = [
+            ...parsed.mustInclude.filter((t) => t.length >= 2),
+            ...parsed.shouldInclude.filter((t) => t.length >= 2),
+            ...parsed.exactPhrases, // Without quotes for API
+          ].join(' ');
+
+          const episodesRes = await searchEpisodesByPerson(apiQueryForEpisodes, {
+            max: 50,
+            fulltext: true,
+          });
 
           if (currentSearchRef.current !== query) {
             return;
@@ -250,6 +269,15 @@ export function useSearch() {
 
             // Skip if already have this episode
             if (existingIds.has(ep.id)) continue;
+
+            // Check exact phrase match (API doesn't support this)
+            if (parsed.exactPhrases.length > 0) {
+              const text = `${ep.title} ${ep.description}`.toLowerCase();
+              const matchesPhrase = parsed.exactPhrases.every((phrase) =>
+                text.includes(phrase.toLowerCase())
+              );
+              if (!matchesPhrase) continue;
+            }
 
             // Check language filter
             const epLang = apiEp?.feedLanguage || '';
