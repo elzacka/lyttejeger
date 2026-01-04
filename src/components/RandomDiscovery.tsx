@@ -13,7 +13,7 @@ import type { PlayingEpisode } from './AudioPlayer';
 import {
   CURATED_PODCASTS,
   CURATED_EPISODES,
-  USE_CURATED_DISCOVERY,
+  DISCOVERY_MODE,
   CURATED_PROBABILITY,
 } from '../data/curatedContent';
 import styles from './RandomDiscovery.module.css';
@@ -43,7 +43,8 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
   const [error, setError] = useState<string | null>(null);
   const [isCurated, setIsCurated] = useState(false);
 
-  // Fetch a random episode from a curated podcast
+  // Fetch the first (oldest) episode from a curated podcast
+  // Many curated podcasts are series, so we always show the first episode
   const fetchFromCuratedPodcast = useCallback(async (): Promise<EpisodeWithPodcast | null> => {
     if (CURATED_PODCASTS.length === 0) return null;
 
@@ -51,13 +52,17 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
     const randomPodcast = CURATED_PODCASTS[Math.floor(Math.random() * CURATED_PODCASTS.length)];
 
     try {
-      // Fetch recent episodes from this podcast
-      const episodesRes = await getEpisodesByFeedId(randomPodcast.feedId, { max: 20 });
+      // Fetch all episodes (max 1000) to find the oldest one
+      const episodesRes = await getEpisodesByFeedId(randomPodcast.feedId, { max: 1000 });
       if (!episodesRes.items || episodesRes.items.length === 0) return null;
 
-      // Pick a random episode from recent ones
-      const randomEp = episodesRes.items[Math.floor(Math.random() * episodesRes.items.length)];
-      const transformed = transformEpisode(randomEp);
+      // Find the oldest episode (smallest datePublished)
+      const oldestEp = episodesRes.items.reduce((oldest, current) => {
+        const oldestDate = oldest.datePublished || 0;
+        const currentDate = current.datePublished || 0;
+        return currentDate < oldestDate ? current : oldest;
+      });
+      const transformed = transformEpisode(oldestEp);
 
       // Fetch podcast info
       const podcastRes = await getPodcastByFeedId(randomPodcast.feedId);
@@ -67,10 +72,10 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
         ...transformed,
         podcast: {
           id: randomPodcast.feedId.toString(),
-          title: feed?.title || randomEp.feedTitle || 'Ukjent podcast',
+          title: feed?.title || oldestEp.feedTitle || 'Ukjent podcast',
           author: feed?.author || '',
           description: feed?.description || '',
-          imageUrl: feed?.image || randomEp.feedImage || '/placeholder-podcast.svg',
+          imageUrl: feed?.image || oldestEp.feedImage || '/placeholder-podcast.svg',
           feedUrl: feed?.url || '',
           categories: [],
           language: feed?.language || '',
@@ -172,29 +177,43 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
         let result: EpisodeWithPodcast | null = null;
         let fromCurated = false;
 
-        // Decide whether to use curated content
+        // Decide source based on DISCOVERY_MODE
         const hasCuratedContent = CURATED_PODCASTS.length > 0 || CURATED_EPISODES.length > 0;
-        const useCurated =
-          USE_CURATED_DISCOVERY && hasCuratedContent && Math.random() < CURATED_PROBABILITY;
 
-        if (useCurated) {
-          // Try curated episodes first, then curated podcasts
+        if (DISCOVERY_MODE === 'curated-only' && hasCuratedContent) {
+          // Only use curated content
           if (CURATED_EPISODES.length > 0 && Math.random() < 0.3) {
             result = await fetchCuratedEpisode();
           }
-
           if (!result && CURATED_PODCASTS.length > 0) {
             result = await fetchFromCuratedPodcast();
           }
-
           if (result) {
             fromCurated = true;
           }
-        }
-
-        // Fall back to random API if no curated result
-        if (!result) {
+        } else if (DISCOVERY_MODE === 'random-only' || !hasCuratedContent) {
+          // Only use random API
           result = await fetchRandomFromApi();
+        } else {
+          // Mixed mode: probability-based selection
+          const useCurated = Math.random() < CURATED_PROBABILITY;
+
+          if (useCurated) {
+            if (CURATED_EPISODES.length > 0 && Math.random() < 0.3) {
+              result = await fetchCuratedEpisode();
+            }
+            if (!result && CURATED_PODCASTS.length > 0) {
+              result = await fetchFromCuratedPodcast();
+            }
+            if (result) {
+              fromCurated = true;
+            }
+          }
+
+          // Fall back to random API if no curated result
+          if (!result) {
+            result = await fetchRandomFromApi();
+          }
         }
 
         if (result) {

@@ -49,13 +49,21 @@ export const CURATED_EPISODES: CuratedEpisode[] = [
 ];
 
 /**
- * Whether to use curated content in discovery mode
- * Set to false to use only the random API-based discovery
+ * Discovery mode configuration
  */
-export const USE_CURATED_DISCOVERY = true;
+export type DiscoveryMode = 'curated-only' | 'random-only' | 'mixed';
+
+/**
+ * Current discovery mode:
+ * - 'curated-only': Only show curated podcasts (shuffled)
+ * - 'random-only': Only show random API discovery
+ * - 'mixed': Mix of curated and random based on CURATED_PROBABILITY
+ */
+export const DISCOVERY_MODE: DiscoveryMode = 'mixed';
 
 /**
  * Probability (0-1) of showing curated content vs random API content
+ * Only used when DISCOVERY_MODE is 'mixed'
  * 0.7 = 70% chance of curated, 30% chance of random
  */
 export const CURATED_PROBABILITY = 0.7;
