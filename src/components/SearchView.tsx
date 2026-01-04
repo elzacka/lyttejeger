@@ -117,7 +117,10 @@ export function SearchView({
       <section className="results-section">
         {/* Show random discovery only when search is empty AND no filters are active */}
         {!filters.query.trim() && activeFilterCount === 0 && !isPending ? (
-          <RandomDiscovery onPlayEpisode={onPlayEpisode} />
+          <RandomDiscovery
+            onPlayEpisode={onPlayEpisode}
+            onSelectPodcastById={onSelectPodcastById}
+          />
         ) : activeTab === 'podcasts' ? (
           <PodcastList
             podcasts={results.podcasts}

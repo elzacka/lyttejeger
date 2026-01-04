@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { PodcastIcon, PlayIcon, RefreshIcon, SpinnerIcon } from './icons';
+import { PodcastIcon, PlayIcon, RefreshIcon, SpinnerIcon, ChevronIcon } from './icons';
 import {
   getRecentEpisodes,
   getEpisodesByFeedId,
@@ -34,14 +34,16 @@ function isAllowedLanguage(lang: string | undefined | null): boolean {
 
 interface RandomDiscoveryProps {
   onPlayEpisode: (episode: PlayingEpisode) => void;
+  onSelectPodcastById?: (podcastId: string) => void;
 }
 
-export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
+export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById }: RandomDiscoveryProps) {
   const [episode, setEpisode] = useState<EpisodeWithPodcast | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCurated, setIsCurated] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Fetch the first (oldest) episode from a curated podcast
   // Many curated podcasts are series, so we always show the first episode
@@ -172,6 +174,7 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
         setIsLoading(true);
       }
       setError(null);
+      setIsExpanded(false);
 
       try {
         let result: EpisodeWithPodcast | null = null;
@@ -315,7 +318,33 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
           </div>
         </div>
 
-        {episode.description && <p className={styles.episodeDescription}>{episode.description}</p>}
+        {episode.description && (
+          <div className={styles.descriptionWrapper}>
+            <p className={`${styles.episodeDescription} ${isExpanded ? styles.expanded : ''}`}>
+              {episode.description}
+            </p>
+            <button
+              className={styles.expandButton}
+              onClick={() => setIsExpanded(!isExpanded)}
+              type="button"
+              aria-expanded={isExpanded}
+            >
+              <ChevronIcon size={16} direction={isExpanded ? 'up' : 'down'} />
+              {isExpanded ? 'Vis mindre' : 'Vis mer'}
+            </button>
+          </div>
+        )}
+
+        {episode.podcast && onSelectPodcastById && (
+          <button
+            className={styles.podcastLink}
+            onClick={() => onSelectPodcastById(episode.podcast!.id)}
+            type="button"
+          >
+            <PodcastIcon size={16} />
+            Gå til {episode.podcast.title}
+          </button>
+        )}
       </article>
 
       <div className={styles.actions}>
