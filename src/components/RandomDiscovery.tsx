@@ -1,10 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PodcastIcon, PlayIcon, RefreshIcon, SpinnerIcon } from './icons';
-import { getRecentEpisodes } from '../services/podcastIndex';
+import {
+  getRecentEpisodes,
+  getEpisodesByFeedId,
+  getPodcastByFeedId,
+  getEpisodeByGuid,
+} from '../services/podcastIndex';
 import { transformEpisode } from '../services/podcastTransform';
 import { formatDuration, formatDateLong } from '../utils/search';
 import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlayingEpisode } from './AudioPlayer';
+import {
+  CURATED_PODCASTS,
+  CURATED_EPISODES,
+  USE_CURATED_DISCOVERY,
+  CURATED_PROBABILITY,
+} from '../data/curatedContent';
 import styles from './RandomDiscovery.module.css';
 
 // Allowed language prefixes for random discovery (Nordic + English)
@@ -30,63 +41,177 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCurated, setIsCurated] = useState(false);
 
-  const fetchRandomEpisode = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
-    setError(null);
+  // Fetch a random episode from a curated podcast
+  const fetchFromCuratedPodcast = useCallback(async (): Promise<EpisodeWithPodcast | null> => {
+    if (CURATED_PODCASTS.length === 0) return null;
+
+    // Pick a random curated podcast
+    const randomPodcast = CURATED_PODCASTS[Math.floor(Math.random() * CURATED_PODCASTS.length)];
 
     try {
-      // Fetch recent episodes - request more to ensure we get enough after filtering
-      const response = await getRecentEpisodes({ max: 1000 });
+      // Fetch recent episodes from this podcast
+      const episodesRes = await getEpisodesByFeedId(randomPodcast.feedId, { max: 20 });
+      if (!episodesRes.items || episodesRes.items.length === 0) return null;
 
-      if (response.items && response.items.length > 0) {
-        // Strictly filter to only allowed languages - NO fallback to unfiltered
-        const filteredEpisodes = response.items.filter((ep) => isAllowedLanguage(ep.feedLanguage));
+      // Pick a random episode from recent ones
+      const randomEp = episodesRes.items[Math.floor(Math.random() * episodesRes.items.length)];
+      const transformed = transformEpisode(randomEp);
 
-        if (filteredEpisodes.length === 0) {
-          setError('Ingen episoder på norsk, svensk, dansk eller engelsk funnet');
-          return;
-        }
+      // Fetch podcast info
+      const podcastRes = await getPodcastByFeedId(randomPodcast.feedId);
+      const feed = podcastRes.feed;
 
-        // Pick a random episode from filtered results only
-        const randomIndex = Math.floor(Math.random() * filteredEpisodes.length);
-        const apiEpisode = filteredEpisodes[randomIndex];
-        const transformed = transformEpisode(apiEpisode);
-
-        // Create EpisodeWithPodcast with podcast info from the API response
-        const episodeWithPodcast: EpisodeWithPodcast = {
-          ...transformed,
-          podcast: {
-            id: apiEpisode.feedId.toString(),
-            title: apiEpisode.feedTitle || 'Ukjent podcast',
-            author: apiEpisode.feedAuthor || '',
-            description: '',
-            imageUrl: apiEpisode.feedImage || '/placeholder-podcast.svg',
-            feedUrl: '',
-            categories: [],
-            language: apiEpisode.feedLanguage || '',
-            episodeCount: 0,
-            lastUpdated: new Date().toISOString(),
-            rating: 3,
-            explicit: false,
-          },
-        };
-
-        setEpisode(episodeWithPodcast);
-      } else {
-        setError('Ingen episoder funnet');
-      }
+      return {
+        ...transformed,
+        podcast: {
+          id: randomPodcast.feedId.toString(),
+          title: feed?.title || randomEp.feedTitle || 'Ukjent podcast',
+          author: feed?.author || '',
+          description: feed?.description || '',
+          imageUrl: feed?.image || randomEp.feedImage || '/placeholder-podcast.svg',
+          feedUrl: feed?.url || '',
+          categories: [],
+          language: feed?.language || '',
+          episodeCount: feed?.episodeCount || 0,
+          lastUpdated: new Date().toISOString(),
+          rating: 3,
+          explicit: feed?.explicit || false,
+        },
+      };
     } catch {
-      setError('Kunne ikke hente tilfeldig episode');
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
+      return null;
     }
   }, []);
+
+  // Fetch a specific curated episode
+  const fetchCuratedEpisode = useCallback(async (): Promise<EpisodeWithPodcast | null> => {
+    if (CURATED_EPISODES.length === 0) return null;
+
+    // Pick a random curated episode
+    const randomCurated = CURATED_EPISODES[Math.floor(Math.random() * CURATED_EPISODES.length)];
+
+    try {
+      const episodeRes = await getEpisodeByGuid(randomCurated.feedId, randomCurated.guid);
+      if (!episodeRes.episode) return null;
+
+      const apiEp = episodeRes.episode;
+      const transformed = transformEpisode(apiEp);
+
+      // Fetch podcast info
+      const podcastRes = await getPodcastByFeedId(randomCurated.feedId);
+      const feed = podcastRes.feed;
+
+      return {
+        ...transformed,
+        podcast: {
+          id: randomCurated.feedId.toString(),
+          title: feed?.title || apiEp.feedTitle || 'Ukjent podcast',
+          author: feed?.author || '',
+          description: feed?.description || '',
+          imageUrl: feed?.image || apiEp.feedImage || '/placeholder-podcast.svg',
+          feedUrl: feed?.url || '',
+          categories: [],
+          language: feed?.language || '',
+          episodeCount: feed?.episodeCount || 0,
+          lastUpdated: new Date().toISOString(),
+          rating: 3,
+          explicit: feed?.explicit || false,
+        },
+      };
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // Fetch random episode from API (original behavior)
+  const fetchRandomFromApi = useCallback(async (): Promise<EpisodeWithPodcast | null> => {
+    const response = await getRecentEpisodes({ max: 1000 });
+
+    if (!response.items || response.items.length === 0) return null;
+
+    // Strictly filter to only allowed languages
+    const filteredEpisodes = response.items.filter((ep) => isAllowedLanguage(ep.feedLanguage));
+    if (filteredEpisodes.length === 0) return null;
+
+    // Pick a random episode
+    const randomIndex = Math.floor(Math.random() * filteredEpisodes.length);
+    const apiEpisode = filteredEpisodes[randomIndex];
+    const transformed = transformEpisode(apiEpisode);
+
+    return {
+      ...transformed,
+      podcast: {
+        id: apiEpisode.feedId.toString(),
+        title: apiEpisode.feedTitle || 'Ukjent podcast',
+        author: apiEpisode.feedAuthor || '',
+        description: '',
+        imageUrl: apiEpisode.feedImage || '/placeholder-podcast.svg',
+        feedUrl: '',
+        categories: [],
+        language: apiEpisode.feedLanguage || '',
+        episodeCount: 0,
+        lastUpdated: new Date().toISOString(),
+        rating: 3,
+        explicit: false,
+      },
+    };
+  }, []);
+
+  const fetchRandomEpisode = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+      setError(null);
+
+      try {
+        let result: EpisodeWithPodcast | null = null;
+        let fromCurated = false;
+
+        // Decide whether to use curated content
+        const hasCuratedContent = CURATED_PODCASTS.length > 0 || CURATED_EPISODES.length > 0;
+        const useCurated =
+          USE_CURATED_DISCOVERY && hasCuratedContent && Math.random() < CURATED_PROBABILITY;
+
+        if (useCurated) {
+          // Try curated episodes first, then curated podcasts
+          if (CURATED_EPISODES.length > 0 && Math.random() < 0.3) {
+            result = await fetchCuratedEpisode();
+          }
+
+          if (!result && CURATED_PODCASTS.length > 0) {
+            result = await fetchFromCuratedPodcast();
+          }
+
+          if (result) {
+            fromCurated = true;
+          }
+        }
+
+        // Fall back to random API if no curated result
+        if (!result) {
+          result = await fetchRandomFromApi();
+        }
+
+        if (result) {
+          setEpisode(result);
+          setIsCurated(fromCurated);
+        } else {
+          setError('Ingen episoder funnet');
+        }
+      } catch {
+        setError('Kunne ikke hente tilfeldig episode');
+      } finally {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [fetchCuratedEpisode, fetchFromCuratedPodcast, fetchRandomFromApi]
+  );
 
   useEffect(() => {
     fetchRandomEpisode();
@@ -149,7 +274,7 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Tilfeldig utvalgt</h2>
+        <h2 className={styles.title}>{isCurated ? 'Anbefalt' : 'Tilfeldig utvalgt'}</h2>
       </div>
 
       <article className={styles.episodeCard}>
