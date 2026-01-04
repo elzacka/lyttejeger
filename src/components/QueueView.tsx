@@ -1,10 +1,10 @@
 import { useState, useRef, useCallback } from 'react';
-import { TrashIcon, GripVerticalIcon, PodcastIcon, CloseIcon, PlayIcon } from './icons';
+import { TrashIcon } from './icons';
 import type { QueueItem } from '../services/db';
-import { formatDuration } from '../utils/search';
+import type { Episode } from '../types/podcast';
 import { SWIPE_THRESHOLD_PX } from '../constants';
 import { ConfirmDialog } from './ConfirmDialog';
-import { EpisodeBadges } from './EpisodeBadges';
+import { EpisodeCard } from './EpisodeCard';
 import styles from './QueueView.module.css';
 
 interface QueueViewProps {
@@ -30,6 +30,24 @@ interface DragState {
   currentY: number;
 }
 
+/**
+ * Convert QueueItem to Episode for EpisodeCard
+ */
+function queueItemToEpisode(item: QueueItem): Episode {
+  return {
+    id: item.episodeId,
+    podcastId: item.podcastId,
+    title: item.title,
+    description: '',
+    audioUrl: item.audioUrl,
+    duration: item.duration || 0,
+    publishedAt: '',
+    imageUrl: item.imageUrl,
+    transcriptUrl: item.transcriptUrl,
+    chaptersUrl: item.chaptersUrl,
+  };
+}
+
 export function QueueView({ queue, onPlay, onRemove, onClear, onReorder }: QueueViewProps) {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [swipedItemId, setSwipedItemId] = useState<number | null>(null);
@@ -50,15 +68,14 @@ export function QueueView({ queue, onPlay, onRemove, onClear, onReorder }: Queue
     dragIndex: number | null;
     dragOverIndex: number | null;
   }>({ dragIndex: null, dragOverIndex: null });
-  const itemRefs = useRef<Map<number, HTMLLIElement>>(new Map());
+  const swipeContentRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const listRef = useRef<HTMLUListElement>(null);
 
   const handleTouchStart = useCallback(
-    (e: React.TouchEvent, itemId: number | undefined) => {
+    (itemId: number | undefined) => (e: React.TouchEvent) => {
       // Reset any other swiped items
       if (swipedItemId && swipedItemId !== itemId) {
-        const prevElement = itemRefs.current.get(swipedItemId);
-        const prevContent = prevElement?.querySelector(`.${styles.swipeContent}`) as HTMLElement;
+        const prevContent = swipeContentRefs.current.get(swipedItemId);
         if (prevContent) {
           prevContent.style.transform = 'translateX(0)';
         }
@@ -75,37 +92,36 @@ export function QueueView({ queue, onPlay, onRemove, onClear, onReorder }: Queue
     [swipedItemId]
   );
 
-  const handleTouchMove = useCallback((e: React.TouchEvent, itemId: number | undefined) => {
-    if (!itemId) return;
+  const handleTouchMove = useCallback(
+    (itemId: number | undefined) => (e: React.TouchEvent) => {
+      if (!itemId) return;
 
-    const touch = e.touches[0];
-    const deltaX = swipeRef.current.startX - touch.clientX;
-    swipeRef.current.currentX = touch.clientX;
+      const touch = e.touches[0];
+      const deltaX = swipeRef.current.startX - touch.clientX;
+      swipeRef.current.currentX = touch.clientX;
 
-    // Only start swiping if horizontal movement is significant
-    if (Math.abs(deltaX) > 10) {
-      swipeRef.current.isSwiping = true;
-    }
+      // Only start swiping if horizontal movement is significant
+      if (Math.abs(deltaX) > 10) {
+        swipeRef.current.isSwiping = true;
+      }
 
-    if (swipeRef.current.isSwiping) {
-      const element = itemRefs.current.get(itemId);
-      if (element) {
-        const translateX = Math.max(0, Math.min(deltaX, SWIPE_THRESHOLD_PX + 20));
-        const content = element.querySelector(`.${styles.swipeContent}`) as HTMLElement;
+      if (swipeRef.current.isSwiping) {
+        const content = swipeContentRefs.current.get(itemId);
         if (content) {
+          const translateX = Math.max(0, Math.min(deltaX, SWIPE_THRESHOLD_PX + 20));
           content.style.transform = `translateX(-${translateX}px)`;
         }
       }
-    }
-  }, []);
+    },
+    []
+  );
 
   const handleTouchEnd = useCallback(
-    (itemId: number | undefined) => {
+    (itemId: number | undefined) => () => {
       if (!itemId) return;
 
       const deltaX = swipeRef.current.startX - swipeRef.current.currentX;
-      const element = itemRefs.current.get(itemId);
-      const content = element?.querySelector(`.${styles.swipeContent}`) as HTMLElement;
+      const content = swipeContentRefs.current.get(itemId);
 
       if (deltaX > SWIPE_THRESHOLD_PX) {
         // Reveal delete button
@@ -200,7 +216,7 @@ export function QueueView({ queue, onPlay, onRemove, onClear, onReorder }: Queue
 
   // Touch drag handlers for the drag handle
   const handleDragTouchStart = useCallback(
-    (e: React.TouchEvent, index: number) => {
+    (index: number) => (e: React.TouchEvent) => {
       e.stopPropagation(); // Prevent swipe-to-delete from triggering
       handleDragStart(index, e.touches[0].clientY);
     },
@@ -223,7 +239,7 @@ export function QueueView({ queue, onPlay, onRemove, onClear, onReorder }: Queue
 
   // Mouse drag handlers for desktop
   const handleDragMouseDown = useCallback(
-    (e: React.MouseEvent, index: number) => {
+    (index: number) => (e: React.MouseEvent) => {
       e.preventDefault();
       handleDragStart(index, e.clientY);
 
@@ -241,6 +257,17 @@ export function QueueView({ queue, onPlay, onRemove, onClear, onReorder }: Queue
       document.addEventListener('mouseup', handleMouseUp);
     },
     [handleDragStart, handleDragMove, handleDragEnd]
+  );
+
+  const setSwipeContentRef = useCallback(
+    (itemId: number) => (el: HTMLDivElement | null) => {
+      if (el) {
+        swipeContentRefs.current.set(itemId, el);
+      } else {
+        swipeContentRefs.current.delete(itemId);
+      }
+    },
+    []
   );
 
   if (queue.length === 0) {
@@ -286,96 +313,35 @@ export function QueueView({ queue, onPlay, onRemove, onClear, onReorder }: Queue
         {queue.map((item, index) => {
           const isDragging = dragState.dragIndex === index;
           const isDragOver = dragState.dragOverIndex === index && dragState.dragIndex !== index;
+
           return (
-            <li
-              key={item.id}
-              className={`${styles.item} ${isDragging ? styles.dragging : ''} ${isDragOver ? styles.dragOver : ''}`}
-              ref={(el) => {
-                if (el && item.id) itemRefs.current.set(item.id, el);
-              }}
-              onTouchStart={(e) => handleTouchStart(e, item.id)}
-              onTouchMove={(e) => handleTouchMove(e, item.id)}
-              onTouchEnd={() => handleTouchEnd(item.id)}
-            >
-              {/* Delete action revealed on swipe */}
-              <div className={styles.swipeAction}>
-                <button
-                  className={styles.deleteButton}
-                  onClick={() => handleRemove(item.id)}
-                  aria-label="Fjern fra kø"
-                >
-                  <TrashIcon size={20} />
-                </button>
-              </div>
-
-              {/* Swipeable content */}
-              <div className={styles.swipeContent}>
-                <div className={styles.topRow}>
-                  {/* Drag handle */}
-                  <button
-                    className={styles.dragHandle}
-                    onMouseDown={(e) => handleDragMouseDown(e, index)}
-                    onTouchStart={(e) => handleDragTouchStart(e, index)}
-                    onTouchMove={handleDragTouchMove}
-                    onTouchEnd={handleDragTouchEnd}
-                    aria-label="Dra for å sortere"
-                  >
-                    <GripVerticalIcon size={20} />
-                  </button>
-
-                  <div className={styles.imageContainer}>
-                    {item.imageUrl || item.podcastImage ? (
-                      <img
-                        src={item.imageUrl || item.podcastImage}
-                        alt=""
-                        className={styles.image}
-                        loading="lazy"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <div className={`${styles.image} image-placeholder`}>
-                        <PodcastIcon size={24} aria-hidden="true" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className={styles.content}>
-                    <p className={styles.podcastName}>{item.podcastTitle}</p>
-                    <p className={styles.episodeTitle}>{item.title}</p>
-                    <p className={styles.meta}>
-                      {item.duration && (
-                        <span className={styles.duration}>{formatDuration(item.duration)}</span>
-                      )}
-                      <EpisodeBadges
-                        chaptersUrl={item.chaptersUrl}
-                        transcriptUrl={item.transcriptUrl}
-                      />
-                    </p>
-                  </div>
-
-                  <div className={styles.actions}>
-                    {/* Desktop: remove button */}
-                    <button
-                      className={`${styles.actionButton} ${styles.desktopOnly}`}
-                      onClick={() => item.id && onRemove(item.id)}
-                      aria-label="Fjern fra kø"
-                    >
-                      <CloseIcon size={18} />
-                    </button>
-
-                    <button
-                      className={styles.playButton}
-                      onClick={() => onPlay(item)}
-                      aria-label={`Spill ${item.title}`}
-                    >
-                      <PlayIcon size={20} />
-                    </button>
-                  </div>
-                </div>
-              </div>
+            <li key={item.id}>
+              <EpisodeCard
+                episode={queueItemToEpisode(item)}
+                podcastInfo={{
+                  id: item.podcastId,
+                  title: item.podcastTitle,
+                  imageUrl: item.podcastImage,
+                }}
+                showPodcastInfo={true}
+                variant="queue"
+                onPlay={() => onPlay(item)}
+                onRemove={() => item.id && handleRemove(item.id)}
+                isDraggable={true}
+                isDragging={isDragging}
+                isDragOver={isDragOver}
+                onDragTouchStart={handleDragTouchStart(index)}
+                onDragTouchMove={handleDragTouchMove}
+                onDragTouchEnd={handleDragTouchEnd}
+                onDragMouseDown={handleDragMouseDown(index)}
+                isSwipeable={true}
+                onSwipeTouchStart={handleTouchStart(item.id)}
+                onSwipeTouchMove={handleTouchMove(item.id)}
+                onSwipeTouchEnd={handleTouchEnd(item.id)}
+                isSwipedOpen={swipedItemId === item.id}
+                swipeContentRef={item.id ? setSwipeContentRef(item.id) : undefined}
+                hideExpand={true}
+              />
             </li>
           );
         })}

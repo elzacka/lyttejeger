@@ -135,15 +135,25 @@ export function EpisodeList({
             <EpisodeCard
               key={episode.id}
               episode={episode}
-              onPlay={(ep) =>
+              podcastInfo={
+                episode.podcast
+                  ? {
+                      id: episode.podcast.id,
+                      title: episode.podcast.title,
+                      imageUrl: episode.podcast.imageUrl,
+                    }
+                  : undefined
+              }
+              showPodcastInfo={true}
+              onPlay={() =>
                 onPlayEpisode({
-                  ...ep,
-                  podcastTitle: ep.podcast?.title,
-                  podcastImage: ep.podcast?.imageUrl,
+                  ...episode,
+                  podcastTitle: episode.podcast?.title,
+                  podcastImage: episode.podcast?.imageUrl,
                 })
               }
-              onAddToQueue={onAddToQueue}
-              onPlayNext={onPlayNext}
+              onAddToQueue={onAddToQueue ? () => onAddToQueue(episode) : undefined}
+              onPlayNext={onPlayNext ? () => onPlayNext(episode) : undefined}
               isInQueue={isInQueue?.(episode.id) ?? false}
               progress={getProgress(episode.id)}
               onSelectPodcast={onSelectPodcast}
@@ -181,15 +191,25 @@ export function EpisodeList({
             >
               <EpisodeCard
                 episode={episode}
-                onPlay={(ep) =>
+                podcastInfo={
+                  episode.podcast
+                    ? {
+                        id: episode.podcast.id,
+                        title: episode.podcast.title,
+                        imageUrl: episode.podcast.imageUrl,
+                      }
+                    : undefined
+                }
+                showPodcastInfo={true}
+                onPlay={() =>
                   onPlayEpisode({
-                    ...ep,
-                    podcastTitle: ep.podcast?.title,
-                    podcastImage: ep.podcast?.imageUrl,
+                    ...episode,
+                    podcastTitle: episode.podcast?.title,
+                    podcastImage: episode.podcast?.imageUrl,
                   })
                 }
-                onAddToQueue={onAddToQueue}
-                onPlayNext={onPlayNext}
+                onAddToQueue={onAddToQueue ? () => onAddToQueue(episode) : undefined}
+                onPlayNext={onPlayNext ? () => onPlayNext(episode) : undefined}
                 isInQueue={isInQueue?.(episode.id) ?? false}
                 progress={getProgress(episode.id)}
                 onSelectPodcast={onSelectPodcast}

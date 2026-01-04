@@ -1,20 +1,12 @@
-import { useEffect, useState, useRef } from 'react';
-import {
-  ArrowLeftIcon,
-  PodcastIcon,
-  StarIcon,
-  MoreVerticalIcon,
-  ListMusicIcon,
-  ListPlusIcon,
-  PlayIcon,
-} from './icons';
+import { useEffect, useState } from 'react';
+import { ArrowLeftIcon, PodcastIcon, StarIcon } from './icons';
 import type { Podcast, Episode } from '../types/podcast';
 import type { PlayingEpisode } from './AudioPlayer';
 import { getEpisodesByFeedId } from '../services/podcastIndex';
 import { transformEpisodes } from '../services/podcastTransform';
-import { formatDuration, formatDateShort, formatDateLong, linkifyText } from '../utils/search';
+import { formatDateShort, linkifyText } from '../utils/search';
 import { translateCategory } from '../utils/categoryTranslations';
-import { EpisodeBadges } from './EpisodeBadges';
+import { EpisodeCard } from './EpisodeCard';
 import styles from './PodcastDetailView.module.css';
 
 interface PodcastDetailViewProps {
@@ -45,35 +37,8 @@ export function PodcastDetailView({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [episodesError, setEpisodesError] = useState<string | null>(null);
   const [hasMoreEpisodes, setHasMoreEpisodes] = useState(false);
-  const [expandedEpisodeId, setExpandedEpisodeId] = useState<string | null>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  // Close menu when clicking outside or pressing Escape
-  useEffect(() => {
-    if (!menuOpenId) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpenId(null);
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMenuOpenId(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [menuOpenId]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -139,9 +104,7 @@ export function PodcastDetailView({
     }
   };
 
-  const handlePlayEpisode = (episode: Episode, e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    e?.preventDefault();
+  const handlePlayEpisode = (episode: Episode) => {
     onPlayEpisode({
       ...episode,
       podcastTitle: podcast.title,
@@ -149,8 +112,12 @@ export function PodcastDetailView({
     });
   };
 
-  const toggleEpisodeExpand = (episodeId: string) => {
-    setExpandedEpisodeId((prev) => (prev === episodeId ? null : episodeId));
+  const handleAddToQueue = (episode: Episode) => {
+    onAddToQueue?.(episode, podcast.title, podcast.imageUrl);
+  };
+
+  const handlePlayNext = (episode: Episode) => {
+    onPlayNext?.(episode, podcast.title, podcast.imageUrl);
   };
 
   return (
@@ -275,147 +242,19 @@ export function PodcastDetailView({
           )}
 
           {!isLoadingEpisodes && episodes.length > 0 && (
-            <ul className={styles.episodeList}>
-              {episodes.map((episode) => {
-                const isExpanded = expandedEpisodeId === episode.id;
-                const isMenuOpen = menuOpenId === episode.id;
-                return (
-                  <li
-                    key={episode.id}
-                    className={`${styles.episodeItem} ${isMenuOpen ? styles.menuOpen : ''}`}
-                  >
-                    <div className={styles.episodeHeader}>
-                      <button
-                        className={styles.episodeToggle}
-                        onClick={() => toggleEpisodeExpand(episode.id)}
-                        aria-expanded={isExpanded}
-                        aria-controls={`episode-details-${episode.id}`}
-                      >
-                        <div className={styles.episodeInfo}>
-                          <p className={styles.episodeTitle}>{episode.title}</p>
-                          <div className={styles.episodeMeta}>
-                            <span>{formatDateLong(episode.publishedAt)}</span>
-                            {formatDuration(episode.duration) && (
-                              <span>{formatDuration(episode.duration)}</span>
-                            )}
-                            <EpisodeBadges
-                              chaptersUrl={episode.chaptersUrl}
-                              transcriptUrl={episode.transcriptUrl}
-                            />
-                          </div>
-                        </div>
-                      </button>
-                      <div className={styles.actions}>
-                        {onAddToQueue && (
-                          <div
-                            className={styles.menuContainer}
-                            ref={menuOpenId === episode.id ? menuRef : null}
-                          >
-                            <button
-                              className={styles.menuButton}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                setMenuOpenId(menuOpenId === episode.id ? null : episode.id);
-                              }}
-                              aria-label="Flere valg"
-                              aria-expanded={menuOpenId === episode.id}
-                            >
-                              <MoreVerticalIcon size={20} />
-                            </button>
-                            {menuOpenId === episode.id && (
-                              <div
-                                className={styles.menuDropdown}
-                                role="menu"
-                                onKeyDown={(e) => {
-                                  const dropdown = e.currentTarget;
-                                  const items = dropdown.querySelectorAll('button:not(:disabled)');
-                                  if (!items?.length) return;
-                                  const currentIndex = Array.from(items).findIndex(
-                                    (item) => item === document.activeElement
-                                  );
-                                  if (e.key === 'ArrowDown') {
-                                    e.preventDefault();
-                                    const nextIndex =
-                                      currentIndex < items.length - 1 ? currentIndex + 1 : 0;
-                                    (items[nextIndex] as HTMLElement).focus();
-                                  } else if (e.key === 'ArrowUp') {
-                                    e.preventDefault();
-                                    const prevIndex =
-                                      currentIndex > 0 ? currentIndex - 1 : items.length - 1;
-                                    (items[prevIndex] as HTMLElement).focus();
-                                  }
-                                }}
-                              >
-                                <button
-                                  className={styles.menuItem}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    onPlayNext?.(episode, podcast.title, podcast.imageUrl);
-                                    setMenuOpenId(null);
-                                  }}
-                                  role="menuitem"
-                                >
-                                  <ListMusicIcon size={18} />
-                                  Spill neste
-                                </button>
-                                <button
-                                  className={styles.menuItem}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    onAddToQueue(episode, podcast.title, podcast.imageUrl);
-                                    setMenuOpenId(null);
-                                  }}
-                                  disabled={isInQueue?.(episode.id)}
-                                  role="menuitem"
-                                >
-                                  <ListPlusIcon size={18} />
-                                  {isInQueue?.(episode.id) ? 'I køen' : 'Legg til i kø'}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        <button
-                          className={styles.playButton}
-                          onClick={(e) => handlePlayEpisode(episode, e)}
-                          aria-label={`Spill ${episode.title}`}
-                        >
-                          <PlayIcon size={20} />
-                        </button>
-                      </div>
-                    </div>
-                    {isExpanded && (
-                      <div id={`episode-details-${episode.id}`} className={styles.episodeDetails}>
-                        {episode.description ? (
-                          <p className={styles.episodeDescription}>
-                            {linkifyText(episode.description).map((part, idx) =>
-                              part.type === 'link' ? (
-                                <a
-                                  key={idx}
-                                  href={part.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={styles.descriptionLink}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {part.content}
-                                </a>
-                              ) : (
-                                <span key={idx}>{part.content}</span>
-                              )
-                            )}
-                          </p>
-                        ) : (
-                          <p className={styles.noDescription}>Ingen beskrivelse tilgjengelig</p>
-                        )}
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
+            <ul className={styles.episodeList} role="list">
+              {episodes.map((episode) => (
+                <li key={episode.id}>
+                  <EpisodeCard
+                    episode={episode}
+                    showPodcastInfo={false}
+                    onPlay={handlePlayEpisode}
+                    onAddToQueue={onAddToQueue ? handleAddToQueue : undefined}
+                    onPlayNext={onPlayNext ? handlePlayNext : undefined}
+                    isInQueue={isInQueue?.(episode.id)}
+                  />
+                </li>
+              ))}
             </ul>
           )}
 

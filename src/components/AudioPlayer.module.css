@@ -647,8 +647,13 @@
 
   .player.collapsed .closeButton {
     display: flex;
-    top: var(--space-2xs);
+    /* Position at very top right, aligned with swipe handle area */
+    top: 2px;
+    right: var(--space-xs);
     transform: none;
+    /* Smaller touch target to fit in handle area */
+    width: var(--button-sm);
+    height: var(--button-sm);
   }
 
   .player.expanded .closeButton {

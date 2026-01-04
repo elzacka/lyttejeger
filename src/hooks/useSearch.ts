@@ -183,8 +183,10 @@ export function useSearch() {
 
       if (currentSearchRef.current !== query) return;
 
-      // Transform and filter: remove dead feeds, then apply language filter
+      // Transform and filter: remove dead feeds, then apply language and category filters
       let podcasts = transformFeeds(allFeeds);
+
+      // Apply language filter
       if (filters.languages.length > 0) {
         // User selected specific languages - use those
         podcasts = podcasts.filter((p) =>
@@ -193,6 +195,20 @@ export function useSearch() {
       } else {
         // No user filter - use default allowed languages
         podcasts = podcasts.filter((p) => isAllowedLanguage(p.language));
+      }
+
+      // Apply category filter (API ignores cat param when q is set, so filter client-side)
+      if (hasCategory) {
+        podcasts = podcasts.filter((p) =>
+          p.categories.some((podcastCat) =>
+            filters.categories.some(
+              (filterCat) =>
+                podcastCat.toLowerCase() === filterCat.toLowerCase() ||
+                podcastCat.toLowerCase().includes(filterCat.toLowerCase()) ||
+                filterCat.toLowerCase().includes(podcastCat.toLowerCase())
+            )
+          )
+        );
       }
 
       // Apply title boost if enabled

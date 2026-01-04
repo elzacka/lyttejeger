@@ -1,22 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  SpinnerIcon,
-  CheckIcon,
-  MoreVerticalIcon,
-  ListMusicIcon,
-  ListPlusIcon,
-  PlayIcon,
-} from './icons';
+import { SpinnerIcon } from './icons';
 import type { Subscription, PlaybackPosition } from '../services/db';
 import { getInProgressEpisodes } from '../services/db';
 import type { Episode } from '../types/podcast';
 import type { PlayingEpisode } from './AudioPlayer';
 import { getEpisodesByFeedIds } from '../services/podcastIndex';
 import { transformEpisodes } from '../services/podcastTransform';
-import { formatDuration, formatDateLong, linkifyText } from '../utils/search';
 import { usePlaybackProgress } from '../hooks/usePlaybackProgress';
 import { PullToRefresh } from './PullToRefresh';
-import { EpisodeBadges } from './EpisodeBadges';
+import { EpisodeCard } from './EpisodeCard';
 import { RECENT_EPISODES_MS, MAX_EPISODES_PER_REQUEST, MS_PER_SECOND } from '../constants';
 import styles from './HomeView.module.css';
 
@@ -49,13 +41,7 @@ export function HomeView({
   const [inProgressEpisodes, setInProgressEpisodes] = useState<InProgressEpisode[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
-  const [expandedEpisodeId, setExpandedEpisodeId] = useState<string | null>(null);
   const { getProgress } = usePlaybackProgress();
-
-  const toggleEpisodeExpand = useCallback((episodeId: string) => {
-    setExpandedEpisodeId((prev) => (prev === episodeId ? null : episodeId));
-  }, []);
 
   const fetchRecentEpisodes = useCallback(async () => {
     if (subscriptions.length === 0) {
@@ -148,14 +134,20 @@ export function HomeView({
     fetchRecentEpisodes();
   }, [fetchRecentEpisodes]);
 
-  const handlePlayEpisode = (episode: EpisodeWithSubscription, e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    e?.preventDefault();
+  const handlePlayEpisode = (episode: EpisodeWithSubscription) => {
     onPlayEpisode({
       ...episode,
       podcastTitle: episode.subscription.title,
       podcastImage: episode.subscription.imageUrl,
     });
+  };
+
+  const handleAddToQueue = (episode: EpisodeWithSubscription) => {
+    onAddToQueue(episode, episode.subscription.title, episode.subscription.imageUrl);
+  };
+
+  const handlePlayNext = (episode: EpisodeWithSubscription) => {
+    onPlayNext(episode, episode.subscription.title, episode.subscription.imageUrl);
   };
 
   if (subscriptions.length === 0) {
@@ -208,154 +200,32 @@ export function HomeView({
     episode: EpisodeWithSubscription,
     showResumeProgress?: { position: number; duration: number }
   ) => {
-    const isMenuOpen = menuOpenId === episode.id;
-    const isExpanded = expandedEpisodeId === episode.id;
     const progress = getProgress(episode.id);
     const displayProgress = showResumeProgress
       ? {
+          position: showResumeProgress.position,
+          duration: showResumeProgress.duration,
           progress: (showResumeProgress.position / showResumeProgress.duration) * 100,
           completed: false,
         }
       : progress;
 
     return (
-      <li key={episode.id} className={`${styles.item} ${isMenuOpen ? styles.menuOpen : ''}`}>
-        <div className={styles.episodeHeader}>
-          <button
-            className={styles.episodeToggle}
-            onClick={() => toggleEpisodeExpand(episode.id)}
-            aria-expanded={isExpanded}
-            aria-controls={`episode-details-${episode.id}`}
-          >
-            <img
-              src={episode.subscription.imageUrl}
-              alt=""
-              className={styles.image}
-              loading="lazy"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-              }}
-            />
-            <div className={styles.info}>
-              <span className={styles.podcastName}>{episode.subscription.title}</span>
-              <span className={styles.episodeTitle}>{episode.title}</span>
-              <div className={styles.meta}>
-                <span>{formatDateLong(episode.publishedAt)}</span>
-                {formatDuration(episode.duration) && (
-                  <span>{formatDuration(episode.duration)}</span>
-                )}
-                {displayProgress?.completed && (
-                  <span className={styles.completed}>
-                    <CheckIcon size={14} aria-hidden="true" />
-                    Hørt
-                  </span>
-                )}
-                {displayProgress && !displayProgress.completed && displayProgress.progress > 1 && (
-                  <span className={styles.inProgress}>{Math.round(displayProgress.progress)}%</span>
-                )}
-                <EpisodeBadges
-                  chaptersUrl={episode.chaptersUrl}
-                  transcriptUrl={episode.transcriptUrl}
-                />
-              </div>
-              {displayProgress && !displayProgress.completed && displayProgress.progress > 1 && (
-                <div className={styles.progressBar}>
-                  <div
-                    className={styles.progressFill}
-                    style={{ width: `${displayProgress.progress}%` }}
-                  />
-                </div>
-              )}
-            </div>
-          </button>
-          <div className={styles.actions}>
-            <div className={styles.menuContainer}>
-              <button
-                className={styles.menuButton}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setMenuOpenId(menuOpenId === episode.id ? null : episode.id);
-                }}
-                aria-label="Flere valg"
-                aria-expanded={isMenuOpen}
-              >
-                <MoreVerticalIcon size={20} />
-              </button>
-              {isMenuOpen && (
-                <div className={styles.menuDropdown}>
-                  <button
-                    className={styles.menuItem}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      onPlayNext(
-                        episode,
-                        episode.subscription.title,
-                        episode.subscription.imageUrl
-                      );
-                      setMenuOpenId(null);
-                    }}
-                  >
-                    <ListMusicIcon size={18} />
-                    Spill neste
-                  </button>
-                  <button
-                    className={styles.menuItem}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      onAddToQueue(
-                        episode,
-                        episode.subscription.title,
-                        episode.subscription.imageUrl
-                      );
-                      setMenuOpenId(null);
-                    }}
-                    disabled={isInQueue(episode.id)}
-                  >
-                    <ListPlusIcon size={18} />
-                    {isInQueue(episode.id) ? 'I køen' : 'Legg til i kø'}
-                  </button>
-                </div>
-              )}
-            </div>
-            <button
-              className={styles.playButton}
-              onClick={(e) => handlePlayEpisode(episode, e)}
-              aria-label={`Spill ${episode.title}`}
-            >
-              <PlayIcon size={20} />
-            </button>
-          </div>
-        </div>
-        {isExpanded && (
-          <div id={`episode-details-${episode.id}`} className={styles.episodeDetails}>
-            {episode.description ? (
-              <p className={styles.episodeDescription}>
-                {linkifyText(episode.description).map((part, idx) =>
-                  part.type === 'link' ? (
-                    <a
-                      key={idx}
-                      href={part.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.descriptionLink}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {part.content}
-                    </a>
-                  ) : (
-                    <span key={idx}>{part.content}</span>
-                  )
-                )}
-              </p>
-            ) : (
-              <p className={styles.noDescription}>Ingen beskrivelse tilgjengelig</p>
-            )}
-          </div>
-        )}
+      <li key={episode.id}>
+        <EpisodeCard
+          episode={episode}
+          podcastInfo={{
+            id: episode.subscription.podcastId,
+            title: episode.subscription.title,
+            imageUrl: episode.subscription.imageUrl,
+          }}
+          showPodcastInfo={true}
+          progress={displayProgress}
+          isInQueue={isInQueue(episode.id)}
+          onPlay={() => handlePlayEpisode(episode)}
+          onAddToQueue={() => handleAddToQueue(episode)}
+          onPlayNext={() => handlePlayNext(episode)}
+        />
       </li>
     );
   };
@@ -370,7 +240,7 @@ export function HomeView({
             Fortsett å lytte
             <span className={styles.badge}>{inProgressEpisodes.length}</span>
           </h2>
-          <ul className={styles.list}>
+          <ul className={styles.list} role="list">
             {inProgressEpisodes.map((episode) =>
               renderEpisodeItem(episode, {
                 position: episode.playbackPosition.position,
@@ -389,7 +259,9 @@ export function HomeView({
             Siste 7 dager
             <span className={styles.badge}>{episodes.length}</span>
           </h2>
-          <ul className={styles.list}>{episodes.map((episode) => renderEpisodeItem(episode))}</ul>
+          <ul className={styles.list} role="list">
+            {episodes.map((episode) => renderEpisodeItem(episode))}
+          </ul>
         </>
       )}
     </section>
