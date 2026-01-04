@@ -14,6 +14,7 @@ import { getEpisodesByFeedId } from '../services/podcastIndex';
 import { transformEpisodes } from '../services/podcastTransform';
 import { formatDuration, formatDateShort, formatDateLong, linkifyText } from '../utils/search';
 import { translateCategory } from '../utils/categoryTranslations';
+import { EpisodeBadges } from './EpisodeBadges';
 import styles from './PodcastDetailView.module.css';
 
 interface PodcastDetailViewProps {
@@ -297,6 +298,10 @@ export function PodcastDetailView({
                             {formatDuration(episode.duration) && (
                               <span>{formatDuration(episode.duration)}</span>
                             )}
+                            <EpisodeBadges
+                              chaptersUrl={episode.chaptersUrl}
+                              transcriptUrl={episode.transcriptUrl}
+                            />
                           </div>
                         </div>
                       </button>

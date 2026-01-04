@@ -1,0 +1,18 @@
+.badges {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.badge svg {
+  width: 12px;
+  height: 12px;
+}

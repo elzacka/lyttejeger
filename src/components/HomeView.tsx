@@ -16,6 +16,7 @@ import { transformEpisodes } from '../services/podcastTransform';
 import { formatDuration, formatDateLong, linkifyText } from '../utils/search';
 import { usePlaybackProgress } from '../hooks/usePlaybackProgress';
 import { PullToRefresh } from './PullToRefresh';
+import { EpisodeBadges } from './EpisodeBadges';
 import { RECENT_EPISODES_MS, MAX_EPISODES_PER_REQUEST, MS_PER_SECOND } from '../constants';
 import styles from './HomeView.module.css';
 
@@ -253,6 +254,10 @@ export function HomeView({
                 {displayProgress && !displayProgress.completed && displayProgress.progress > 1 && (
                   <span className={styles.inProgress}>{Math.round(displayProgress.progress)}%</span>
                 )}
+                <EpisodeBadges
+                  chaptersUrl={episode.chaptersUrl}
+                  transcriptUrl={episode.transcriptUrl}
+                />
               </div>
               {displayProgress && !displayProgress.completed && displayProgress.progress > 1 && (
                 <div className={styles.progressBar}>

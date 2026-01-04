@@ -4,6 +4,7 @@ import type { QueueItem } from '../services/db';
 import { formatDuration } from '../utils/search';
 import { SWIPE_THRESHOLD_PX } from '../constants';
 import { ConfirmDialog } from './ConfirmDialog';
+import { EpisodeBadges } from './EpisodeBadges';
 import styles from './QueueView.module.css';
 
 interface QueueViewProps {
@@ -344,9 +345,15 @@ export function QueueView({ queue, onPlay, onRemove, onClear, onReorder }: Queue
                   <div className={styles.content}>
                     <p className={styles.podcastName}>{item.podcastTitle}</p>
                     <p className={styles.episodeTitle}>{item.title}</p>
-                    {item.duration && (
-                      <p className={styles.duration}>{formatDuration(item.duration)}</p>
-                    )}
+                    <p className={styles.meta}>
+                      {item.duration && (
+                        <span className={styles.duration}>{formatDuration(item.duration)}</span>
+                      )}
+                      <EpisodeBadges
+                        chaptersUrl={item.chaptersUrl}
+                        transcriptUrl={item.transcriptUrl}
+                      />
+                    </p>
                   </div>
 
                   <div className={styles.actions}>

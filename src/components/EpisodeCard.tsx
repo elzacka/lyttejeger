@@ -6,13 +6,12 @@ import {
   ListMusicIcon,
   ListPlusIcon,
   PlayIcon,
-  ChapterListIcon,
-  TranscriptIcon,
 } from './icons';
 import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlaybackProgress } from '../hooks/usePlaybackProgress';
 import { formatDuration, formatDateLong, linkifyText } from '../utils/search';
 import { FEATURES } from '../config/features';
+import { EpisodeBadges } from './EpisodeBadges';
 import styles from './EpisodeCard.module.css';
 
 /**
@@ -209,16 +208,10 @@ export const EpisodeCard = memo(function EpisodeCard({
                 <span className={styles.inProgress}>{Math.round(progress.progress)}%</span>
               )}
               {isInQueue && <span className={styles.inQueue}>I kø</span>}
-              {FEATURES.CHAPTERS && episode.chaptersUrl && (
-                <span className={styles.p2pBadge} title="Har kapitler">
-                  <ChapterListIcon size={12} aria-hidden="true" />
-                </span>
-              )}
-              {FEATURES.TRANSCRIPTS && episode.transcriptUrl && (
-                <span className={styles.p2pBadge} title="Har transkripsjon">
-                  <TranscriptIcon size={12} aria-hidden="true" />
-                </span>
-              )}
+              <EpisodeBadges
+                chaptersUrl={episode.chaptersUrl}
+                transcriptUrl={episode.transcriptUrl}
+              />
             </div>
             {progress && !progress.completed && progress.progress > 1 && (
               <div className={styles.progressBar}>
