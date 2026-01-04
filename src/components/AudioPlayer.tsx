@@ -647,10 +647,6 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     setIsExpanded((prev) => !prev);
   }, []);
 
-  const handleInfoClick = useCallback(() => {
-    toggleExpanded();
-  }, [toggleExpanded]);
-
   // Swipe gesture handling
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -735,7 +731,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
           {/* Episode info - on mobile collapsed: play/pause, otherwise: expand/collapse */}
           <button
             className={styles.info}
-            onClick={handleInfoClick}
+            onClick={toggleExpanded}
             aria-label={isExpanded ? 'Skjul kontroller' : 'Vis kontroller'}
             aria-expanded={isExpanded}
           >

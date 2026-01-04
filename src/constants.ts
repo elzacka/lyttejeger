@@ -12,11 +12,8 @@ export const RECENT_EPISODES_MS = RECENT_EPISODES_DAYS * MS_PER_DAY;
 
 // API and fetching
 export const MAX_EPISODES_PER_REQUEST = 100;
-export const MAX_PODCASTS_PER_REQUEST = 100;
 
 // UI constants
-export const DESCRIPTION_TRUNCATE_LENGTH = 120;
-export const DRAG_THRESHOLD_PX = 100;
 export const ESTIMATED_LIST_ITEM_HEIGHT_PX = 100;
 
 // Swipe gesture threshold (px) - used in QueueView and SubscriptionsView
@@ -34,7 +31,3 @@ export const SORT_LABELS: Record<SortBy, string> = {
   oldest: 'Eldste',
   popular: 'Populære',
 };
-
-// Audio player
-export const PLAYBACK_SAVE_INTERVAL_MS = 5 * MS_PER_SECOND;
-export const PLAYBACK_UPDATE_INTERVAL_MS = MS_PER_SECOND;

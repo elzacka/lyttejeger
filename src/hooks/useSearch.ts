@@ -13,7 +13,7 @@ import {
   type SearchOptions,
 } from '../services/podcastIndex';
 import { transformFeeds, transformEpisodes } from '../services/podcastTransform';
-import { parseSearchQuery } from '../utils/search';
+import { parseSearchQuery, isAllowedLanguage } from '../utils/search';
 import { FEATURES } from '../config/features';
 
 const initialFilters: SearchFilters = {
@@ -44,7 +44,6 @@ export function useSearch() {
   const [apiEpisodes, setApiEpisodes] = useState<Episode[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchWarning, setSearchWarning] = useState<string | null>(null);
 
   // Always use API
   const shouldUseApi = isConfigured();
@@ -67,13 +66,6 @@ export function useSearch() {
   // Allowed language codes for API filter (Norwegian, Danish, Swedish, English)
   const ALLOWED_LANGUAGES_API = 'no,nb,nn,da,sv,en';
 
-  // Check if a language code is allowed (for client-side filtering)
-  const isAllowedLanguage = (langCode: string | undefined): boolean => {
-    if (!langCode) return true;
-    const code = langCode.toLowerCase().slice(0, 2);
-    return ['no', 'nb', 'nn', 'da', 'sv', 'en'].includes(code);
-  };
-
   // Search via API with enhanced options
   const searchViaApi = async (query: string, searchType: 'podcasts' | 'episodes') => {
     if (!query.trim()) {
@@ -86,7 +78,6 @@ export function useSearch() {
 
     setIsLoading(true);
     setError(null);
-    setSearchWarning(null);
 
     try {
       // Parse query to extract only positive terms for API
@@ -231,8 +222,6 @@ export function useSearch() {
       if (searchType === 'episodes') {
         const allEpisodes: Episode[] = [];
         const existingIds = new Set<string>();
-        let strategy1Failed = false;
-        let strategy2Failed = false;
 
         // Strategy 1: byperson API - searches person tags, title, description
         try {
@@ -274,8 +263,7 @@ export function useSearch() {
             existingIds.add(ep.id);
           }
         } catch {
-          strategy1Failed = true;
-          // Continue to strategy 2
+          // Strategy 1 failed, continue to strategy 2
         }
 
         // Strategy 2: Fetch episodes from matching podcasts using batch API
@@ -345,7 +333,7 @@ export function useSearch() {
               }
             }
           } catch {
-            strategy2Failed = true;
+            // Strategy 2 failed - continue with episodes from strategy 1
           }
         }
 
@@ -371,13 +359,6 @@ export function useSearch() {
             const dateB = new Date(b.publishedAt).getTime();
             return filters.sortBy === 'oldest' ? dateA - dateB : dateB - dateA;
           });
-        }
-
-        // Set warning if search was incomplete
-        if (strategy1Failed && strategy2Failed) {
-          setSearchWarning('Søket ga ufullstendige resultater. Prøv igjen senere.');
-        } else if (strategy1Failed || strategy2Failed) {
-          setSearchWarning('Noen episoder kan mangle fra resultatene.');
         }
 
         setApiEpisodes(finalEpisodes);
@@ -874,17 +855,6 @@ export function useSearch() {
     });
   }, []);
 
-  const toggleExcludeCategory = useCallback((category: string) => {
-    startTransition(() => {
-      setFilters((prev) => ({
-        ...prev,
-        excludeCategories: prev.excludeCategories.includes(category)
-          ? prev.excludeCategories.filter((c) => c !== category)
-          : [...prev.excludeCategories, category],
-      }));
-    });
-  }, []);
-
   const toggleLanguage = useCallback((language: string) => {
     startTransition(() => {
       setFilters((prev) => ({
@@ -911,12 +881,6 @@ export function useSearch() {
   const setSortBy = useCallback((sortBy: SearchFilters['sortBy']) => {
     startTransition(() => {
       setFilters((prev) => ({ ...prev, sortBy }));
-    });
-  }, []);
-
-  const setExplicit = useCallback((explicit: boolean | null) => {
-    startTransition(() => {
-      setFilters((prev) => ({ ...prev, explicit }));
     });
   }, []);
 
@@ -948,23 +912,18 @@ export function useSearch() {
     filters,
     results,
     isPending: isPending || isLoading,
-    isLoading,
     error,
-    searchWarning,
     activeTab,
     setActiveTab,
     setQuery,
     toggleCategory,
-    toggleExcludeCategory,
     toggleLanguage,
     setDateFrom,
     setDateTo,
     setSortBy,
-    setExplicit,
     setDiscoveryMode,
     clearFilters,
     activeFilterCount,
-    isApiConfigured: shouldUseApi,
   };
 }
 

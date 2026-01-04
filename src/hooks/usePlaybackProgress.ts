@@ -11,11 +11,6 @@ export interface PlaybackProgress {
 export function usePlaybackProgress() {
   const [positions, setPositions] = useState<Map<string, PlaybackPosition>>(new Map());
 
-  const refresh = useCallback(async () => {
-    const data = await getAllPlaybackPositions();
-    setPositions(data);
-  }, []);
-
   // Load initial data and set up periodic refresh
   useEffect(() => {
     let mounted = true;
@@ -52,5 +47,5 @@ export function usePlaybackProgress() {
     [positions]
   );
 
-  return { getProgress, refresh };
+  return { getProgress };
 }

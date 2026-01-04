@@ -2,24 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { PodcastIcon, PlayIcon, RefreshIcon, SpinnerIcon } from './icons';
 import { getRecentEpisodes } from '../services/podcastIndex';
 import { transformEpisode } from '../services/podcastTransform';
-import { formatDuration, formatDateLong } from '../utils/search';
+import { formatDuration, formatDateLong, isAllowedLanguage } from '../utils/search';
 import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlayingEpisode } from './AudioPlayer';
 import styles from './RandomDiscovery.module.css';
-
-// Allowed language prefixes for random discovery (Nordic + English)
-const ALLOWED_LANG_PREFIXES = ['no', 'nb', 'nn', 'en', 'da', 'sv'];
-
-/**
- * Check if a language code is in our allowed list
- * Handles various formats: "en", "en-US", "en_US", etc.
- */
-function isAllowedLanguage(lang: string | undefined | null): boolean {
-  if (!lang) return false;
-  // Normalize: lowercase, take first part before - or _
-  const normalized = lang.toLowerCase().split(/[-_]/)[0];
-  return ALLOWED_LANG_PREFIXES.includes(normalized);
-}
 
 interface RandomDiscoveryProps {
   onPlayEpisode: (episode: PlayingEpisode) => void;
@@ -45,7 +31,9 @@ export function RandomDiscovery({ onPlayEpisode }: RandomDiscoveryProps) {
 
       if (response.items && response.items.length > 0) {
         // Strictly filter to only allowed languages - NO fallback to unfiltered
-        const filteredEpisodes = response.items.filter((ep) => isAllowedLanguage(ep.feedLanguage));
+        const filteredEpisodes = response.items.filter((ep) =>
+          isAllowedLanguage(ep.feedLanguage, true)
+        );
 
         if (filteredEpisodes.length === 0) {
           setError('Ingen episoder på norsk, svensk, dansk eller engelsk funnet');
