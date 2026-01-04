@@ -4,6 +4,10 @@ export interface IconProps extends SVGProps<SVGSVGElement> {
   size?: number;
 }
 
+/**
+ * ChapterListIcon - Represents chapters/table of contents
+ * Based on Lucide table-of-contents icon (MIT license)
+ */
 export function ChapterListIcon({ size = 24, ...props }: IconProps) {
   return (
     <svg
@@ -18,13 +22,12 @@ export function ChapterListIcon({ size = 24, ...props }: IconProps) {
       strokeLinejoin="round"
       {...props}
     >
-      {/* List icon with play markers - represents chapters */}
-      <line x1="8" y1="6" x2="21" y2="6" />
-      <line x1="8" y1="12" x2="21" y2="12" />
-      <line x1="8" y1="18" x2="21" y2="18" />
-      <polygon points="3,5 3,7 5,6" />
-      <polygon points="3,11 3,13 5,12" />
-      <polygon points="3,17 3,19 5,18" />
+      <path d="M16 12H3" />
+      <path d="M16 18H3" />
+      <path d="M16 6H3" />
+      <path d="M21 6h.01" />
+      <path d="M21 12h.01" />
+      <path d="M21 18h.01" />
     </svg>
   );
 }

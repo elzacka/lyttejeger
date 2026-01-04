@@ -39,6 +39,8 @@ function toPlayingEpisode(
     duration: episode.duration,
     description: episode.description,
     publishedAt: episode.publishedAt,
+    transcriptUrl: episode.transcriptUrl,
+    chaptersUrl: episode.chaptersUrl,
   };
 }
 

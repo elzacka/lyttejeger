@@ -82,7 +82,7 @@
   background: var(--border);
   opacity: 0.8;
   border-radius: 3px;
-  margin: var(--space-xs) auto 0;
+  margin: var(--space-2xs) auto 0;
   transition:
     opacity var(--transition-fast),
     background var(--transition-fast);
@@ -625,7 +625,7 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    padding: var(--space-xs) var(--space-sm);
+    padding: var(--space-2xs) var(--space-sm) var(--space-xs);
   }
 
   .player.collapsed .swipeHandle {
@@ -636,6 +636,7 @@
   .player.collapsed .swipeHint {
     display: block;
     order: -1;
+    margin-top: 2px;
   }
 
   .player.collapsed .contentRow {
@@ -683,7 +684,7 @@
 
   .player.expanded .closeButton {
     display: flex;
-    top: var(--space-sm);
+    top: var(--space-xs);
     transform: none;
   }
 
@@ -695,15 +696,15 @@
   .player.expanded .container {
     display: flex;
     flex-direction: column;
-    gap: var(--space-sm);
-    /* Add top padding to make room for close button: button-lg (44px) + space-sm (8px) + gap (8px) */
-    padding: calc(var(--button-lg) + var(--space-md)) var(--space-sm) var(--space-sm);
+    gap: var(--space-xs);
+    /* Add top padding to make room for close button */
+    padding: var(--space-xs) var(--space-sm) var(--space-sm);
     position: relative;
   }
 
   .player.expanded .swipeHandle {
     display: block;
-    margin-bottom: var(--space-xs);
+    margin-bottom: var(--space-2xs);
   }
 
   .player.expanded .contentRow {
@@ -730,7 +731,7 @@
   .player.expanded .fullControls {
     display: flex;
     flex-direction: column;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
     width: 100%;
   }
 
