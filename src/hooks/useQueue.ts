@@ -39,6 +39,8 @@ export function useQueue() {
         imageUrl: episode.imageUrl,
         podcastImage: episode.podcastImage,
         duration: episode.duration,
+        transcriptUrl: episode.transcriptUrl,
+        chaptersUrl: episode.chaptersUrl,
       });
       const items = await getQueue();
       setQueue(items);
@@ -58,6 +60,8 @@ export function useQueue() {
         imageUrl: episode.imageUrl,
         podcastImage: episode.podcastImage,
         duration: episode.duration,
+        transcriptUrl: episode.transcriptUrl,
+        chaptersUrl: episode.chaptersUrl,
       });
       const items = await getQueue();
       setQueue(items);
@@ -105,6 +109,8 @@ export function useQueue() {
         description: '',
         publishedAt: '',
         podcastId: next.podcastId,
+        transcriptUrl: next.transcriptUrl,
+        chaptersUrl: next.chaptersUrl,
       };
     } catch {
       return null;

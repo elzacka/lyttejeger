@@ -786,15 +786,6 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               )}
             </button>
           </div>
-
-          {/* Close button - mobile collapsed */}
-          <button
-            className={styles.mobileCloseButton}
-            onClick={onClose}
-            aria-label="Lukk avspiller"
-          >
-            <CloseIcon size={24} />
-          </button>
         </div>
         {/* End contentRow */}
 

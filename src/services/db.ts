@@ -20,6 +20,8 @@ export interface QueueItem {
   imageUrl?: string;
   podcastImage?: string;
   duration?: number;
+  transcriptUrl?: string;
+  chaptersUrl?: string;
   addedAt: number; // timestamp
   position: number; // order in queue
 }

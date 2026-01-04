@@ -170,6 +170,8 @@ function App() {
       duration: item.duration ?? 0,
       description: '',
       publishedAt: '',
+      transcriptUrl: item.transcriptUrl,
+      chaptersUrl: item.chaptersUrl,
     });
   }, []);
 
