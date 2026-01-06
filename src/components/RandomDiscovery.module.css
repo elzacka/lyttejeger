@@ -123,6 +123,7 @@
   font-size: var(--font-sm);
   color: var(--text-secondary);
   line-height: 1.5;
+  white-space: pre-line;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -132,6 +133,19 @@
 .episodeDescription.expanded {
   display: block;
   -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+  overflow: visible;
+  white-space: pre-line;
+}
+
+.episodeDescription a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.episodeDescription a:hover {
+  opacity: 0.8;
 }
 
 .expandButton {

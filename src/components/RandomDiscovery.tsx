@@ -10,12 +10,8 @@ import { transformEpisode } from '../services/podcastTransform';
 import { formatDuration, formatDateLong } from '../utils/search';
 import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlayingEpisode } from './AudioPlayer';
-import {
-  CURATED_PODCASTS,
-  CURATED_EPISODES,
-  DISCOVERY_MODE,
-  CURATED_PROBABILITY,
-} from '../data/curatedContent';
+import { CURATED_PODCASTS, CURATED_EPISODES, DISCOVERY_MODE } from '../data/curatedContent';
+import { FormattedText } from './FormattedText';
 import styles from './RandomDiscovery.module.css';
 
 // Allowed language prefixes for random discovery (Nordic + English)
@@ -180,43 +176,47 @@ export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById }: RandomDi
         let result: EpisodeWithPodcast | null = null;
         let fromCurated = false;
 
-        // Decide source based on DISCOVERY_MODE
-        const hasCuratedContent = CURATED_PODCASTS.length > 0 || CURATED_EPISODES.length > 0;
+        // Velg kilde basert på DISCOVERY_MODE
+        switch (DISCOVERY_MODE) {
+          case 'random':
+            // Variant 1: Kun tilfeldige fra API
+            result = await fetchRandomFromApi();
+            break;
 
-        if (DISCOVERY_MODE === 'curated-only' && hasCuratedContent) {
-          // Only use curated content
-          if (CURATED_EPISODES.length > 0 && Math.random() < 0.3) {
-            result = await fetchCuratedEpisode();
-          }
-          if (!result && CURATED_PODCASTS.length > 0) {
-            result = await fetchFromCuratedPodcast();
-          }
-          if (result) {
-            fromCurated = true;
-          }
-        } else if (DISCOVERY_MODE === 'random-only' || !hasCuratedContent) {
-          // Only use random API
-          result = await fetchRandomFromApi();
-        } else {
-          // Mixed mode: probability-based selection
-          const useCurated = Math.random() < CURATED_PROBABILITY;
-
-          if (useCurated) {
-            if (CURATED_EPISODES.length > 0 && Math.random() < 0.3) {
-              result = await fetchCuratedEpisode();
+          case 'podcasts':
+            // Variant 2: Kun kuraterte podcaster (første episode)
+            if (CURATED_PODCASTS.length > 0) {
+              result = await fetchFromCuratedPodcast();
+              fromCurated = true;
             }
-            if (!result && CURATED_PODCASTS.length > 0) {
+            break;
+
+          case 'episodes':
+            // Variant 3: Kun kuraterte episoder
+            if (CURATED_EPISODES.length > 0) {
+              result = await fetchCuratedEpisode();
+              fromCurated = true;
+            }
+            break;
+
+          case 'podcasts-episodes':
+            // Variant 4: Mix av kuraterte podcaster og episoder
+            if (CURATED_EPISODES.length > 0 && CURATED_PODCASTS.length > 0) {
+              // 50/50 sjanse for podcast vs episode
+              if (Math.random() < 0.5) {
+                result = await fetchCuratedEpisode();
+              } else {
+                result = await fetchFromCuratedPodcast();
+              }
+            } else if (CURATED_EPISODES.length > 0) {
+              result = await fetchCuratedEpisode();
+            } else if (CURATED_PODCASTS.length > 0) {
               result = await fetchFromCuratedPodcast();
             }
             if (result) {
               fromCurated = true;
             }
-          }
-
-          // Fall back to random API if no curated result
-          if (!result) {
-            result = await fetchRandomFromApi();
-          }
+            break;
         }
 
         if (result) {
@@ -296,7 +296,7 @@ export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById }: RandomDi
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>{isCurated ? 'Anbefalt' : 'Tilfeldig utvalgt'}</h2>
+        <h2 className={styles.title}>{isCurated ? 'Anbefalt' : 'Tilfeldig'}</h2>
       </div>
 
       <article className={styles.episodeCard}>
@@ -321,7 +321,7 @@ export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById }: RandomDi
         {episode.description && (
           <div className={styles.descriptionWrapper}>
             <p className={`${styles.episodeDescription} ${isExpanded ? styles.expanded : ''}`}>
-              {episode.description}
+              <FormattedText text={episode.description} />
             </p>
             <button
               className={styles.expandButton}
@@ -341,7 +341,6 @@ export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById }: RandomDi
             onClick={() => onSelectPodcastById(episode.podcast!.id)}
             type="button"
           >
-            <PodcastIcon size={16} />
             Gå til {episode.podcast.title}
           </button>
         )}

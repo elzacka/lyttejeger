@@ -4,7 +4,8 @@ import type { Podcast, Episode } from '../types/podcast';
 import type { PlayingEpisode } from './AudioPlayer';
 import { getEpisodesByFeedId } from '../services/podcastIndex';
 import { transformEpisodes } from '../services/podcastTransform';
-import { formatDateShort, linkifyText } from '../utils/search';
+import { formatDateShort } from '../utils/search';
+import { FormattedText } from './FormattedText';
 import { translateCategory } from '../utils/categoryTranslations';
 import { EpisodeCard } from './EpisodeCard';
 import styles from './PodcastDetailView.module.css';
@@ -171,21 +172,7 @@ export function PodcastDetailView({
             <p
               className={`${styles.descriptionText} ${isDescriptionExpanded ? styles.descriptionExpanded : ''}`}
             >
-              {linkifyText(podcast.description).map((part, idx) =>
-                part.type === 'link' ? (
-                  <a
-                    key={idx}
-                    href={part.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.descriptionLink}
-                  >
-                    {part.content}
-                  </a>
-                ) : (
-                  <span key={idx}>{part.content}</span>
-                )
-              )}
+              <FormattedText text={podcast.description} />
             </p>
             {podcast.description.length > 200 && (
               <button

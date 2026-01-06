@@ -170,6 +170,7 @@
   font-size: var(--font-sm);
   color: var(--text-secondary);
   line-height: 1.6;
+  white-space: pre-line;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -179,19 +180,20 @@
 .descriptionText.descriptionExpanded {
   display: block;
   -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
   overflow: visible;
-  white-space: pre-wrap;
+  white-space: pre-line;
   word-break: break-word;
 }
 
-.descriptionLink {
+.descriptionText a {
   color: var(--accent);
-  text-decoration: none;
-  word-break: break-all;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-.descriptionLink:hover {
-  text-decoration: underline;
+.descriptionText a:hover {
+  opacity: 0.8;
 }
 
 .expandButton {

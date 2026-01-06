@@ -1,7 +1,8 @@
 import { memo, useState } from 'react';
 import { PodcastIcon, ChevronIcon } from './icons';
 import type { Podcast } from '../types/podcast';
-import { formatDateLong, linkifyText } from '../utils/search';
+import { formatDateLong } from '../utils/search';
+import { FormattedText } from './FormattedText';
 import styles from './PodcastCard.module.css';
 
 interface PodcastCardProps {
@@ -84,22 +85,7 @@ export const PodcastCard = memo(function PodcastCard({
         <div id={`podcast-details-${podcast.id}`} className={styles.podcastDetails}>
           {podcast.description ? (
             <p className={styles.podcastDescription}>
-              {linkifyText(podcast.description).map((part, idx) =>
-                part.type === 'link' ? (
-                  <a
-                    key={idx}
-                    href={part.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.descriptionLink}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {part.content}
-                  </a>
-                ) : (
-                  <span key={idx}>{part.content}</span>
-                )
-              )}
+              <FormattedText text={podcast.description} />
             </p>
           ) : (
             <p className={styles.noDescription}>Ingen beskrivelse tilgjengelig</p>

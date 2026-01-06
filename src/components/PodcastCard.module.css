@@ -161,18 +161,18 @@
   font-size: var(--font-sm);
   color: var(--text-secondary);
   line-height: 1.6;
-  white-space: pre-wrap;
+  white-space: pre-line;
   word-break: break-word;
 }
 
-.descriptionLink {
+.podcastDescription a {
   color: var(--accent);
-  text-decoration: none;
-  word-break: break-all;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-.descriptionLink:hover {
-  text-decoration: underline;
+.podcastDescription a:hover {
+  opacity: 0.8;
 }
 
 .noDescription {

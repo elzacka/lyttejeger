@@ -1,30 +1,57 @@
 /**
- * Curated podcast and episode recommendations
+ * ============================================================================
+ * KURATERT INNHOLD - Konfigurasjon for Discovery-modus
+ * ============================================================================
  *
- * Add podcasts by feedId (from Podcast Index) or episodes by episode guid.
- * The discovery mode will shuffle through these when available.
+ * Denne filen styrer hva som vises i "Anbefalt" / "Tilfeldig utvalgt" boksen
+ * på forsiden når søkefeltet er tomt.
  *
- * To find feedId: Search on podcastindex.org or use the app's search
- * To find episode guid: Check the podcast RSS feed or episode API response
+ * FIRE VARIANTER:
+ * ───────────────────────────────────────────────────────────────────────────
+ * 1. 'random'           → Tilfeldig episode fra API (overskrift: "Tilfeldig")
+ * 2. 'podcasts'         → Første episode fra kuraterte podcaster (overskrift: "Anbefalt")
+ * 3. 'episodes'         → Spesifikke kuraterte episoder (overskrift: "Anbefalt")
+ * 4. 'podcasts-episodes'→ Mix av kuraterte podcaster og episoder (overskrift: "Anbefalt")
+ *
+ * SLIK AKTIVERER DU EN VARIANT:
+ * Endre DISCOVERY_MODE nederst i filen til ønsket verdi.
  */
+
+// ============================================================================
+// TYPER
+// ============================================================================
 
 export interface CuratedPodcast {
   feedId: number;
-  /** Optional comment for your own reference */
+  /** Valgfri kommentar for egen referanse */
   note?: string;
 }
 
 export interface CuratedEpisode {
   feedId: number;
-  /** Episode guid from RSS feed */
+  /** Episode-guid fra RSS-feed */
   guid: string;
-  /** Optional comment for your own reference */
+  /** Valgfri kommentar for egen referanse */
   note?: string;
 }
 
 /**
- * Curated podcasts - discovery will fetch a random recent episode from these
+ * Discovery-modus:
+ * - 'random'            : Kun tilfeldige episoder fra API
+ * - 'podcasts'          : Kun kuraterte podcaster (første episode)
+ * - 'episodes'          : Kun kuraterte episoder
+ * - 'podcasts-episodes' : Blanding av kuraterte podcaster og episoder
  */
+export type DiscoveryMode = 'random' | 'podcasts' | 'episodes' | 'podcasts-episodes';
+
+// ============================================================================
+// KURATERTE PODCASTER
+// ============================================================================
+// Legg til podcaster med feedId. Discovery viser FØRSTE episode (eldste),
+// siden mange er serier der rekkefølge er viktig.
+//
+// Finn feedId: Søk på podcastindex.org eller i appen.
+
 export const CURATED_PODCASTS: CuratedPodcast[] = [
   { feedId: 6884446 },
   { feedId: 6927194 },
@@ -39,31 +66,25 @@ export const CURATED_PODCASTS: CuratedPodcast[] = [
   { feedId: 6875318 },
 ];
 
-/**
- * Curated episodes - discovery will randomly pick from these specific episodes
- * Good for highlighting particularly great episodes
- */
+// ============================================================================
+// KURATERTE EPISODER
+// ============================================================================
+// Legg til spesifikke episoder med feedId og guid.
+// Bra for å fremheve spesielt gode enkeltepisoder.
+//
+// Finn guid: Sjekk podcast RSS-feed eller episode API-respons.
+
 export const CURATED_EPISODES: CuratedEpisode[] = [
-  // Add specific episodes here:
-  // { feedId: 123456, guid: 'episode-guid-here', note: 'Great interview with...' },
+  { feedId: 13758, guid: 'Buzzsprout-18184709', note: 'Flott intervju med...' },
 ];
 
-/**
- * Discovery mode configuration
- */
-export type DiscoveryMode = 'curated-only' | 'random-only' | 'mixed';
+// ============================================================================
+// AKTIV MODUS - ENDRE HER FOR Å BYTTE VARIANT
+// ============================================================================
+//
+// Variant 1: 'random'            → Overskrift: "Tilfeldig"
+// Variant 2: 'podcasts'          → Overskrift: "Anbefalt"
+// Variant 3: 'episodes'          → Overskrift: "Anbefalt"
+// Variant 4: 'podcasts-episodes' → Overskrift: "Anbefalt"
 
-/**
- * Current discovery mode:
- * - 'curated-only': Only show curated podcasts (shuffled)
- * - 'random-only': Only show random API discovery
- * - 'mixed': Mix of curated and random based on CURATED_PROBABILITY
- */
-export const DISCOVERY_MODE: DiscoveryMode = 'mixed';
-
-/**
- * Probability (0-1) of showing curated content vs random API content
- * Only used when DISCOVERY_MODE is 'mixed'
- * 0.7 = 70% chance of curated, 30% chance of random
- */
-export const CURATED_PROBABILITY = 0.7;
+export const DISCOVERY_MODE: DiscoveryMode = 'podcasts-episodes';

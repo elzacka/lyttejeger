@@ -28,7 +28,7 @@ export function transformFeed(feed: PodcastIndexFeed): Podcast {
     guid: feed.podcastGuid || undefined,
     title: feed.title || 'Untitled',
     author: feed.author || feed.ownerName || 'Unknown',
-    description: stripHtml(feed.description || ''),
+    description: htmlToTextWithLinks(feed.description || ''),
     imageUrl: feed.artwork || feed.image || '/placeholder-podcast.svg',
     feedUrl: feed.url || feed.originalUrl,
     websiteUrl: feed.link || undefined,
@@ -90,7 +90,7 @@ export function transformEpisode(episode: PodcastIndexEpisode): Episode {
     id: episode.id.toString(),
     podcastId: episode.feedId.toString(),
     title: episode.title || 'Untitled Episode',
-    description: stripHtml(episode.description || ''),
+    description: htmlToTextWithLinks(episode.description || ''),
     audioUrl: episode.enclosureUrl,
     duration: episode.duration || 0,
     publishedAt: safeTimestampToISO(episode.datePublished),
@@ -184,16 +184,51 @@ function calculateRating(feed: PodcastIndexFeed): number {
 }
 
 /**
- * Strip HTML tags from text
+ * Decode HTML entities
  */
-function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, '')
+function decodeHtmlEntities(text: string): string {
+  return text
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+    .replace(/&hellip;/g, '...');
+}
+
+/**
+ * Clean up excessive whitespace
+ */
+function cleanupWhitespace(text: string): string {
+  return text
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n[ \t]+/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
+}
+
+/**
+ * Convert HTML to formatted text while preserving links as markdown-style markers
+ * Returns text with links marked as [[url|text]] for later rendering
+ */
+export function htmlToTextWithLinks(html: string): string {
+  return cleanupWhitespace(
+    decodeHtmlEntities(
+      html
+        // Convert links to markdown-style markers before stripping other HTML
+        .replace(/<a[^>]*href=["']([^"']+)["'][^>]*>([^<]*)<\/a>/gi, '[[link:$1|$2]]')
+        // Add newlines before block elements
+        .replace(/<(p|div|br|h[1-6]|li|tr)[^>]*>/gi, '\n')
+        // Add bullet points for list items
+        .replace(/<li[^>]*>/gi, '\n• ')
+        // Add newlines after closing block elements
+        .replace(/<\/(p|div|h[1-6]|ul|ol|table)>/gi, '\n')
+        // Remove all remaining HTML tags
+        .replace(/<[^>]*>/g, '')
+    )
+  );
 }

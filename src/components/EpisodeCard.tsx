@@ -12,7 +12,8 @@ import {
 } from './icons';
 import type { Episode } from '../types/podcast';
 import type { PlaybackProgress } from '../hooks/usePlaybackProgress';
-import { formatDuration, formatDateLong, linkifyText } from '../utils/search';
+import { formatDuration, formatDateLong } from '../utils/search';
+import { FormattedText } from './FormattedText';
 import { FEATURES } from '../config/features';
 import { EpisodeBadges } from './EpisodeBadges';
 import styles from './EpisodeCard.module.css';
@@ -418,22 +419,7 @@ export const EpisodeCard = memo(function EpisodeCard({
         )}
         {episode.description ? (
           <p className={styles.episodeDescription}>
-            {linkifyText(episode.description).map((part, idx) =>
-              part.type === 'link' ? (
-                <a
-                  key={idx}
-                  href={part.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.descriptionLink}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {part.content}
-                </a>
-              ) : (
-                <span key={idx}>{part.content}</span>
-              )
-            )}
+            <FormattedText text={episode.description} />
           </p>
         ) : (
           <p className={styles.noDescription}>Ingen beskrivelse tilgjengelig</p>
