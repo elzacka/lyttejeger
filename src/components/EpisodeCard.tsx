@@ -472,17 +472,22 @@ export const EpisodeCard = memo(function EpisodeCard({
               </button>
             )}
 
-            <div className={styles.imageContainer}>{renderImage()}</div>
-
             <div className={styles.content}>
               {showPodcastInfo && podcastName && (
                 <p className={styles.podcastName}>{podcastName}</p>
               )}
               <p className={styles.episodeTitle}>{episode.title}</p>
               <div className={styles.meta}>
+                <span>{formatDateLong(episode.publishedAt)}</span>
                 {formatDuration(episode.duration) && (
                   <span className={styles.duration}>{formatDuration(episode.duration)}</span>
                 )}
+                {FEATURES.SEASON_EPISODE_METADATA &&
+                  formatSeasonEpisode(episode.season, episode.episode) && (
+                    <span className={styles.seasonEpisode}>
+                      {formatSeasonEpisode(episode.season, episode.episode)}
+                    </span>
+                  )}
                 {progress?.completed && (
                   <span className={styles.completed}>
                     <CheckIcon size={14} aria-hidden="true" />

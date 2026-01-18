@@ -485,20 +485,6 @@
   box-shadow: 0 0 0 2px var(--accent-alpha);
 }
 
-.imageContainer {
-  width: var(--image-sm);
-  height: var(--image-sm);
-  flex-shrink: 0;
-}
-
-.imageContainer .image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: var(--radius-sm);
-  background: var(--bg-hover);
-}
-
 /* Queue variant: podcast name is accent colored */
 .queueItem .podcastName {
   font-weight: 500;
@@ -594,11 +580,6 @@
 
   .topRow {
     flex-wrap: wrap;
-  }
-
-  .imageContainer {
-    width: var(--image-xs);
-    height: var(--image-xs);
   }
 
   .desktopOnly {
