@@ -32,7 +32,7 @@ export function useQueue() {
     try {
       await dbAddToQueue({
         episodeId: episode.id,
-        podcastId: '',
+        podcastId: episode.podcastId || '',
         title: episode.title,
         podcastTitle: episode.podcastTitle || '',
         audioUrl: episode.audioUrl,
@@ -41,6 +41,9 @@ export function useQueue() {
         duration: episode.duration,
         transcriptUrl: episode.transcriptUrl,
         chaptersUrl: episode.chaptersUrl,
+        publishedAt: episode.publishedAt,
+        season: episode.season,
+        episode: episode.episode,
       });
       const items = await getQueue();
       setQueue(items);
@@ -53,7 +56,7 @@ export function useQueue() {
     try {
       await dbPlayNext({
         episodeId: episode.id,
-        podcastId: '',
+        podcastId: episode.podcastId || '',
         title: episode.title,
         podcastTitle: episode.podcastTitle || '',
         audioUrl: episode.audioUrl,
@@ -62,6 +65,9 @@ export function useQueue() {
         duration: episode.duration,
         transcriptUrl: episode.transcriptUrl,
         chaptersUrl: episode.chaptersUrl,
+        publishedAt: episode.publishedAt,
+        season: episode.season,
+        episode: episode.episode,
       });
       const items = await getQueue();
       setQueue(items);

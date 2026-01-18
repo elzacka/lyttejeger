@@ -43,10 +43,12 @@ function queueItemToEpisode(item: QueueItem): Episode {
     description: '',
     audioUrl: item.audioUrl,
     duration: item.duration || 0,
-    publishedAt: '',
+    publishedAt: item.publishedAt || '',
     imageUrl: item.imageUrl,
     transcriptUrl: item.transcriptUrl,
     chaptersUrl: item.chaptersUrl,
+    season: item.season,
+    episode: item.episode,
   };
 }
 

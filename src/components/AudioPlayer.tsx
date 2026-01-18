@@ -280,16 +280,38 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     });
 
     // Set up action handlers
+    // CRITICAL for iOS: When resuming from lock screen, the audio may be suspended.
+    // We need to ensure the audio is properly loaded before playing.
     navigator.mediaSession.setActionHandler('play', async () => {
       if (!audioRef.current) return;
+      const audio = audioRef.current;
+
       try {
-        await audioRef.current.play();
+        // First attempt: direct play
+        await audio.play();
       } catch {
         try {
-          audioRef.current.load();
-          await audioRef.current.play();
+          // iOS often suspends audio when locked. Reload and retry.
+          audio.load();
+          // Wait for audio to be ready
+          await new Promise<void>((resolve, reject) => {
+            const onCanPlay = () => {
+              audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('error', onError);
+              resolve();
+            };
+            const onError = () => {
+              audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('error', onError);
+              reject(new Error('Audio load failed'));
+            };
+            audio.addEventListener('canplay', onCanPlay, { once: true });
+            audio.addEventListener('error', onError, { once: true });
+          });
+          await audio.play();
         } catch {
-          // Still failed - user needs to interact
+          // Still failed - user needs to unlock and interact with app
+          setIsPlaying(false);
         }
       }
     });
@@ -343,19 +365,36 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   }, [currentTime, duration]);
 
   // Handle visibility change - sync UI with audio state
+  // CRITICAL for iOS: When returning from lock screen, audio may have been interrupted.
+  // We need to detect this and attempt to resume playback.
   useEffect(() => {
     if (!episode) return;
 
-    const handleVisibilityChange = () => {
+    const handleVisibilityChange = async () => {
       if (document.visibilityState === 'visible' && audioRef.current) {
-        setIsPlaying(!audioRef.current.paused);
-        setCurrentTime(audioRef.current.currentTime);
+        const audio = audioRef.current;
+        const wasPlaying = isPlaying;
+
+        // Sync UI with actual audio state
+        setIsPlaying(!audio.paused);
+        setCurrentTime(audio.currentTime);
+
+        // iOS fix: If we thought we were playing but audio is actually paused,
+        // iOS may have interrupted the audio session. Try to resume.
+        if (wasPlaying && audio.paused) {
+          try {
+            await audio.play();
+          } catch {
+            // Play failed - audio session may need user interaction
+            // This is expected behavior on iOS
+          }
+        }
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [episode]);
+  }, [episode, isPlaying]);
 
   // Apply playback speed to audio element (also when episode changes since element remounts)
   useEffect(() => {

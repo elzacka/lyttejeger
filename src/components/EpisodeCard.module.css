@@ -579,7 +579,7 @@
   }
 
   .topRow {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .desktopOnly {

@@ -478,7 +478,7 @@ export const EpisodeCard = memo(function EpisodeCard({
               )}
               <p className={styles.episodeTitle}>{episode.title}</p>
               <div className={styles.meta}>
-                <span>{formatDateLong(episode.publishedAt)}</span>
+                {episode.publishedAt && <span>{formatDateLong(episode.publishedAt)}</span>}
                 {formatDuration(episode.duration) && (
                   <span className={styles.duration}>{formatDuration(episode.duration)}</span>
                 )}

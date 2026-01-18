@@ -22,6 +22,9 @@ export interface QueueItem {
   duration?: number;
   transcriptUrl?: string;
   chaptersUrl?: string;
+  publishedAt?: string;
+  season?: number;
+  episode?: number;
   addedAt: number; // timestamp
   position: number; // order in queue
 }
