@@ -4,7 +4,7 @@ import {
   getRecentEpisodes,
   getEpisodesByFeedId,
   getPodcastByFeedId,
-  getEpisodeByGuid,
+  getEpisodeById,
 } from '../services/podcastIndex';
 import { transformEpisode } from '../services/podcastTransform';
 import { formatDuration, formatDateLong } from '../utils/search';
@@ -88,7 +88,7 @@ export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById }: RandomDi
     }
   }, []);
 
-  // Fetch a specific curated episode
+  // Fetch a specific curated episode by Podcast Index episode ID
   const fetchCuratedEpisode = useCallback(async (): Promise<EpisodeWithPodcast | null> => {
     if (CURATED_EPISODES.length === 0) return null;
 
@@ -96,20 +96,20 @@ export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById }: RandomDi
     const randomCurated = CURATED_EPISODES[Math.floor(Math.random() * CURATED_EPISODES.length)];
 
     try {
-      const episodeRes = await getEpisodeByGuid(randomCurated.feedId, randomCurated.guid);
+      const episodeRes = await getEpisodeById(randomCurated.episodeId);
       if (!episodeRes.episode) return null;
 
       const apiEp = episodeRes.episode;
       const transformed = transformEpisode(apiEp);
 
       // Fetch podcast info
-      const podcastRes = await getPodcastByFeedId(randomCurated.feedId);
+      const podcastRes = await getPodcastByFeedId(apiEp.feedId);
       const feed = podcastRes.feed;
 
       return {
         ...transformed,
         podcast: {
-          id: randomCurated.feedId.toString(),
+          id: apiEp.feedId.toString(),
           title: feed?.title || apiEp.feedTitle || 'Ukjent podcast',
           author: feed?.author || '',
           description: feed?.description || '',

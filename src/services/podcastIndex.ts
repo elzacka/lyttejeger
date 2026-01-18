@@ -335,6 +335,18 @@ export async function getEpisodeByGuid(
   });
 }
 
+export interface EpisodeByIdResponse {
+  status: string;
+  episode: PodcastIndexEpisode | null;
+  description: string;
+}
+
+export async function getEpisodeById(episodeId: number): Promise<EpisodeByIdResponse> {
+  return apiRequest<EpisodeByIdResponse>('/episodes/byid', {
+    id: episodeId.toString(),
+  });
+}
+
 export interface PersonSearchOptions {
   max?: number;
   fulltext?: boolean;

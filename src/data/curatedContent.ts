@@ -28,9 +28,8 @@ export interface CuratedPodcast {
 }
 
 export interface CuratedEpisode {
-  feedId: number;
-  /** Episode-guid fra RSS-feed */
-  guid: string;
+  /** Podcast Index episode ID (fra URL: ?episode=XXXXX) */
+  episodeId: number;
   /** Valgfri kommentar for egen referanse */
   note?: string;
 }
@@ -69,13 +68,16 @@ export const CURATED_PODCASTS: CuratedPodcast[] = [
 // ============================================================================
 // KURATERTE EPISODER
 // ============================================================================
-// Legg til spesifikke episoder med feedId og guid.
+// Legg til spesifikke episoder med episodeId fra Podcast Index.
 // Bra for å fremheve spesielt gode enkeltepisoder.
 //
-// Finn guid: Sjekk podcast RSS-feed eller episode API-respons.
+// Finn episodeId: Fra URL på podcastindex.org (?episode=XXXXX)
 
 export const CURATED_EPISODES: CuratedEpisode[] = [
-  { feedId: 13758, guid: 'Buzzsprout-18184709', note: 'Flott intervju med...' },
+  { episodeId: 47748262624, note: 'Prince Andrew | Part 5' },
+  { episodeId: 43553967123, note: 'The Spy Who Outran the KGB' },
+  { episodeId: 18379969700, note: 'RadioLab - The Living Room' },
+  { episodeId: 15993255039, note: 'Rumble Strip - Ode to Village Life' },
 ];
 
 // ============================================================================
