@@ -483,11 +483,29 @@ export const EpisodeCard = memo(function EpisodeCard({
                 {formatDuration(episode.duration) && (
                   <span className={styles.duration}>{formatDuration(episode.duration)}</span>
                 )}
+                {progress?.completed && (
+                  <span className={styles.completed}>
+                    <CheckIcon size={14} aria-hidden="true" />
+                    Hørt
+                  </span>
+                )}
+                {progress && !progress.completed && progress.progress > 1 && (
+                  <span className={styles.inProgress}>{Math.round(progress.progress)}%</span>
+                )}
                 <EpisodeBadges
                   chaptersUrl={episode.chaptersUrl}
                   transcriptUrl={episode.transcriptUrl}
                 />
               </div>
+              {progress && !progress.completed && progress.progress > 1 && (
+                <div className={styles.progressBar}>
+                  <div
+                    className={styles.progressFill}
+                    style={{ width: `${progress.progress}%` }}
+                    aria-label={`${Math.round(progress.progress)}% avspilt`}
+                  />
+                </div>
+              )}
             </div>
 
             <div className={styles.actions}>

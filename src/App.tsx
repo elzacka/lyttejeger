@@ -12,6 +12,7 @@ import { SheetProvider } from './components/SheetProvider';
 import { useSearch } from './hooks/useSearch';
 import { useQueue } from './hooks/useQueue';
 import { useSubscriptions } from './hooks/useSubscriptions';
+import { usePlaybackProgress } from './hooks/usePlaybackProgress';
 import { allLanguages } from './data/languages';
 import { allCategories } from './data/categories';
 import { getPodcastByFeedId } from './services/podcastIndex';
@@ -85,6 +86,7 @@ function App() {
   } = useQueue();
   const { subscriptions, subscribe, unsubscribe, isSubscribed, subscriptionCount } =
     useSubscriptions();
+  const { getProgress } = usePlaybackProgress();
 
   const handlePlayEpisode = useCallback((episode: PlayingEpisode) => {
     setPlayingEpisode(episode);
@@ -271,6 +273,7 @@ function App() {
               onAddToQueue={handleAddEpisodeToQueue}
               onPlayNext={handlePlayEpisodeNext}
               isInQueue={isInQueue}
+              getProgress={getProgress}
               isSubscribed={isSubscribed(selectedPodcast.id)}
               onSubscribe={handleSubscribe}
               onUnsubscribe={handleUnsubscribe}
@@ -350,6 +353,7 @@ function App() {
                     onRemove={removeFromQueue}
                     onClear={clearQueue}
                     onReorder={handleReorder}
+                    getProgress={getProgress}
                   />
                 </ErrorBoundary>
               )}

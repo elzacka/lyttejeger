@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { TrashIcon } from './icons';
 import type { QueueItem } from '../services/db';
 import type { Episode } from '../types/podcast';
+import type { PlaybackProgress } from '../hooks/usePlaybackProgress';
 import { SWIPE_THRESHOLD_PX } from '../constants';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EpisodeCard } from './EpisodeCard';
@@ -13,6 +14,7 @@ interface QueueViewProps {
   onRemove: (id: number) => void;
   onClear: () => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
+  getProgress?: (episodeId: string) => PlaybackProgress | null;
 }
 
 interface SwipeState {
@@ -48,7 +50,14 @@ function queueItemToEpisode(item: QueueItem): Episode {
   };
 }
 
-export function QueueView({ queue, onPlay, onRemove, onClear, onReorder }: QueueViewProps) {
+export function QueueView({
+  queue,
+  onPlay,
+  onRemove,
+  onClear,
+  onReorder,
+  getProgress,
+}: QueueViewProps) {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [swipedItemId, setSwipedItemId] = useState<number | null>(null);
   const swipeRef = useRef<SwipeState>({
@@ -324,6 +333,7 @@ export function QueueView({ queue, onPlay, onRemove, onClear, onReorder }: Queue
                   imageUrl: item.podcastImage,
                 }}
                 showPodcastInfo={true}
+                progress={getProgress?.(item.episodeId)}
                 variant="queue"
                 onPlay={() => onPlay(item)}
                 onRemove={() => item.id && handleRemove(item.id)}

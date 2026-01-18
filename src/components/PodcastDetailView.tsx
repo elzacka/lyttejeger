@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeftIcon, PodcastIcon, StarIcon } from './icons';
 import type { Podcast, Episode } from '../types/podcast';
 import type { PlayingEpisode } from './AudioPlayer';
+import type { PlaybackProgress } from '../hooks/usePlaybackProgress';
 import { getEpisodesByFeedId } from '../services/podcastIndex';
 import { transformEpisodes } from '../services/podcastTransform';
 import { formatDateShort } from '../utils/search';
@@ -16,6 +17,7 @@ interface PodcastDetailViewProps {
   onAddToQueue?: (episode: Episode, podcastTitle: string, podcastImage: string) => void;
   onPlayNext?: (episode: Episode, podcastTitle: string, podcastImage: string) => void;
   isInQueue?: (episodeId: string) => boolean;
+  getProgress?: (episodeId: string) => PlaybackProgress | null;
   isSubscribed?: boolean;
   onSubscribe?: () => void;
   onUnsubscribe?: () => void;
@@ -28,6 +30,7 @@ export function PodcastDetailView({
   onAddToQueue,
   onPlayNext,
   isInQueue,
+  getProgress,
   isSubscribed,
   onSubscribe,
   onUnsubscribe,
@@ -235,6 +238,7 @@ export function PodcastDetailView({
                   <EpisodeCard
                     episode={episode}
                     showPodcastInfo={false}
+                    progress={getProgress?.(episode.id)}
                     onPlay={handlePlayEpisode}
                     onAddToQueue={onAddToQueue ? handleAddToQueue : undefined}
                     onPlayNext={onPlayNext ? handlePlayNext : undefined}
