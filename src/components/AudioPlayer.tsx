@@ -114,6 +114,13 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const lastSaveRef = useRef<number>(0);
   const saveIntervalRef = useRef<number | null>(null);
 
+  // iOS 26 fix: Track when app was last visible and if we were playing
+  // This helps detect audio session interruptions from lock screen
+  const lastVisibleRef = useRef<number>(Date.now());
+  const wasPlayingBeforeHiddenRef = useRef(false);
+  // Counter to force audio element re-creation if needed
+  const [audioKey, setAudioKey] = useState(0);
+
   // Handle episode changes - reset state and load audio
   // CRITICAL: This explicit initialization is required for iOS Safari.
   // DO NOT rely solely on key={episode.id} remounting - iOS needs explicit load() call.
@@ -280,40 +287,93 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     });
 
     // Set up action handlers
-    // CRITICAL for iOS: When resuming from lock screen, the audio may be suspended.
-    // We need to ensure the audio is properly loaded before playing.
+    // CRITICAL for iOS 26: When resuming from lock screen, the audio may be suspended.
+    // iOS 26 has a known bug where PWA audio can become unresponsive after being locked.
+    // We use multiple recovery strategies and always sync state afterwards.
     navigator.mediaSession.setActionHandler('play', async () => {
       if (!audioRef.current) return;
       const audio = audioRef.current;
+      const savedPosition = audio.currentTime;
 
-      try {
-        // First attempt: direct play
-        await audio.play();
-      } catch {
-        try {
-          // iOS often suspends audio when locked. Reload and retry.
-          audio.load();
-          // Wait for audio to be ready
-          await new Promise<void>((resolve, reject) => {
-            const onCanPlay = () => {
-              audio.removeEventListener('canplay', onCanPlay);
-              audio.removeEventListener('error', onError);
-              resolve();
-            };
-            const onError = () => {
-              audio.removeEventListener('canplay', onCanPlay);
-              audio.removeEventListener('error', onError);
-              reject(new Error('Audio load failed'));
-            };
-            audio.addEventListener('canplay', onCanPlay, { once: true });
-            audio.addEventListener('error', onError, { once: true });
-          });
-          await audio.play();
-        } catch {
-          // Still failed - user needs to unlock and interact with app
-          setIsPlaying(false);
+      // Sync function to update both React state and Media Session state
+      const syncPlayState = (playing: boolean) => {
+        setIsPlaying(playing);
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = playing ? 'playing' : 'paused';
         }
+      };
+
+      // Helper to verify playback actually started
+      const verifyPlaying = async (): Promise<boolean> => {
+        await new Promise((r) => setTimeout(r, 200));
+        return !audio.paused;
+      };
+
+      // Strategy 1: Direct play
+      try {
+        await audio.play();
+        if (await verifyPlaying()) {
+          syncPlayState(true);
+          return;
+        }
+      } catch {
+        // Continue to next strategy
       }
+
+      // Strategy 2: Load, restore position, and play
+      try {
+        audio.load();
+        await new Promise<void>((resolve) => {
+          const onCanPlay = () => {
+            audio.removeEventListener('canplay', onCanPlay);
+            resolve();
+          };
+          audio.addEventListener('canplay', onCanPlay, { once: true });
+          setTimeout(resolve, 3000); // Timeout after 3s
+        });
+        // Restore position after reload
+        if (savedPosition > 0) {
+          audio.currentTime = savedPosition;
+        }
+        await audio.play();
+        if (await verifyPlaying()) {
+          syncPlayState(true);
+          return;
+        }
+      } catch {
+        // Continue to next strategy
+      }
+
+      // Strategy 3: Set src directly and load (forces full re-initialization)
+      try {
+        const currentSrc = audio.src;
+        audio.src = '';
+        audio.load();
+        await new Promise((r) => setTimeout(r, 100));
+        audio.src = currentSrc;
+        audio.load();
+        await new Promise<void>((resolve) => {
+          const onCanPlay = () => {
+            audio.removeEventListener('canplay', onCanPlay);
+            resolve();
+          };
+          audio.addEventListener('canplay', onCanPlay, { once: true });
+          setTimeout(resolve, 3000);
+        });
+        if (savedPosition > 0) {
+          audio.currentTime = savedPosition;
+        }
+        await audio.play();
+        if (await verifyPlaying()) {
+          syncPlayState(true);
+          return;
+        }
+      } catch {
+        // All strategies failed
+      }
+
+      // All strategies failed - sync UI to paused state
+      syncPlayState(false);
     });
     navigator.mediaSession.setActionHandler('pause', () => {
       audioRef.current?.pause();
@@ -365,28 +425,84 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   }, [currentTime, duration]);
 
   // Handle visibility change - sync UI with audio state
-  // CRITICAL for iOS: When returning from lock screen, audio may have been interrupted.
-  // We need to detect this and attempt to resume playback.
+  // CRITICAL for iOS 26: When returning from lock screen, audio may have been interrupted.
+  // iOS 26 has a known bug where PWA audio sessions can become corrupted.
+  // We track visibility changes to detect and recover from this.
   useEffect(() => {
     if (!episode) return;
 
     const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible' && audioRef.current) {
+      if (document.visibilityState === 'hidden') {
+        // App going to background - track state
+        lastVisibleRef.current = Date.now();
+        wasPlayingBeforeHiddenRef.current = isPlaying;
+      } else if (document.visibilityState === 'visible' && audioRef.current) {
         const audio = audioRef.current;
-        const wasPlaying = isPlaying;
+        const timeSinceHidden = Date.now() - lastVisibleRef.current;
+        const wasPlaying = wasPlayingBeforeHiddenRef.current;
 
-        // Sync UI with actual audio state
+        // Sync UI with actual audio state first
         setIsPlaying(!audio.paused);
         setCurrentTime(audio.currentTime);
 
-        // iOS fix: If we thought we were playing but audio is actually paused,
-        // iOS may have interrupted the audio session. Try to resume.
+        // iOS 26 fix: If we were playing but audio is now paused,
+        // the audio session was likely interrupted
         if (wasPlaying && audio.paused) {
+          // Save current position before attempting recovery
+          const savedPosition = audio.currentTime;
+
+          // Try multiple recovery strategies
+          let recovered = false;
+
+          // Strategy 1: Simple play
           try {
             await audio.play();
+            await new Promise((r) => setTimeout(r, 200));
+            if (!audio.paused) {
+              recovered = true;
+              setIsPlaying(true);
+            }
           } catch {
-            // Play failed - audio session may need user interaction
-            // This is expected behavior on iOS
+            // Continue to next strategy
+          }
+
+          // Strategy 2: Load and play
+          if (!recovered) {
+            try {
+              audio.load();
+              await new Promise<void>((resolve) => {
+                const onCanPlay = () => {
+                  audio.removeEventListener('canplay', onCanPlay);
+                  resolve();
+                };
+                audio.addEventListener('canplay', onCanPlay, { once: true });
+                setTimeout(resolve, 3000); // Timeout after 3s
+              });
+              audio.currentTime = savedPosition;
+              await audio.play();
+              await new Promise((r) => setTimeout(r, 200));
+              if (!audio.paused) {
+                recovered = true;
+                setIsPlaying(true);
+              }
+            } catch {
+              // Continue to next strategy
+            }
+          }
+
+          // Strategy 3: Force re-create audio element (iOS 26 nuclear option)
+          // Only use this if hidden for more than 30 seconds (known iOS issue threshold)
+          if (!recovered && timeSinceHidden > 30000) {
+            // Force re-mount the audio element by changing its key
+            setAudioKey((k) => k + 1);
+            // The useEffect for episode changes will handle loading
+            // Mark for auto-play
+            shouldAutoPlayRef.current = true;
+          }
+
+          // Final sync
+          if (!recovered) {
+            setIsPlaying(false);
           }
         }
       }
@@ -742,7 +858,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
       {...swipeHandlers}
     >
       <audio
-        key={episode.id}
+        key={`${episode.id}-${audioKey}`}
         ref={audioRef}
         src={episode.audioUrl}
         preload="auto"
