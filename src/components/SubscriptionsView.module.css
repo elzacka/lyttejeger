@@ -68,7 +68,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-sm);
-  max-width: 240px; /* 4 × 49px + 3 × 8px gaps = 196px + 24px = 220px + padding */
+  max-width: 420px; /* 4 × 98px + 3 × 8px gaps = 392px + 24px + padding */
 }
 
 /* Card styling */
@@ -226,7 +226,7 @@
   .grid {
     grid-template-columns: repeat(4, 1fr);
     gap: var(--space-xs);
-    max-width: 200px;
+    max-width: 380px;
   }
 
   .podcastTitle {
@@ -251,7 +251,7 @@
   .grid {
     grid-template-columns: repeat(4, 1fr);
     gap: var(--space-sm);
-    max-width: 220px;
+    max-width: 400px;
   }
 
   .podcastTitle {
@@ -268,7 +268,7 @@
   .grid {
     grid-template-columns: repeat(4, 1fr);
     gap: var(--space-sm);
-    max-width: 240px;
+    max-width: 420px;
   }
 
   .title {
