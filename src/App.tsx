@@ -11,7 +11,6 @@ import { SkipLink } from './components/SkipLink';
 const PodcastDetailView = lazy(() => import('./components/PodcastDetailView'));
 const QueueView = lazy(() => import('./components/QueueView'));
 const SubscriptionsView = lazy(() => import('./components/SubscriptionsView'));
-const HomeView = lazy(() => import('./components/HomeView'));
 import { useSearch } from './hooks/useSearch';
 import { useQueue } from './hooks/useQueue';
 import { useSubscriptions } from './hooks/useSubscriptions';
@@ -53,10 +52,10 @@ function toPlayingEpisode(
 function App() {
   const [playingEpisode, setPlayingEpisode] = useState<PlayingEpisode | null>(null);
   const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null);
-  const [previousActiveTab, setPreviousActiveTab] = useState<'home' | 'search' | 'subscriptions'>(
+  const [previousActiveTab, setPreviousActiveTab] = useState<'search' | 'subscriptions'>(
     'search'
   );
-  const [currentView, setCurrentView] = useState<'home' | 'search' | 'subscriptions' | 'queue'>(
+  const [currentView, setCurrentView] = useState<'search' | 'subscriptions' | 'queue'>(
     'search'
   );
 
@@ -270,10 +269,7 @@ function App() {
         // Clear selected podcast when navigating away
         setSelectedPodcast(null);
 
-        if (item === 'home') {
-          setCurrentView('home');
-          setQuery('');
-        } else if (item === 'search') {
+        if (item === 'search') {
           setCurrentView('search');
           setActiveTab('podcasts');
         } else if (item === 'subscriptions') {
@@ -326,23 +322,7 @@ function App() {
             <OfflineBanner />
 
             <main className="main" id="main-content" role="main" aria-label="Hovedinnhold">
-              {/* Home view - shows recent episodes from subscriptions */}
-              {currentView === 'home' && (
-                <ErrorBoundary viewName="hjem-visningen">
-                  <Suspense fallback={<div className="loading-view">Laster...</div>}>
-                    <HomeView
-                      subscriptions={subscriptions}
-                      onPlayEpisode={handlePlayEpisode}
-                      onAddToQueue={handleAddEpisodeToQueue}
-                      onPlayNext={handlePlayEpisodeNext}
-                      isInQueue={isInQueue}
-                      onNavigateToSearch={() => handleNavigation('search')}
-                    />
-                  </Suspense>
-                </ErrorBoundary>
-              )}
-
-              {/* Search view - search bar, filters, and results */}
+              {/* Search view - search bar, filters, and results (or home view with recent episodes) */}
               {currentView === 'search' && (
                 <ErrorBoundary viewName="søkevisningen">
                   <SearchView
@@ -354,6 +334,7 @@ function App() {
                     categories={allCategories}
                     languages={allLanguages}
                     activeFilterCount={activeFilterCount}
+                    subscriptions={subscriptions}
                     onSetQuery={setQuery}
                     onTabChange={setActiveTab}
                     onToggleCategory={toggleCategory}

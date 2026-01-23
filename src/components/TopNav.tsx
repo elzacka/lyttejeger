@@ -1,6 +1,5 @@
 import {
   Home as HomeIcon,
-  Clock as ClockIcon,
   Heart as HeartIcon,
   ListMusic as ListMusicIcon,
   Headphones as HeadphonesIcon,
@@ -42,17 +41,6 @@ export function TopNav({ activeItem, onNavigate, queueCount, subscriptionCount }
             <HomeIcon size={24} aria-hidden="true" />
           </span>
           <span className={styles.label}>Hjem</span>
-        </button>
-
-        <button
-          className={`${styles.navItem} ${activeItem === 'home' ? styles.active : ''}`}
-          onClick={() => onNavigate('home')}
-          aria-current={activeItem === 'home' ? 'page' : undefined}
-        >
-          <span className={styles.iconWrapper}>
-            <ClockIcon size={24} aria-hidden="true" />
-          </span>
-          <span className={styles.label}>Nyeste</span>
         </button>
 
         <button

@@ -1,9 +1,9 @@
+import { Suspense, lazy } from 'react';
 import { AlertCircle as ErrorIcon } from 'lucide-react';
 import { SearchBar } from './SearchBar';
 import { FilterPanel } from './FilterPanel';
 import { PodcastList } from './PodcastList';
 import { EpisodeList } from './EpisodeList';
-import { RandomDiscovery } from './RandomDiscovery';
 import { useScrollDirection } from '../hooks/useScrollDirection';
 import type {
   FilterOption,
@@ -11,10 +11,14 @@ import type {
   SearchFilters,
   DateFilter,
   DiscoveryMode,
+  Episode,
 } from '../types/podcast';
 import type { EpisodeWithPodcast } from '../utils/search';
 import type { PlayingEpisode } from './AudioPlayer';
 import type { TabType } from './TabBar';
+import type { Subscription } from '../services/db';
+
+const HomeView = lazy(() => import('./HomeView'));
 
 interface SearchViewProps {
   filters: SearchFilters;
@@ -28,6 +32,7 @@ interface SearchViewProps {
   categories: FilterOption[];
   languages: string[];
   activeFilterCount: number;
+  subscriptions: Subscription[];
   onSetQuery: (query: string) => void;
   onTabChange: (tab: TabType) => void;
   onToggleCategory: (category: string) => void;
@@ -40,8 +45,8 @@ interface SearchViewProps {
   onSelectPodcast: (podcast: Podcast) => void;
   onSelectPodcastById: (podcastId: string) => void;
   onPlayEpisode: (episode: PlayingEpisode) => void;
-  onAddToQueue: (episode: EpisodeWithPodcast) => void;
-  onPlayNext: (episode: EpisodeWithPodcast) => void;
+  onAddToQueue: (episode: EpisodeWithPodcast | Episode, podcastTitle?: string, podcastImage?: string) => void;
+  onPlayNext: (episode: EpisodeWithPodcast | Episode, podcastTitle?: string, podcastImage?: string) => void;
   isInQueue: (episodeId: string) => boolean;
 }
 
@@ -54,6 +59,7 @@ export function SearchView({
   categories,
   languages,
   activeFilterCount,
+  subscriptions,
   onSetQuery,
   onTabChange,
   onToggleCategory,
@@ -72,7 +78,7 @@ export function SearchView({
 }: SearchViewProps) {
   const scrollDirection = useScrollDirection();
 
-  const showRandomDiscovery = !filters.query.trim() && activeFilterCount === 0 && !isPending;
+  const showHomeView = !filters.query.trim() && activeFilterCount === 0 && !isPending;
 
   return (
     <>
@@ -117,15 +123,17 @@ export function SearchView({
       )}
 
       <section className="results-section">
-        {/* Show random discovery only when search is empty AND no filters are active */}
-        {showRandomDiscovery ? (
-          <RandomDiscovery
-            onPlayEpisode={onPlayEpisode}
-            onSelectPodcastById={onSelectPodcastById}
-            onAddToQueue={onAddToQueue}
-            onPlayNext={onPlayNext}
-            isInQueue={isInQueue}
-          />
+        {/* Show home view (recent episodes) when search is empty AND no filters are active */}
+        {showHomeView ? (
+          <Suspense fallback={<div className="loading-view">Laster...</div>}>
+            <HomeView
+              subscriptions={subscriptions}
+              onPlayEpisode={onPlayEpisode}
+              onAddToQueue={onAddToQueue as any}
+              onPlayNext={onPlayNext as any}
+              isInQueue={isInQueue}
+            />
+          </Suspense>
         ) : activeTab === 'podcasts' ? (
           <PodcastList
             podcasts={results.podcasts}
