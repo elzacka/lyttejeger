@@ -30,9 +30,6 @@ interface InProgressEpisode extends EpisodeWithSubscription {
 }
 
 // Cache key for home view episodes
-const HOME_CACHE_KEY = 'homeView_episodes';
-const HOME_CACHE_TIMESTAMP_KEY = 'homeView_timestamp';
-const HOME_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
 export function HomeView({
   subscriptions,
@@ -149,7 +146,7 @@ export function HomeView({
     const cacheAge = now - lastFetchTimeRef.current;
 
     // Skip if we have episodes and cache is fresh (less than 10 minutes old)
-    if (episodes.length > 0 && cacheAge < HOME_CACHE_DURATION) {
+    if (episodes.length > 0 && cacheAge < 600000) {
       hasInitialLoadedRef.current = true;
       return;
     }
