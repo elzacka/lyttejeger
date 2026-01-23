@@ -72,7 +72,7 @@
 
 .navItem.active {
   color: var(--accent, var(--color-accent));
-  background: rgba(26, 95, 122, 0.08);
+  background: transparent;
   font-weight: 600;
 }
 
