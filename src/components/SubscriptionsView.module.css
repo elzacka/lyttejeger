@@ -66,8 +66,9 @@
 /* Grid layout */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-sm);
+  max-width: 240px; /* 4 × 49px + 3 × 8px gaps = 196px + 24px = 220px + padding */
 }
 
 /* Card styling */
@@ -223,8 +224,9 @@
   }
 
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: var(--space-sm);
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-xs);
+    max-width: 200px;
   }
 
   .podcastTitle {
@@ -247,8 +249,9 @@
 /* Tablet breakpoint */
 @media (min-width: 641px) and (max-width: 1024px) {
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: var(--space-md);
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-sm);
+    max-width: 220px;
   }
 
   .podcastTitle {
@@ -263,8 +266,9 @@
   }
 
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: var(--space-lg);
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-sm);
+    max-width: 240px;
   }
 
   .title {
