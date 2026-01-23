@@ -34,6 +34,7 @@ export function useQueue() {
         episodeId: episode.id,
         podcastId: episode.podcastId || '',
         title: episode.title,
+        description: episode.description, // Include description for expandable cards
         podcastTitle: episode.podcastTitle || '',
         audioUrl: episode.audioUrl,
         imageUrl: episode.imageUrl,
@@ -58,6 +59,7 @@ export function useQueue() {
         episodeId: episode.id,
         podcastId: episode.podcastId || '',
         title: episode.title,
+        description: episode.description, // Include description for expandable cards
         podcastTitle: episode.podcastTitle || '',
         audioUrl: episode.audioUrl,
         imageUrl: episode.imageUrl,
@@ -112,8 +114,8 @@ export function useQueue() {
         podcastTitle: next.podcastTitle,
         podcastImage: next.podcastImage,
         duration: next.duration ?? 0,
-        description: '',
-        publishedAt: '',
+        description: next.description || '', // Use description from queue item
+        publishedAt: next.publishedAt || '',
         podcastId: next.podcastId,
         transcriptUrl: next.transcriptUrl,
         chaptersUrl: next.chaptersUrl,

@@ -40,7 +40,7 @@ function queueItemToEpisode(item: QueueItem): Episode {
     id: item.episodeId,
     podcastId: item.podcastId,
     title: item.title,
-    description: '',
+    description: item.description || '', // Use description from queue item
     audioUrl: item.audioUrl,
     duration: item.duration || 0,
     publishedAt: item.publishedAt || '',

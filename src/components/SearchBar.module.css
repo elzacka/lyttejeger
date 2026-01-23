@@ -173,7 +173,7 @@
 
   /* Use 16px font to prevent iOS zoom on focus */
   .input {
-    font-size: 16px;
+    font-size: var(--text-lg);
   }
 
   .inputWrapper {
@@ -196,7 +196,7 @@
     }
 
     .input {
-      font-size: 16px;
+      font-size: var(--text-lg);
     }
   }
 }

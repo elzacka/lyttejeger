@@ -12,8 +12,9 @@
   gap: var(--space-sm);
   margin: 0 0 var(--space-sm) 0;
   font-family: var(--font-mono);
-  font-size: var(--font-base);
+  font-size: var(--font-h2);
   font-weight: 500;
+  line-height: var(--leading-tight);
   color: var(--text-primary);
 }
 
@@ -27,8 +28,9 @@
   background: var(--accent);
   color: var(--color-white);
   font-family: var(--font-mono);
-  font-size: var(--font-xs);
+  font-size: var(--font-badge);
   font-weight: 500;
+  line-height: var(--leading-none);
   border-radius: var(--radius-full);
 }
 
@@ -46,7 +48,8 @@
   padding: var(--space-md);
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: var(--font-body-sm);
+  line-height: var(--leading-normal);
 }
 
 .spinner {
@@ -66,7 +69,8 @@
   padding: var(--space-md);
   color: var(--error-color);
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: var(--font-body-sm);
+  line-height: var(--leading-normal);
   text-align: center;
 }
 
@@ -83,7 +87,8 @@
 .emptyText {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: var(--font-body);
+  line-height: var(--leading-normal);
   color: var(--text-muted);
 }
 
@@ -95,7 +100,8 @@
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: var(--font-xs);
+  font-size: var(--font-label-sm);
+  line-height: var(--leading-snug);
   cursor: pointer;
   transition:
     color var(--transition-fast),
@@ -118,7 +124,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: var(--space-3); /* 12px - standardized spacing */
 }
 
 /* Mobile */
@@ -131,11 +137,11 @@
   }
 
   .title {
-    font-size: var(--font-sm);
+    font-size: var(--font-h2); /* Responsive via design-tokens.css */
     margin-bottom: var(--space-sm);
   }
 
   .list {
-    gap: var(--space-xs);
+    gap: var(--space-2); /* 8px - tighter on mobile */
   }
 }

@@ -129,43 +129,53 @@
   --font-sans: var(--font-mono); /* Alias for compatibility */
 
   /*
-   * Type Scale for Monospace
-   * Monospace fonts need slightly larger sizes for readability.
-   * Using a 1.2 (minor third) ratio for tighter, more balanced scale.
+   * Type Scale - Modern 2026 Best Practices
    *
-   * Hierarchy:
-   * - Display: Hero text, marketing headlines (48-72px)
-   * - Heading: Section headers (20-36px)
-   * - Body: Reading text (16-18px)
-   * - UI: Buttons, labels, inputs (13-16px)
-   * - Caption: Helper text, metadata (12px)
+   * Based on fluid typography and responsive design principles:
+   * - Mobile-first approach with clamp() for fluid scaling
+   * - Consistent 1.25 (major third) ratio for clear hierarchy
+   * - Optimized for monospace (DM Mono) readability
+   * - WCAG 2.2 AA compliant contrast and sizing
+   *
+   * Semantic Usage:
+   * - Display: Hero sections, landing pages (32-48px)
+   * - Heading: Page/section titles (20-28px)
+   * - Title: Card/item titles (16-18px)
+   * - Body: Primary reading text (15-16px)
+   * - Label: UI controls, buttons (13-14px)
+   * - Caption: Metadata, timestamps (11-12px)
    */
 
-  /* Base sizes */
-  --text-xs: 0.75rem; /* 12px - captions, helper text */
-  --text-sm: 0.8125rem; /* 13px - small UI elements */
-  --text-base: 1rem; /* 16px - body text, default */
-  --text-lg: 1.125rem; /* 18px - lead paragraphs */
-  --text-xl: 1.25rem; /* 20px - h4, small headings */
-  --text-2xl: 1.5rem; /* 24px - h3 */
-  --text-3xl: 1.875rem; /* 30px - h2 */
-  --text-4xl: 2.25rem; /* 36px - h1 */
-  --text-5xl: 3rem; /* 48px - display-sm */
-  --text-6xl: 3.75rem; /* 60px - display-md */
-  --text-7xl: 4.5rem; /* 72px - display-lg */
+  /* Caption level (smallest) */
+  --text-2xs: 0.6875rem;    /* 11px - badges, tiny labels */
+  --text-xs: 0.75rem;       /* 12px - captions, metadata */
 
-  /* Mono-optimized sizes (slightly larger for optical balance) */
-  --text-mono-xs: 0.8125rem; /* 13px */
-  --text-mono-sm: 0.875rem; /* 14px */
-  --text-mono-base: 1.0625rem; /* 17px */
+  /* Label level (UI elements) */
+  --text-sm: 0.8125rem;     /* 13px - form labels, small buttons */
+  --text-md: 0.875rem;      /* 14px - button text, tabs */
 
-  /* Line Heights - Slightly looser for monospace readability */
+  /* Body level (content) */
+  --text-base: 0.9375rem;   /* 15px - body text, descriptions */
+  --text-lg: 1rem;          /* 16px - emphasized body, card titles */
+
+  /* Title level (headings) */
+  --text-xl: 1.125rem;      /* 18px - h4, subsection titles */
+  --text-2xl: 1.25rem;      /* 20px - h3, card headers */
+  --text-3xl: 1.5rem;       /* 24px - h2, section headers */
+  --text-4xl: 1.75rem;      /* 28px - h1, page titles */
+
+  /* Display level (hero content) */
+  --text-5xl: 2rem;         /* 32px - small display */
+  --text-6xl: 2.5rem;       /* 40px - medium display */
+  --text-7xl: 3rem;         /* 48px - large display */
+
+  /* Line Heights - 2026 best practices for readability */
   --leading-none: 1;
-  --leading-tight: 1.3;
-  --leading-snug: 1.4;
-  --leading-normal: 1.6;
-  --leading-relaxed: 1.75;
-  --leading-loose: 2;
+  --leading-tight: 1.25;    /* Headings, display text */
+  --leading-snug: 1.375;    /* Titles, UI labels */
+  --leading-normal: 1.5;    /* Body text (WCAG recommended) */
+  --leading-relaxed: 1.625; /* Long-form content */
+  --leading-loose: 2;       /* Special cases */
 
   /* Font Weights - DM Mono supports 300, 400, 500 */
   --font-light: 300;

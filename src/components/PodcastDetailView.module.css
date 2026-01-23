@@ -57,7 +57,7 @@
 }
 
 .backButton .material-symbols-outlined {
-  font-size: 24px;
+  font-size: var(--text-3xl);
 }
 
 .content {
@@ -247,7 +247,8 @@
 
 .metaLabel {
   font-family: var(--font-mono);
-  font-size: var(--font-meta);
+  font-size: var(--font-caption);
+  line-height: var(--leading-normal);
   color: var(--text-muted);
 }
 
@@ -255,6 +256,7 @@
   font-family: var(--font-mono);
   font-size: var(--font-body);
   font-weight: var(--font-weight-medium);
+  line-height: var(--leading-snug);
   color: var(--text-primary);
 }
 
@@ -270,7 +272,8 @@
   background: var(--bg-secondary);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: var(--font-meta);
+  font-size: var(--font-caption);
+  line-height: var(--leading-snug);
   color: var(--text-muted);
 }
 
@@ -379,7 +382,8 @@
 .episodeCount {
   margin: var(--space-4) 0 0;
   font-family: var(--font-mono);
-  font-size: var(--font-meta);
+  font-size: var(--font-caption);
+  line-height: var(--leading-normal);
   color: var(--text-muted);
   text-align: center;
 }
@@ -406,19 +410,19 @@
 
   .subscribeButton {
     padding: 0 var(--space-2);
-    font-size: var(--font-meta);
+    font-size: var(--font-label-sm);
   }
 
   .title {
-    font-size: var(--font-title);
+    font-size: var(--font-h2);
   }
 
   .author {
-    font-size: var(--font-meta);
+    font-size: var(--font-body-sm);
   }
 
   .episodesTitle {
-    font-size: var(--font-title);
+    font-size: var(--font-h3);
   }
 
   .episodeList {

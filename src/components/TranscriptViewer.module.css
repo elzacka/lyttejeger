@@ -102,7 +102,7 @@
 .text {
   font-size: var(--font-sm);
   color: var(--text-primary);
-  line-height: 1.4;
+  line-height: var(--leading-snug);
 }
 
 .loading,

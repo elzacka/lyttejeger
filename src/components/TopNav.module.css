@@ -84,7 +84,7 @@
 }
 
 .iconWrapper .material-symbols-outlined {
-  font-size: 24px;
+  font-size: var(--text-3xl);
 }
 
 .label {
@@ -100,7 +100,7 @@
   padding: 0 4px;
   background: var(--accent, var(--color-accent));
   color: var(--text-inverse, white);
-  font-size: 9px;
+  font-size: var(--font-badge);
   font-weight: var(--font-weight-semibold, 600);
   border-radius: var(--radius-full);
   display: flex;
@@ -118,7 +118,7 @@
 }
 
 .logoIcon {
-  font-size: 20px;
+  font-size: var(--text-2xl);
   color: var(--accent, var(--color-accent));
 }
 
@@ -158,7 +158,7 @@
     position: static;
     min-width: 14px;
     height: 14px;
-    font-size: 8px;
+    font-size: var(--font-badge);
   }
 }
 
@@ -245,6 +245,6 @@
     right: -8px;
     min-width: 16px;
     height: 16px;
-    font-size: 9px;
+    font-size: var(--font-badge);
   }
 }

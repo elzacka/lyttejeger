@@ -207,7 +207,7 @@
   background: transparent;
   color: var(--text-primary, #1a1a1a);
   font-family: var(--font-mono, monospace);
-  font-size: 16px; /* Alltid 16px - forhindrer iOS zoom */
+  font-size: var(--text-lg); /* Alltid 16px - forhindrer iOS zoom */
   outline: none;
   min-width: 0;
   /* iOS-spesifikke forbedringer */

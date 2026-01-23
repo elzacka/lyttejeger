@@ -36,7 +36,7 @@
   background: var(--accent);
   color: var(--color-white);
   border-radius: var(--radius-full);
-  font-size: var(--text-sm);
+  font-size: var(--font-label-sm);
   min-height: var(--button-height-lg); /* 44px touch target */
 }
 
@@ -58,7 +58,7 @@
   color: var(--text-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
-  font-size: var(--text-sm);
+  font-size: var(--font-label-sm);
   min-height: var(--button-height-lg);
 }
 
@@ -79,7 +79,7 @@
   padding: var(--space-xs) var(--space-sm);
   background: transparent;
   color: var(--accent);
-  font-size: var(--text-xs);
+  font-size: var(--font-caption);
 }
 
 .btnGhost:hover:not(:disabled) {
@@ -95,7 +95,7 @@
   background: var(--error-color);
   color: var(--color-white);
   border-radius: var(--radius-full);
-  font-size: var(--text-sm);
+  font-size: var(--font-label-sm);
   min-height: var(--button-height-lg);
 }
 
@@ -150,7 +150,7 @@
   padding: 0;
   background: transparent;
   color: var(--accent);
-  font-size: var(--text-xs);
+  font-size: var(--font-caption);
   text-decoration: none;
 }
 
@@ -162,13 +162,13 @@
 /* ===== SIZE VARIANTS ===== */
 .btnSmall {
   padding: var(--space-2xs) var(--space-md);
-  font-size: var(--text-xs);
+  font-size: var(--font-caption);
   min-height: var(--button-height-sm); /* 32px */
 }
 
 .btnLarge {
   padding: var(--space-sm) var(--space-xl);
-  font-size: var(--text-base);
+  font-size: var(--font-body);
   min-height: var(--button-height-lg); /* 44px */
 }
 

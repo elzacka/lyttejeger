@@ -1,10 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import {
-  Podcast as PodcastIcon,
   Check as CheckIcon,
   MoreVertical as MoreVerticalIcon,
-  ListMusic as ListMusicIcon,
-  ListPlus as ListPlusIcon,
   Play as PlayIcon,
   GripVertical as GripVerticalIcon,
   Trash2 as TrashIcon,
@@ -30,7 +27,6 @@ function formatSeasonEpisode(season?: number, episodeNum?: number): string | nul
 
 /**
  * Podcast info to display on the card
- * Either comes from episode.podcast or from a subscription
  */
 export interface EpisodePodcastInfo {
   id: string;
@@ -39,8 +35,8 @@ export interface EpisodePodcastInfo {
 }
 
 /**
- * Unified EpisodeCard props interface
- * Supports all use cases: SearchView, PodcastDetailView, HomeView, QueueView
+ * Simplified EpisodeCard props
+ * Standardized design: cover art + title + metadata, expandable for description
  */
 export interface EpisodeCardProps {
   /** The episode to display */
@@ -116,11 +112,6 @@ export interface EpisodeCardProps {
   /** Ref callback for the swipe content element */
   swipeContentRef?: React.RefCallback<HTMLDivElement>;
 
-  // --- Layout variants ---
-
-  /** Hide the expand/collapse functionality */
-  hideExpand?: boolean;
-
   /** Visual variant for different contexts */
   variant?: 'default' | 'queue';
 }
@@ -148,16 +139,13 @@ export function EpisodeCard({
   onSwipeTouchEnd,
   isSwipedOpen = false,
   swipeContentRef,
-  hideExpand = false,
   variant = 'default',
 }: EpisodeCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [menuPosition, setMenuPosition] = useState<'right' | 'left'>('right');
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Determine image URL from episode or podcast info
   const imageUrl = episode.imageUrl || podcastInfo?.imageUrl;
@@ -205,35 +193,14 @@ export function EpisodeCard({
     }
   };
 
-  const handleToggleExpand = () => {
-    if (!hideExpand) {
-      setIsExpanded((prev) => !prev);
-    }
+  const handleToggleExpand = (e?: React.MouseEvent | React.TouchEvent) => {
+    e?.stopPropagation();
+    setIsExpanded((prev) => !prev);
   };
 
   const handleMenuClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     e.preventDefault();
-
-    // Calculate menu position before opening
-    if (!menuOpen && containerRef.current) {
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const menuWidth = 160;
-      const viewportWidth = window.innerWidth;
-
-      const dropdownLeftEdgeIfRight = containerRect.right - menuWidth;
-      const wouldOverflowLeft = dropdownLeftEdgeIfRight < 0;
-
-      const dropdownRightEdgeIfLeft = containerRect.left + menuWidth;
-      const wouldOverflowRight = dropdownRightEdgeIfLeft > viewportWidth;
-
-      if (wouldOverflowLeft && !wouldOverflowRight) {
-        setMenuPosition('left');
-      } else {
-        setMenuPosition('right');
-      }
-    }
-
     setMenuOpen(!menuOpen);
   };
 
@@ -281,148 +248,6 @@ export function EpisodeCard({
     setImageError(true);
   };
 
-  // Render image with integrated play button (and drag handle for queue)
-  const renderImage = () => {
-    return (
-      <button
-        className={styles.imageButton}
-        onClick={handleImageClick}
-        aria-label={`Spill ${episode.title}`}
-      >
-        {imageUrl && !imageError ? (
-          <img
-            src={imageUrl}
-            alt=""
-            className={styles.image}
-            loading="lazy"
-            onError={handleImageError}
-          />
-        ) : (
-          <div className={`${styles.image} image-placeholder`}>
-            <PodcastIcon size={24} aria-hidden="true" />
-          </div>
-        )}
-        <div className={styles.playOverlay}>
-          <PlayIcon size={20} aria-hidden="true" />
-        </div>
-      </button>
-    );
-  };
-
-  // Render progress bar
-  const renderProgressBar = () => {
-    if (!progress || progress.completed || progress.progress <= 1) return null;
-    return (
-      <div className={styles.progressBar}>
-        <div
-          className={styles.progressFill}
-          style={{ width: `${progress.progress}%` }}
-          aria-label={`${Math.round(progress.progress)}% avspilt`}
-        />
-      </div>
-    );
-  };
-
-  // Render metadata line
-  const renderMeta = () => (
-    <div className={styles.meta}>
-      <span>{formatDateLong(episode.publishedAt)}</span>
-      {formatDuration(episode.duration) && <span>{formatDuration(episode.duration)}</span>}
-      {FEATURES.SEASON_EPISODE_METADATA && formatSeasonEpisode(episode.season, episode.episode) && (
-        <span className={styles.seasonEpisode}>
-          {formatSeasonEpisode(episode.season, episode.episode)}
-        </span>
-      )}
-      {FEATURES.SEASON_EPISODE_METADATA &&
-        episode.episodeType &&
-        episode.episodeType !== 'full' && (
-          <span className={styles.episodeTypeBadge}>{episode.episodeType}</span>
-        )}
-      {progress?.completed && (
-        <span className={styles.completed}>
-          <CheckIcon size={14} aria-hidden="true" />
-          Hørt
-        </span>
-      )}
-      {progress && !progress.completed && progress.progress > 1 && (
-        <span className={styles.inProgress}>{Math.round(progress.progress)}%</span>
-      )}
-      {isInQueue && <span className={styles.inQueue}>I kø</span>}
-      <EpisodeBadges chaptersUrl={episode.chaptersUrl} transcriptUrl={episode.transcriptUrl} />
-    </div>
-  );
-
-  // Render menu dropdown
-  const renderMenu = () => {
-    if (!onAddToQueue && !onPlayNext) return null;
-
-    return (
-      <div ref={containerRef} className={styles.menuContainer}>
-        <button
-          ref={buttonRef}
-          className={styles.menuButton}
-          onClick={handleMenuClick}
-          aria-label="Flere valg"
-          aria-expanded={menuOpen}
-          aria-haspopup="menu"
-        >
-          <MoreVerticalIcon size={20} />
-        </button>
-
-        {menuOpen && (
-          <div
-            ref={menuRef}
-            className={`${styles.menuDropdown} ${menuPosition === 'left' ? styles.menuDropdownLeft : ''}`}
-            role="menu"
-            onKeyDown={handleMenuKeyDown}
-          >
-            {onPlayNext && (
-              <button className={styles.menuItem} onClick={handlePlayNext} role="menuitem">
-                <ListMusicIcon size={18} />
-                Spill neste
-              </button>
-            )}
-            {onAddToQueue && !isInQueue && (
-              <button className={styles.menuItem} onClick={handleAddToQueue} role="menuitem">
-                <ListPlusIcon size={18} />
-                Legg til i kø
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Render description with line-clamp
-  const renderDescription = () => {
-    if (!episode.description || hideExpand) return null;
-
-    return (
-      <div className={`${styles.episodeDescription} ${isExpanded ? styles.expanded : ''}`}>
-        <FormattedText text={episode.description} />
-        {!hideExpand && (
-          <span className={styles.expandIndicator}>
-            {isExpanded ? ' ↑' : ' ↓'}
-          </span>
-        )}
-      </div>
-    );
-  };
-
-  // Render play button for actions section
-  const renderPlayButton = () => {
-    return (
-      <button
-        className={styles.playButton}
-        onClick={handlePlay}
-        aria-label={`Spill ${episode.title}`}
-      >
-        <PlayIcon size={18} />
-      </button>
-    );
-  };
-
   // Queue variant has different structure for swipe-to-delete and drag
   if (variant === 'queue') {
     return (
@@ -452,98 +277,230 @@ export function EpisodeCard({
           className={styles.swipeContent}
           style={isSwipedOpen ? { transform: 'translateX(-60px)' } : undefined}
         >
-          <div className={styles.topRow}>
-            {/* Drag handle button */}
-            {isDraggable && (
-              <button
-                className={styles.dragHandle}
-                onMouseDown={onDragMouseDown}
-                onTouchStart={onDragTouchStart}
-                onTouchMove={onDragTouchMove}
-                onTouchEnd={onDragTouchEnd}
-                aria-label="Dra for å endre rekkefølge"
-              >
-                <GripVerticalIcon size={18} aria-hidden="true" />
-              </button>
-            )}
+          {/* Drag handle button */}
+          {isDraggable && (
+            <button
+              className={styles.dragHandle}
+              onMouseDown={onDragMouseDown}
+              onTouchStart={onDragTouchStart}
+              onTouchMove={onDragTouchMove}
+              onTouchEnd={onDragTouchEnd}
+              aria-label="Dra for å endre rekkefølge"
+            >
+              <GripVerticalIcon size={18} aria-hidden="true" />
+            </button>
+          )}
 
-            {showPodcastInfo && renderImage()}
-
-            <div className={styles.content} onClick={handleToggleExpand}>
-              {showPodcastInfo && podcastName && (
-                <p className={styles.podcastName}>{podcastName}</p>
-              )}
-              <p className={styles.episodeTitle}>{episode.title}</p>
-              <div className={styles.meta}>
-                {episode.publishedAt && <span>{formatDateLong(episode.publishedAt)}</span>}
-                {formatDuration(episode.duration) && (
-                  <span className={styles.duration}>{formatDuration(episode.duration)}</span>
-                )}
-                {FEATURES.SEASON_EPISODE_METADATA &&
-                  formatSeasonEpisode(episode.season, episode.episode) && (
-                    <span className={styles.seasonEpisode}>
-                      {formatSeasonEpisode(episode.season, episode.episode)}
-                    </span>
-                  )}
-                {progress?.completed && (
-                  <span className={styles.completed}>
-                    <CheckIcon size={14} aria-hidden="true" />
-                    Hørt
-                  </span>
-                )}
-                {progress && !progress.completed && progress.progress > 1 && (
-                  <span className={styles.inProgress}>{Math.round(progress.progress)}%</span>
-                )}
-                <EpisodeBadges
-                  chaptersUrl={episode.chaptersUrl}
-                  transcriptUrl={episode.transcriptUrl}
-                />
+          {/* Cover art with play overlay */}
+          <button
+            className={styles.imageButton}
+            onClick={handleImageClick}
+            aria-label={`Spill ${episode.title}`}
+          >
+            {imageUrl && !imageError ? (
+              <img
+                src={imageUrl}
+                alt=""
+                className={styles.image}
+                loading="lazy"
+                onError={handleImageError}
+              />
+            ) : (
+              <div className={styles.placeholderImage} aria-hidden="true">
+                🎙️
               </div>
-              {progress && !progress.completed && progress.progress > 1 && (
-                <div className={styles.progressBar}>
-                  <div
-                    className={styles.progressFill}
-                    style={{ width: `${progress.progress}%` }}
-                    aria-label={`${Math.round(progress.progress)}% avspilt`}
-                  />
-                </div>
+            )}
+            <div className={styles.playOverlay}>
+              <PlayIcon size={24} />
+            </div>
+          </button>
+
+          {/* Episode info - clickable to expand */}
+          <div
+            className={styles.info}
+            onClick={handleToggleExpand}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+          >
+            {showPodcastInfo && podcastName && (
+              <p className={styles.podcastName}>{podcastName}</p>
+            )}
+            <p className={styles.episodeTitle}>{episode.title}</p>
+
+            {/* Metadata */}
+            <div className={styles.meta}>
+              {episode.publishedAt && <span>{formatDateLong(episode.publishedAt)}</span>}
+              {formatDuration(episode.duration) && (
+                <span className={styles.duration}>{formatDuration(episode.duration)}</span>
               )}
-              {renderDescription()}
+              {FEATURES.SEASON_EPISODE_METADATA &&
+                formatSeasonEpisode(episode.season, episode.episode) && (
+                  <span>{formatSeasonEpisode(episode.season, episode.episode)}</span>
+                )}
+              {progress?.completed && (
+                <span className={styles.completed}>
+                  <CheckIcon size={14} aria-hidden="true" />
+                  Hørt
+                </span>
+              )}
+              {progress && !progress.completed && progress.progress > 1 && (
+                <span className={styles.inProgress}>{Math.round(progress.progress)}%</span>
+              )}
+              <EpisodeBadges
+                chaptersUrl={episode.chaptersUrl}
+                transcriptUrl={episode.transcriptUrl}
+              />
             </div>
 
-            {/* No actions section in queue variant - use swipe-to-delete */}
+            {/* Progress bar */}
+            {progress && !progress.completed && progress.progress > 1 && (
+              <div className={styles.progressBar}>
+                <div
+                  className={styles.progressFill}
+                  style={{ width: `${progress.progress}%` }}
+                  aria-label={`${Math.round(progress.progress)}% avspilt`}
+                />
+              </div>
+            )}
+
+            {/* Expandable description */}
+            {episode.description && (
+              <div className={`${styles.description} ${isExpanded ? styles.expanded : ''}`}>
+                <FormattedText text={episode.description} />
+              </div>
+            )}
           </div>
         </div>
       </article>
     );
   }
 
-  // Default variant: compact card with inline footer
+  // Default variant: standardized minimal design
   return (
     <article
-      className={`${styles.item} ${menuOpen ? styles.menuOpen : ''}`}
+      className={`${styles.card} ${menuOpen ? styles.menuOpen : ''}`}
       role="listitem"
-      data-menu-open={menuOpen ? 'true' : undefined}
     >
-      <div className={styles.episodeHeader}>
-        <div className={styles.episodeToggle} onClick={handleToggleExpand}>
-          {showPodcastInfo && renderImage()}
-
-          <div className={styles.info}>
-            {showPodcastInfo && podcastName && (
-              <span className={styles.podcastName}>{podcastName}</span>
-            )}
-            <span className={styles.episodeTitle}>{episode.title}</span>
-            {renderMeta()}
-            {renderProgressBar()}
-            {renderDescription()}
+      {/* Cover art with play overlay */}
+      <button
+        className={styles.imageButton}
+        onClick={handleImageClick}
+        aria-label={`Spill ${episode.title}`}
+      >
+        {imageUrl && !imageError ? (
+          <img
+            src={imageUrl}
+            alt=""
+            className={styles.image}
+            loading="lazy"
+            onError={handleImageError}
+          />
+        ) : (
+          <div className={styles.placeholderImage} aria-hidden="true">
+            🎙️
           </div>
+        )}
+        <div className={styles.playOverlay}>
+          <PlayIcon size={24} />
+        </div>
+      </button>
+
+      {/* Episode info - clickable to expand */}
+      <div className={styles.content}>
+        <div className={styles.header} onClick={handleToggleExpand}>
+          {showPodcastInfo && podcastName && (
+            <p className={styles.podcastName}>{podcastName}</p>
+          )}
+          <h3 className={styles.episodeTitle}>{episode.title}</h3>
+
+          {/* Metadata */}
+          <div className={styles.meta}>
+            {episode.publishedAt && <span>{formatDateLong(episode.publishedAt)}</span>}
+            {formatDuration(episode.duration) && (
+              <span className={styles.duration}>{formatDuration(episode.duration)}</span>
+            )}
+            {FEATURES.SEASON_EPISODE_METADATA &&
+              formatSeasonEpisode(episode.season, episode.episode) && (
+                <span>{formatSeasonEpisode(episode.season, episode.episode)}</span>
+              )}
+            {progress?.completed && (
+              <span className={styles.completed}>
+                <CheckIcon size={14} aria-hidden="true" />
+                Hørt
+              </span>
+            )}
+            {progress && !progress.completed && progress.progress > 1 && (
+              <span className={styles.inProgress}>{Math.round(progress.progress)}%</span>
+            )}
+            <EpisodeBadges
+              chaptersUrl={episode.chaptersUrl}
+              transcriptUrl={episode.transcriptUrl}
+            />
+          </div>
+
+          {/* Progress bar */}
+          {progress && !progress.completed && progress.progress > 1 && (
+            <div className={styles.progressBar}>
+              <div
+                className={styles.progressFill}
+                style={{ width: `${progress.progress}%` }}
+                aria-label={`${Math.round(progress.progress)}% avspilt`}
+              />
+            </div>
+          )}
+
+          {/* Expandable description */}
+          {episode.description && (
+            <div className={`${styles.description} ${isExpanded ? styles.expanded : ''}`}>
+              <FormattedText text={episode.description} />
+            </div>
+          )}
         </div>
 
-        <div className={styles.actions}>
-          {!showPodcastInfo && renderPlayButton()}
-          {renderMenu()}
-        </div>
+        {/* Context menu (if add to queue or play next is available) */}
+        {(onAddToQueue || onPlayNext) && (
+          <div className={styles.actions}>
+            <button
+              ref={buttonRef}
+              className={styles.menuButton}
+              onClick={handleMenuClick}
+              aria-label="Handlinger"
+              aria-expanded={menuOpen}
+              aria-haspopup="true"
+            >
+              <MoreVerticalIcon size={20} />
+            </button>
+
+            {menuOpen && (
+              <div
+                ref={menuRef}
+                className={styles.menuDropdown}
+                role="menu"
+                onKeyDown={handleMenuKeyDown}
+              >
+                {onPlayNext && (
+                  <button
+                    className={styles.menuItem}
+                    onClick={handlePlayNext}
+                    role="menuitem"
+                  >
+                    Spill neste
+                  </button>
+                )}
+                {onAddToQueue && !isInQueue && (
+                  <button
+                    className={styles.menuItem}
+                    onClick={handleAddToQueue}
+                    role="menuitem"
+                  >
+                    Legg til i kø
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </article>
   );

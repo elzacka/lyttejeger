@@ -16,8 +16,9 @@
 .title {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--heading-2); /* 18px - consistent with other views */
+  font-size: var(--font-h2);
   font-weight: 500;
+  line-height: var(--leading-tight);
   color: var(--text-primary);
 }
 
@@ -50,7 +51,8 @@
 .count {
   margin: 0 0 var(--space-md) 0;
   font-family: var(--font-mono);
-  font-size: var(--font-xs);
+  font-size: var(--font-caption);
+  line-height: var(--leading-normal);
   color: var(--text-muted);
 }
 
@@ -64,7 +66,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--list-gap-compact); /* 8px - more content visible */
+  gap: var(--space-3); /* 12px - standardized spacing */
 }
 
 /* Empty state */
@@ -81,15 +83,17 @@
 .empty h3 {
   margin: 0 0 var(--space-xs) 0;
   font-family: var(--font-mono);
-  font-size: var(--font-base);
+  font-size: var(--font-h3);
   font-weight: 500;
+  line-height: var(--leading-tight);
   color: var(--text-secondary);
 }
 
 .empty p {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-xs);
+  font-size: var(--font-body);
+  line-height: var(--leading-normal);
 }
 
 /* Mobile */
@@ -116,6 +120,6 @@
   }
 
   .list {
-    gap: var(--space-xs);
+    gap: var(--space-2); /* 8px - tighter on mobile */
   }
 }

@@ -23,17 +23,36 @@
   --space-section: var(--space-5);          /* 24px mellom seksjoner */
 
   /* ===== TYPOGRAPHY SEMANTIC TOKENS ===== */
+  /*
+   * Modern 2026 semantic typography system
+   * Clear hierarchy with consistent visual rhythm
+   */
 
-  /* Headings - tydelig hierarki */
-  --font-h1: var(--text-xl);        /* 20px - Page titles */
-  --font-h2: var(--text-lg);        /* 18px - Section headings */
-  --font-h3: var(--text-md);        /* 16px - Sub-sections */
+  /* Display level - Hero content, landing pages */
+  --font-display: var(--text-5xl);      /* 32px - Hero titles */
+  --font-display-sm: var(--text-4xl);   /* 28px - Sub-hero */
 
-  /* Body text */
-  --font-title: var(--text-base);   /* 15px - Episode/podcast titles */
-  --font-body: var(--text-sm);      /* 13px - Descriptions */
-  --font-meta: var(--text-xs);      /* 12px - Metadata, timestamps */
-  --font-badge: var(--text-2xs);    /* 11px - Badges, indicators */
+  /* Heading level - Page structure */
+  --font-h1: var(--text-3xl);           /* 24px - Page titles */
+  --font-h2: var(--text-2xl);           /* 20px - Section headings */
+  --font-h3: var(--text-xl);            /* 18px - Subsection headings */
+  --font-h4: var(--text-lg);            /* 16px - Minor headings */
+
+  /* Title level - Cards and items */
+  --font-title: var(--text-lg);         /* 16px - Card titles, podcast names */
+  --font-title-sm: var(--text-base);    /* 15px - Episode titles */
+
+  /* Body level - Content and descriptions */
+  --font-body: var(--text-base);        /* 15px - Primary text */
+  --font-body-sm: var(--text-sm);       /* 13px - Secondary text, descriptions */
+
+  /* UI level - Interactive elements */
+  --font-label: var(--text-md);         /* 14px - Form labels, buttons */
+  --font-label-sm: var(--text-sm);      /* 13px - Small buttons, tabs */
+
+  /* Caption level - Metadata */
+  --font-caption: var(--text-xs);       /* 12px - Timestamps, metadata */
+  --font-badge: var(--text-2xs);        /* 11px - Badges, counts */
 
   /* ===== IMAGE SIZES ===== */
 
@@ -63,10 +82,14 @@
 /* ===== MOBILE OVERRIDES (max-width: 640px) ===== */
 @media (max-width: 640px) {
   :root {
-    /* Typography - moderate scaling */
-    --font-h1: 1.1875rem;         /* 19px - down from 20px */
-    --font-h2: 1.0625rem;         /* 17px - down from 18px */
-    --font-title: 0.875rem;       /* 14px - down from 15px */
+    /* Typography - optimized for small screens */
+    --font-display: var(--text-4xl);      /* 28px - down from 32px */
+    --font-display-sm: var(--text-3xl);   /* 24px - down from 28px */
+    --font-h1: var(--text-2xl);           /* 20px - down from 24px */
+    --font-h2: var(--text-xl);            /* 18px - down from 20px */
+    --font-h3: var(--text-lg);            /* 16px - down from 18px */
+    --font-title: var(--text-base);       /* 15px - down from 16px */
+    --font-title-sm: var(--text-sm);      /* 13px - down from 15px */
 
     /* Images - tighter on small screens */
     --image-xs: 32px;

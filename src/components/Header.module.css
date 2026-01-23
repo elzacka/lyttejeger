@@ -47,7 +47,7 @@
 }
 
 .logoIcon {
-  font-size: 28px;
+  font-size: var(--text-4xl);
   font-weight: 300;
 
   /* Modern gradient icon */

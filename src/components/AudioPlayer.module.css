@@ -302,7 +302,7 @@
   font-size: var(--font-2xs);
   font-weight: 500;
   color: currentColor;
-  line-height: 1;
+  line-height: var(--leading-none);
 }
 
 /* Progress bar */
@@ -573,7 +573,7 @@
   font-family: var(--font-mono);
   font-size: var(--font-sm);
   color: var(--text-primary);
-  line-height: 1.5;
+  line-height: var(--leading-normal);
 }
 
 /* Soundbite list */
@@ -805,7 +805,7 @@
   }
 
   .skipLabel {
-    font-size: var(--text-xs);
+    font-size: var(--font-caption);
   }
 
   .player.expanded .playButton {

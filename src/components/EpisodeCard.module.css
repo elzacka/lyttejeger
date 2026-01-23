@@ -1,79 +1,41 @@
-/* EpisodeCard - Modernized unified episode card */
+/* EpisodeCard - Standardized minimal design */
+/* Cover art + title + metadata, expandable for description */
 
 /* ===== DEFAULT VARIANT ===== */
-.item {
+.card {
   display: flex;
-  flex-direction: column;
-  background: var(--bg-primary);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: var(--radius-xl);
-  transition:
-    all var(--duration-fast) var(--ease-out),
-    transform var(--transition-fast);
-  position: relative;
-
-  /* Modern shadow for depth */
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 4px 12px rgba(0, 0, 0, 0.02);
-
-  /* Enable container queries for responsive card layout */
-  container-type: inline-size;
-  container-name: episode-card;
-}
-
-.item.menuOpen {
-  z-index: calc(var(--z-dropdown) + 1);
-}
-
-.item:hover {
-  border-color: rgba(26, 95, 122, 0.3);
-  transform: translateY(-2px);
-
-  /* Enhanced shadow on hover */
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    0 8px 24px rgba(0, 0, 0, 0.06);
-}
-
-.episodeHeader {
-  display: flex;
-  align-items: flex-start;
+  flex-direction: row;
   gap: var(--space-3);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: visible; /* Allow dropdown menu to overflow */
+  transition: all var(--duration-fast) var(--ease-out);
+  position: relative;
   padding: var(--space-3);
 }
 
-.episodeToggle {
-  flex: 1;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  min-width: 0;
-  padding: 0;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  text-align: left;
+.card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.episodeToggle:disabled {
-  cursor: default;
+.card.menuOpen {
+  z-index: 100; /* Ensure menu appears above other cards */
+  overflow: visible; /* Ensure dropdown is not clipped */
 }
 
-.episodeToggle:focus-visible {
-  outline: none;
-}
-
+/* Cover art with play overlay */
 .imageButton {
   position: relative;
-  width: var(--image-sm);
-  height: var(--image-sm);
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
   padding: 0;
   border: none;
-  background: transparent;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  flex-shrink: 0;
-  border-radius: var(--radius-md);
   overflow: hidden;
   transition: transform var(--duration-fast) var(--ease-out);
 }
@@ -88,17 +50,28 @@
 
 .imageButton:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 .image {
   width: 100%;
   height: 100%;
-  border-radius: var(--radius-md);
   object-fit: cover;
   display: block;
 }
 
+.placeholderImage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-4xl);
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+/* Play overlay on hover */
 .playOverlay {
   position: absolute;
   top: 0;
@@ -112,72 +85,73 @@
   opacity: 0;
   transition: opacity var(--duration-fast) var(--ease-out);
   pointer-events: none;
+  color: white;
 }
 
 .imageButton:hover .playOverlay {
   opacity: 1;
 }
 
-.playOverlay svg {
-  width: 24px;
-  height: 24px;
-  color: white;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-}
-
-
-.info {
-  flex: 1;
-  min-width: 0;
+/* Content area */
+.content {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+  position: relative;
 }
 
+.header {
+  cursor: pointer;
+  flex: 1;
+}
+
+/* Podcast name (when shown) */
 .podcastName {
+  margin: 0 0 var(--space-1) 0;
   font-family: var(--font-mono);
-  font-size: var(--font-meta);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--font-caption);
+  font-weight: 500;
+  line-height: var(--leading-snug);
   color: var(--accent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0;
 }
 
+/* Episode title */
 .episodeTitle {
+  margin: 0 0 var(--space-2) 0;
   font-family: var(--font-mono);
-  font-size: var(--font-title);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--leading-normal);
+  font-size: var(--font-title-sm);
+  font-weight: 500;
+  line-height: var(--leading-snug);
   color: var(--text-primary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin: 0;
 }
 
+/* Metadata */
 .meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1) var(--space-2);
+  margin-bottom: var(--space-2);
   font-family: var(--font-mono);
-  font-size: var(--font-meta);
+  font-size: var(--font-caption);
+  line-height: var(--leading-normal);
   color: var(--text-muted);
-  margin: 0;
+}
+
+.meta span {
+  white-space: nowrap;
 }
 
 .duration {
-  font-family: var(--font-mono);
-  font-size: var(--font-meta);
-  color: var(--text-muted);
-}
-
-.inQueue {
-  color: var(--accent);
-  font-weight: var(--font-weight-medium);
+  font-weight: 500;
 }
 
 .completed {
@@ -185,71 +159,67 @@
   align-items: center;
   gap: var(--space-0-5);
   color: var(--success-color);
-  font-weight: var(--font-weight-medium);
-}
-
-.completed .material-symbols-outlined {
-  font-size: 14px;
+  font-weight: 500;
 }
 
 .inProgress {
   color: var(--accent);
-  font-weight: var(--font-weight-medium);
+  font-weight: 500;
 }
 
-.seasonEpisode {
-  color: var(--text-muted);
-  font-weight: var(--font-weight-medium);
-}
-
-.episodeTypeBadge {
-  padding: 0 var(--space-1);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-sm);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  font-size: var(--font-badge);
-}
-
-/* Progress bar - modernized */
+/* Progress bar */
 .progressBar {
   width: 100%;
   height: 3px;
-  background: var(--border);
+  background: var(--bg-tertiary);
   border-radius: var(--radius-full);
   overflow: hidden;
-  margin-top: var(--space-1);
+  margin-bottom: var(--space-2);
 }
 
 .progressFill {
   height: 100%;
   background: var(--accent);
-  border-radius: var(--radius-full);
   transition: width var(--duration-normal) var(--ease-out);
 }
 
-.actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-shrink: 0;
+/* Expandable description */
+.description {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+  font-size: var(--font-body-sm);
+  line-height: var(--leading-normal);
+  color: var(--text-secondary);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all var(--duration-normal) var(--ease-out);
 }
 
-.menuContainer {
-  position: relative;
-  z-index: 1;
+.description.expanded {
+  max-height: 1000px;
+  opacity: 1;
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+}
+
+/* Context menu */
+.actions {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
 }
 
 .menuButton {
-  width: var(--button-height-md);
-  height: var(--button-height-md);
+  width: var(--button-lg);
+  height: var(--button-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   color: var(--text-muted);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);
@@ -260,36 +230,30 @@
   color: var(--text-primary);
 }
 
-.menuButton:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
+.menuButton:active {
+  transform: scale(0.95);
 }
 
-.menuButton .material-symbols-outlined {
-  font-size: 20px;
+.menuButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .menuDropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + var(--space-1));
   right: 0;
-  min-width: 180px;
-  max-width: min(220px, calc(100vw - var(--space-5)));
+  min-width: 160px;
   background: var(--bg-primary);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  z-index: var(--z-dropdown);
-  overflow: hidden;
-  animation: fadeIn var(--duration-fast) var(--ease-out);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: var(--space-1);
+  z-index: 1001; /* Above card z-index when menu is open */
+  animation: slideDown var(--duration-fast) var(--ease-out);
 }
 
-.menuDropdownLeft {
-  right: auto;
-  left: 0;
-}
-
-@keyframes fadeIn {
+@keyframes slideDown {
   from {
     opacity: 0;
     transform: translateY(-4px);
@@ -301,232 +265,108 @@
 }
 
 .menuItem {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
   width: 100%;
-  min-height: var(--button-height-lg);
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--space-3);
   background: none;
   border: none;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: var(--font-body);
-  font-weight: var(--font-weight-normal);
+  border-radius: var(--radius-sm);
   text-align: left;
+  font-family: var(--font-mono);
+  font-size: var(--font-body-sm);
+  line-height: var(--leading-snug);
+  color: var(--text-primary);
   cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-out);
+  transition: background var(--duration-fast) var(--ease-out);
 }
 
-.menuItem:hover:not(:disabled) {
-  background: var(--bg-secondary);
-  color: var(--accent);
+.menuItem:hover {
+  background: var(--bg-hover);
 }
 
 .menuItem:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
-  background: var(--bg-secondary);
-}
-
-.menuItem:disabled {
-  color: var(--text-muted);
-  cursor: not-allowed;
-}
-
-.menuItem .material-symbols-outlined {
-  font-size: 18px;
-}
-
-/* Play button - round circle for all variants */
-.playButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--button-height-md);
-  height: var(--button-height-md);
-  padding: 0;
-  background: var(--accent);
-  border: none;
-  border-radius: 50%;
-  color: var(--color-accent-foreground);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: all var(--duration-fast) var(--ease-out);
-}
-
-.playButton:hover {
-  background: var(--accent-hover);
-  transform: scale(1.05);
-}
-
-.playButton:active {
-  transform: scale(0.95);
-}
-
-.playButton:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* Episode details (expanded) */
-.episodeDetails {
-  padding: 0 var(--space-card) var(--space-card);
-  animation: slideDown var(--duration-normal) var(--ease-out);
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Description with line-clamp */
-.episodeDescription {
-  margin: var(--space-2) 0 0 0;
-  font-size: var(--font-meta);
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  line-height: var(--leading-normal);
-  white-space: pre-line;
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  position: relative;
-}
-
-.episodeDescription.expanded {
-  -webkit-line-clamp: unset;
-  display: block;
-}
-
-.episodeDescription a {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.episodeDescription a:hover {
-  color: var(--accent-hover);
-}
-
-/* Expand indicator */
-.expandIndicator {
-  display: inline;
-  color: var(--text-muted);
-  font-size: var(--font-meta);
-  margin-left: var(--space-2);
-  cursor: pointer;
-  user-select: none;
-  transition: color var(--duration-fast);
-}
-
-.expandIndicator:hover {
-  color: var(--accent);
 }
 
 /* ===== QUEUE VARIANT ===== */
 .queueItem {
   position: relative;
-  overflow: hidden;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
+  overflow-x: hidden; /* Clip swipe action horizontally */
+  overflow-y: visible; /* Allow expandable description to show vertically */
   transition: all var(--duration-fast) var(--ease-out);
 }
 
 .queueItem:hover {
   border-color: var(--accent);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-/* Queue variant: compact images */
-.queueItem .imageButton {
-  width: 48px;
-  height: 48px;
+.queueItem.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
 }
 
-.queueItem .image {
-  width: 48px;
-  height: 48px;
+.queueItem.dragOver {
+  border-top: 2px solid var(--accent);
 }
 
-/* Swipe-to-delete structure */
+/* Swipe action (revealed on left swipe) */
 .swipeAction {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
-  width: 80px;
+  width: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--error-color);
-  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
 }
 
 .deleteButton {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
   background: transparent;
   border: none;
-  color: var(--color-accent-foreground);
+  color: white;
   cursor: pointer;
 }
 
-.deleteButton .material-symbols-outlined {
-  font-size: 28px;
+.deleteButton:focus-visible {
+  outline: 2px solid white;
+  outline-offset: -4px;
 }
 
+/* Swipeable content */
 .swipeContent {
-  position: relative;
-  background: var(--bg-primary);
-  padding: var(--space-2);
-  transition: transform var(--duration-fast) var(--ease-out);
-  touch-action: pan-y;
-}
-
-.topRow {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start; /* Allow .info to expand vertically */
   gap: var(--space-2);
-}
-
-.content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  cursor: pointer;
+  padding: var(--space-3);
+  background: var(--bg-secondary);
+  transition: transform var(--duration-fast) var(--ease-out);
+  position: relative;
+  z-index: 1;
 }
 
 /* Drag handle */
 .dragHandle {
+  width: var(--button-lg);
+  height: var(--button-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--button-height-md);
-  height: var(--button-height-md);
-  padding: 0;
   background: transparent;
   border: none;
   color: var(--text-muted);
   cursor: grab;
-  touch-action: none;
   flex-shrink: 0;
-  border-radius: var(--radius-md);
-  transition: all var(--duration-fast);
+  transition: color var(--duration-fast) var(--ease-out);
 }
 
 .dragHandle:active {
@@ -535,98 +375,58 @@
 
 .dragHandle:hover {
   color: var(--text-primary);
-  background: var(--bg-hover);
 }
 
-.dragHandle svg {
-  width: 18px;
-  height: 18px;
+.dragHandle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
-/* Drag states */
-.queueItem.dragging {
-  opacity: 0.5;
-  background: var(--bg-secondary);
+/* Queue variant: image */
+.queueItem .imageButton {
+  width: var(--image-sm);
+  height: var(--image-sm);
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
 }
 
-.queueItem.dragOver {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--color-accent-alpha);
+/* Queue variant: info section */
+.queueItem .info {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
 }
 
-/* Queue variant: keep podcast name accent colored */
-.queueItem .podcastName {
-  font-weight: var(--font-weight-medium);
-  color: var(--accent);
+.queueItem .info:hover {
+  opacity: 0.8;
 }
 
-/* Desktop-only action button - removed for queue variant */
-
-/* Desktop: hide swipe elements */
-@media (min-width: 641px) {
-  .swipeAction {
-    display: none;
-  }
-
-  .swipeContent {
-    transform: none !important;
-  }
-}
-
-/* Mobile responsiveness */
+/* Mobile */
 @media (max-width: 640px) {
-  .episodeHeader {
-    padding: var(--space-3);
+  /* Default variant - smaller cover art on mobile */
+  .card {
+    padding: var(--space-2);
     gap: var(--space-2);
   }
 
   .imageButton {
-    width: var(--image-sm);
-    height: var(--image-sm);
+    width: 64px;
+    height: 64px;
   }
 
-  .episodeTitle {
-    font-size: var(--font-title);
-    -webkit-line-clamp: 2;
+  /* Queue variant */
+  .queueItem .imageButton {
+    width: var(--image-xs);
+    height: var(--image-xs);
   }
 
-  .episodeDetails {
-    padding: 0 var(--space-card-compact) var(--space-card-compact);
-  }
-
-  .episodeDescription {
-    font-size: var(--font-meta);
-  }
-
-  /* Queue variant mobile styles */
   .swipeContent {
     padding: var(--space-2);
-  }
-
-  .topRow {
-    flex-wrap: nowrap;
     gap: var(--space-2);
   }
 
-  .content {
-    gap: var(--space-1);
-  }
-
-  .queueItem .episodeTitle {
-    -webkit-line-clamp: 2;
-  }
-
-  .playButton {
-    width: var(--button-height-md);
-    height: var(--button-height-md);
-  }
-
-  .playButton .material-symbols-outlined {
-    font-size: 20px;
-  }
-
-  .dragHandle svg {
-    width: 16px;
-    height: 16px;
+  .menuDropdown {
+    min-width: 140px;
   }
 }

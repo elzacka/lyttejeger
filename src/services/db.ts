@@ -15,6 +15,7 @@ export interface QueueItem {
   episodeId: string;
   podcastId: string;
   title: string;
+  description?: string; // Episode description for expandable cards
   podcastTitle: string;
   audioUrl: string;
   imageUrl?: string;
