@@ -35,6 +35,11 @@ interface RandomDiscoveryProps {
   isInQueue: (episodeId: string) => boolean;
 }
 
+// Cache episodes in sessionStorage to persist across navigation
+const CACHE_KEY = 'randomDiscovery_episodes';
+const CACHE_TIMESTAMP_KEY = 'randomDiscovery_timestamp';
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+
 export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById, onAddToQueue, onPlayNext, isInQueue }: RandomDiscoveryProps) {
   const [episodes, setEpisodes] = useState<EpisodeWithPodcast[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +48,7 @@ export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById, onAddToQue
   const [isCurated, setIsCurated] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const hasLoadedRef = useRef(false);
 
   // Fetch the first (oldest) episode from a curated podcast
   // Many curated podcasts are series, so we always show the first episode
@@ -167,6 +173,39 @@ export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById, onAddToQue
     };
   };
 
+  // Load cached episodes from sessionStorage
+  const loadCachedEpisodes = (): EpisodeWithPodcast[] | null => {
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      const timestamp = sessionStorage.getItem(CACHE_TIMESTAMP_KEY);
+
+      if (!cached || !timestamp) return null;
+
+      const age = Date.now() - parseInt(timestamp, 10);
+      if (age > CACHE_DURATION) {
+        // Cache expired
+        sessionStorage.removeItem(CACHE_KEY);
+        sessionStorage.removeItem(CACHE_TIMESTAMP_KEY);
+        return null;
+      }
+
+      return JSON.parse(cached) as EpisodeWithPodcast[];
+    } catch (error) {
+      console.error('Failed to load cached episodes:', error);
+      return null;
+    }
+  };
+
+  // Save episodes to sessionStorage
+  const saveCachedEpisodes = (episodesToCache: EpisodeWithPodcast[]) => {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify(episodesToCache));
+      sessionStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+    } catch (error) {
+      console.error('Failed to cache episodes:', error);
+    }
+  };
+
   const fetchRandomEpisodes = async (isRefresh = false) => {
     if (isRefresh) {
       setIsRefreshing(true);
@@ -235,6 +274,8 @@ export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById, onAddToQue
       if (results.length > 0) {
         setEpisodes(results);
         setIsCurated(fromCurated);
+        // Save to cache
+        saveCachedEpisodes(results);
       } else {
         setError('Ingen episoder funnet');
       }
@@ -248,7 +289,24 @@ export function RandomDiscovery({ onPlayEpisode, onSelectPodcastById, onAddToQue
   };
 
   useEffect(() => {
+    // Only fetch once per session - use cache on subsequent mounts
+    if (hasLoadedRef.current) {
+      return;
+    }
+
+    // Try to load from cache first
+    const cached = loadCachedEpisodes();
+    if (cached && cached.length > 0) {
+      setEpisodes(cached);
+      setIsLoading(false);
+      setIsCurated(true); // Assume curated for cached content
+      hasLoadedRef.current = true;
+      return;
+    }
+
+    // No cache, fetch new episodes
     fetchRandomEpisodes();
+    hasLoadedRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

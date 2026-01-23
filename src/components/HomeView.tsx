@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Loader2 as SpinnerIcon } from 'lucide-react';
 import type { Subscription, PlaybackPosition } from '../services/db';
 import { getInProgressEpisodes } from '../services/db';
@@ -29,6 +29,11 @@ interface InProgressEpisode extends EpisodeWithSubscription {
   playbackPosition: PlaybackPosition;
 }
 
+// Cache key for home view episodes
+const HOME_CACHE_KEY = 'homeView_episodes';
+const HOME_CACHE_TIMESTAMP_KEY = 'homeView_timestamp';
+const HOME_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+
 export function HomeView({
   subscriptions,
   onPlayEpisode,
@@ -41,6 +46,8 @@ export function HomeView({
   const [inProgressEpisodes, setInProgressEpisodes] = useState<InProgressEpisode[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lastFetchTimeRef = useRef<number>(0);
+  const hasInitialLoadedRef = useRef<boolean>(false);
   const { getProgress } = usePlaybackProgress();
 
   const fetchRecentEpisodes = useCallback(async () => {
@@ -123,6 +130,8 @@ export function HomeView({
 
       setEpisodes(allEpisodes);
       setInProgressEpisodes(inProgress);
+      // Update last fetch time
+      lastFetchTimeRef.current = Date.now();
     } catch {
       setError('Kunne ikke hente nye episoder');
     } finally {
@@ -131,8 +140,25 @@ export function HomeView({
   }, [subscriptions]);
 
   useEffect(() => {
+    // Only fetch on initial load if no data exists
+    if (hasInitialLoadedRef.current) {
+      return; // Already loaded, don't fetch again on re-mount
+    }
+
+    const now = Date.now();
+    const cacheAge = now - lastFetchTimeRef.current;
+
+    // Skip if we have episodes and cache is fresh (less than 10 minutes old)
+    if (episodes.length > 0 && cacheAge < HOME_CACHE_DURATION) {
+      hasInitialLoadedRef.current = true;
+      return;
+    }
+
+    // Fetch new episodes only on first load or if cache is stale
     fetchRecentEpisodes();
-  }, [fetchRecentEpisodes]);
+    lastFetchTimeRef.current = now;
+    hasInitialLoadedRef.current = true;
+  }, [fetchRecentEpisodes, episodes.length]);
 
   const handlePlayEpisode = (episode: EpisodeWithSubscription) => {
     onPlayEpisode({
