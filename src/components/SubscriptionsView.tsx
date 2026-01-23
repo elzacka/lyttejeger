@@ -42,6 +42,11 @@ export function SubscriptionsView({
     );
   }
 
+  // Sort subscriptions alphabetically by title
+  const sortedSubscriptions = [...subscriptions].sort((a, b) =>
+    a.title.localeCompare(b.title, 'nb-NO', { sensitivity: 'base' })
+  );
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -50,7 +55,7 @@ export function SubscriptionsView({
       </div>
 
       <div className={styles.grid}>
-        {subscriptions.map((sub) => {
+        {sortedSubscriptions.map((sub) => {
           const isConfirming = confirmDeleteId === sub.podcastId;
 
           return (
