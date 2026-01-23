@@ -68,6 +68,7 @@ export function SubscriptionsView({
                 className={styles.cardButton}
                 onClick={() => onSelectPodcast(sub.podcastId)}
                 aria-label={`Gå til ${sub.title}`}
+                title={sub.title}
               >
                 <div className={styles.imageWrapper}>
                   <img
