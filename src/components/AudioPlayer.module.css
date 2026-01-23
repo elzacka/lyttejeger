@@ -1,4 +1,4 @@
-/* AudioPlayer - Fixed position at bottom with collapsible mobile state */
+/* AudioPlayer - Modern redesign with glassmorphism */
 
 .player {
   position: fixed;
@@ -8,24 +8,60 @@
   left: 0;
   right: 0;
   z-index: var(--z-player);
-  background: var(--bg-primary);
-  border-top: 1px solid var(--border);
-  box-shadow: var(--shadow-player);
+
+  /* Modern glassmorphism effect */
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 -4px 20px rgba(0, 0, 0, 0.04),
+    0 -1px 4px rgba(0, 0, 0, 0.02);
+
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
   overflow: hidden;
-  transition: height 0.2s ease;
+
+  /* Smooth transitions */
+  transition:
+    height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-/* Mini progress bar at top of player */
+/* Mini progress bar at top of player - modern gradient */
 .miniProgress {
   position: absolute;
   top: 0;
   left: 0;
-  height: 4px;
-  background: var(--accent);
-  transition: width 0.1s linear;
+  height: 3px;
+
+  /* Modern gradient progress bar */
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    color-mix(in srgb, var(--accent) 80%, #fff) 100%
+  );
+
+  /* Smooth glow effect */
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
+
+  transition: width 0.15s linear;
+
+  /* Subtle animation */
+  animation: progress-shimmer 2s ease-in-out infinite;
+}
+
+@keyframes progress-shimmer {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.95;
+  }
 }
 
 .container {
@@ -159,32 +195,59 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent);
+
+  /* Modern gradient background */
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+
   border: none;
   border-radius: 50%;
   color: var(--color-white);
   cursor: pointer;
+
+  /* Enhanced shadow for depth */
+  box-shadow:
+    0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent),
+    0 2px 4px color-mix(in srgb, var(--accent) 20%, transparent),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+
   transition:
     background var(--transition-fast),
-    transform var(--transition-fast);
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+
+  /* Smooth scale on interaction */
+  will-change: transform;
 }
 
 .playButton:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 100%);
+
+  /* Enhanced glow on hover */
+  box-shadow:
+    0 6px 16px color-mix(in srgb, var(--accent) 40%, transparent),
+    0 3px 6px color-mix(in srgb, var(--accent) 30%, transparent),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+
+  transform: translateY(-1px);
 }
 
 .playButton:active:not(:disabled) {
-  transform: scale(0.92);
+  transform: scale(0.95) translateY(0);
+
+  box-shadow:
+    0 2px 8px color-mix(in srgb, var(--accent) 25%, transparent),
+    inset 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .playButton:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: 3px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  outline-offset: 3px;
 }
 
 .playButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .loading {

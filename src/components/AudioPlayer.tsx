@@ -768,6 +768,46 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     [handleTouchStart, handleTouchEnd]
   );
 
+  // Keyboard navigation for accessibility
+  useEffect(() => {
+    if (!episode) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      switch (e.key) {
+        case ' ':
+        case 'k':
+          e.preventDefault();
+          togglePlayPause();
+          break;
+        case 'ArrowLeft':
+        case 'j':
+          e.preventDefault();
+          skipBackward();
+          break;
+        case 'ArrowRight':
+        case 'l':
+          e.preventDefault();
+          skipForward();
+          break;
+        case 'f':
+          e.preventDefault();
+          setIsExpanded((prev) => !prev);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [episode, togglePlayPause, skipBackward, skipForward]);
+
   // Don't render if no episode
   if (!episode) return null;
 
