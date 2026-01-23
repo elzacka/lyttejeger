@@ -352,7 +352,6 @@ export function QueueView({
                 onSwipeTouchEnd={handleTouchEnd(item.id)}
                 isSwipedOpen={swipedItemId === item.id}
                 swipeContentRef={item.id ? setSwipeContentRef(item.id) : undefined}
-                hideExpand={true}
               />
             </li>
           );

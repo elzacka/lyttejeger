@@ -1,19 +1,19 @@
 import { useState } from 'react';
 import { X as CloseIcon } from 'lucide-react';
 import type { Subscription } from '../services/db';
-import styles from './SubscriptionsView.module.css';
+import styles from './MyPodsView.module.css';
 
-interface SubscriptionsViewProps {
+interface MyPodsViewProps {
   subscriptions: Subscription[];
   onUnsubscribe: (podcastId: string) => void;
   onSelectPodcast: (podcastId: string) => void;
 }
 
-export function SubscriptionsView({
+export function MyPodsView({
   subscriptions,
   onUnsubscribe,
   onSelectPodcast,
-}: SubscriptionsViewProps) {
+}: MyPodsViewProps) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const handleUnsubscribeClick = (e: React.MouseEvent, podcastId: string) => {
@@ -103,4 +103,4 @@ export function SubscriptionsView({
 }
 
 // Default export for lazy loading
-export default SubscriptionsView;
+export default MyPodsView;

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import { OfflineBanner } from './components/OfflineBanner';
-import { SearchView } from './components/SearchView';
+import { HomeView } from './components/HomeView';
 import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { TopNav, type NavItem } from './components/TopNav';
@@ -10,7 +10,7 @@ import { SkipLink } from './components/SkipLink';
 // Lazy load non-critical views for better performance
 const PodcastDetailView = lazy(() => import('./components/PodcastDetailView'));
 const QueueView = lazy(() => import('./components/QueueView'));
-const SubscriptionsView = lazy(() => import('./components/SubscriptionsView'));
+const MyPodsView = lazy(() => import('./components/MyPodsView'));
 import { useSearch } from './hooks/useSearch';
 import { useQueue } from './hooks/useQueue';
 import { useSubscriptions } from './hooks/useSubscriptions';
@@ -158,9 +158,7 @@ function App() {
       setPreviousActiveTab(
         currentView === 'subscriptions'
           ? 'subscriptions'
-          : currentView === 'search'
-            ? 'search'
-            : 'home'
+          : 'search'
       );
       setSelectedPodcast(podcast);
     },
@@ -322,10 +320,10 @@ function App() {
             <OfflineBanner />
 
             <main className="main" id="main-content" role="main" aria-label="Hovedinnhold">
-              {/* Search view - search bar, filters, and results (or home view with recent episodes) */}
+              {/* Home view - search bar, filters, and results (or recent episodes when empty) */}
               {currentView === 'search' && (
                 <ErrorBoundary viewName="søkevisningen">
-                  <SearchView
+                  <HomeView
                     filters={filters}
                     results={results}
                     isPending={isPending}
@@ -354,11 +352,11 @@ function App() {
                 </ErrorBoundary>
               )}
 
-              {/* Subscriptions view */}
+              {/* My Pods view */}
               {currentView === 'subscriptions' && (
                 <ErrorBoundary viewName="abonnementene">
                   <Suspense fallback={<div className="loading-view">Laster...</div>}>
-                    <SubscriptionsView
+                    <MyPodsView
                       subscriptions={subscriptions}
                       onUnsubscribe={unsubscribe}
                       onSelectPodcast={handleSelectSubscribedPodcast}
