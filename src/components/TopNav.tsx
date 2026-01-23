@@ -1,5 +1,5 @@
 import {
-  Search as SearchIcon,
+  Home as HomeIcon,
   Clock as ClockIcon,
   Heart as HeartIcon,
   ListMusic as ListMusicIcon,
@@ -39,9 +39,9 @@ export function TopNav({ activeItem, onNavigate, queueCount, subscriptionCount }
           aria-current={activeItem === 'search' ? 'page' : undefined}
         >
           <span className={styles.iconWrapper}>
-            <SearchIcon size={24} aria-hidden="true" />
+            <HomeIcon size={24} aria-hidden="true" />
           </span>
-          <span className={styles.label}>Søk</span>
+          <span className={styles.label}>Hjem</span>
         </button>
 
         <button
