@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>Scroll Test</title></head>
+<body>
+<div style="height: 3000px; background: linear-gradient(white, black);">
+  <h1>If you can scroll this page, scrolling works</h1>
+  <p>Page is 3000px tall</p>
+</div>
+<script>
+console.log('Body position:', getComputedStyle(document.body).position);
+console.log('Body overflow:', getComputedStyle(document.body).overflow);
+console.log('Body classList:', document.body.classList);
+console.log('Body inline styles:', document.body.style.cssText);
+</script>
+</body>
+</html>

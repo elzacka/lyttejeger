@@ -1,0 +1,849 @@
+/* AudioPlayer - Fixed position at bottom with collapsible mobile state */
+
+.player {
+  position: fixed;
+  /* Position above the bottom nav - mobile: 56px touch target + 4px nav padding */
+  --nav-height: 60px;
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  right: 0;
+  z-index: var(--z-player);
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border);
+  box-shadow: var(--shadow-player);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  transition: height 0.2s ease;
+}
+
+/* Mini progress bar at top of player */
+.miniProgress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background: var(--accent);
+  transition: width 0.1s linear;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+}
+
+/* Episode info - now a button for expand/collapse */
+.info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.info:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.expandIcon {
+  display: none;
+  color: var(--text-muted);
+  font-size: var(--icon-sm);
+  flex-shrink: 0;
+}
+
+/* Mini controls - shown in collapsed mobile state */
+.miniControls {
+  display: none;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Swipe handle indicator - more prominent for better affordance */
+.swipeHandle {
+  display: none;
+  width: 48px;
+  height: 6px;
+  background: var(--border);
+  opacity: 0.8;
+  border-radius: 3px;
+  margin: var(--space-2xs) auto 0;
+  transition:
+    opacity var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.swipeHandle:hover {
+  opacity: 1;
+  background: var(--text-muted);
+}
+
+/* Hint text below handle in collapsed state */
+.swipeHint {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: var(--font-2xs);
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: 4px;
+  opacity: 0.9;
+}
+
+/* Full controls wrapper */
+.fullControls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-shrink: 0;
+}
+
+.image {
+  width: var(--image-sm);
+  height: var(--image-sm);
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.text {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.podcast {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.playButton {
+  width: var(--button-lg);
+  height: var(--button-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  border: none;
+  border-radius: 50%;
+  color: var(--color-white);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.playButton:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.playButton:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.playButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.playButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.skipButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-0-5);
+  min-width: var(--touch-target, 44px);
+  min-height: var(--touch-target, 44px);
+  padding: var(--space-1);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.skipButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.skipButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.skipButton svg {
+  width: 24px;
+  height: 24px;
+}
+
+.skipLabel {
+  font-family: var(--font-mono);
+  font-size: var(--font-2xs);
+  font-weight: 500;
+  color: currentColor;
+  line-height: 1;
+}
+
+/* Progress bar */
+.progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  flex: 1;
+}
+
+.time {
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  min-width: 42px;
+  text-align: center;
+}
+
+.slider {
+  flex: 1;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--accent);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.slider:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+.slider:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Close button - positioned at far right of player */
+.closeButton {
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--button-lg);
+  height: var(--button-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.closeButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Secondary controls (speed, sleep timer) - hidden on desktop, shown on mobile expanded */
+.secondaryControls {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+.secondaryButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: var(--touch-target, 44px);
+}
+
+.secondaryButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.secondaryButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.secondaryButton.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--color-white);
+}
+
+.secondaryButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.speedLabel {
+  font-weight: 500;
+  min-width: 32px;
+  text-align: center;
+}
+
+.timerLabel {
+  font-size: var(--font-2xs);
+}
+
+.chapterCount {
+  font-size: var(--font-2xs);
+  font-weight: 500;
+}
+
+/* Chapter list */
+.chapterList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  max-height: 200px;
+  overflow-y: auto;
+  padding: var(--space-xs);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.chapterItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  min-height: var(--touch-target, 44px);
+}
+
+.chapterItem:hover {
+  background: var(--bg-hover);
+}
+
+.chapterItem:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.chapterItemActive {
+  background: var(--accent-subtle);
+}
+
+.chapterItemActive .chapterTime,
+.chapterItemActive .chapterTitle {
+  color: var(--accent);
+}
+
+.chapterTime {
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  min-width: 48px;
+  flex-shrink: 0;
+}
+
+.chapterTitle {
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Transcript list */
+.transcriptList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  max-height: 300px;
+  overflow-y: auto;
+  padding: var(--space-xs);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.transcriptItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  min-height: var(--touch-target, 44px);
+}
+
+.transcriptItem:hover {
+  background: var(--bg-hover);
+}
+
+.transcriptItem:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.transcriptItemActive {
+  background: var(--accent-subtle);
+}
+
+.transcriptItemActive .transcriptTime,
+.transcriptItemActive .transcriptText {
+  color: var(--accent);
+}
+
+.transcriptTime {
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  min-width: 48px;
+  flex-shrink: 0;
+}
+
+.transcriptText {
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* Soundbite list */
+.soundbiteCount {
+  font-size: var(--font-2xs);
+  font-weight: 500;
+}
+
+.soundbiteList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  max-height: 200px;
+  overflow-y: auto;
+  padding: var(--space-xs);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.soundbiteItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  min-height: var(--touch-target, 44px);
+}
+
+.soundbiteItem:hover {
+  background: var(--bg-hover);
+}
+
+.soundbiteItem:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.soundbiteTime {
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.soundbiteTitle {
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Error message */
+.errorMessage {
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--color-error-500);
+  text-align: center;
+  margin: 0;
+  padding: var(--space-xs) 0;
+}
+
+/* Mobile layout - collapsible */
+@media (max-width: 640px) {
+  .player {
+    padding: 0;
+  }
+
+  /* Collapsed state (default on mobile) */
+  .player.collapsed .container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: var(--space-2xs) var(--space-sm) var(--space-xs);
+  }
+
+  .player.collapsed .swipeHandle {
+    display: block;
+    order: -1;
+  }
+
+  .player.collapsed .swipeHint {
+    display: block;
+    order: -1;
+    margin-top: 2px;
+  }
+
+  .player.collapsed .contentRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    width: 100%;
+  }
+
+  .player.collapsed .info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Hide expand icon in info area when collapsed - swipe to expand */
+  .player.collapsed .expandIcon {
+    display: none;
+  }
+
+  .player.collapsed .miniControls {
+    display: flex;
+  }
+
+  .player.collapsed .miniControls .playButton {
+    width: var(--button-md);
+    height: var(--button-md);
+  }
+
+  .player.collapsed .miniControls .playButton svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .player.collapsed .fullControls {
+    display: none;
+  }
+
+  .player.collapsed .miniProgress {
+    display: block;
+  }
+
+  .player.collapsed .closeButton {
+    display: flex;
+    /* Position at very top right, aligned with swipe handle area */
+    top: 2px;
+    right: var(--space-xs);
+    transform: none;
+    /* Smaller touch target to fit in handle area */
+    width: var(--button-sm);
+    height: var(--button-sm);
+  }
+
+  .player.expanded .closeButton {
+    display: flex;
+    top: var(--space-xs);
+    transform: none;
+  }
+
+  /* Expanded state */
+  .player.expanded .container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    /* Add top padding to make room for close button */
+    padding: var(--space-xs) var(--space-sm) var(--space-sm);
+    position: relative;
+  }
+
+  .player.expanded .swipeHandle {
+    display: block;
+    margin-bottom: var(--space-2xs);
+  }
+
+  .player.expanded .contentRow {
+    display: contents;
+  }
+
+  .player.expanded .info {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .player.expanded .expandIcon {
+    display: none;
+  }
+
+  .player.expanded .miniControls {
+    display: none;
+  }
+
+  .player.expanded .fullControls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    width: 100%;
+  }
+
+  .player.expanded .controls {
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  .player.expanded .progress {
+    width: 100%;
+  }
+
+  .player.expanded .secondaryControls {
+    display: flex;
+  }
+
+  .player.expanded .miniProgress {
+    display: none;
+  }
+
+  .image {
+    width: var(--image-xs);
+    height: var(--image-xs);
+  }
+
+  .title {
+    font-size: var(--font-xs);
+  }
+
+  .podcast {
+    font-size: var(--font-2xs);
+  }
+
+  .skipButton {
+    min-width: var(--touch-target, 44px);
+    min-height: var(--touch-target, 44px);
+  }
+
+  .skipButton svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .skipLabel {
+    font-size: var(--text-xs);
+  }
+
+  .player.expanded .playButton {
+    width: var(--touch-target-large, 56px);
+    height: var(--touch-target-large, 56px);
+  }
+
+  .player.expanded .playButton svg {
+    width: var(--icon-lg);
+    height: var(--icon-lg);
+  }
+
+  .time {
+    font-size: var(--font-2xs);
+    min-width: 38px;
+  }
+
+  .slider {
+    height: 10px;
+  }
+
+  .slider::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+
+  .slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Tablet - show full controls, hide mini elements */
+@media (min-width: 641px) and (max-width: 768px) {
+  .player {
+    /* Tablet: bottom nav still visible */
+    --nav-height: 36px;
+  }
+
+  .miniProgress {
+    display: none;
+  }
+
+  .miniControls {
+    display: none;
+  }
+
+  .expandIcon {
+    display: none;
+  }
+
+  .swipeHandle {
+    display: none;
+  }
+
+  .contentRow {
+    display: contents;
+  }
+
+  .info {
+    cursor: default;
+  }
+
+  .secondaryControls {
+    display: flex;
+  }
+}
+
+/* Desktop - no bottom nav, player at true bottom */
+@media (min-width: 769px) {
+  .player {
+    /* No bottom nav on desktop - player sits directly at bottom */
+    --nav-height: 0px;
+  }
+
+  .miniProgress {
+    display: none;
+  }
+
+  .miniControls {
+    display: none;
+  }
+
+  .expandIcon {
+    display: none;
+  }
+
+  .swipeHandle {
+    display: none;
+  }
+
+  .contentRow {
+    display: contents;
+  }
+
+  .info {
+    cursor: default;
+  }
+
+  /* Show speed/sleep controls on desktop */
+  .secondaryControls {
+    display: flex;
+  }
+}

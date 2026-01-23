@@ -1,0 +1,210 @@
+.container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: visible;
+  padding-bottom: calc(var(--player-height) + var(--space-xl));
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .container {
+    padding-bottom: calc(var(--nav-height) + var(--player-height-mobile) + var(--space-xl));
+  }
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.resultCount {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+}
+
+.sortWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sortSelect {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: var(--space-xs) var(--space-lg) var(--space-xs) var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.sortSelect:hover,
+.sortSelect:focus {
+  color: var(--text-primary);
+}
+
+.sortSelect:focus-visible {
+  outline: none;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 2px;
+}
+
+.sortIcon {
+  position: absolute;
+  right: var(--space-xs);
+  pointer-events: none;
+  color: var(--text-muted);
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--list-gap-compact); /* 8px - more podcasts visible */
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+}
+
+/* Non-virtualized: raise z-index when card is expanded */
+.grid > article:has([aria-expanded='true']) {
+  z-index: 10;
+  position: relative;
+}
+
+/* Window-based virtualized list container */
+.virtualList {
+  position: relative;
+  width: 100%;
+}
+
+.virtualItem {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding-bottom: var(--space-sm);
+}
+
+/* Raise z-index when card inside is expanded (using :has selector) */
+.virtualItem:has([aria-expanded='true']) {
+  z-index: 10;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  color: var(--text-muted);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: var(--radius-full);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty svg {
+  margin-bottom: var(--space-sm);
+  opacity: 0.4;
+}
+
+.empty h3 {
+  margin: 0 0 var(--space-xs) 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-base);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.empty p {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+}
+
+.emptyState {
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+}
+
+/* Skeleton loading */
+.skeletonGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.skeletonCard {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.skeletonImage {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+}
+
+.skeletonContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
+.skeletonTitle {
+  height: 16px;
+  width: 70%;
+  border-radius: var(--radius-sm);
+}
+
+.skeletonText {
+  height: 12px;
+  width: 50%;
+  border-radius: var(--radius-sm);
+}
+
+.skeletonTextShort {
+  height: 12px;
+  width: 80%;
+  border-radius: var(--radius-sm);
+}

@@ -1,0 +1,143 @@
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid transparent;
+  border-radius: 24px;
+  box-sizing: border-box;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.inputWrapper:focus-within {
+  background: var(--bg-primary);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--color-accent-alpha);
+}
+
+.prefix {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  user-select: none;
+  margin-right: var(--space-2);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-body);
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: var(--space-2);
+}
+
+.spinner {
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+}
+
+.spinnerIcon {
+  font-size: var(--icon-md);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinnerIcon {
+    animation: none;
+  }
+}
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.clearButton .material-symbols-outlined {
+  font-size: var(--icon-sm);
+}
+
+.clearButton:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.shortcut {
+  display: flex;
+  align-items: center;
+}
+
+.shortcut kbd {
+  padding: var(--space-0-5) var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+/* Hide keyboard hints on mobile */
+@media (max-width: 640px) {
+  .shortcut {
+    display: none;
+  }
+
+  /* Use 16px font to prevent iOS zoom on focus */
+  .input {
+    font-size: 16px;
+  }
+}

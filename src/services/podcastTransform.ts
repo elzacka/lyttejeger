@@ -1,0 +1,234 @@
+/**
+ * Transform Podcast Index API responses to app types
+ */
+import type { Podcast, Episode, Soundbite } from '../types/podcast';
+import type { PodcastIndexFeed, PodcastIndexEpisode, PodcastIndexSoundbite } from './podcastIndex';
+
+/**
+ * Safely convert unix timestamp to ISO string
+ */
+function safeTimestampToISO(timestamp: number | undefined | null): string {
+  if (!timestamp || timestamp <= 0) {
+    return new Date().toISOString(); // Default to now
+  }
+  const date = new Date(timestamp * 1000);
+  // Check if date is valid
+  if (isNaN(date.getTime())) {
+    return new Date().toISOString();
+  }
+  return date.toISOString();
+}
+
+/**
+ * Transform API feed to Podcast type
+ */
+export function transformFeed(feed: PodcastIndexFeed): Podcast {
+  return {
+    id: feed.id.toString(),
+    guid: feed.podcastGuid || undefined,
+    title: feed.title || 'Untitled',
+    author: feed.author || feed.ownerName || 'Unknown',
+    description: htmlToTextWithLinks(feed.description || ''),
+    imageUrl: feed.artwork || feed.image || '/placeholder-podcast.svg',
+    feedUrl: feed.url || feed.originalUrl,
+    websiteUrl: feed.link || undefined,
+    categories: Object.values(feed.categories || {}),
+    language: normalizeLanguage(feed.language),
+    episodeCount: feed.episodeCount || 0,
+    lastUpdated: safeTimestampToISO(feed.lastUpdateTime),
+    rating: calculateRating(feed),
+    explicit: feed.explicit || false,
+    itunesId: feed.itunesId ?? null,
+  };
+}
+
+/**
+ * Transform API soundbites to app Soundbite type
+ */
+function transformSoundbites(
+  soundbite: PodcastIndexSoundbite | null,
+  soundbites: PodcastIndexSoundbite[]
+): Soundbite[] | undefined {
+  const result: Soundbite[] = [];
+
+  // Add primary soundbite if present
+  if (soundbite && soundbite.startTime >= 0 && soundbite.duration > 0) {
+    result.push({
+      startTime: soundbite.startTime,
+      duration: soundbite.duration,
+      title: soundbite.title || 'Høydepunkt',
+    });
+  }
+
+  // Add array soundbites
+  if (soundbites && Array.isArray(soundbites)) {
+    for (const sb of soundbites) {
+      if (sb && sb.startTime >= 0 && sb.duration > 0) {
+        // Avoid duplicates
+        const isDuplicate = result.some(
+          (existing) => existing.startTime === sb.startTime && existing.duration === sb.duration
+        );
+        if (!isDuplicate) {
+          result.push({
+            startTime: sb.startTime,
+            duration: sb.duration,
+            title: sb.title || 'Høydepunkt',
+          });
+        }
+      }
+    }
+  }
+
+  return result.length > 0 ? result : undefined;
+}
+
+/**
+ * Transform API episode to Episode type
+ */
+export function transformEpisode(episode: PodcastIndexEpisode): Episode {
+  return {
+    id: episode.id.toString(),
+    podcastId: episode.feedId.toString(),
+    title: episode.title || 'Untitled Episode',
+    description: htmlToTextWithLinks(episode.description || ''),
+    audioUrl: episode.enclosureUrl,
+    duration: episode.duration || 0,
+    publishedAt: safeTimestampToISO(episode.datePublished),
+    imageUrl: episode.image || episode.feedImage || undefined,
+    transcriptUrl: episode.transcriptUrl || undefined,
+    chaptersUrl: episode.chaptersUrl || undefined,
+    season: episode.season > 0 ? episode.season : undefined,
+    episode: episode.episode !== null && episode.episode > 0 ? episode.episode : undefined,
+    episodeType: normalizeEpisodeType(episode.episodeType),
+    soundbites: transformSoundbites(episode.soundbite, episode.soundbites),
+  };
+}
+
+/**
+ * Normalize episode type to typed values
+ */
+function normalizeEpisodeType(type: string | undefined): 'full' | 'trailer' | 'bonus' | undefined {
+  if (!type) return undefined;
+  const normalized = type.toLowerCase();
+  if (normalized === 'trailer') return 'trailer';
+  if (normalized === 'bonus') return 'bonus';
+  if (normalized === 'full') return 'full';
+  return undefined;
+}
+
+/**
+ * Transform multiple feeds
+ */
+export function transformFeeds(feeds: PodcastIndexFeed[]): Podcast[] {
+  return feeds
+    .filter((feed) => !feed.dead) // Filter out dead feeds
+    .map(transformFeed);
+}
+
+/**
+ * Transform multiple episodes
+ */
+export function transformEpisodes(episodes: PodcastIndexEpisode[]): Episode[] {
+  return episodes.map((ep) => transformEpisode(ep));
+}
+
+/**
+ * Normalize language codes to display format
+ */
+function normalizeLanguage(lang: string): string {
+  if (!lang) return 'Unknown';
+
+  const langMap: Record<string, string> = {
+    no: 'Norsk',
+    nb: 'Norsk',
+    nn: 'Nynorsk',
+    en: 'English',
+    'en-us': 'English',
+    'en-gb': 'English',
+    sv: 'Svenska',
+    da: 'Dansk',
+    de: 'Deutsch',
+    fr: 'Français',
+    es: 'Español',
+    fi: 'Suomi',
+    is: 'Íslenska',
+  };
+
+  const normalized = lang.toLowerCase().split('-')[0];
+  return langMap[lang.toLowerCase()] || langMap[normalized] || lang.toUpperCase();
+}
+
+/**
+ * Calculate a rating based on feed metrics
+ * (Podcast Index doesn't provide ratings, so we estimate based on activity)
+ */
+function calculateRating(feed: PodcastIndexFeed): number {
+  let score = 3.0; // Base score
+
+  // Boost for episode count
+  if (feed.episodeCount > 100) score += 0.5;
+  else if (feed.episodeCount > 50) score += 0.3;
+  else if (feed.episodeCount > 20) score += 0.1;
+
+  // Boost for recent updates
+  const daysSinceUpdate = (Date.now() / 1000 - feed.lastUpdateTime) / 86400;
+  if (daysSinceUpdate < 7) score += 0.5;
+  else if (daysSinceUpdate < 30) score += 0.3;
+  else if (daysSinceUpdate < 90) score += 0.1;
+
+  // Penalty for errors
+  if (feed.crawlErrors > 0 || feed.parseErrors > 0) score -= 0.3;
+
+  // Clamp between 1 and 5
+  return Math.max(1, Math.min(5, Math.round(score * 10) / 10));
+}
+
+/**
+ * Decode HTML entities
+ */
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+    .replace(/&hellip;/g, '...');
+}
+
+/**
+ * Clean up excessive whitespace
+ */
+function cleanupWhitespace(text: string): string {
+  return text
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n[ \t]+/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+/**
+ * Convert HTML to formatted text while preserving links as markdown-style markers
+ * Returns text with links marked as [[url|text]] for later rendering
+ */
+export function htmlToTextWithLinks(html: string): string {
+  return cleanupWhitespace(
+    decodeHtmlEntities(
+      html
+        // Convert links to markdown-style markers before stripping other HTML
+        .replace(/<a[^>]*href=["']([^"']+)["'][^>]*>([^<]*)<\/a>/gi, '[[link:$1|$2]]')
+        // Add newlines before block elements
+        .replace(/<(p|div|br|h[1-6]|li|tr)[^>]*>/gi, '\n')
+        // Add bullet points for list items
+        .replace(/<li[^>]*>/gi, '\n• ')
+        // Add newlines after closing block elements
+        .replace(/<\/(p|div|h[1-6]|ul|ol|table)>/gi, '\n')
+        // Remove all remaining HTML tags
+        .replace(/<[^>]*>/g, '')
+    )
+  );
+}

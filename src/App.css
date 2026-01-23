@@ -1,0 +1,198 @@
+/* Skip link - visually hidden until focused */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-accent);
+  color: var(--color-accent-foreground);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  z-index: var(--z-modal);
+  transition: top var(--duration-fast) var(--ease-out);
+}
+
+.skip-link:focus {
+  top: var(--space-md);
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Main app container */
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Main content - narrow width, aligned to top */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-section);      /* 24px mellom seksjoner */
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-view-desktop);
+  padding-bottom: calc(var(--player-height) + var(--space-8));
+}
+
+/* Sticky search header - contains search bar and filters */
+.search-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto var(--space-6);
+}
+
+/* Search section */
+.search-section {
+  width: 100%;
+}
+
+/* Filter section - tighter coupling with search */
+.filter-section {
+  width: 100%;
+  padding-top: var(--space-2xs);
+}
+
+/* Results section - breathing room from filters */
+.results-section {
+  width: 100%;
+  flex: 1;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Mobile-only reset row - hidden on desktop */
+.mobile-reset-row {
+  display: none;
+}
+
+.mobile-reset-button {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.mobile-reset-button:hover {
+  color: var(--error-color);
+}
+
+.mobile-reset-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Error Banner - centered with results */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  max-width: 800px;
+  margin: 0 auto var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(var(--error-rgb), 0.08);
+  border: 1px solid rgba(var(--error-rgb), 0.2);
+  border-radius: var(--radius-md);
+  color: var(--color-error-500);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+}
+
+.error-banner svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  flex-shrink: 0;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .main {
+    gap: var(--space-4);            /* 16px på mobil */
+    padding: var(--space-view-mobile);   /* 12px */
+    /* Account for bottom nav (56px) + player height + spacing */
+    padding-bottom: calc(
+      var(--nav-height) + var(--player-height-mobile) + var(--space-6) +
+        env(safe-area-inset-bottom, 0px)
+    );
+  }
+
+  /* Sticky search header with scroll-to-hide on mobile */
+  .search-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    background: var(--bg-primary);
+    /* Full width on mobile */
+    max-width: none;
+    width: calc(100% + 2 * var(--space-view-mobile));
+    /* Ergonomic top padding - pushes search bar down for easier thumb reach */
+    padding-top: calc(var(--space-5) + env(safe-area-inset-top, 0px));
+    padding-bottom: var(--space-3);
+    margin: calc(-1 * var(--space-view-mobile)) calc(-1 * var(--space-view-mobile)) var(--space-4);
+    padding-left: var(--space-view-mobile);
+    padding-right: var(--space-view-mobile);
+    /* Smooth transition for hide/show */
+    transition:
+      transform var(--duration-normal) var(--ease-out),
+      opacity var(--duration-fast) var(--ease-out);
+    will-change: transform;
+  }
+
+  /* Search field and filters: full width on mobile */
+  .search-header .search-section,
+  .search-header .filter-section {
+    width: 100%;
+    max-width: none;
+  }
+
+  .search-header--hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .results-section {
+    max-width: none;
+    scroll-margin-top: 100px;
+  }
+
+  .error-banner {
+    max-width: none;
+  }
+
+  /* Show mobile reset button */
+  .mobile-reset-row {
+    display: block;
+    max-width: none;
+    margin-bottom: var(--space-xs);
+  }
+}
+
+/* Desktop: top nav means content starts below it */
+@media (min-width: 769px) {
+  .main {
+    /* Account for top nav height */
+    padding-top: calc(var(--space-5) + var(--touch-target));
+    /* No bottom nav on desktop, only player */
+    padding-bottom: calc(var(--player-height) + var(--space-6));
+  }
+}

@@ -1,0 +1,282 @@
+/* SubscriptionsView - Clean list with swipe-to-unsubscribe */
+
+.container {
+  padding: var(--space-md);
+  padding-bottom: calc(var(--player-height) + var(--space-xl));
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-base);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--badge-size);
+  height: var(--badge-size);
+  padding: 0 var(--space-xs);
+  background: var(--accent);
+  color: var(--color-white);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  border-radius: var(--radius-full);
+}
+
+.swipeHint {
+  margin: 0 0 var(--space-sm) 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--list-gap-compact); /* 8px - more subscriptions visible */
+}
+
+.item {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  transition: border-color var(--transition-fast);
+}
+
+.item:hover {
+  border-color: var(--accent);
+}
+
+/* Swipe action - revealed on swipe left */
+.swipeAction {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--swipe-action-width);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--error-color);
+}
+
+/* Swipeable content */
+.swipeContent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-secondary);
+  transition: transform var(--duration-fast) var(--ease-out);
+  position: relative;
+  z-index: 1;
+}
+
+.podcastButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.podcastButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.image {
+  width: var(--image-sm);
+  height: var(--image-sm);
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+
+.podcastTitle {
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.author {
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Unsubscribe button in swipe action */
+.unsubscribeButton {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-white);
+  cursor: pointer;
+}
+
+.unsubscribeButton:focus-visible {
+  outline: 2px solid var(--color-white);
+  outline-offset: -4px;
+}
+
+.unsubscribeButton .material-symbols-outlined {
+  font-size: var(--icon-lg);
+}
+
+/* Desktop unsubscribe button */
+.desktopUnsubscribe {
+  display: none;
+  width: var(--button-lg);
+  height: var(--button-lg);
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.desktopUnsubscribe:hover {
+  background: rgba(var(--error-rgb), 0.1);
+  color: var(--error-color);
+}
+
+.desktopUnsubscribe:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.desktopUnsubscribe .material-symbols-outlined {
+  font-size: var(--icon-md);
+}
+
+/* Empty state */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty .material-symbols-outlined {
+  font-size: var(--text-4xl);
+  margin-bottom: var(--space-md);
+  opacity: 0.5;
+}
+
+.empty h3 {
+  margin: 0 0 var(--space-xs) 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-base);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.empty p {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .container {
+    padding: var(--space-sm);
+    /* iOS safe area: use direct env() for notch/dynamic island */
+    padding-top: calc(var(--space-lg) + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(var(--nav-height) + var(--player-height-mobile) + var(--space-xl));
+  }
+
+  .header {
+    margin-bottom: var(--space-xs);
+  }
+
+  .title {
+    font-size: var(--font-sm);
+  }
+
+  .list {
+    gap: var(--space-xs);
+  }
+
+  .swipeContent {
+    padding: var(--space-sm);
+  }
+
+  .image {
+    width: var(--image-xs);
+    height: var(--image-xs);
+  }
+
+  .podcastTitle {
+    font-size: var(--font-xs);
+  }
+
+  .author {
+    font-size: var(--font-2xs);
+  }
+}
+
+/* Desktop - show unsubscribe button, hide swipe hint */
+@media (min-width: 641px) {
+  .swipeHint {
+    display: none;
+  }
+
+  .desktopUnsubscribe {
+    display: flex;
+  }
+
+  .swipeAction {
+    display: none;
+  }
+}

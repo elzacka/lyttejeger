@@ -1,0 +1,537 @@
+/* FilterSheet - Bottom sheet for filter selection */
+/* Moderne CSS med dvh for pålitelig mobil-viewport */
+
+.container {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal, 1000);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* Bruk dvh for dynamisk viewport-høyde (iOS Safari) */
+  height: 100dvh;
+  height: 100vh; /* Fallback */
+  box-sizing: border-box;
+}
+
+.containerClosing .backdrop {
+  animation: fadeOut 0.2s ease-out forwards;
+}
+
+.containerClosing .sheet {
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--color-overlay-strong, rgba(0, 0, 0, 0.4));
+  animation: fadeIn 0.2s ease-out;
+  /* Sikre at backdrop fanger touch events */
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.sheet {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 100%;
+  background: var(--color-background, #fff);
+  border-radius: var(--radius-xl, 16px) var(--radius-xl, 16px) 0 0;
+  border-top: 1px solid var(--border, #e5e5e5);
+  box-shadow:
+    0 -4px 24px rgba(0, 0, 0, 0.12),
+    0 -1px 3px rgba(0, 0, 0, 0.08);
+  animation: slideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  /* Safe area padding only - no extra audio player padding needed */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* FJERNET touch-action: none - lar content scrolle */
+  will-change: transform;
+  /* GPU-akselerasjon for jevnere animasjoner */
+  transform: translateZ(0);
+}
+
+/* Sheet sizes - height variants */
+/* Språk: 50vh */
+.sizeSmall {
+  max-height: 50dvh;
+  max-height: 50vh;
+}
+
+/* Oppdage: 75vh */
+.sizeMedium {
+  max-height: 75dvh;
+  max-height: 75vh;
+}
+
+/* År: full height (100%) */
+.sizeLarge {
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - 24px);
+}
+
+/* Kategori: full height med scroll */
+.sizeFull {
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - 24px);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+.dragHandle {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-sm, 8px) var(--space-md, 16px);
+  cursor: grab;
+  touch-action: none; /* Kun her - blokkerer scroll kun på handle */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* Større touch-target */
+  min-height: 28px;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragIndicator {
+  width: 36px;
+  height: 4px;
+  background: var(--border, #e5e5e5);
+  border-radius: var(--radius-full, 9999px);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-md, 16px) var(--space-md, 16px);
+  border-bottom: 1px solid var(--border, #e5e5e5);
+  flex-shrink: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-base, 16px);
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.doneButton {
+  min-height: 44px;
+  min-width: 44px;
+  padding: var(--space-xs, 4px) var(--space-md, 16px);
+  background: var(--accent, #0066cc);
+  border: none;
+  border-radius: var(--radius-sm, 6px);
+  color: var(--color-white, #fff);
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-sm, 14px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.doneButton:hover {
+  background: var(--accent-hover, #0055aa);
+}
+
+.doneButton:active {
+  transform: scale(0.98);
+}
+
+/* Search input */
+.searchContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs, 4px);
+  padding: var(--space-sm, 8px) var(--space-md, 16px);
+  background: var(--bg-secondary, #f5f5f5);
+  margin: 0 var(--space-md, 16px) var(--space-sm, 8px);
+  border-radius: var(--radius-md, 8px);
+  min-height: 44px;
+  flex-shrink: 0;
+}
+
+.searchIcon {
+  color: var(--text-secondary, #666);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-primary, #1a1a1a);
+  font-family: var(--font-mono, monospace);
+  font-size: 16px; /* Alltid 16px - forhindrer iOS zoom */
+  outline: none;
+  min-width: 0;
+  /* iOS-spesifikke forbedringer */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.searchInput::placeholder {
+  color: var(--text-tertiary, #999);
+}
+
+/* Fjern iOS søk-styling */
+.searchInput::-webkit-search-cancel-button,
+.searchInput::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.clearSearch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  padding: var(--space-xs, 4px);
+  border: none;
+  background: var(--bg-hover, #eaeaea);
+  border-radius: var(--radius-full, 9999px);
+  color: var(--text-secondary, #666);
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.clearSearch:hover {
+  background: var(--border, #e5e5e5);
+  color: var(--text-primary, #1a1a1a);
+}
+
+.content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Padding with extra bottom space for last element visibility */
+  padding: var(--space-sm, 8px) var(--space-md, 16px);
+  padding-bottom: var(--space-lg, 24px);
+  min-height: 100px;
+  /* iOS Safari momentum scrolling */
+  -webkit-overflow-scrolling: touch;
+  /* Allow normal touch scrolling */
+  touch-action: pan-y;
+}
+
+/* Option grid - multiselect chips */
+.optionGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm, 8px);
+}
+
+.option {
+  min-height: 44px;
+  padding: var(--space-sm, 8px) var(--space-md, 16px);
+  background: var(--bg-secondary, #f5f5f5);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md, 8px);
+  color: var(--text-primary, #1a1a1a);
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-sm, 14px);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.option:hover {
+  background: var(--bg-hover, #eaeaea);
+  border-color: var(--border, #e5e5e5);
+}
+
+.option:active {
+  transform: scale(0.98);
+}
+
+.optionSelected {
+  background: var(--accent, #0066cc);
+  border-color: var(--accent, #0066cc);
+  color: var(--color-white, #fff);
+}
+
+.optionSelected:hover {
+  background: var(--accent-hover, #0055aa);
+  border-color: var(--accent-hover, #0055aa);
+}
+
+/* Year grid */
+.yearGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-xs, 4px);
+}
+
+.yearOption {
+  min-height: 44px;
+  padding: var(--space-sm, 8px);
+  background: var(--bg-secondary, #f5f5f5);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md, 8px);
+  color: var(--text-primary, #1a1a1a);
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-sm, 14px);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.yearOption:hover {
+  background: var(--bg-hover, #eaeaea);
+  border-color: var(--border, #e5e5e5);
+}
+
+.yearOption:active {
+  transform: scale(0.98);
+}
+
+.yearOptionSelected {
+  background: var(--accent, #0066cc);
+  border-color: var(--accent, #0066cc);
+  color: var(--color-white, #fff);
+}
+
+.yearOptionSelected:hover {
+  background: var(--accent-hover, #0055aa);
+  border-color: var(--accent-hover, #0055aa);
+}
+
+/* Category list */
+.categoryList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs, 4px);
+}
+
+.noResults {
+  padding: var(--space-lg, 24px) var(--space-md, 16px);
+  text-align: center;
+  color: var(--text-muted, #999);
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-sm, 14px);
+}
+
+.categoryOption {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: var(--space-sm, 8px) var(--space-md, 16px);
+  background: var(--bg-secondary, #f5f5f5);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md, 8px);
+  color: var(--text-primary, #1a1a1a);
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-sm, 14px);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.categoryOption:hover {
+  background: var(--bg-hover, #eaeaea);
+  border-color: var(--border, #e5e5e5);
+}
+
+.categoryOption:active {
+  transform: scale(0.99);
+}
+
+.categoryOptionSelected {
+  background: var(--accent, #0066cc);
+  border-color: var(--accent, #0066cc);
+  color: var(--color-white, #fff);
+}
+
+.categoryOptionSelected:hover {
+  background: var(--accent-hover, #0055aa);
+  border-color: var(--accent-hover, #0055aa);
+}
+
+/* Discovery mode options */
+.discoveryOption {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 60px;
+  padding: var(--space-md, 16px);
+  background: var(--bg-secondary, #f5f5f5);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.discoveryOption:hover {
+  background: var(--bg-hover, #eaeaea);
+  border-color: var(--border, #e5e5e5);
+}
+
+.discoveryOption:active {
+  transform: scale(0.99);
+}
+
+.discoveryLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-sm, 14px);
+  font-weight: 500;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.discoveryDescription {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-xs, 12px);
+  color: var(--text-muted, #999);
+  margin-top: var(--space-2xs, 2px);
+}
+
+.discoveryOption.optionSelected {
+  background: var(--accent, #0066cc);
+  border-color: var(--accent, #0066cc);
+}
+
+.discoveryOption.optionSelected .discoveryLabel,
+.discoveryOption.optionSelected .discoveryDescription {
+  color: var(--color-white, #fff);
+}
+
+.discoveryOption.optionSelected:hover {
+  background: var(--accent-hover, #0055aa);
+  border-color: var(--accent-hover, #0055aa);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .sheet {
+    max-width: 100%;
+    border-radius: var(--radius-lg, 12px) var(--radius-lg, 12px) 0 0;
+  }
+
+  .searchContainer {
+    margin: 0 var(--space-sm, 8px) var(--space-sm, 8px);
+  }
+
+  .content {
+    padding: var(--space-sm, 8px);
+    padding-bottom: var(--space-lg, 24px);
+  }
+}
+
+/* Standalone PWA mode - no container padding needed, backdrop covers full screen */
+
+/* Focus styles for keyboard navigation */
+.dragHandle:focus-visible {
+  outline: 2px solid var(--accent, #0066cc);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 6px);
+}
+
+.doneButton:focus-visible {
+  outline: 2px solid var(--color-white, #fff);
+  outline-offset: 2px;
+}
+
+.option:focus-visible,
+.yearOption:focus-visible,
+.categoryOption:focus-visible,
+.discoveryOption:focus-visible {
+  outline: 2px solid var(--accent, #0066cc);
+  outline-offset: 2px;
+}
+
+.optionSelected:focus-visible,
+.yearOptionSelected:focus-visible,
+.categoryOptionSelected:focus-visible {
+  outline-color: var(--color-white, #fff);
+}
+
+.searchContainer:focus-within {
+  outline: 2px solid var(--accent, #0066cc);
+  outline-offset: 2px;
+}
+
+.clearSearch:focus-visible {
+  outline: 2px solid var(--accent, #0066cc);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .sheet {
+    animation: none;
+  }
+
+  .containerClosing .backdrop,
+  .containerClosing .sheet {
+    animation: none;
+    opacity: 0;
+  }
+
+  .option,
+  .yearOption,
+  .categoryOption,
+  .discoveryOption,
+  .doneButton {
+    transition: none;
+  }
+}

@@ -1,0 +1,39 @@
+/* Header - App branding */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  text-align: center;
+  padding: var(--space-lg) var(--space-md) var(--space-md);
+  padding-top: calc(var(--space-lg) + env(safe-area-inset-top, 0px));
+  background: var(--bg-primary);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--text-primary);
+}
+
+.logoIcon {
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--accent);
+}
+
+.logoText {
+  font-family: var(--font-mono);
+  font-size: var(--icon-lg);
+  font-weight: 400;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+
+/* Mobile - hide header entirely */
+@media (max-width: 640px) {
+  .header {
+    display: none;
+  }
+}

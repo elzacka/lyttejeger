@@ -1,0 +1,86 @@
+/*
+ * Lyttejeger Design Tokens
+ * Semantic tokens built on top of standalone-tokens.css
+ * Modernized for consistent spacing, typography, and sizing
+ */
+
+:root {
+  /* ===== SEMANTIC SPACING ===== */
+
+  /* View/Container padding */
+  --space-view-mobile: var(--space-3);      /* 12px */
+  --space-view-desktop: var(--space-4);     /* 16px */
+
+  /* Card padding */
+  --space-card: var(--space-4);             /* 16px desktop */
+  --space-card-compact: var(--space-3);     /* 12px mobile */
+
+  /* List gaps - konsistent vertikal rytme */
+  --space-list-gap: var(--space-3);         /* 12px default mellom items */
+  --space-list-gap-tight: var(--space-2);   /* 8px for ultra-dense lists */
+
+  /* Section spacing */
+  --space-section: var(--space-5);          /* 24px mellom seksjoner */
+
+  /* ===== TYPOGRAPHY SEMANTIC TOKENS ===== */
+
+  /* Headings - tydelig hierarki */
+  --font-h1: var(--text-xl);        /* 20px - Page titles */
+  --font-h2: var(--text-lg);        /* 18px - Section headings */
+  --font-h3: var(--text-md);        /* 16px - Sub-sections */
+
+  /* Body text */
+  --font-title: var(--text-base);   /* 15px - Episode/podcast titles */
+  --font-body: var(--text-sm);      /* 13px - Descriptions */
+  --font-meta: var(--text-xs);      /* 12px - Metadata, timestamps */
+  --font-badge: var(--text-2xs);    /* 11px - Badges, indicators */
+
+  /* ===== IMAGE SIZES ===== */
+
+  --image-xs: 40px;         /* Very small icons */
+  --image-sm: 56px;         /* Episode cards, queue items */
+  --image-md: 80px;         /* Featured content, podcast detail */
+  --image-lg: 120px;        /* Hero/promotional */
+
+  /* ===== BUTTON SIZES ===== */
+
+  --button-height-sm: 32px;     /* Small actions (desktop) */
+  --button-height-md: 40px;     /* Standard buttons */
+  --button-height-lg: 44px;     /* Touch targets (WCAG minimum) */
+  --button-icon: 40px;          /* Round icon buttons */
+
+  /* ===== BADGE SIZING ===== */
+
+  --badge-size: 18px;           /* Notification badges */
+
+  /* ===== RESPONSIVE BREAKPOINTS ===== */
+
+  /* Mobile: 0-640px (default) */
+  /* Tablet: 641-768px */
+  /* Desktop: 769px+ */
+}
+
+/* ===== MOBILE OVERRIDES (max-width: 640px) ===== */
+@media (max-width: 640px) {
+  :root {
+    /* Typography - moderate scaling */
+    --font-h1: 1.1875rem;         /* 19px - down from 20px */
+    --font-h2: 1.0625rem;         /* 17px - down from 18px */
+    --font-title: 0.875rem;       /* 14px - down from 15px */
+
+    /* Images - tighter on small screens */
+    --image-xs: 32px;
+    --image-sm: 48px;
+    --image-md: 64px;
+    --image-lg: 96px;
+  }
+}
+
+/* ===== TABLET OVERRIDES (641-768px) ===== */
+@media (min-width: 641px) and (max-width: 768px) {
+  :root {
+    /* Intermediate sizing - smooth transition */
+    --image-sm: 52px;
+    --image-md: 72px;
+  }
+}

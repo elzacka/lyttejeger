@@ -1,0 +1,426 @@
+/* PodcastDetailView - Podcast detail page styles */
+/* Episode item styles are in EpisodeCard.module.css */
+
+.page {
+  min-height: 100vh;
+  padding-top: var(--nav-height);
+  padding-bottom: calc(var(--player-height) + var(--space-4));
+  background: var(--bg-primary);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  /* Match content max-width (800px) and center - use same padding formula as TopNav */
+  width: 100%;
+  max-width: 100%;
+  padding: var(--space-3) max(var(--space-4), calc((100% - 800px) / 2));
+  background: transparent;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--button-height-lg);
+  height: var(--button-height-lg);
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--duration-fast);
+}
+
+.backButton:hover {
+  background: var(--bg-hover);
+}
+
+.backButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.backButton .material-symbols-outlined {
+  font-size: 24px;
+}
+
+.content {
+  /* Match header padding formula for consistent alignment */
+  width: 100%;
+  max-width: 100%;
+  padding: var(--space-4) max(var(--space-4), calc((100% - 800px) / 2));
+  overflow-x: hidden;
+}
+
+.podcastInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.image {
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.infoContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-h1);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  line-height: var(--leading-tight);
+}
+
+.author {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-body);
+  color: var(--text-muted);
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.subscribeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  padding: 0 var(--space-4);
+  height: var(--button-height-lg);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-accent-foreground);
+  font-family: var(--font-mono);
+  font-size: var(--font-body);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast),
+    transform var(--duration-fast);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.subscribeButton:hover {
+  background: var(--accent-hover);
+  color: var(--color-white);
+}
+
+.subscribeButton:active {
+  transform: scale(0.98);
+}
+
+.subscribeButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.subscribeButton.subscribed {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.subscribeButton.subscribed:hover {
+  background: var(--bg-hover);
+  border-color: var(--error-color);
+  color: var(--error-color);
+}
+
+.description {
+  margin-bottom: var(--space-4);
+}
+
+.descriptionText {
+  margin: 0;
+  font-size: var(--font-body);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  white-space: pre-line;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.descriptionExpanded {
+  display: block !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: unset !important;
+  overflow: visible !important;
+}
+
+.descriptionText a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.descriptionText a:hover {
+  opacity: 0.8;
+}
+
+.expandButton {
+  display: inline-block;
+  margin-top: var(--space-2);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--font-body);
+  cursor: pointer;
+}
+
+.expandButton:hover {
+  text-decoration: underline;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-0-5);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.metaLabel {
+  font-family: var(--font-mono);
+  font-size: var(--font-meta);
+  color: var(--text-muted);
+}
+
+.metaValue {
+  font-family: var(--font-mono);
+  font-size: var(--font-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.category {
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-meta);
+  color: var(--text-muted);
+}
+
+/* Episodes section */
+.episodesSection {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.episodesTitle {
+  margin: 0 0 var(--space-3) 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-h2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+/* Skeleton loading */
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.skeletonItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.skeletonTitle {
+  height: 16px;
+  width: 80%;
+  border-radius: var(--radius-sm);
+}
+
+.skeletonMeta {
+  height: 12px;
+  width: 40%;
+  border-radius: var(--radius-sm);
+}
+
+.error {
+  padding: var(--space-4);
+  color: var(--error-color);
+  font-family: var(--font-mono);
+  font-size: var(--font-body);
+  text-align: center;
+}
+
+.noEpisodes {
+  padding: var(--space-4);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-body);
+  text-align: center;
+}
+
+.episodeList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Load more button */
+.loadMoreButton {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-body);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast),
+    border-color var(--duration-fast),
+    color var(--duration-fast);
+}
+
+.loadMoreButton:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.loadMoreButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.loadMoreButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.episodeCount {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-meta);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .page {
+    padding-bottom: calc(var(--nav-height) + var(--player-height-mobile) + var(--space-6));
+  }
+
+  .header {
+    padding: var(--space-3);
+  }
+
+  .content {
+    padding: var(--space-3);
+  }
+
+  .podcastInfo {
+    gap: var(--space-3);
+  }
+
+  /* Image size now handled by CSS variable --image-md (responsive) */
+
+  .subscribeButton {
+    padding: 0 var(--space-2);
+    font-size: var(--font-meta);
+  }
+
+  .title {
+    font-size: var(--font-title);
+  }
+
+  .author {
+    font-size: var(--font-meta);
+  }
+
+  .episodesTitle {
+    font-size: var(--font-title);
+  }
+
+  .episodeList {
+    gap: var(--space-2);
+  }
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .header {
+    padding: var(--space-4) max(var(--space-5), calc((100% - 800px) / 2));
+  }
+
+  .content {
+    padding: var(--space-4) max(var(--space-5), calc((100% - 800px) / 2));
+  }
+
+  .podcastInfo {
+    gap: var(--space-5);
+  }
+
+  /* Image size now handled by CSS variable --image-md */
+
+  .title {
+    font-size: var(--font-h1);
+  }
+}

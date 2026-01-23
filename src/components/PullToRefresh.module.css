@@ -1,0 +1,38 @@
+/* PullToRefresh indicator */
+
+.indicator {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  margin-left: calc(-1 * var(--touch-target) / 2);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-100) var(--ease-out);
+}
+
+.icon {
+  font-size: var(--icon-md);
+  color: var(--accent);
+  transition: transform var(--duration-100) var(--ease-out);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

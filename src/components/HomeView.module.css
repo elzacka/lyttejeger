@@ -1,0 +1,141 @@
+/* HomeView - View container styles only */
+/* Episode item styles are in EpisodeCard.module.css */
+
+.container {
+  padding: var(--space-md);
+  padding-bottom: calc(var(--player-height) + var(--space-xl));
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-sm) 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-base);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--badge-size);
+  height: var(--badge-size);
+  padding: 0 var(--space-xs);
+  background: var(--accent);
+  color: var(--color-white);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  border-radius: var(--radius-full);
+}
+
+.sectionDivider {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  padding: var(--space-md);
+  color: var(--error-color);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  text-align: center;
+}
+
+/* Empty state - centered with icon */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+}
+
+.emptyText {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+}
+
+.ctaButton {
+  margin-top: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.ctaButton:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.ctaButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .container {
+    padding: var(--space-sm);
+    /* iOS safe area: use direct env() for notch/dynamic island */
+    padding-top: calc(var(--space-lg) + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(var(--nav-height) + var(--player-height-mobile) + var(--space-xl));
+  }
+
+  .title {
+    font-size: var(--font-sm);
+    margin-bottom: var(--space-sm);
+  }
+
+  .list {
+    gap: var(--space-xs);
+  }
+}

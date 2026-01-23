@@ -1,0 +1,217 @@
+/* PodcastCard - Expandable list item matching EpisodeCard style */
+
+.item {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+  position: relative;
+}
+
+.item.expanded {
+  /* Higher z-index to show above sibling cards in virtualized list */
+  z-index: 10;
+}
+
+.item:hover {
+  border-color: var(--accent);
+}
+
+.podcastHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+}
+
+.podcastToggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.podcastToggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.image {
+  width: var(--image-sm);
+  height: var(--image-sm);
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.podcastTitle {
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.author {
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+}
+
+.explicitBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-xs);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-2xs);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.selectButton {
+  width: var(--button-md);
+  height: var(--button-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.selectButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.selectButton:active {
+  transform: scale(0.95);
+}
+
+.selectButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Podcast details (expanded) */
+.podcastDetails {
+  padding: 0 var(--space-md) var(--space-md);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.podcastDescription {
+  margin: 0;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  white-space: pre-line;
+  word-break: break-word;
+}
+
+.podcastDescription a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.podcastDescription a:hover {
+  opacity: 0.8;
+}
+
+.noDescription {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .podcastHeader {
+    padding: var(--space-sm);
+  }
+
+  .image {
+    width: var(--image-xs);
+    height: var(--image-xs);
+  }
+
+  .author {
+    font-size: var(--font-2xs);
+  }
+
+  .podcastTitle {
+    font-size: var(--font-xs);
+    -webkit-line-clamp: 1;
+  }
+
+  .meta {
+    font-size: var(--font-2xs);
+  }
+
+  .podcastDetails {
+    padding: 0 var(--space-sm) var(--space-sm);
+  }
+
+  .podcastDescription {
+    font-size: var(--font-xs);
+  }
+}

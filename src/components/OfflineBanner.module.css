@@ -1,0 +1,34 @@
+/* OfflineBanner - Shows when user is offline */
+
+.banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-toast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  padding-top: calc(var(--space-sm) + env(safe-area-inset-top, 0px));
+  background: var(--color-warning);
+  color: var(--color-white);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  animation: slideDown 0.2s ease-out;
+}
+
+.banner .material-symbols-outlined {
+  font-size: var(--icon-sm);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
