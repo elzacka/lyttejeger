@@ -38,6 +38,17 @@ export default defineConfig({
         orientation: 'portrait',
         scope: '/lyttejeger/',
         start_url: '/lyttejeger/',
+        // Share Target API - allow sharing podcast URLs to the app
+        share_target: {
+          action: '/lyttejeger/share',
+          method: 'GET',
+          enctype: 'application/x-www-form-urlencoded',
+          params: {
+            title: 'title',
+            text: 'text',
+            url: 'url',
+          },
+        },
         icons: [
           {
             src: 'favicon.svg',

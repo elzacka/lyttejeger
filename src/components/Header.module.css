@@ -1,34 +1,80 @@
-/* Header - App branding */
+/* Header - Modern redesign with glassmorphism */
 
 .header {
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
   text-align: center;
-  padding: var(--space-lg) var(--space-md) var(--space-md);
-  padding-top: calc(var(--space-lg) + env(safe-area-inset-top, 0px));
-  background: var(--bg-primary);
+  padding: var(--space-md) var(--space-md) var(--space-sm);
+  padding-top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
+
+  /* Modern glassmorphism effect */
+  background: rgba(245, 245, 240, 0.9);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+  /* Subtle border and shadow for depth */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 4px 12px rgba(0, 0, 0, 0.02);
+
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+/* Enhanced depth on scroll - can be triggered with JS class */
+.header.scrolled {
+  background: rgba(245, 245, 240, 0.95);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.04);
 }
 
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
   color: var(--text-primary);
+
+  /* Add subtle animation on hover */
+  transition: transform var(--transition-fast);
+}
+
+.logo:hover {
+  transform: translateY(-1px);
 }
 
 .logoIcon {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 300;
-  color: var(--accent);
+
+  /* Modern gradient icon */
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  /* Subtle shadow for depth */
+  filter: drop-shadow(0 2px 4px rgba(26, 95, 122, 0.15));
+
+  transition: filter var(--transition-fast);
+}
+
+.logo:hover .logoIcon {
+  filter: drop-shadow(0 4px 8px rgba(26, 95, 122, 0.25));
 }
 
 .logoText {
   font-family: var(--font-mono);
-  font-size: var(--icon-lg);
-  font-weight: 400;
+  font-size: var(--font-xl);
+  font-weight: 500;
   color: var(--text-primary);
-  letter-spacing: 0.5px;
+  letter-spacing: -0.02em;
+
+  /* Subtle text shadow for depth */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 /* Mobile - hide header entirely */

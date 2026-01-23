@@ -1,4 +1,4 @@
-/* Top navigation bar - fixed at bottom on mobile, moves to top on desktop */
+/* Top navigation bar - modern redesign with glassmorphism */
 .nav {
   position: fixed;
   bottom: 0;
@@ -8,8 +8,19 @@
   display: flex;
   /* flex: 1 on items handles equal distribution, no justify-content needed */
   align-items: stretch;
-  background: var(--bg-primary, var(--color-bg-primary));
-  border-top: 1px solid var(--border, var(--color-border));
+
+  /* Modern glassmorphism effect */
+  background: rgba(245, 245, 240, 0.9);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+  /* Subtle shadow for depth */
+  box-shadow:
+    0 -1px 3px rgba(0, 0, 0, 0.03),
+    0 -4px 12px rgba(0, 0, 0, 0.02);
+
   /* Extra padding for iPhone home indicator, plus safe areas on sides */
   padding: 0 env(safe-area-inset-right, 0px) calc(env(safe-area-inset-bottom, 0px) + 4px)
     env(safe-area-inset-left, 0px);
@@ -39,15 +50,19 @@
   color: var(--text-muted, var(--color-text-muted));
   font-family: var(--font-mono);
   font-size: var(--font-size-2xs, 10px);
+  font-weight: 500;
   cursor: pointer;
   transition:
     color var(--transition-fast),
-    background var(--transition-fast);
+    background var(--transition-fast),
+    transform var(--transition-fast);
+  border-radius: var(--radius-md);
 }
 
 .navItem:hover {
-  background: var(--bg-hover, var(--color-bg-hover));
+  background: rgba(0, 0, 0, 0.04);
   color: var(--text-primary, var(--color-text-primary));
+  transform: translateY(-1px);
 }
 
 .navItem:focus-visible {
@@ -57,7 +72,8 @@
 
 .navItem.active {
   color: var(--accent, var(--color-accent));
-  background: var(--color-accent-alpha);
+  background: rgba(26, 95, 122, 0.08);
+  font-weight: 600;
 }
 
 .iconWrapper {

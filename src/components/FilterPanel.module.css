@@ -39,22 +39,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
-  padding: 0 var(--space-3);
+  height: 40px;
+  padding: 0 var(--space-4);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: var(--font-body);
+  font-size: var(--font-sm);
+  font-weight: 500;
   color: var(--text-muted);
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: 18px;
-  transition: all var(--duration-fast) var(--ease-out);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  transition:
+    all var(--duration-fast) var(--ease-out),
+    transform var(--transition-fast);
   user-select: none;
+
+  /* Subtle shadow */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .radioLabel:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
+  border-color: rgba(26, 95, 122, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 .radioInput {
@@ -69,10 +78,16 @@
 }
 
 .radioLabel:has(.radioInput:checked) {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  font-weight: var(--font-weight-medium);
-  border-color: var(--border);
+  /* Modern gradient background */
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  color: var(--color-white);
+  font-weight: 600;
+  border-color: transparent;
+
+  /* Enhanced shadow for selected state */
+  box-shadow:
+    0 4px 12px rgba(26, 95, 122, 0.25),
+    0 2px 4px rgba(26, 95, 122, 0.15);
 }
 
 /* Filter chips - inline buttons */
@@ -86,25 +101,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
+  height: 36px;
   padding: 0 var(--space-3);
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  color: var(--text-muted);
+  background: var(--bg-primary);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: var(--font-meta);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--font-sm);
+  font-weight: 500;
   cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-out);
+  transition:
+    all var(--duration-fast) var(--ease-out),
+    transform var(--transition-fast);
   white-space: nowrap;
   box-sizing: border-box;
+
+  /* Modern shadow */
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .filterChip:hover {
   background: var(--bg-hover);
-  border-color: var(--accent);
+  border-color: rgba(26, 95, 122, 0.3);
   color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 4px 8px rgba(0, 0, 0, 0.04);
 }
 
 .filterChip:focus-visible {
@@ -113,15 +139,24 @@
 }
 
 .filterChipActive {
-  background: var(--accent);
-  border-color: var(--accent);
+  /* Modern gradient for active state */
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  border-color: transparent;
   color: var(--color-white);
+
+  /* Enhanced shadow */
+  box-shadow:
+    0 3px 8px rgba(26, 95, 122, 0.2),
+    0 1px 3px rgba(26, 95, 122, 0.15);
 }
 
 .filterChipActive:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
+  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 100%);
+  border-color: transparent;
   color: var(--color-white);
+  box-shadow:
+    0 4px 12px rgba(26, 95, 122, 0.3),
+    0 2px 4px rgba(26, 95, 122, 0.2);
 }
 
 /* Clear/reset chip */

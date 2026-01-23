@@ -18,7 +18,15 @@
   width: 100%;
   max-width: 100%;
   padding: var(--space-3) max(var(--space-4), calc((100% - 800px) / 2));
-  background: transparent;
+
+  /* Modern glassmorphism effect */
+  background: rgba(245, 245, 240, 0.9);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+  /* Subtle border and shadow */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
 .backButton {
@@ -33,11 +41,14 @@
   border-radius: var(--radius-md);
   color: var(--text-primary);
   cursor: pointer;
-  transition: background var(--duration-fast);
+  transition:
+    background var(--duration-fast),
+    transform var(--transition-fast);
 }
 
 .backButton:hover {
-  background: var(--bg-hover);
+  background: rgba(0, 0, 0, 0.04);
+  transform: translateX(-2px);
 }
 
 .backButton:focus-visible {
@@ -67,9 +78,20 @@
 .image {
   width: 120px;
   height: 120px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   object-fit: cover;
   flex-shrink: 0;
+
+  /* Modern shadow for depth */
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.06);
+
+  transition: transform var(--transition-fast);
+}
+
+.image:hover {
+  transform: scale(1.02);
 }
 
 .infoContent {

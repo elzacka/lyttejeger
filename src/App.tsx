@@ -5,6 +5,7 @@ import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { TopNav, type NavItem } from './components/TopNav';
 import { SheetProvider } from './components/SheetProvider';
+import { SkipLink } from './components/SkipLink';
 
 // Lazy load non-critical views for better performance
 const PodcastDetailView = lazy(() => import('./components/PodcastDetailView'));
@@ -321,12 +322,10 @@ function App() {
           </ErrorBoundary>
         ) : (
           <>
-            <a href="#main-content" className="skip-link">
-              Hopp til hovedinnhold
-            </a>
+            <SkipLink />
             <OfflineBanner />
 
-            <main className="main" id="main-content">
+            <main className="main" id="main-content" role="main" aria-label="Hovedinnhold">
               {/* Home view - shows recent episodes from subscriptions */}
               {currentView === 'home' && (
                 <ErrorBoundary viewName="hjem-visningen">

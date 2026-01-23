@@ -1,0 +1,38 @@
+/* SkipLink - Hidden until focused for keyboard navigation */
+
+.skipLink {
+  position: fixed;
+  top: -40px;
+  left: 0;
+  z-index: 10000;
+  padding: var(--space-3) var(--space-4);
+  background: var(--accent);
+  color: var(--color-white);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 var(--radius-md) 0;
+
+  /* Modern shadow */
+  box-shadow:
+    0 4px 12px rgba(26, 95, 122, 0.3),
+    0 2px 4px rgba(26, 95, 122, 0.2);
+
+  transition:
+    top var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.skipLink:focus {
+  top: 0;
+  outline: 3px solid rgba(26, 95, 122, 0.3);
+  outline-offset: 3px;
+}
+
+.skipLink:hover {
+  background: var(--accent-hover);
+  box-shadow:
+    0 6px 16px rgba(26, 95, 122, 0.4),
+    0 3px 6px rgba(26, 95, 122, 0.3);
+}
