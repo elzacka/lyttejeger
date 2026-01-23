@@ -1,0 +1,58 @@
+/**
+ * Teal Accent - Lyttejeger & Sporjeger
+ *
+ * Assosiasjon: Lyd, bolger, dybde
+ * Brukes for: Lyttejeger (begge versjoner), Sporjeger
+ *
+ * @package @designsystem/tokens
+ */
+
+:root {
+  /* ========================================
+   * PRIMARY/ACCENT SCALE (Teal)
+   * ======================================== */
+
+  --color-primary-50: #e6f2f5;
+  --color-primary-100: #cce5eb;
+  --color-primary-200: #99cbd7;
+  --color-primary-300: #66b1c3;
+  --color-primary-400: #3397af;
+  --color-primary-500: #1a5f7a;
+  --color-primary-600: #134a5f;
+  --color-primary-700: #0f3a4a;
+  --color-primary-800: #0b2a36;
+  --color-primary-900: #071a21;
+  --color-primary-950: #030d11;
+
+  /* ========================================
+   * SEMANTIC ACCENT COLORS
+   * ======================================== */
+
+  --color-accent: #1a5f7a;
+  --color-accent-hover: #134a5f;
+  --color-accent-foreground: #f4f1ea;
+  --color-ring: #1a5f7a;
+  --color-focus: #cce5eb;
+}
+
+/* ========================================
+ * DARK MODE
+ * ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-accent: #3397af;
+    --color-accent-hover: #66b1c3;
+    --color-accent-foreground: #1c1c1c;
+    --color-ring: #3397af;
+    --color-focus: #0b2a36;
+  }
+}
+
+.dark {
+  --color-accent: #3397af;
+  --color-accent-hover: #66b1c3;
+  --color-accent-foreground: #1c1c1c;
+  --color-ring: #3397af;
+  --color-focus: #0b2a36;
+}

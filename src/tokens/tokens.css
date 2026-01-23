@@ -1,0 +1,423 @@
+/**
+ * Design System Tokens
+ *
+ * This file defines all design tokens as CSS custom properties.
+ * These tokens should be the single source of truth for all styling values.
+ *
+ * Usage: var(--token-name)
+ *
+ * @package @designsystem/tokens
+ */
+
+:root {
+  /* ========================================
+   * COLOR PRIMITIVES
+   * Retro-inspirert, minimalistisk palett med papir-aktige toner
+   * ======================================== */
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Gray/Beige Scale (papir-toner) */
+  --color-gray-50: #f4f1ea; /* bg-primary */
+  --color-gray-100: #ebe7de; /* bg-secondary */
+  --color-gray-200: #e2ded4; /* bg-hover */
+  --color-gray-300: #d4d0c6; /* border */
+  --color-gray-400: #8a8a8a; /* text-muted */
+  --color-gray-500: #5a5a5a; /* text-secondary */
+  --color-gray-600: #4a4a4a;
+  --color-gray-700: #3a3a3a;
+  --color-gray-800: #2c2c2c; /* text-primary */
+  --color-gray-900: #1c1c1c;
+  --color-gray-950: #0c0c0c;
+
+  /* Primary (Teal/Blågrønn - dempet aksent) */
+  --color-primary-50: #e6f2f5;
+  --color-primary-100: #cce5eb;
+  --color-primary-200: #99cbd7;
+  --color-primary-300: #66b1c3;
+  --color-primary-400: #3397af;
+  --color-primary-500: #1a5f7a; /* accent */
+  --color-primary-600: #134a5f; /* accent-hover */
+  --color-primary-700: #0f3a4a;
+  --color-primary-800: #0b2a36;
+  --color-primary-900: #071a21;
+  --color-primary-950: #030d11;
+
+  /* Success (Dempet grønn) */
+  --color-success-50: #eef5f0;
+  --color-success-100: #ddebe1;
+  --color-success-200: #bbd7c3;
+  --color-success-300: #99c3a5;
+  --color-success-400: #77af87;
+  --color-success-500: #3d6649; /* color-success - darkened for WCAG AA contrast */
+  --color-success-600: #325438;
+  --color-success-700: #264028;
+  --color-success-800: #1a2c1b;
+  --color-success-900: #0e180e;
+  --color-success-950: #070c07;
+
+  /* Warning (Dempet jordtone) */
+  --color-warning-50: #f5f2ed;
+  --color-warning-100: #ebe5db;
+  --color-warning-200: #d7cbb7;
+  --color-warning-300: #c3b193;
+  --color-warning-400: #af976f;
+  --color-warning-500: #7b6d4d; /* color-warning */
+  --color-warning-600: #62573e;
+  --color-warning-700: #4a412e;
+  --color-warning-800: #312b1f;
+  --color-warning-900: #19150f;
+  --color-warning-950: #0c0b08;
+
+  /* Error (Dempet rust/rød) */
+  --color-error-50: #faf2f0;
+  --color-error-100: #f5e5e1;
+  --color-error-200: #ebcbc3;
+  --color-error-300: #e1b1a5;
+  --color-error-400: #d79787;
+  --color-error-500: #9b2915; /* color-error */
+  --color-error-600: #7c2111;
+  --color-error-700: #5d190d;
+  --color-error-800: #3e1008;
+  --color-error-900: #1f0804;
+  --color-error-950: #100402;
+
+  /* Info/Neutral (Dempet olivengrønn) */
+  --color-info-50: #f2f3f0;
+  --color-info-100: #e5e7e1;
+  --color-info-200: #cbcfc3;
+  --color-info-300: #b1b7a5;
+  --color-info-400: #979f87;
+  --color-info-500: #6b705c; /* color-neutral */
+  --color-info-600: #565a4a;
+  --color-info-700: #404337;
+  --color-info-800: #2b2d25;
+  --color-info-900: #151612;
+  --color-info-950: #0b0b09;
+
+  /* ========================================
+   * SEMANTIC COLORS (Light Mode)
+   * Retro papir-tema med varme, dempede toner
+   * ======================================== */
+
+  --color-background: #f4f1ea; /* Varm beige/papir */
+  --color-foreground: #2c2c2c; /* Mørk tekst */
+  --color-muted: #ebe7de; /* Sekundær bakgrunn */
+  --color-muted-foreground: #5a5a5a; /* Sekundær tekst */
+  --color-accent: #1a5f7a; /* Dempet blågrønn */
+  --color-accent-hover: #134a5f; /* Mørkere for hover */
+  --color-accent-foreground: #f4f1ea;
+  --color-border: #d4d0c6;
+  --color-ring: #1a5f7a;
+  --color-overlay: rgb(44 44 44 / 0.5);
+
+  /* Interactive states */
+  --color-hover: #e2ded4;
+  --color-active: #d4d0c6;
+  --color-focus: #cce5eb;
+  --color-disabled: #ebe7de;
+  --color-disabled-foreground: #8a8a8a;
+
+  /* ========================================
+   * TYPOGRAPHY
+   * DM Mono-only design system
+   * ======================================== */
+
+  /* Font Family - Single font for cohesive retro aesthetic */
+  --font-mono: 'DM Mono', 'Consolas', 'Monaco', monospace;
+  --font-sans: var(--font-mono); /* Alias for compatibility */
+
+  /*
+   * Type Scale for Monospace
+   * Monospace fonts need slightly larger sizes for readability.
+   * Using a 1.2 (minor third) ratio for tighter, more balanced scale.
+   *
+   * Hierarchy:
+   * - Display: Hero text, marketing headlines (48-72px)
+   * - Heading: Section headers (20-36px)
+   * - Body: Reading text (16-18px)
+   * - UI: Buttons, labels, inputs (13-16px)
+   * - Caption: Helper text, metadata (12px)
+   */
+
+  /* Base sizes */
+  --text-xs: 0.75rem; /* 12px - captions, helper text */
+  --text-sm: 0.8125rem; /* 13px - small UI elements */
+  --text-base: 1rem; /* 16px - body text, default */
+  --text-lg: 1.125rem; /* 18px - lead paragraphs */
+  --text-xl: 1.25rem; /* 20px - h4, small headings */
+  --text-2xl: 1.5rem; /* 24px - h3 */
+  --text-3xl: 1.875rem; /* 30px - h2 */
+  --text-4xl: 2.25rem; /* 36px - h1 */
+  --text-5xl: 3rem; /* 48px - display-sm */
+  --text-6xl: 3.75rem; /* 60px - display-md */
+  --text-7xl: 4.5rem; /* 72px - display-lg */
+
+  /* Mono-optimized sizes (slightly larger for optical balance) */
+  --text-mono-xs: 0.8125rem; /* 13px */
+  --text-mono-sm: 0.875rem; /* 14px */
+  --text-mono-base: 1.0625rem; /* 17px */
+
+  /* Line Heights - Slightly looser for monospace readability */
+  --leading-none: 1;
+  --leading-tight: 1.3;
+  --leading-snug: 1.4;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.75;
+  --leading-loose: 2;
+
+  /* Font Weights - DM Mono supports 300, 400, 500 */
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  /* Aliases for compatibility */
+  --font-thin: 300;
+  --font-semibold: 500;
+  --font-bold: 500;
+  --font-extrabold: 500;
+
+  /* Letter Spacing - Monospace needs less negative tracking */
+  --tracking-tighter: -0.02em;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.04em;
+  --tracking-widest: 0.08em;
+
+  /* ========================================
+   * SPACING (4px base unit)
+   * ======================================== */
+
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 0.125rem; /* 2px */
+  --space-1: 0.25rem; /* 4px */
+  --space-1-5: 0.375rem; /* 6px */
+  --space-2: 0.5rem; /* 8px */
+  --space-2-5: 0.625rem; /* 10px */
+  --space-3: 0.75rem; /* 12px */
+  --space-3-5: 0.875rem; /* 14px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-7: 1.75rem; /* 28px */
+  --space-8: 2rem; /* 32px */
+  --space-9: 2.25rem; /* 36px */
+  --space-10: 2.5rem; /* 40px */
+  --space-11: 2.75rem; /* 44px */
+  --space-12: 3rem; /* 48px */
+  --space-14: 3.5rem; /* 56px */
+  --space-16: 4rem; /* 64px */
+  --space-20: 5rem; /* 80px */
+  --space-24: 6rem; /* 96px */
+  --space-28: 7rem; /* 112px */
+  --space-32: 8rem; /* 128px */
+
+  /* ========================================
+   * SIZING
+   * ======================================== */
+
+  --size-0: 0;
+  --size-full: 100%;
+  --size-screen: 100vw;
+  --size-min: min-content;
+  --size-max: max-content;
+  --size-fit: fit-content;
+
+  /* Container widths */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+
+  /* ========================================
+   * BORDER RADIUS
+   * ======================================== */
+
+  --radius-none: 0;
+  --radius-sm: 0.125rem; /* 2px */
+  --radius-md: 0.375rem; /* 6px */
+  --radius-lg: 0.5rem; /* 8px */
+  --radius-xl: 0.75rem; /* 12px */
+  --radius-2xl: 1rem; /* 16px */
+  --radius-3xl: 1.5rem; /* 24px */
+  --radius-full: 9999px;
+
+  /* ========================================
+   * SHADOWS
+   * ======================================== */
+
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+  /* ========================================
+   * MOTION / ANIMATION
+   * ======================================== */
+
+  /* Durations */
+  --duration-0: 0ms;
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+
+  /* Semantic durations */
+  --duration-instant: var(--duration-0);
+  --duration-fast: var(--duration-150);
+  --duration-normal: var(--duration-300);
+  --duration-slow: var(--duration-500);
+
+  /* Easing Functions */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Legacy alias for compatibility */
+  --ease-default: var(--ease-in-out);
+
+  /* ========================================
+   * Z-INDEX
+   * ======================================== */
+
+  --z-hide: -1;
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+  --z-sheet: 900;
+  --z-max: 9999;
+
+  /* ========================================
+   * BREAKPOINTS (for reference in JS)
+   * ======================================== */
+
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* ========================================
+   * FOCUS RING
+   * ======================================== */
+
+  --ring-width: 2px;
+  --ring-offset: 2px;
+  --ring-color: var(--color-primary-500);
+}
+
+/* ========================================
+ * DARK MODE
+ * ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #1c1c1c;
+    --color-foreground: #f4f1ea;
+    --color-muted: #2c2c2c;
+    --color-muted-foreground: #8a8a8a;
+    --color-accent: #3397af;
+    --color-accent-hover: #66b1c3;
+    --color-accent-foreground: #1c1c1c;
+    --color-border: #3a3a3a;
+    --color-ring: #3397af;
+    --color-overlay: rgb(0 0 0 / 0.8);
+
+    /* Interactive states */
+    --color-hover: #2c2c2c;
+    --color-active: #3a3a3a;
+    --color-focus: #0b2a36;
+    --color-disabled: #2c2c2c;
+    --color-disabled-foreground: #5a5a5a;
+  }
+}
+
+/* Manual dark mode class override */
+.dark {
+  --color-background: #1c1c1c;
+  --color-foreground: #f4f1ea;
+  --color-muted: #2c2c2c;
+  --color-muted-foreground: #8a8a8a;
+  --color-accent: #3397af;
+  --color-accent-hover: #66b1c3;
+  --color-accent-foreground: #1c1c1c;
+  --color-border: #3a3a3a;
+  --color-ring: #3397af;
+  --color-overlay: rgb(0 0 0 / 0.8);
+
+  --color-hover: #2c2c2c;
+  --color-active: #3a3a3a;
+  --color-focus: #0b2a36;
+  --color-disabled: #2c2c2c;
+  --color-disabled-foreground: #5a5a5a;
+}
+
+/* ========================================
+ * REDUCED MOTION
+ * ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+  }
+}
+
+/* ========================================
+ * BASE STYLES
+ * ======================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings:
+    'liga' 1,
+    'calt' 1;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Focus visible styles */
+:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
