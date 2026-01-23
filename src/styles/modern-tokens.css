@@ -1,0 +1,237 @@
+/**
+ * Modern Design Tokens - 2026
+ *
+ * Enhanced design system with improved semantic naming,
+ * container query support, and modern CSS features.
+ */
+
+@layer tokens {
+  :root {
+    /* ========================================
+     * ENHANCED TYPOGRAPHY
+     * ======================================== */
+
+    /* Letter Spacing (NEW - was missing) */
+    --letter-spacing-tight: -0.025em;
+    --letter-spacing-normal: 0em;
+    --letter-spacing-wide: 0.025em;
+    --letter-spacing-wider: 0.05em;
+
+    /* Text Styles - Semantic combinations */
+    --text-heading-1: var(--text-3xl) / var(--leading-tight) var(--font-bold);
+    --text-heading-2: var(--text-2xl) / var(--leading-tight) var(--font-bold);
+    --text-heading-3: var(--text-xl) / var(--leading-snug) var(--font-semibold);
+    --text-heading-4: var(--text-lg) / var(--leading-snug) var(--font-medium);
+    --text-body: var(--text-base) / var(--leading-normal) var(--font-normal);
+    --text-body-sm: var(--text-sm) / var(--leading-normal) var(--font-normal);
+    --text-caption: var(--text-xs) / var(--leading-snug) var(--font-normal);
+
+    /* ========================================
+     * COMPONENT-SPECIFIC TOKENS
+     * ======================================== */
+
+    /* Card */
+    --card-radius: var(--radius-xl); /* 12px - modern default */
+    --card-padding: var(--space-4);
+    --card-padding-sm: var(--space-3);
+    --card-gap: var(--space-3);
+    --card-shadow: var(--shadow-sm);
+    --card-shadow-hover: var(--shadow-md);
+
+    /* Button */
+    --button-radius: var(--radius-lg); /* 8px */
+    --button-height: 44px; /* Touch target */
+    --button-height-sm: 36px;
+    --button-height-lg: 52px;
+    --button-padding-x: var(--space-4);
+    --button-padding-x-sm: var(--space-3);
+    --button-padding-x-lg: var(--space-6);
+
+    /* Input */
+    --input-radius: var(--radius-lg);
+    --input-height: 44px;
+    --input-padding-x: var(--space-4);
+    --input-padding-y: var(--space-3);
+    --input-border-width: 1px;
+
+    /* Icon */
+    --icon-xs: 16px;
+    --icon-sm: 20px;
+    --icon-md: 24px;
+    --icon-lg: 32px;
+    --icon-xl: 40px;
+
+    /* Avatar / Podcast Image */
+    --avatar-xs: 32px;
+    --avatar-sm: 40px;
+    --avatar-md: 48px;
+    --avatar-lg: 56px;
+    --avatar-xl: 64px;
+    --avatar-2xl: 80px;
+
+    /* ========================================
+     * LAYOUT TOKENS
+     * ======================================== */
+
+    /* Responsive padding (mobile → desktop) */
+    --view-padding-x: var(--space-4);
+    --view-padding-y: var(--space-4);
+
+    @media (min-width: 641px) {
+      --view-padding-x: var(--space-6);
+      --view-padding-y: var(--space-6);
+    }
+
+    @media (min-width: 768px) {
+      --view-padding-x: var(--space-8);
+    }
+
+    /* Max widths */
+    --content-max-width: 800px;
+    --narrow-max-width: 600px;
+    --wide-max-width: 1200px;
+
+    /* Gaps */
+    --gap-xs: var(--space-2);
+    --gap-sm: var(--space-3);
+    --gap-md: var(--space-4);
+    --gap-lg: var(--space-6);
+    --gap-xl: var(--space-8);
+
+    /* ========================================
+     * INTERACTION STATES
+     * ======================================== */
+
+    /* Opacity levels */
+    --opacity-disabled: 0.5;
+    --opacity-hover: 0.8;
+    --opacity-pressed: 0.6;
+
+    /* Transitions */
+    --transition-fast: var(--duration-fast) var(--ease-out);
+    --transition-normal: var(--duration-normal) var(--ease-out);
+    --transition-slow: var(--duration-slow) var(--ease-out);
+    --transition-spring: var(--duration-300) var(--ease-spring);
+
+    /* ========================================
+     * AUDIO PLAYER SPECIFIC
+     * ======================================== */
+
+    --player-height-collapsed: 80px;
+    --player-height-mini: 64px; /* NEW - compact mobile */
+    --player-padding: var(--space-4);
+    --player-gap: var(--space-3);
+    --player-controls-size: 44px;
+    --player-controls-size-sm: 36px;
+
+    /* Progress bar */
+    --progress-height: 4px;
+    --progress-height-hover: 6px;
+    --progress-thumb-size: 14px;
+
+    /* ========================================
+     * GLASSMORPHISM / MODERN EFFECTS
+     * ======================================== */
+
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-bg-dark: rgba(0, 0, 0, 0.6);
+    --glass-blur: 20px;
+    --glass-border: 1px solid rgba(255, 255, 255, 0.2);
+
+    /* ========================================
+     * SCROLL & TOUCH
+     * ======================================== */
+
+    /* Touch target minimum */
+    --touch-target-min: 44px;
+
+    /* Scrollbar styling */
+    --scrollbar-width: 8px;
+    --scrollbar-thumb-radius: var(--radius-full);
+  }
+}
+
+/**
+ * Container Query Support
+ * Define container types for responsive components
+ */
+@layer base {
+  /* Container contexts */
+  .container-inline-size {
+    container-type: inline-size;
+  }
+
+  .container-size {
+    container-type: size;
+  }
+
+  /* Named containers */
+  .container\\:card {
+    container-type: inline-size;
+    container-name: card;
+  }
+
+  .container\\:list {
+    container-type: inline-size;
+    container-name: list;
+  }
+
+  .container\\:player {
+    container-type: inline-size;
+    container-name: player;
+  }
+}
+
+/**
+ * Modern scrollbar styles
+ */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: var(--scrollbar-width);
+    height: var(--scrollbar-width);
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--scrollbar-thumb-radius);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-secondary);
+  }
+}
+
+/**
+ * Focus visible improvements
+ */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Remove default focus for non-keyboard */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/**
+ * Selection styles
+ */
+@layer base {
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-background);
+  }
+}

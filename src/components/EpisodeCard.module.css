@@ -9,6 +9,10 @@
   border-radius: var(--radius-lg);
   transition: all var(--duration-fast) var(--ease-out);
   position: relative;
+
+  /* Enable container queries for responsive card layout */
+  container-type: inline-size;
+  container-name: episode-card;
 }
 
 .item.menuOpen {

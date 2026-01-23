@@ -267,3 +267,6 @@ export function HomeView({
     </section>
   );
 }
+
+// Default export for lazy loading
+export default HomeView;

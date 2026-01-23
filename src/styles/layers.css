@@ -1,0 +1,21 @@
+/**
+ * CSS Cascade Layers - 2026 Modern Architecture
+ *
+ * Defines the cascade order for all styles in the application.
+ * Lower layers (earlier in list) have lower specificity.
+ *
+ * Order: reset → tokens → base → components → utilities → overrides
+ */
+
+@layer reset, tokens, base, components, utilities, overrides;
+
+/**
+ * Layer Purpose:
+ *
+ * @layer reset - Browser normalization (future: modern-normalize)
+ * @layer tokens - Design system variables (spacing, colors, typography)
+ * @layer base - Element defaults (body, headings, links)
+ * @layer components - Component styles (all .module.css imports)
+ * @layer utilities - Helper classes (.sr-only, .truncate)
+ * @layer overrides - State overrides (.is-loading, .has-error)
+ */

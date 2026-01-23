@@ -49,8 +49,8 @@ export function useSearch() {
   // Always use API
   const shouldUseApi = isConfigured();
 
-  // Track current search to prevent race conditions
-  const currentSearchRef = useRef<string>('');
+  // Modern AbortController for cancelling in-flight requests
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Store last successful search results for incremental filtering
   const lastSearchQueryRef = useRef<string>('');
@@ -81,8 +81,14 @@ export function useSearch() {
       return;
     }
 
-    // Track this search to prevent race conditions
-    currentSearchRef.current = query;
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     setIsLoading(true);
     setError(null);
@@ -171,7 +177,7 @@ export function useSearch() {
         // Title search failed, continue with term search only
       }
 
-      if (currentSearchRef.current !== query) return;
+      if (signal.aborted) return;
 
       // Broader term search for completeness
       const podcastIndexRes = await apiSearchPodcasts(apiQuery, searchOptions);
@@ -182,7 +188,7 @@ export function useSearch() {
         }
       }
 
-      if (currentSearchRef.current !== query) return;
+      if (signal.aborted) return;
 
       // Transform and filter: remove dead feeds, then apply language and category filters
       let podcasts = transformFeeds(allFeeds);
@@ -257,7 +263,7 @@ export function useSearch() {
             fulltext: true,
           });
 
-          if (currentSearchRef.current !== query) {
+          if (signal.aborted) {
             return;
           }
 
@@ -412,14 +418,18 @@ export function useSearch() {
       } else {
         setApiEpisodes([]);
       }
-    } catch {
+    } catch (err) {
+      // Don't show error if request was aborted
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       // Only show error if this is still the current search
-      if (currentSearchRef.current === query) {
+      if (!signal.aborted) {
         setError('Søket feilet. Prøv igjen.');
       }
     } finally {
       // Only stop loading if this is still the current search
-      if (currentSearchRef.current === query) {
+      if (!signal.aborted) {
         setIsLoading(false);
       }
     }
@@ -427,9 +437,17 @@ export function useSearch() {
 
   // Browse by filters only (no search query) - fetches trending/recent content
   const browseByFilters = async (browseType: 'podcasts' | 'episodes') => {
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     setIsLoading(true);
     setError(null);
-    currentSearchRef.current = '__browse__';
 
     try {
       if (browseType === 'podcasts') {
@@ -457,7 +475,7 @@ export function useSearch() {
             val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
           });
 
-          if (currentSearchRef.current !== '__browse__') return;
+          if (signal.aborted) return;
 
           podcasts = transformFeeds(searchRes.feeds);
 
@@ -489,7 +507,7 @@ export function useSearch() {
             val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
           });
 
-          if (currentSearchRef.current !== '__browse__') return;
+          if (signal.aborted) return;
 
           podcasts = transformFeeds(trendingRes.feeds);
 
@@ -542,7 +560,7 @@ export function useSearch() {
               val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
             });
 
-            if (currentSearchRef.current !== '__browse__') return;
+            if (signal.aborted) return;
 
             podcasts = transformFeeds(searchRes.feeds);
 
@@ -576,7 +594,7 @@ export function useSearch() {
               val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
             });
 
-            if (currentSearchRef.current !== '__browse__') return;
+            if (signal.aborted) return;
 
             podcasts = transformFeeds(trendingRes.feeds);
 
@@ -654,7 +672,7 @@ export function useSearch() {
             lang: getApiLanguageCodes(filters.languages),
           });
 
-          if (currentSearchRef.current !== '__browse__') return;
+          if (signal.aborted) return;
 
           const episodes = transformEpisodes(recentRes.items || []);
           const episodesWithMeta = episodes
@@ -683,12 +701,16 @@ export function useSearch() {
           setApiEpisodes(episodesWithMeta as Episode[]);
         }
       }
-    } catch {
-      if (currentSearchRef.current === '__browse__') {
+    } catch (err) {
+      // Don't show error if request was aborted
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
+      if (!signal.aborted) {
         setError('Kunne ikke hente innhold. Prøv igjen.');
       }
     } finally {
-      if (currentSearchRef.current === '__browse__') {
+      if (!signal.aborted) {
         setIsLoading(false);
       }
     }
@@ -971,6 +993,15 @@ export function useSearch() {
     if (filters.discoveryMode !== 'all') count++;
     return count;
   }, [filters]);
+
+  // Cleanup on unmount - abort any in-flight requests
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   return {
     filters,

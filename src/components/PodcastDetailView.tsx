@@ -267,3 +267,6 @@ export function PodcastDetailView({
     </div>
   );
 }
+
+// Default export for lazy loading
+export default PodcastDetailView;

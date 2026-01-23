@@ -5,6 +5,10 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+
+  /* Enable container queries for responsive behavior */
+  container-type: inline-size;
+  container-name: searchbar;
 }
 
 .inputWrapper {
@@ -130,8 +134,8 @@
   color: var(--text-muted);
 }
 
-/* Hide keyboard hints on mobile */
-@media (max-width: 640px) {
+/* Container queries - respond to parent width instead of viewport */
+@container searchbar (max-width: 480px) {
   .shortcut {
     display: none;
   }
@@ -139,5 +143,29 @@
   /* Use 16px font to prevent iOS zoom on focus */
   .input {
     font-size: 16px;
+  }
+
+  .inputWrapper {
+    height: 44px;
+    padding: 0 var(--space-3);
+  }
+}
+
+@container searchbar (min-width: 481px) and (max-width: 768px) {
+  .shortcut {
+    display: none;
+  }
+}
+
+/* Legacy media query fallback for browsers without container query support */
+@media (max-width: 640px) {
+  @supports not (container-type: inline-size) {
+    .shortcut {
+      display: none;
+    }
+
+    .input {
+      font-size: 16px;
+    }
   }
 }

@@ -1,14 +1,16 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import { OfflineBanner } from './components/OfflineBanner';
 import { SearchView } from './components/SearchView';
-import { PodcastDetailView } from './components/PodcastDetailView';
-import { QueueView } from './components/QueueView';
-import { SubscriptionsView } from './components/SubscriptionsView';
-import { HomeView } from './components/HomeView';
 import { AudioPlayer, type PlayingEpisode } from './components/AudioPlayer';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { TopNav, type NavItem } from './components/TopNav';
 import { SheetProvider } from './components/SheetProvider';
+
+// Lazy load non-critical views for better performance
+const PodcastDetailView = lazy(() => import('./components/PodcastDetailView'));
+const QueueView = lazy(() => import('./components/QueueView'));
+const SubscriptionsView = lazy(() => import('./components/SubscriptionsView'));
+const HomeView = lazy(() => import('./components/HomeView'));
 import { useSearch } from './hooks/useSearch';
 import { useQueue } from './hooks/useQueue';
 import { useSubscriptions } from './hooks/useSubscriptions';
@@ -262,23 +264,33 @@ function App() {
   // Navigation handler for TopNav
   const handleNavigation = useCallback(
     (item: NavItem) => {
-      // Clear selected podcast when navigating away
-      setSelectedPodcast(null);
+      // Use View Transitions API for smooth navigation if available
+      const transition = () => {
+        // Clear selected podcast when navigating away
+        setSelectedPodcast(null);
 
-      if (item === 'home') {
-        setCurrentView('home');
-        setQuery('');
-      } else if (item === 'search') {
-        setCurrentView('search');
-        setActiveTab('podcasts');
-      } else if (item === 'subscriptions') {
-        setCurrentView('subscriptions');
-        setActiveTab('subscriptions');
-      } else if (item === 'queue') {
-        setCurrentView('queue');
-        setActiveTab('queue');
+        if (item === 'home') {
+          setCurrentView('home');
+          setQuery('');
+        } else if (item === 'search') {
+          setCurrentView('search');
+          setActiveTab('podcasts');
+        } else if (item === 'subscriptions') {
+          setCurrentView('subscriptions');
+          setActiveTab('subscriptions');
+        } else if (item === 'queue') {
+          setCurrentView('queue');
+          setActiveTab('queue');
+        }
+        // 'info' is handled internally by TopNav (opens InfoPopover)
+      };
+
+      // Check if View Transitions API is supported
+      if ('startViewTransition' in document) {
+        (document as any).startViewTransition(transition);
+      } else {
+        transition();
       }
-      // 'info' is handled internally by TopNav (opens InfoPopover)
     },
     [setActiveTab, setQuery]
   );
@@ -292,18 +304,20 @@ function App() {
         {/* Show PodcastDetailView when selected, otherwise show main content */}
         {selectedPodcast ? (
           <ErrorBoundary viewName="podcast-visningen">
-            <PodcastDetailView
-              podcast={selectedPodcast}
-              onPlayEpisode={handlePlayEpisode}
-              onAddToQueue={handleAddEpisodeToQueue}
-              onPlayNext={handlePlayEpisodeNext}
-              isInQueue={isInQueue}
-              getProgress={getProgress}
-              isSubscribed={isSubscribed(selectedPodcast.id)}
-              onSubscribe={handleSubscribe}
-              onUnsubscribe={handleUnsubscribe}
-              onBack={handleBackFromPodcast}
-            />
+            <Suspense fallback={<div className="loading-view">Laster podcast...</div>}>
+              <PodcastDetailView
+                podcast={selectedPodcast}
+                onPlayEpisode={handlePlayEpisode}
+                onAddToQueue={handleAddEpisodeToQueue}
+                onPlayNext={handlePlayEpisodeNext}
+                isInQueue={isInQueue}
+                getProgress={getProgress}
+                isSubscribed={isSubscribed(selectedPodcast.id)}
+                onSubscribe={handleSubscribe}
+                onUnsubscribe={handleUnsubscribe}
+                onBack={handleBackFromPodcast}
+              />
+            </Suspense>
           </ErrorBoundary>
         ) : (
           <>
@@ -316,14 +330,16 @@ function App() {
               {/* Home view - shows recent episodes from subscriptions */}
               {currentView === 'home' && (
                 <ErrorBoundary viewName="hjem-visningen">
-                  <HomeView
-                    subscriptions={subscriptions}
-                    onPlayEpisode={handlePlayEpisode}
-                    onAddToQueue={handleAddEpisodeToQueue}
-                    onPlayNext={handlePlayEpisodeNext}
-                    isInQueue={isInQueue}
-                    onNavigateToSearch={() => handleNavigation('search')}
-                  />
+                  <Suspense fallback={<div className="loading-view">Laster...</div>}>
+                    <HomeView
+                      subscriptions={subscriptions}
+                      onPlayEpisode={handlePlayEpisode}
+                      onAddToQueue={handleAddEpisodeToQueue}
+                      onPlayNext={handlePlayEpisodeNext}
+                      isInQueue={isInQueue}
+                      onNavigateToSearch={() => handleNavigation('search')}
+                    />
+                  </Suspense>
                 </ErrorBoundary>
               )}
 
@@ -361,25 +377,29 @@ function App() {
               {/* Subscriptions view */}
               {currentView === 'subscriptions' && (
                 <ErrorBoundary viewName="abonnementene">
-                  <SubscriptionsView
-                    subscriptions={subscriptions}
-                    onUnsubscribe={unsubscribe}
-                    onSelectPodcast={handleSelectSubscribedPodcast}
-                  />
+                  <Suspense fallback={<div className="loading-view">Laster...</div>}>
+                    <SubscriptionsView
+                      subscriptions={subscriptions}
+                      onUnsubscribe={unsubscribe}
+                      onSelectPodcast={handleSelectSubscribedPodcast}
+                    />
+                  </Suspense>
                 </ErrorBoundary>
               )}
 
               {/* Queue view */}
               {currentView === 'queue' && (
                 <ErrorBoundary viewName="spillekøen">
-                  <QueueView
-                    queue={queue}
-                    onPlay={handlePlayFromQueue}
-                    onRemove={removeFromQueue}
-                    onClear={clearQueue}
-                    onReorder={handleReorder}
-                    getProgress={getProgress}
-                  />
+                  <Suspense fallback={<div className="loading-view">Laster...</div>}>
+                    <QueueView
+                      queue={queue}
+                      onPlay={handlePlayFromQueue}
+                      onRemove={removeFromQueue}
+                      onClear={clearQueue}
+                      onReorder={handleReorder}
+                      getProgress={getProgress}
+                    />
+                  </Suspense>
                 </ErrorBoundary>
               )}
             </main>

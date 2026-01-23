@@ -361,3 +361,6 @@ export function QueueView({
     </div>
   );
 }
+
+// Default export for lazy loading
+export default QueueView;
