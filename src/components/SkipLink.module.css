@@ -2,7 +2,7 @@
 
 .skipLink {
   position: fixed;
-  top: -40px;
+  top: -100px;
   left: 0;
   z-index: 10000;
   padding: var(--space-3) var(--space-4);
@@ -13,6 +13,8 @@
   font-weight: 600;
   text-decoration: none;
   border-radius: 0 0 var(--radius-md) 0;
+  opacity: 0;
+  pointer-events: none;
 
   /* Modern shadow */
   box-shadow:
@@ -21,11 +23,14 @@
 
   transition:
     top var(--transition-fast),
+    opacity var(--transition-fast),
     box-shadow var(--transition-fast);
 }
 
 .skipLink:focus {
   top: 0;
+  opacity: 1;
+  pointer-events: auto;
   outline: 3px solid rgba(26, 95, 122, 0.3);
   outline-offset: 3px;
 }
