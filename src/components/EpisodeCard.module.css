@@ -190,9 +190,6 @@
 
 /* Expandable description - uses full card width */
 .description {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: none;
   font-size: var(--font-body-sm);
   line-height: var(--leading-normal);
   color: var(--text-secondary);
@@ -205,21 +202,23 @@
 .description.expanded {
   max-height: 1000px;
   opacity: 1;
-  margin-top: var(--space-4);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border);
 }
 
-/* Default variant: expand description to full width with proper padding */
+/* Default variant: description with border on top, full width */
 .card .description {
-  /* Extend to both card edges (not over the image area) */
-  /* Go back to card's left edge: card padding + image + gap */
+  /* Extend to card edges on both sides */
   margin-left: calc(-1 * (var(--space-3) + 80px + var(--space-3)));
-  /* Go to card's right edge: card padding + content padding-right */
   margin-right: calc(-1 * (var(--space-3) + var(--button-lg)));
-  /* Add back padding for readability */
+  /* Add padding for readability */
   padding-left: var(--space-3);
   padding-right: var(--space-3);
+}
+
+.card .description.expanded {
+  /* Border separator above description */
+  border-top: 1px solid var(--border);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
 }
 
 /* Queue variant: expand description to full width with equal padding */
