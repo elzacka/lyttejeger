@@ -354,7 +354,7 @@ function App() {
 
               {/* My Pods view */}
               {currentView === 'subscriptions' && (
-                <ErrorBoundary viewName="abonnementene">
+                <ErrorBoundary viewName="podcaster du følger">
                   <Suspense fallback={<div className="loading-view">Laster...</div>}>
                     <MyPodsView
                       subscriptions={subscriptions}

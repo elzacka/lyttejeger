@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { X as CloseIcon } from 'lucide-react';
 import type { Subscription } from '../services/db';
 import styles from './MyPodsView.module.css';
 
@@ -59,11 +60,17 @@ export function MyPodsView({
     setSelectedPodcast(null);
   };
 
+  const handleDesktopDelete = (e: React.MouseEvent, subscription: Subscription) => {
+    e.stopPropagation(); // Prevent navigation
+    setSelectedPodcast(subscription);
+    setShowDeleteDialog(true);
+  };
+
   if (subscriptions.length === 0) {
     return (
       <div className={styles.empty}>
         <h3>Du følger ingen podcaster ennå</h3>
-        <p>Søk etter podcaster og trykk på Følg for å abonnere</p>
+        <p>Søk etter podcaster og trykk på hjertet for å følge dem</p>
       </div>
     );
   }
@@ -109,6 +116,15 @@ export function MyPodsView({
                   </div>
                   <h3 className={styles.podcastTitle}>{sub.title}</h3>
                 </button>
+                {/* Desktop-only delete button */}
+                <button
+                  className={styles.desktopDeleteButton}
+                  onClick={(e) => handleDesktopDelete(e, sub)}
+                  aria-label={`Slett ${sub.title}`}
+                  title="Slett"
+                >
+                  <CloseIcon size={16} />
+                </button>
               </article>
             );
           })}
@@ -119,14 +135,14 @@ export function MyPodsView({
       {showDeleteDialog && selectedPodcast && (
         <div className={styles.dialogOverlay} onClick={handleCancel}>
           <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles.dialogTitle}>Avslutt abonnement?</h3>
+            <h3 className={styles.dialogTitle}>Slutt å følge?</h3>
             <p className={styles.dialogText}>{selectedPodcast.title}</p>
             <div className={styles.dialogButtons}>
               <button className={styles.cancelButton} onClick={handleCancel}>
                 Avbryt
               </button>
               <button className={styles.deleteButton} onClick={handleDelete}>
-                Slett
+                Ja
               </button>
             </div>
           </div>

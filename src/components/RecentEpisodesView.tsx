@@ -177,7 +177,7 @@ export function RecentEpisodesView({
     return (
       <section className={styles.container}>
         <div className={styles.emptyState}>
-          <p className={styles.emptyText}>Ingen abonnementer enda</p>
+          <p className={styles.emptyText}>Du følger ingen podcaster enda</p>
           {onNavigateToSearch && (
             <button className={styles.ctaButton} onClick={onNavigateToSearch}>
               Finn podkaster

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft as ArrowLeftIcon, Podcast as PodcastIcon, Star as StarIcon } from 'lucide-react';
+import { ArrowLeft as ArrowLeftIcon, Podcast as PodcastIcon, Star as StarIcon, Heart as HeartIcon } from 'lucide-react';
 import type { Podcast, Episode } from '../types/podcast';
 import type { PlayingEpisode } from './AudioPlayer';
 import type { PlaybackProgress } from '../hooks/usePlaybackProgress';
@@ -162,8 +162,14 @@ export function PodcastDetailView({
               className={`${styles.subscribeButton} ${isSubscribed ? styles.subscribed : ''}`}
               onClick={isSubscribed ? onUnsubscribe : onSubscribe}
               aria-pressed={isSubscribed}
+              aria-label={isSubscribed ? 'Slutt å følge' : 'Følg podcast'}
+              title={isSubscribed ? 'Slutt å følge' : 'Følg'}
             >
-              {isSubscribed ? 'Følger' : 'Følg'}
+              <HeartIcon
+                size={20}
+                fill={isSubscribed ? 'currentColor' : 'none'}
+                strokeWidth={isSubscribed ? 0 : 2}
+              />
             </button>
           )}
         </section>

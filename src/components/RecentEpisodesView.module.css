@@ -132,7 +132,7 @@
   .container {
     padding: var(--space-sm);
     /* iOS safe area: use direct env() for notch/dynamic island */
-    padding-top: calc(var(--space-lg) + env(safe-area-inset-top, 0px));
+    padding-top: calc(var(--space-xs) + env(safe-area-inset-top, 0px));
     padding-bottom: calc(var(--nav-height) + var(--player-height-mobile) + var(--space-xl));
   }
 

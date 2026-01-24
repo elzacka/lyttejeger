@@ -87,7 +87,7 @@
 }
 
 /* ===== DANGER BUTTON ===== */
-/* Destructive actions (delete, unsubscribe) */
+/* Destructive actions (delete, unfollow) */
 .btnDanger {
   composes: btn;
   gap: var(--space-xs);

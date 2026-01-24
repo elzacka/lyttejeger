@@ -1,4 +1,4 @@
-/* SubscriptionsView - Grid layout with confirmation-based deletion */
+/* MyPodsView - Grid layout with confirmation-based deletion */
 
 .container {
   padding: var(--space-md);
@@ -138,6 +138,47 @@
   border-width: 0;
 }
 
+/* Desktop delete button - hidden on mobile */
+.desktopDeleteButton {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  border: none;
+  border-radius: 50%;
+  color: var(--color-white);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
+  z-index: 2;
+}
+
+.card:hover .desktopDeleteButton {
+  opacity: 1;
+}
+
+.desktopDeleteButton:hover {
+  background: var(--error-color);
+  transform: scale(1.1);
+}
+
+.desktopDeleteButton:active {
+  transform: scale(0.95);
+}
+
+.desktopDeleteButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 50%;
+  opacity: 1;
+}
+
 /* Delete confirmation dialog */
 .dialogOverlay {
   position: fixed;
@@ -270,6 +311,11 @@
   .podcastTitle {
     font-size: var(--font-caption); /* Responsive size maintained */
     padding: var(--space-xs);
+  }
+
+  /* Hide desktop delete button on mobile - use long-press instead */
+  .desktopDeleteButton {
+    display: none;
   }
 }
 
