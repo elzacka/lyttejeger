@@ -190,9 +190,9 @@
 
 /* Expandable description - uses full card width */
 .description {
-  margin-top: var(--space-4);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border);
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
   font-size: var(--font-body-sm);
   line-height: var(--leading-normal);
   color: var(--text-secondary);
@@ -207,15 +207,15 @@
   opacity: 1;
   margin-top: var(--space-4);
   padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
 }
 
 /* Default variant: expand description to full width with proper padding */
 .card .description {
-  /* Extend to left edge but keep padding for readability */
+  /* Extend to both edges and add equal padding */
   margin-left: calc(-1 * (var(--space-3) + 80px + var(--space-3)));
+  margin-right: calc(-1 * var(--space-3));
   padding-left: var(--space-3);
-  /* Keep right padding accounting for context menu */
-  margin-right: 0;
   padding-right: var(--space-3);
 }
 
