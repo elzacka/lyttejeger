@@ -275,7 +275,7 @@ export function EpisodeCard({
         <div
           ref={swipeContentRef}
           className={styles.swipeContent}
-          style={isSwipedOpen ? { transform: 'translateX(-60px)' } : undefined}
+          style={isSwipedOpen ? { transform: 'translateX(-80px)' } : undefined}
         >
           {/* Drag handle button */}
           {isDraggable && (
