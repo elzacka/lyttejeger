@@ -145,6 +145,17 @@
   -webkit-touch-callout: none;
 }
 
+/* Overlay to prevent clicks/expand during reorder mode */
+.reorderOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  cursor: default;
+}
+
 .queueItem {
   position: relative;
 }

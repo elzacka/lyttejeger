@@ -48,13 +48,17 @@ export function QueueView({
   const [reorderMode, setReorderMode] = useState(false);
   const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(null);
   const longPressTimer = useRef<number | null>(null);
+  const longPressActivated = useRef(false);
 
   // Long-press for reorder mode (mobile and desktop)
   const handleLongPressStart = useCallback((index: number) => (e: React.TouchEvent | React.MouseEvent) => {
     // Prevent default to avoid text selection on desktop
     if ('button' in e && e.button !== 0) return; // Only left click on desktop
 
+    longPressActivated.current = false;
+
     longPressTimer.current = window.setTimeout(() => {
+      longPressActivated.current = true;
       setReorderMode(true);
       setSelectedItemIndex(index);
       // Haptic feedback on mobile
@@ -64,10 +68,17 @@ export function QueueView({
     }, 500); // 500ms long press
   }, []);
 
-  const handleLongPressEnd = useCallback(() => {
+  const handleLongPressEnd = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
+    }
+
+    // If long press was activated, prevent any click events
+    if (longPressActivated.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      longPressActivated.current = false;
     }
   }, []);
 
@@ -171,6 +182,16 @@ export function QueueView({
                   onPlay={() => onPlay(item)}
                   isDraggable={false}
                 />
+                {/* Overlay to prevent expand/collapse when in reorder mode */}
+                {reorderMode && (
+                  <div
+                    className={styles.reorderOverlay}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  />
+                )}
               </div>
 
               {/* Reorder toolbar - appears as popup next to selected item */}
