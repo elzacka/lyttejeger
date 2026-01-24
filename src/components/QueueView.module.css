@@ -202,6 +202,17 @@
   flex-shrink: 0;
 }
 
+.deleteButton {
+  background: var(--error-color);
+  color: var(--color-white);
+  border-color: var(--error-color);
+}
+
+.deleteButton:hover:not(:disabled) {
+  background: var(--error-color-hover);
+  filter: brightness(1.1);
+}
+
 .doneButton {
   background: var(--accent);
   color: var(--color-white);
@@ -211,11 +222,4 @@
 .doneButton:hover {
   background: var(--accent);
   filter: brightness(1.1);
-}
-
-/* Desktop - hide reorder toolbar */
-@media (min-width: 769px) {
-  .reorderToolbar {
-    display: none;
-  }
 }
