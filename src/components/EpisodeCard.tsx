@@ -126,6 +126,9 @@ export interface EpisodeCardProps {
 
   /** Long-press end handler for info area (queue variant) */
   onInfoLongPressEnd?: (e: React.TouchEvent | React.MouseEvent) => void;
+
+  /** Callback when expand/collapse state changes (for virtualization re-measurement) */
+  onExpandChange?: (expanded: boolean) => void;
 }
 
 export function EpisodeCard({
@@ -156,6 +159,7 @@ export function EpisodeCard({
   onImageLongPressEnd,
   onInfoLongPressStart,
   onInfoLongPressEnd,
+  onExpandChange,
 }: EpisodeCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -211,7 +215,11 @@ export function EpisodeCard({
 
   const handleToggleExpand = (e?: React.MouseEvent | React.TouchEvent) => {
     e?.stopPropagation();
-    setIsExpanded((prev) => !prev);
+    setIsExpanded((prev) => {
+      const newExpanded = !prev;
+      onExpandChange?.(newExpanded);
+      return newExpanded;
+    });
   };
 
   const handleMenuClick = (e: React.MouseEvent | React.TouchEvent) => {

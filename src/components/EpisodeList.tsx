@@ -53,6 +53,8 @@ export function EpisodeList({
   const { getProgress } = usePlaybackProgress();
   const listRef = useRef<HTMLDivElement>(null);
   const [scrollMargin, setScrollMargin] = useState(0);
+  // Store refs to virtual items for re-measuring
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   // Use virtualization for large lists - memoized to prevent recalculation
   const useVirtual = useMemo(
@@ -73,12 +75,17 @@ export function EpisodeList({
     overscan: 5,
     scrollMargin,
     enabled: useVirtual,
-    // Measure actual element height for accurate positioning
-    measureElement:
-      typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
-        ? (element) => element?.getBoundingClientRect().height ?? ESTIMATED_EPISODE_HEIGHT
-        : undefined,
   });
+
+  // Re-measure a specific item after DOM update
+  const remeasureItem = (index: number) => {
+    requestAnimationFrame(() => {
+      const element = itemRefs.current.get(index);
+      if (element) {
+        virtualizer.measureElement(element);
+      }
+    });
+  };
 
   if (isLoading) {
     return (
@@ -193,7 +200,14 @@ export function EpisodeList({
             <div
               key={episode.id}
               data-index={virtualItem.index}
-              ref={virtualizer.measureElement}
+              ref={(el) => {
+                if (el) {
+                  itemRefs.current.set(virtualItem.index, el);
+                  virtualizer.measureElement(el);
+                } else {
+                  itemRefs.current.delete(virtualItem.index);
+                }
+              }}
               className={styles.virtualItem}
               style={{
                 transform: `translateY(${virtualItem.start - scrollMargin}px)`,
@@ -223,6 +237,7 @@ export function EpisodeList({
                 isInQueue={isInQueue?.(episode.id) ?? false}
                 progress={getProgress(episode.id)}
                 onSelectPodcast={onSelectPodcast}
+                onExpandChange={() => remeasureItem(virtualItem.index)}
               />
             </div>
           );
