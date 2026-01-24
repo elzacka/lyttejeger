@@ -160,15 +160,7 @@ export function QueueView({
               className={`${isSelected ? styles.selectedItem : ''} ${styles.queueItem}`}
               style={{ position: 'relative' }}
             >
-              <div
-                className={styles.longPressWrapper}
-                onTouchStart={!reorderMode ? handleLongPressStart(index) : undefined}
-                onTouchEnd={!reorderMode ? handleLongPressEnd : undefined}
-                onTouchCancel={!reorderMode ? handleLongPressEnd : undefined}
-                onMouseDown={!reorderMode ? handleLongPressStart(index) : undefined}
-                onMouseUp={!reorderMode ? handleLongPressEnd : undefined}
-                onMouseLeave={!reorderMode ? handleLongPressEnd : undefined}
-              >
+              <div className={styles.cardWrapper}>
                 <EpisodeCard
                   episode={queueItemToEpisode(item)}
                   podcastInfo={{
@@ -182,7 +174,19 @@ export function QueueView({
                   onPlay={() => onPlay(item)}
                   isDraggable={false}
                 />
-                {/* Overlay to prevent expand/collapse when in reorder mode */}
+                {/* Long-press overlay - captures touch/mouse for long press without blocking clicks */}
+                {!reorderMode && (
+                  <div
+                    className={styles.longPressOverlay}
+                    onTouchStart={handleLongPressStart(index)}
+                    onTouchEnd={handleLongPressEnd}
+                    onTouchCancel={handleLongPressEnd}
+                    onMouseDown={handleLongPressStart(index)}
+                    onMouseUp={handleLongPressEnd}
+                    onMouseLeave={handleLongPressEnd}
+                  />
+                )}
+                {/* Reorder overlay - blocks all interaction when in reorder mode */}
                 {reorderMode && (
                   <div
                     className={styles.reorderOverlay}

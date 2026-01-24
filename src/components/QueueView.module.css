@@ -137,15 +137,28 @@
   50% { transform: scale(1.02); }
 }
 
-/* Long-press wrapper - captures touch/mouse events without interfering with clicks */
-.longPressWrapper {
+/* Card wrapper */
+.cardWrapper {
   position: relative;
+}
+
+/* Long-press overlay - transparent layer that captures long press without blocking clicks */
+.longPressOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  /* Allows clicks to pass through to elements below */
+  pointer-events: auto;
+  /* Prevent text selection during long press */
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
 
-/* Overlay to prevent clicks/expand during reorder mode */
+/* Reorder overlay - blocks all interaction when in reorder mode */
 .reorderOverlay {
   position: absolute;
   top: 0;
@@ -154,6 +167,8 @@
   bottom: 0;
   z-index: 5;
   cursor: default;
+  /* Block all pointer events */
+  pointer-events: auto;
 }
 
 .queueItem {
