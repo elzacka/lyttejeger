@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { X as CloseIcon } from 'lucide-react';
+import { useState, useRef } from 'react';
 import type { Subscription } from '../services/db';
 import styles from './MyPodsView.module.css';
 
@@ -14,23 +13,50 @@ export function MyPodsView({
   onUnsubscribe,
   onSelectPodcast,
 }: MyPodsViewProps) {
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedPodcast, setSelectedPodcast] = useState<Subscription | null>(null);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressTriggered = useRef(false);
 
-  const handleUnsubscribeClick = (e: React.MouseEvent, podcastId: string) => {
-    e.stopPropagation(); // Prevent triggering podcast navigation
+  const handleTouchStart = (subscription: Subscription) => {
+    longPressTriggered.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      setSelectedPodcast(subscription);
+      setShowDeleteDialog(true);
+      // Haptic feedback on supported devices
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
+    }, 500); // 500ms long press
+  };
 
-    if (confirmDeleteId === podcastId) {
-      // Second click confirms deletion
-      onUnsubscribe(podcastId);
-      setConfirmDeleteId(null);
-    } else {
-      // First click shows confirmation
-      setConfirmDeleteId(podcastId);
-      // Auto-reset after 3 seconds
-      setTimeout(() => {
-        setConfirmDeleteId((current) => current === podcastId ? null : current);
-      }, 3000);
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
     }
+  };
+
+  const handleClick = (podcastId: string) => {
+    // Only navigate if not triggered by long press
+    if (!longPressTriggered.current) {
+      onSelectPodcast(podcastId);
+    }
+    longPressTriggered.current = false;
+  };
+
+  const handleDelete = () => {
+    if (selectedPodcast) {
+      onUnsubscribe(selectedPodcast.podcastId);
+      setShowDeleteDialog(false);
+      setSelectedPodcast(null);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowDeleteDialog(false);
+    setSelectedPodcast(null);
   };
 
   if (subscriptions.length === 0) {
@@ -48,57 +74,65 @@ export function MyPodsView({
   );
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>Mine podder</h2>
-        <span className={styles.count}>{subscriptions.length}</span>
+    <>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Mine podder</h2>
+          <span className={styles.count}>{subscriptions.length}</span>
+        </div>
+
+        <div className={styles.grid}>
+          {sortedSubscriptions.map((sub) => {
+            return (
+              <article key={sub.podcastId} className={styles.card}>
+                {/* Main clickable area for navigation with long-press support */}
+                <button
+                  className={styles.cardButton}
+                  onClick={() => handleClick(sub.podcastId)}
+                  onTouchStart={() => handleTouchStart(sub)}
+                  onTouchEnd={handleTouchEnd}
+                  onTouchCancel={handleTouchEnd}
+                  aria-label={`Gå til ${sub.title}`}
+                  title={sub.title}
+                >
+                  <div className={styles.imageWrapper}>
+                    <img
+                      src={sub.imageUrl}
+                      alt=""
+                      className={styles.image}
+                      loading="lazy"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  <h3 className={styles.podcastTitle}>{sub.title}</h3>
+                </button>
+              </article>
+            );
+          })}
+        </div>
       </div>
 
-      <div className={styles.grid}>
-        {sortedSubscriptions.map((sub) => {
-          const isConfirming = confirmDeleteId === sub.podcastId;
-
-          return (
-            <article
-              key={sub.podcastId}
-              className={`${styles.card} ${isConfirming ? styles.cardConfirming : ''}`}
-            >
-              {/* Main clickable area for navigation */}
-              <button
-                className={styles.cardButton}
-                onClick={() => onSelectPodcast(sub.podcastId)}
-                aria-label={`Gå til ${sub.title}`}
-                title={sub.title}
-              >
-                <div className={styles.imageWrapper}>
-                  <img
-                    src={sub.imageUrl}
-                    alt=""
-                    className={styles.image}
-                    loading="lazy"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                    }}
-                  />
-                </div>
-                <h3 className={styles.podcastTitle}>{sub.title}</h3>
+      {/* Delete confirmation dialog */}
+      {showDeleteDialog && selectedPodcast && (
+        <div className={styles.dialogOverlay} onClick={handleCancel}>
+          <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.dialogTitle}>Avslutt abonnement?</h3>
+            <p className={styles.dialogText}>{selectedPodcast.title}</p>
+            <div className={styles.dialogButtons}>
+              <button className={styles.cancelButton} onClick={handleCancel}>
+                Avbryt
               </button>
-
-              {/* Delete button - appears on hover/long-press */}
-              <button
-                className={`${styles.deleteButton} ${isConfirming ? styles.deleteButtonConfirm : ''}`}
-                onClick={(e) => handleUnsubscribeClick(e, sub.podcastId)}
-                aria-label={isConfirming ? `Bekreft avslutning av ${sub.title}` : `Avslutt abonnement på ${sub.title}`}
-                title={isConfirming ? 'Klikk igjen for å bekrefte' : 'Avslutt abonnement'}
-              >
-                <CloseIcon size={16} />
+              <button className={styles.deleteButton} onClick={handleDelete}>
+                Slett
               </button>
-            </article>
-          );
-        })}
-      </div>
-    </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
