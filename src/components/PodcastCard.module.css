@@ -24,6 +24,10 @@
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-sm);
+  /* Prevent iOS text selection menu on long press */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .podcastToggle {
@@ -145,9 +149,9 @@
 
 /* Podcast details (expanded) */
 .podcastDetails {
-  /* Extend to full width with equal padding on both sides */
+  /* Extend to full width with equal padding on both sides - standardized to 12px */
   margin: 0 calc(-1 * var(--space-sm));
-  padding: var(--space-sm) var(--space-sm) var(--space-md);
+  padding: var(--space-3) var(--space-3) var(--space-md);
   animation: slideDown 0.2s ease-out;
 }
 
@@ -216,7 +220,7 @@
 
   .podcastDetails {
     margin: 0 calc(-1 * var(--space-sm));
-    padding: var(--space-sm) var(--space-sm) var(--space-md);
+    padding: var(--space-3) var(--space-3) var(--space-md);
   }
 
   .podcastDescription {

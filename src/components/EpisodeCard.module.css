@@ -71,7 +71,7 @@
   color: var(--text-muted);
 }
 
-/* Play overlay on hover */
+/* Play overlay - always visible with subtle background */
 .playOverlay {
   position: absolute;
   top: 0;
@@ -81,15 +81,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.6);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-out);
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 1;
+  transition: background var(--duration-fast) var(--ease-out);
   pointer-events: none;
   color: white;
 }
 
 .imageButton:hover .playOverlay {
-  opacity: 1;
+  background: rgba(0, 0, 0, 0.6);
 }
 
 /* Content area */
@@ -100,6 +100,10 @@
   min-width: 0; /* Allow text truncation */
   position: relative;
   padding-right: var(--button-lg); /* Reserve space for context menu button */
+  /* Prevent iOS text selection menu on long press */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .header {
