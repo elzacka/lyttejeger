@@ -215,13 +215,12 @@
   padding-right: var(--space-3);
 }
 
-/* Queue variant: expand description to full width with proper padding */
+/* Queue variant: expand description to full width with equal padding */
 .queueItem .description {
-  /* Extend to left edge but keep padding for readability */
+  /* Extend to both edges and add equal padding */
   margin-left: calc(-1 * (var(--space-3) + var(--image-sm) + var(--space-2)));
+  margin-right: calc(-1 * var(--space-3));
   padding-left: var(--space-3);
-  /* Keep right padding for readability */
-  margin-right: 0;
   padding-right: var(--space-3);
 }
 
@@ -475,6 +474,7 @@
   /* Queue variant mobile: adjust description margins for mobile image size */
   .queueItem .description {
     margin-left: calc(-1 * (var(--space-3) + 64px + var(--space-3)));
+    margin-right: calc(-1 * var(--space-3));
     padding-left: var(--space-3);
     padding-right: var(--space-3);
   }
