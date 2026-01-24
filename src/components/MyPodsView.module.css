@@ -240,6 +240,8 @@
     right: var(--space-xs);
     width: 32px;
     height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 
   /* Touch device - always show delete button */
