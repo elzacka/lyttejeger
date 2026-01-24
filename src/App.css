@@ -225,7 +225,7 @@
     width: calc(100% + 2 * var(--space-view-mobile));
     /* Ergonomic top padding - pushes search bar down for easier thumb reach */
     padding-top: calc(var(--space-5) + env(safe-area-inset-top, 0px));
-    padding-bottom: var(--space-3);
+    padding-bottom: var(--space-xs);
     /* Minimal bottom margin - results section directly below */
     margin: calc(-1 * var(--space-view-mobile)) calc(-1 * var(--space-view-mobile)) 0;
     padding-left: var(--space-view-mobile);

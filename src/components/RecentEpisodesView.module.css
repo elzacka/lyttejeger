@@ -139,7 +139,7 @@
 
   .title {
     font-size: var(--font-h2); /* Responsive via design-tokens.css */
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-xs);
   }
 
   .list {
