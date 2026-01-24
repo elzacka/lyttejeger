@@ -146,9 +146,11 @@ export function QueueView({
           return (
             <li
               key={item.id}
-              className={isSelected ? styles.selectedItem : undefined}
+              className={`${isSelected ? styles.selectedItem : ''} ${styles.queueItem}`}
+              style={{ position: 'relative' }}
             >
               <div
+                className={styles.longPressWrapper}
                 onTouchStart={!reorderMode ? handleLongPressStart(index) : undefined}
                 onTouchEnd={!reorderMode ? handleLongPressEnd : undefined}
                 onTouchCancel={!reorderMode ? handleLongPressEnd : undefined}
@@ -170,50 +172,51 @@ export function QueueView({
                   isDraggable={false}
                 />
               </div>
+
+              {/* Reorder toolbar - appears as popup next to selected item */}
+              {isSelected && (
+                <div className={styles.itemToolbar}>
+                  <button
+                    className={styles.toolbarButton}
+                    onClick={handleMoveUp}
+                    disabled={selectedItemIndex === 0}
+                    aria-label="Flytt opp"
+                    title="Flytt opp"
+                  >
+                    <ChevronUp size={20} />
+                  </button>
+                  <button
+                    className={styles.toolbarButton}
+                    onClick={handleMoveDown}
+                    disabled={selectedItemIndex === queue.length - 1}
+                    aria-label="Flytt ned"
+                    title="Flytt ned"
+                  >
+                    <ChevronDown size={20} />
+                  </button>
+                  <button
+                    className={`${styles.toolbarButton} ${styles.deleteButton}`}
+                    onClick={handleDeleteSelected}
+                    aria-label="Slett episode"
+                    title="Slett episode"
+                  >
+                    <TrashIcon size={18} />
+                  </button>
+                  <button
+                    className={`${styles.toolbarButton} ${styles.doneButton}`}
+                    onClick={handleExitReorderMode}
+                    aria-label="Ferdig"
+                    title="Ferdig"
+                  >
+                    Ferdig
+                  </button>
+                </div>
+              )}
             </li>
           );
         })}
       </ul>
 
-      {/* Reorder mode floating toolbar */}
-      {reorderMode && selectedItemIndex !== null && (
-        <div className={styles.reorderToolbar}>
-          <button
-            className={styles.toolbarButton}
-            onClick={handleMoveUp}
-            disabled={selectedItemIndex === 0}
-            aria-label="Flytt opp"
-            title="Flytt opp"
-          >
-            <ChevronUp size={24} />
-          </button>
-          <button
-            className={styles.toolbarButton}
-            onClick={handleMoveDown}
-            disabled={selectedItemIndex === queue.length - 1}
-            aria-label="Flytt ned"
-            title="Flytt ned"
-          >
-            <ChevronDown size={24} />
-          </button>
-          <button
-            className={`${styles.toolbarButton} ${styles.deleteButton}`}
-            onClick={handleDeleteSelected}
-            aria-label="Slett episode"
-            title="Slett episode"
-          >
-            <TrashIcon size={20} />
-          </button>
-          <button
-            className={`${styles.toolbarButton} ${styles.doneButton}`}
-            onClick={handleExitReorderMode}
-            aria-label="Ferdig"
-            title="Ferdig"
-          >
-            Ferdig
-          </button>
-        </div>
-      )}
     </div>
   );
 }
