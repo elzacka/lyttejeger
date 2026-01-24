@@ -49,6 +49,7 @@ export function QueueView({
   const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(null);
   const longPressTimer = useRef<number | null>(null);
   const longPressActivated = useRef(false);
+  const touchStartTime = useRef<number>(0);
 
   // Long-press for reorder mode (mobile and desktop)
   const handleLongPressStart = useCallback((index: number) => (e: React.TouchEvent | React.MouseEvent) => {
@@ -56,6 +57,7 @@ export function QueueView({
     if ('button' in e && e.button !== 0) return; // Only left click on desktop
 
     longPressActivated.current = false;
+    touchStartTime.current = Date.now();
 
     longPressTimer.current = window.setTimeout(() => {
       longPressActivated.current = true;
@@ -69,13 +71,15 @@ export function QueueView({
   }, []);
 
   const handleLongPressEnd = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    const touchDuration = Date.now() - touchStartTime.current;
+
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
 
-    // If long press was activated, prevent click/expand
-    if (longPressActivated.current) {
+    // Only prevent click if long press was actually activated (>500ms)
+    if (longPressActivated.current && touchDuration >= 500) {
       e.preventDefault();
       e.stopPropagation();
       longPressActivated.current = false;
