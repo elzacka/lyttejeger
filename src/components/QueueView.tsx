@@ -74,7 +74,7 @@ export function QueueView({
       longPressTimer.current = null;
     }
 
-    // If long press was activated, prevent any click events
+    // If long press was activated, prevent click/expand
     if (longPressActivated.current) {
       e.preventDefault();
       e.stopPropagation();
@@ -174,20 +174,10 @@ export function QueueView({
                   onPlay={() => onPlay(item)}
                   onImageLongPressStart={handleLongPressStart(index)}
                   onImageLongPressEnd={handleLongPressEnd}
+                  onInfoLongPressStart={handleLongPressStart(index)}
+                  onInfoLongPressEnd={handleLongPressEnd}
                   isDraggable={false}
                 />
-                {/* Long-press overlay - captures touch/mouse for long press without blocking clicks */}
-                {!reorderMode && (
-                  <div
-                    className={styles.longPressOverlay}
-                    onTouchStart={handleLongPressStart(index)}
-                    onTouchEnd={handleLongPressEnd}
-                    onTouchCancel={handleLongPressEnd}
-                    onMouseDown={handleLongPressStart(index)}
-                    onMouseUp={handleLongPressEnd}
-                    onMouseLeave={handleLongPressEnd}
-                  />
-                )}
                 {/* Reorder overlay - blocks all interaction when in reorder mode */}
                 {reorderMode && (
                   <div

@@ -120,6 +120,12 @@ export interface EpisodeCardProps {
 
   /** Long-press end handler for image button (queue variant) */
   onImageLongPressEnd?: (e: React.TouchEvent | React.MouseEvent) => void;
+
+  /** Long-press start handler for info area (queue variant) */
+  onInfoLongPressStart?: (e: React.TouchEvent | React.MouseEvent) => void;
+
+  /** Long-press end handler for info area (queue variant) */
+  onInfoLongPressEnd?: (e: React.TouchEvent | React.MouseEvent) => void;
 }
 
 export function EpisodeCard({
@@ -148,6 +154,8 @@ export function EpisodeCard({
   variant = 'default',
   onImageLongPressStart,
   onImageLongPressEnd,
+  onInfoLongPressStart,
+  onInfoLongPressEnd,
 }: EpisodeCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -335,6 +343,12 @@ export function EpisodeCard({
             <div
               className={styles.info}
               onClick={handleToggleExpand}
+              onTouchStart={onInfoLongPressStart}
+              onTouchEnd={onInfoLongPressEnd}
+              onTouchCancel={onInfoLongPressEnd}
+              onMouseDown={onInfoLongPressStart}
+              onMouseUp={onInfoLongPressEnd}
+              onMouseLeave={onInfoLongPressEnd}
             >
             {showPodcastInfo && podcastName && (
               <p className={styles.podcastName}>{podcastName}</p>
