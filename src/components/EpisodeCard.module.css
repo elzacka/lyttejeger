@@ -223,10 +223,12 @@
 
 /* Queue variant: expand description to full width with equal padding */
 .queueItem .description {
-  /* Extend to both edges and add equal padding */
-  margin-left: calc(-1 * (var(--space-3) + var(--image-sm) + var(--space-2)));
+  /* Go back to swipeContent's left edge (not over image) */
+  margin-left: 0;
+  /* Go to swipeContent's right edge */
   margin-right: calc(-1 * var(--space-3));
-  padding-left: var(--space-3);
+  /* Equal padding on both sides */
+  padding-left: 0;
   padding-right: var(--space-3);
 }
 
