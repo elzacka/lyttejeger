@@ -62,6 +62,9 @@ export function QueueView({
 }: QueueViewProps) {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [swipedItemId, setSwipedItemId] = useState<number | null>(null);
+  const [reorderMode, setReorderMode] = useState(false);
+  const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(null);
+  const longPressTimer = useRef<number | null>(null);
   const swipeRef = useRef<SwipeState>({
     itemId: undefined,
     startX: 0,
@@ -164,6 +167,44 @@ export function QueueView({
     },
     [onRemove]
   );
+
+  // Long-press for reorder mode (mobile)
+  const handleLongPressStart = useCallback((index: number) => {
+    longPressTimer.current = window.setTimeout(() => {
+      setReorderMode(true);
+      setSelectedItemIndex(index);
+      // Haptic feedback
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
+    }, 500); // 500ms long press
+  }, []);
+
+  const handleLongPressEnd = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
+
+  const handleMoveUp = useCallback(() => {
+    if (selectedItemIndex !== null && selectedItemIndex > 0) {
+      onReorder(selectedItemIndex, selectedItemIndex - 1);
+      setSelectedItemIndex(selectedItemIndex - 1);
+    }
+  }, [selectedItemIndex, onReorder]);
+
+  const handleMoveDown = useCallback(() => {
+    if (selectedItemIndex !== null && selectedItemIndex < queue.length - 1) {
+      onReorder(selectedItemIndex, selectedItemIndex + 1);
+      setSelectedItemIndex(selectedItemIndex + 1);
+    }
+  }, [selectedItemIndex, queue.length, onReorder]);
+
+  const handleExitReorderMode = useCallback(() => {
+    setReorderMode(false);
+    setSelectedItemIndex(null);
+  }, []);
 
   // Drag-to-reorder handlers
   const getItemIndexFromY = useCallback((y: number): number | null => {
@@ -326,9 +367,16 @@ export function QueueView({
         {queue.map((item, index) => {
           const isDragging = dragState.dragIndex === index;
           const isDragOver = dragState.dragOverIndex === index && dragState.dragIndex !== index;
+          const isSelected = reorderMode && selectedItemIndex === index;
 
           return (
-            <li key={item.id}>
+            <li
+              key={item.id}
+              className={isSelected ? styles.selectedItem : undefined}
+              onTouchStart={() => !reorderMode && handleLongPressStart(index)}
+              onTouchEnd={handleLongPressEnd}
+              onTouchCancel={handleLongPressEnd}
+            >
               <EpisodeCard
                 episode={queueItemToEpisode(item)}
                 podcastInfo={{
@@ -348,7 +396,7 @@ export function QueueView({
                 onDragTouchMove={handleDragTouchMove}
                 onDragTouchEnd={handleDragTouchEnd}
                 onDragMouseDown={handleDragMouseDown(index)}
-                isSwipeable={true}
+                isSwipeable={!reorderMode}
                 onSwipeTouchStart={handleTouchStart(item.id)}
                 onSwipeTouchMove={handleTouchMove(item.id)}
                 onSwipeTouchEnd={handleTouchEnd(item.id)}
@@ -359,6 +407,41 @@ export function QueueView({
           );
         })}
       </ul>
+
+      {/* Reorder mode floating toolbar */}
+      {reorderMode && selectedItemIndex !== null && (
+        <div className={styles.reorderToolbar}>
+          <button
+            className={styles.toolbarButton}
+            onClick={handleMoveUp}
+            disabled={selectedItemIndex === 0}
+            aria-label="Flytt opp"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 15l-6-6-6 6"/>
+            </svg>
+            Flytt opp
+          </button>
+          <button
+            className={styles.toolbarButton}
+            onClick={handleMoveDown}
+            disabled={selectedItemIndex === queue.length - 1}
+            aria-label="Flytt ned"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+            Flytt ned
+          </button>
+          <button
+            className={`${styles.toolbarButton} ${styles.doneButton}`}
+            onClick={handleExitReorderMode}
+            aria-label="Ferdig"
+          >
+            Ferdig
+          </button>
+        </div>
+      )}
     </div>
   );
 }
