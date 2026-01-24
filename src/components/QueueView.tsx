@@ -117,6 +117,7 @@ export function QueueView({
       }
 
       if (swipeRef.current.isSwiping) {
+        e.preventDefault(); // Prevent scrolling while swiping
         const content = swipeContentRefs.current.get(itemId);
         if (content) {
           const translateX = Math.max(0, Math.min(deltaX, SWIPE_THRESHOLD_PX + 20));
