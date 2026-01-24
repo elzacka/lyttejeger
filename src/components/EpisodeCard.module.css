@@ -420,13 +420,14 @@
   border-radius: var(--radius-sm);
 }
 
-/* Queue variant: show play button only on hover like in PodcastDetailView */
+/* Queue variant: always show play button */
 .queueItem .playOverlay {
-  opacity: 0;
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .queueItem .imageButton:hover .playOverlay {
-  opacity: 1;
+  background: rgba(0, 0, 0, 0.6);
 }
 
 /* Queue variant: info section */
