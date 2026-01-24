@@ -245,8 +245,7 @@ export function QueueView({
     [handleDragMove]
   );
 
-  const handleDragTouchEnd = useCallback((e: React.TouchEvent) => {
-    e.stopPropagation(); // Prevent swipe-to-delete from triggering
+  const handleDragTouchEnd = useCallback(() => {
     handleDragEnd();
   }, [handleDragEnd]);
 
@@ -339,7 +338,7 @@ export function QueueView({
                 showPodcastInfo={true}
                 progress={getProgress?.(item.episodeId)}
                 variant="queue"
-                onPlay={(episode) => onPlay(item)}
+                onPlay={() => onPlay(item)}
                 onRemove={() => item.id && handleRemove(item.id)}
                 isDraggable={true}
                 isDragging={isDragging}

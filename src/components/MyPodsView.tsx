@@ -15,7 +15,7 @@ export function MyPodsView({
 }: MyPodsViewProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedPodcast, setSelectedPodcast] = useState<Subscription | null>(null);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimer = useRef<number | null>(null);
   const longPressTriggered = useRef(false);
 
   const handleTouchStart = (subscription: Subscription) => {
