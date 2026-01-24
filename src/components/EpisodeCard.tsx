@@ -285,55 +285,57 @@ export function EpisodeCard({
           className={styles.swipeContent}
           style={isSwipedOpen ? { transform: 'translateX(-80px)' } : undefined}
         >
-          {/* Drag handle button */}
-          {isDraggable && (
-            <button
-              className={styles.dragHandle}
-              onMouseDown={onDragMouseDown}
-              onTouchStart={onDragTouchStart}
-              onTouchMove={onDragTouchMove}
-              onTouchEnd={onDragTouchEnd}
-              aria-label="Dra for å endre rekkefølge"
-            >
-              <GripVerticalIcon size={18} aria-hidden="true" />
-            </button>
-          )}
-
-          {/* Cover art with play overlay */}
-          <button
-            className={styles.imageButton}
-            onClick={handleImageClick}
-            onTouchStart={onImageLongPressStart}
-            onTouchEnd={onImageLongPressEnd}
-            onTouchCancel={onImageLongPressEnd}
-            onMouseDown={onImageLongPressStart}
-            onMouseUp={onImageLongPressEnd}
-            onMouseLeave={onImageLongPressEnd}
-            aria-label={`Spill ${episode.title}`}
-          >
-            {imageUrl && !imageError ? (
-              <img
-                src={imageUrl}
-                alt=""
-                className={styles.image}
-                loading="lazy"
-                onError={handleImageError}
-              />
-            ) : (
-              <div className={styles.placeholderImage} aria-hidden="true">
-                🎙️
-              </div>
+          {/* Top row: image and info */}
+          <div className={styles.topRow}>
+            {/* Drag handle button */}
+            {isDraggable && (
+              <button
+                className={styles.dragHandle}
+                onMouseDown={onDragMouseDown}
+                onTouchStart={onDragTouchStart}
+                onTouchMove={onDragTouchMove}
+                onTouchEnd={onDragTouchEnd}
+                aria-label="Dra for å endre rekkefølge"
+              >
+                <GripVerticalIcon size={18} aria-hidden="true" />
+              </button>
             )}
-            <div className={styles.playOverlay}>
-              <PlayIcon size={24} />
-            </div>
-          </button>
 
-          {/* Episode info - clickable to expand */}
-          <div
-            className={styles.info}
-            onClick={handleToggleExpand}
-          >
+            {/* Cover art with play overlay */}
+            <button
+              className={styles.imageButton}
+              onClick={handleImageClick}
+              onTouchStart={onImageLongPressStart}
+              onTouchEnd={onImageLongPressEnd}
+              onTouchCancel={onImageLongPressEnd}
+              onMouseDown={onImageLongPressStart}
+              onMouseUp={onImageLongPressEnd}
+              onMouseLeave={onImageLongPressEnd}
+              aria-label={`Spill ${episode.title}`}
+            >
+              {imageUrl && !imageError ? (
+                <img
+                  src={imageUrl}
+                  alt=""
+                  className={styles.image}
+                  loading="lazy"
+                  onError={handleImageError}
+                />
+              ) : (
+                <div className={styles.placeholderImage} aria-hidden="true">
+                  🎙️
+                </div>
+              )}
+              <div className={styles.playOverlay}>
+                <PlayIcon size={24} />
+              </div>
+            </button>
+
+            {/* Episode info - clickable to expand */}
+            <div
+              className={styles.info}
+              onClick={handleToggleExpand}
+            >
             {showPodcastInfo && podcastName && (
               <p className={styles.podcastName}>{podcastName}</p>
             )}
@@ -374,14 +376,15 @@ export function EpisodeCard({
                 />
               </div>
             )}
-
-            {/* Expandable description */}
-            {episode.description && (
-              <div className={`${styles.description} ${isExpanded ? styles.expanded : ''}`}>
-                <FormattedText text={episode.description} />
-              </div>
-            )}
           </div>
+          </div>
+
+          {/* Expandable description - full width */}
+          {episode.description && (
+            <div className={`${styles.description} ${isExpanded ? styles.expanded : ''}`}>
+              <FormattedText text={episode.description} />
+            </div>
+          )}
         </div>
       </article>
     );
@@ -460,14 +463,14 @@ export function EpisodeCard({
               />
             </div>
           )}
-
-          {/* Expandable description */}
-          {episode.description && (
-            <div className={`${styles.description} ${isExpanded ? styles.expanded : ''}`}>
-              <FormattedText text={episode.description} />
-            </div>
-          )}
         </div>
+
+        {/* Expandable description - full width */}
+        {episode.description && (
+          <div className={`${styles.description} ${isExpanded ? styles.expanded : ''}`}>
+            <FormattedText text={episode.description} />
+          </div>
+        )}
 
         {/* Context menu (if add to queue or play next is available) */}
         {(onAddToQueue || onPlayNext) && (
