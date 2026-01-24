@@ -205,21 +205,23 @@
   padding-top: var(--space-3);
 }
 
-/* Default variant: expand description to full width minus context menu space */
+/* Default variant: expand description to full width with proper padding */
 .card .description {
-  /* Compensate for: padding-left + image width + gap */
+  /* Extend to left edge but keep padding for readability */
   margin-left: calc(-1 * (var(--space-3) + 80px + var(--space-3)));
   padding-left: var(--space-3);
-  margin-right: calc(-1 * var(--button-lg));
-  padding-right: var(--button-lg);
+  /* Keep right padding accounting for context menu */
+  margin-right: 0;
+  padding-right: var(--space-3);
 }
 
-/* Queue variant: expand description to full width */
+/* Queue variant: expand description to full width with proper padding */
 .queueItem .description {
-  /* Compensate for: padding-left + image width + gap */
+  /* Extend to left edge but keep padding for readability */
   margin-left: calc(-1 * (var(--space-3) + var(--image-sm) + var(--space-2)));
   padding-left: var(--space-3);
-  margin-right: calc(-1 * var(--space-3));
+  /* Keep right padding for readability */
+  margin-right: 0;
   padding-right: var(--space-3);
 }
 
@@ -455,6 +457,7 @@
   .card .description {
     margin-left: calc(-1 * (var(--space-2) + 64px + var(--space-2)));
     padding-left: var(--space-2);
+    padding-right: var(--space-2);
   }
 
   /* Queue variant - larger cover art on mobile */
@@ -472,6 +475,7 @@
   .queueItem .description {
     margin-left: calc(-1 * (var(--space-3) + 64px + var(--space-3)));
     padding-left: var(--space-3);
+    padding-right: var(--space-3);
   }
 
   /* Hide drag handle on mobile - use long-press instead */
