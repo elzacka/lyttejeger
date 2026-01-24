@@ -61,10 +61,17 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: var(--list-gap-compact); /* 8px - more episodes visible */
+  gap: var(--space-2); /* 8px - more episodes visible */
   width: 100%;
   max-width: 100%;
   overflow: visible;
+  position: relative;
+}
+
+/* Non-virtualized: raise z-index when card is expanded */
+.list > article:has(.expanded) {
+  z-index: 10;
+  position: relative;
 }
 
 /* Window-based virtualized list container */
@@ -78,12 +85,13 @@
   top: 0;
   left: 0;
   width: 100%;
-  padding-bottom: var(--space-sm);
+  padding-bottom: var(--space-2);
   box-sizing: border-box;
 }
 
-/* Lift virtualItem when its child menu is open (using data attribute) */
-.virtualItem:has([data-menu-open='true']) {
+/* Raise z-index when card inside is expanded (description or menu) */
+.virtualItem:has([data-menu-open='true']),
+.virtualItem:has(.expanded) {
   z-index: calc(var(--z-dropdown) + 1);
 }
 
