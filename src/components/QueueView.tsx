@@ -238,13 +238,15 @@ export function QueueView({
     (e: React.TouchEvent) => {
       if (dragRef.current.isDragging) {
         e.preventDefault(); // Prevent scrolling while dragging
+        e.stopPropagation(); // Prevent swipe-to-delete from triggering
         handleDragMove(e.touches[0].clientY);
       }
     },
     [handleDragMove]
   );
 
-  const handleDragTouchEnd = useCallback(() => {
+  const handleDragTouchEnd = useCallback((e: React.TouchEvent) => {
+    e.stopPropagation(); // Prevent swipe-to-delete from triggering
     handleDragEnd();
   }, [handleDragEnd]);
 
@@ -337,7 +339,7 @@ export function QueueView({
                 showPodcastInfo={true}
                 progress={getProgress?.(item.episodeId)}
                 variant="queue"
-                onPlay={() => onPlay(item)}
+                onPlay={(episode) => onPlay(item)}
                 onRemove={() => item.id && handleRemove(item.id)}
                 isDraggable={true}
                 isDragging={isDragging}
