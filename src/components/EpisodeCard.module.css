@@ -215,9 +215,9 @@
 }
 
 .card .description.expanded {
-  /* Border separator above description */
+  /* Border separator above description - extra margin to clear image */
   border-top: 1px solid var(--border);
-  margin-top: var(--space-4);
+  margin-top: var(--space-6);
   padding-top: var(--space-4);
 }
 
