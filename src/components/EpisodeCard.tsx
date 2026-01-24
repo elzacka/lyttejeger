@@ -114,6 +114,12 @@ export interface EpisodeCardProps {
 
   /** Visual variant for different contexts */
   variant?: 'default' | 'queue';
+
+  /** Long-press start handler for image button (queue variant) */
+  onImageLongPressStart?: (e: React.TouchEvent | React.MouseEvent) => void;
+
+  /** Long-press end handler for image button (queue variant) */
+  onImageLongPressEnd?: (e: React.TouchEvent | React.MouseEvent) => void;
 }
 
 export function EpisodeCard({
@@ -140,6 +146,8 @@ export function EpisodeCard({
   isSwipedOpen = false,
   swipeContentRef,
   variant = 'default',
+  onImageLongPressStart,
+  onImageLongPressEnd,
 }: EpisodeCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -295,6 +303,12 @@ export function EpisodeCard({
           <button
             className={styles.imageButton}
             onClick={handleImageClick}
+            onTouchStart={onImageLongPressStart}
+            onTouchEnd={onImageLongPressEnd}
+            onTouchCancel={onImageLongPressEnd}
+            onMouseDown={onImageLongPressStart}
+            onMouseUp={onImageLongPressEnd}
+            onMouseLeave={onImageLongPressEnd}
             aria-label={`Spill ${episode.title}`}
           >
             {imageUrl && !imageError ? (

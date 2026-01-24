@@ -172,6 +172,8 @@ export function QueueView({
                   progress={getProgress?.(item.episodeId)}
                   variant="queue"
                   onPlay={() => onPlay(item)}
+                  onImageLongPressStart={handleLongPressStart(index)}
+                  onImageLongPressEnd={handleLongPressEnd}
                   isDraggable={false}
                 />
                 {/* Long-press overlay - captures touch/mouse for long press without blocking clicks */}
