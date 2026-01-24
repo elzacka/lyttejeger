@@ -92,7 +92,7 @@
 /* Raise z-index when card inside is expanded (description or menu) */
 .virtualItem:has([data-menu-open='true']),
 .virtualItem:has(.expanded) {
-  z-index: 100;
+  z-index: var(--z-dropdown);
 }
 
 .loading {

@@ -299,13 +299,20 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
         // If play fails, try to recover but don't block the synchronous chain
         // Set a flag to attempt recovery on next user interaction
         setAudioError(true);
+        navigator.mediaSession.playbackState = 'paused';
       });
 
       // Update state immediately
       setIsPlaying(true);
+      // CRITICAL for iOS: Update Media Session playback state
+      navigator.mediaSession.playbackState = 'playing';
     });
     navigator.mediaSession.setActionHandler('pause', () => {
-      audioRef.current?.pause();
+      if (!audioRef.current) return;
+      audioRef.current.pause();
+      // Update Media Session playback state
+      navigator.mediaSession.playbackState = 'paused';
+      setIsPlaying(false);
     });
     navigator.mediaSession.setActionHandler('seekbackward', () => {
       if (audioRef.current) {
@@ -505,10 +512,20 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     }
   }, []);
 
-  const handlePlay = useCallback(() => setIsPlaying(true), []);
+  const handlePlay = useCallback(() => {
+    setIsPlaying(true);
+    // Update Media Session playback state for iOS lock screen
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = 'playing';
+    }
+  }, []);
 
   const handlePause = useCallback(() => {
     setIsPlaying(false);
+    // Update Media Session playback state for iOS lock screen
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = 'paused';
+    }
     if (episode && audioRef.current) {
       savePlaybackPosition(
         episode.id,
