@@ -319,9 +319,6 @@ export function EpisodeCard({
           <div
             className={styles.info}
             onClick={handleToggleExpand}
-            onTouchStart={(e) => e.stopPropagation()}
-            onTouchMove={(e) => e.stopPropagation()}
-            onTouchEnd={(e) => e.stopPropagation()}
           >
             {showPodcastInfo && podcastName && (
               <p className={styles.podcastName}>{podcastName}</p>

@@ -99,6 +99,7 @@
   flex: 1;
   min-width: 0; /* Allow text truncation */
   position: relative;
+  padding-right: var(--button-lg); /* Reserve space for context menu button */
 }
 
 .header {
@@ -207,8 +208,8 @@
 /* Context menu */
 .actions {
   position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
+  top: 0;
+  right: 0;
 }
 
 .menuButton {
@@ -390,6 +391,18 @@
   height: var(--image-sm);
   flex-shrink: 0;
   border-radius: var(--radius-sm);
+}
+
+/* Queue variant: show play button on desktop */
+@media (min-width: 641px) {
+  .queueItem .playOverlay {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .queueItem .imageButton:hover .playOverlay {
+    background: rgba(0, 0, 0, 0.6);
+  }
 }
 
 /* Queue variant: info section */
