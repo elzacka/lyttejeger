@@ -212,11 +212,13 @@
 
 /* Default variant: expand description to full width with proper padding */
 .card .description {
-  /* Extend left to just after the image (not over it) */
-  margin-left: 0;
-  /* Must compensate for both card padding AND content padding-right (for menu button) */
+  /* Extend to both card edges (not over the image area) */
+  /* Go back to card's left edge: card padding + image + gap */
+  margin-left: calc(-1 * (var(--space-3) + 80px + var(--space-3)));
+  /* Go to card's right edge: card padding + content padding-right */
   margin-right: calc(-1 * (var(--space-3) + var(--button-lg)));
-  padding-left: 0;
+  /* Add back padding for readability */
+  padding-left: var(--space-3);
   padding-right: var(--space-3);
 }
 
