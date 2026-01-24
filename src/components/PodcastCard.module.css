@@ -149,9 +149,9 @@
 
 /* Podcast details (expanded) */
 .podcastDetails {
-  /* Extend to full width with equal padding on both sides - standardized to 12px */
-  margin: 0 calc(-1 * var(--space-sm));
-  padding: var(--space-3) var(--space-3) var(--space-md);
+  /* Stay at natural position with equal padding */
+  margin: 0;
+  padding: var(--space-3) var(--space-sm) var(--space-md);
   animation: slideDown 0.2s ease-out;
 }
 
