@@ -393,16 +393,14 @@
   border-radius: var(--radius-sm);
 }
 
-/* Queue variant: show play button on desktop */
-@media (min-width: 641px) {
-  .queueItem .playOverlay {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.4);
-  }
+/* Queue variant: show play button on desktop and mobile */
+.queueItem .playOverlay {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.4);
+}
 
-  .queueItem .imageButton:hover .playOverlay {
-    background: rgba(0, 0, 0, 0.6);
-  }
+.queueItem .imageButton:hover .playOverlay {
+  background: rgba(0, 0, 0, 0.6);
 }
 
 /* Queue variant: info section */
