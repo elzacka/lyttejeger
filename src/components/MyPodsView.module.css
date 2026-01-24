@@ -224,8 +224,8 @@
   }
 
   .grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-xs);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
     max-width: 740px;
   }
 
@@ -235,14 +235,17 @@
   }
 
   .deleteButton {
-    width: var(--button-md);
-    height: var(--button-md);
+    top: auto;
+    bottom: var(--space-xs);
+    right: var(--space-xs);
+    width: 32px;
+    height: 32px;
   }
 
   /* Touch device - always show delete button */
   .deleteButton {
     opacity: 1;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7);
   }
 }
 
