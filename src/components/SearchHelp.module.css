@@ -96,7 +96,7 @@
 .example {
   display: block;
   font-family: var(--font-mono);
-  font-size: var(--font-meta);
+  font-size: var(--font-sm);
   font-weight: var(--font-weight-medium);
   color: var(--accent);
   word-break: break-word;
@@ -105,7 +105,7 @@
 
 .description {
   font-family: var(--font-mono);
-  font-size: var(--font-meta);
+  font-size: var(--font-sm);
   color: var(--text-muted);
   line-height: var(--leading-normal);
 }

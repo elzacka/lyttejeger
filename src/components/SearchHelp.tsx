@@ -22,7 +22,7 @@ const searchTips = [
   },
   {
     example: '"true crime" -mord',
-    description: 'Eksakt frase uten mord',
+    description: 'Eksakt frase, men ikke mord',
   },
 ];
 
