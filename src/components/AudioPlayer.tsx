@@ -1025,7 +1025,6 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               title="Endre hastighet"
             >
               <span className={styles.speedLabel}>{playbackSpeed}x</span>
-              <ChevronDown size={16} className={styles.speedDropdownIcon} aria-hidden="true" />
             </button>
 
             {/* Chapter toggle - only show if episode has chapters */}

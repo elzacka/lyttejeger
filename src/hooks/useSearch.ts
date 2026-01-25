@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useTransition, useEffect, useRef } from 'react';
-import type { Podcast, Episode, SearchFilters, DateFilter, DiscoveryMode } from '../types/podcast';
+import type { Podcast, Episode, SearchFilters, DateFilter } from '../types/podcast';
 import { type EpisodeWithPodcast } from '../utils/search';
 import type { TabType } from '../components/TabBar';
 import {
@@ -26,7 +26,6 @@ const initialFilters: SearchFilters = {
   explicit: null,
   dateFrom: null,
   dateTo: null,
-  discoveryMode: 'all',
 };
 
 export interface SearchResultsState {
@@ -145,13 +144,6 @@ export function useSearch() {
       // Add category filter if selected
       if (hasCategory) {
         searchOptions.cat = filters.categories.join(',');
-      }
-
-      // Add discovery mode filter for finding hidden gems
-      if (filters.discoveryMode === 'value4value') {
-        searchOptions.val = 'any'; // Podcasts supporting value4value (Bitcoin/Lightning)
-      } else if (filters.discoveryMode === 'indie') {
-        searchOptions.aponly = false; // Not on Apple = more indie
       }
 
       // Hybrid search strategy:
@@ -472,7 +464,6 @@ export function useSearch() {
           const searchRes = await apiSearchPodcasts(categorySearchTerms, {
             max: 200,
             lang: getApiLanguageCodes(filters.languages),
-            val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
           });
 
           if (signal.aborted) return;
@@ -504,7 +495,6 @@ export function useSearch() {
                 ? filters.excludeCategories.join(',')
                 : undefined,
             lang: hasCategory ? undefined : getApiLanguageCodes(filters.languages),
-            val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
           });
 
           if (signal.aborted) return;
@@ -523,24 +513,17 @@ export function useSearch() {
           }
         }
 
-        // Filter for indie podcasts (no iTunes ID) if discovery mode is 'indie'
-        if (filters.discoveryMode === 'indie') {
-          podcasts = podcasts.filter((p) => !p.itunesId);
-        }
-
         lastSearchQueryRef.current = '';
         lastSearchResultsRef.current = podcasts;
         setApiPodcasts(podcasts);
         setApiEpisodes([]);
       } else {
-        // For episodes with category/discovery/date filter, we need to:
+        // For episodes with category/date filter, we need to:
         // 1. Get podcasts in the selected categories
         // 2. Fetch episodes from those podcasts
         // The /recent/episodes endpoint doesn't support category or date filtering
         const needsAdvancedEpisodeFetch =
-          filters.categories.length > 0 ||
-          filters.discoveryMode !== 'all' ||
-          filters.dateFrom !== null;
+          filters.categories.length > 0 || filters.dateFrom !== null;
 
         if (needsAdvancedEpisodeFetch) {
           const hasCategory = filters.categories.length > 0;
@@ -557,7 +540,6 @@ export function useSearch() {
             const searchRes = await apiSearchPodcasts(categorySearchTerms, {
               max: 100,
               lang: getApiLanguageCodes(filters.languages),
-              val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
             });
 
             if (signal.aborted) return;
@@ -591,7 +573,6 @@ export function useSearch() {
                   ? filters.excludeCategories.join(',')
                   : undefined,
               lang: hasCategory ? undefined : getApiLanguageCodes(filters.languages),
-              val: filters.discoveryMode === 'value4value' ? 'any' : undefined,
             });
 
             if (signal.aborted) return;
@@ -608,11 +589,6 @@ export function useSearch() {
             } else {
               podcasts = podcasts.filter((p) => isAllowedLanguage(p.language));
             }
-          }
-
-          // Filter for indie podcasts (no iTunes ID) if discovery mode is 'indie'
-          if (filters.discoveryMode === 'indie') {
-            podcasts = podcasts.filter((p) => !p.itunesId);
           }
 
           // Calculate since timestamp if year filter is active
@@ -720,7 +696,6 @@ export function useSearch() {
   const filtersRef = useRef({
     languages: filters.languages,
     categories: filters.categories,
-    discoveryMode: filters.discoveryMode,
     dateFrom: filters.dateFrom,
   });
 
@@ -728,8 +703,7 @@ export function useSearch() {
   const hasActiveFilters =
     filters.categories.length > 0 ||
     filters.languages.length > 0 ||
-    filters.dateFrom !== null ||
-    filters.discoveryMode !== 'all';
+    filters.dateFrom !== null;
 
   // Debounced API search or filter-only browse
   useEffect(() => {
@@ -797,16 +771,13 @@ export function useSearch() {
     const categoriesChanged =
       filtersRef.current.categories.length !== filters.categories.length ||
       filtersRef.current.categories.some((cat, i) => cat !== filters.categories[i]);
-    const discoveryModeChanged = filtersRef.current.discoveryMode !== filters.discoveryMode;
     const dateFromChanged = filtersRef.current.dateFrom?.year !== filters.dateFrom?.year;
-    const filtersChanged =
-      languagesChanged || categoriesChanged || discoveryModeChanged || dateFromChanged;
+    const filtersChanged = languagesChanged || categoriesChanged || dateFromChanged;
 
     if (filtersChanged) {
       filtersRef.current = {
         languages: filters.languages,
         categories: filters.categories,
-        discoveryMode: filters.discoveryMode,
         dateFrom: filters.dateFrom,
       };
       // Re-trigger API search with updated filters
@@ -818,15 +789,7 @@ export function useSearch() {
     }
     // Uses refs to compare filter changes - including searchViaApi would cause infinite loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    filters.languages,
-    filters.categories,
-    filters.discoveryMode,
-    filters.dateFrom,
-    filters.query,
-    activeTab,
-    shouldUseApi,
-  ]);
+  }, [filters.languages, filters.categories, filters.dateFrom, filters.query, activeTab, shouldUseApi]);
 
   // Use API results
   const podcasts = apiPodcasts;
@@ -970,12 +933,6 @@ export function useSearch() {
     });
   }, []);
 
-  const setDiscoveryMode = useCallback((discoveryMode: DiscoveryMode) => {
-    startTransition(() => {
-      setFilters((prev) => ({ ...prev, discoveryMode }));
-    });
-  }, []);
-
   const clearFilters = useCallback(() => {
     startTransition(() => {
       setFilters(initialFilters);
@@ -990,7 +947,6 @@ export function useSearch() {
     if (filters.languages.length > 0) count++;
     if (filters.explicit !== null) count++;
     if (filters.dateFrom !== null || filters.dateTo !== null) count++;
-    if (filters.discoveryMode !== 'all') count++;
     return count;
   }, [filters]);
 
@@ -1020,7 +976,6 @@ export function useSearch() {
     setDateTo,
     setSortBy,
     setExplicit,
-    setDiscoveryMode,
     clearFilters,
     activeFilterCount,
     isApiConfigured: shouldUseApi,

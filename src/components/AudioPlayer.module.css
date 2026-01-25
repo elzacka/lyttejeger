@@ -196,6 +196,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  aspect-ratio: 1;
 
   /* Modern gradient background */
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
@@ -480,15 +482,6 @@
   font-size: var(--font-sm);
   min-width: 36px;
   text-align: center;
-}
-
-.speedDropdownIcon {
-  opacity: 0.7;
-  transition: opacity var(--transition-fast);
-}
-
-.speedButton:hover .speedDropdownIcon {
-  opacity: 1;
 }
 
 .timerLabel {
@@ -915,6 +908,12 @@
 
   .player.expanded .miniProgress {
     display: none;
+  }
+
+  /* Limit content panels height on mobile to prevent overlap */
+  .player.expanded .transcriptList,
+  .player.expanded .chapterList {
+    max-height: 150px;
   }
 
   .image {

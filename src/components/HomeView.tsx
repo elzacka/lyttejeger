@@ -10,7 +10,6 @@ import type {
   Podcast,
   SearchFilters,
   DateFilter,
-  DiscoveryMode,
   Episode,
 } from '../types/podcast';
 import type { EpisodeWithPodcast } from '../utils/search';
@@ -40,7 +39,6 @@ interface HomeViewProps {
   onSetDateFrom: (date: DateFilter | null) => void;
   onSetDateTo: (date: DateFilter | null) => void;
   onSetSortBy: (sortBy: 'relevance' | 'newest' | 'oldest' | 'popular') => void;
-  onSetDiscoveryMode: (mode: DiscoveryMode) => void;
   onClearFilters: () => void;
   onSelectPodcast: (podcast: Podcast) => void;
   onSelectPodcastById: (podcastId: string) => void;
@@ -67,7 +65,6 @@ export function HomeView({
   onSetDateFrom,
   onSetDateTo,
   onSetSortBy,
-  onSetDiscoveryMode,
   onClearFilters,
   onSelectPodcast,
   onSelectPodcastById,
@@ -99,7 +96,6 @@ export function HomeView({
             onToggleLanguage={onToggleLanguage}
             onSetDateFrom={onSetDateFrom}
             onSetDateTo={onSetDateTo}
-            onSetDiscoveryMode={onSetDiscoveryMode}
             onClearFilters={onClearFilters}
             activeFilterCount={activeFilterCount}
           />

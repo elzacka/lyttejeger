@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { SearchFilters, FilterOption, DateFilter, DiscoveryMode } from '../types/podcast';
+import type { SearchFilters, FilterOption, DateFilter } from '../types/podcast';
 import type { TabType } from './TabBar';
 import { FilterSheet } from './FilterSheet';
 import styles from './FilterPanel.module.css';
@@ -15,18 +15,11 @@ interface FilterPanelProps {
   onToggleLanguage: (language: string) => void;
   onSetDateFrom: (date: DateFilter | null) => void;
   onSetDateTo: (date: DateFilter | null) => void;
-  onSetDiscoveryMode: (mode: DiscoveryMode) => void;
   onClearFilters: () => void;
   activeFilterCount: number;
 }
 
-type SheetType = 'language' | 'year' | 'category' | 'discovery' | null;
-
-const discoveryModes: { value: DiscoveryMode; label: string; description: string }[] = [
-  { value: 'all', label: 'Alle', description: 'Vis alle podcaster' },
-  { value: 'indie', label: 'Uavhengig', description: 'Podcaster utenfor Apple/Spotify' },
-  { value: 'value4value', label: 'V4V', description: 'Støtter Bitcoin/Lightning' },
-];
+type SheetType = 'language' | 'year' | 'category' | null;
 
 // Fixed width for filter chips to ensure consistent sizing
 const FILTER_CHIP_WIDTH = '5.5rem'; // Based on "Kategori" width
@@ -41,7 +34,6 @@ export function FilterPanel({
   onToggleLanguage,
   onSetDateFrom,
   onSetDateTo,
-  onSetDiscoveryMode,
   onClearFilters,
   activeFilterCount,
 }: FilterPanelProps) {
@@ -88,8 +80,6 @@ export function FilterPanel({
   const languageCount = filters.languages.length;
   const yearCount = selectedYear ? 1 : 0;
   const categoryCount = filters.categories.length;
-  const discoveryLabel =
-    discoveryModes.find((m) => m.value === filters.discoveryMode)?.label || 'Alle';
 
   return (
     <div className={styles.container}>
@@ -138,17 +128,6 @@ export function FilterPanel({
           >
             Kategori{categoryCount > 0 && ` (${categoryCount})`}
           </button>
-
-          {activeTab === 'podcasts' && (
-            <button
-              className={`${styles.filterChip} ${filters.discoveryMode !== 'all' ? styles.filterChipActive : ''}`}
-              onClick={() => setOpenSheet('discovery')}
-              type="button"
-              style={{ minWidth: FILTER_CHIP_WIDTH }}
-            >
-              {filters.discoveryMode !== 'all' ? discoveryLabel : 'Oppdage'}
-            </button>
-          )}
 
           {activeTab === 'episodes' && (
             <button
@@ -245,33 +224,6 @@ export function FilterPanel({
               </button>
             ))
           )}
-        </div>
-      </FilterSheet>
-
-      {/* Discovery Mode Sheet - medium, 3 options with descriptions */}
-      <FilterSheet
-        isOpen={openSheet === 'discovery'}
-        onClose={handleCloseSheet}
-        title="Oppdagelsesmodus"
-        size="medium"
-      >
-        <div className={sheetStyles.optionGrid}>
-          {discoveryModes.map((mode) => (
-            <button
-              key={mode.value}
-              className={`${sheetStyles.discoveryOption} ${
-                filters.discoveryMode === mode.value ? sheetStyles.optionSelected : ''
-              }`}
-              onClick={() => {
-                onSetDiscoveryMode(mode.value);
-                handleCloseSheet();
-              }}
-              type="button"
-            >
-              <span className={sheetStyles.discoveryLabel}>{mode.label}</span>
-              <span className={sheetStyles.discoveryDescription}>{mode.description}</span>
-            </button>
-          ))}
         </div>
       </FilterSheet>
     </div>
