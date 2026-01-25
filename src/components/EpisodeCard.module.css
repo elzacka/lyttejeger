@@ -21,7 +21,7 @@
 }
 
 .card.menuOpen {
-  z-index: var(--z-dropdown); /* Ensure menu appears above other cards */
+  z-index: 1000; /* Ensure menu appears above all other cards in list */
   overflow: visible; /* Ensure dropdown is not clipped */
 }
 
@@ -278,7 +278,7 @@
   border-radius: var(--radius-md);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: var(--space-1);
-  z-index: calc(var(--z-dropdown) + 1); /* Above card z-index when menu is open */
+  z-index: 1001; /* Above card z-index (1000) when menu is open */
   animation: slideDown var(--duration-fast) var(--ease-out);
 }
 
