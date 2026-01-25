@@ -93,7 +93,7 @@
 .title {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-h1);
+  font-size: calc(var(--font-h1) * 0.6);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   line-height: var(--leading-tight);
@@ -277,7 +277,7 @@
 .episodesTitle {
   margin: 0 0 var(--space-3) 0;
   font-family: var(--font-mono);
-  font-size: var(--font-h2);
+  font-size: calc(var(--font-h2) * 0.6);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
 }
@@ -405,7 +405,7 @@
   }
 
   .title {
-    font-size: var(--font-h2);
+    font-size: calc(var(--font-h2) * 0.6);
   }
 
   .author {
@@ -413,7 +413,7 @@
   }
 
   .episodesTitle {
-    font-size: var(--font-h3);
+    font-size: calc(var(--font-h3) * 0.6);
   }
 
   .episodeList {
@@ -438,6 +438,6 @@
   /* Image size now handled by CSS variable --image-md */
 
   .title {
-    font-size: var(--font-h1);
+    font-size: calc(var(--font-h1) * 0.6);
   }
 }
