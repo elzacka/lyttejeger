@@ -1,4 +1,5 @@
 import { useEffect, useRef, useId, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Search as SearchIcon, X as CloseIcon } from 'lucide-react';
 import { useSheetContext } from '../hooks/useSheetContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
@@ -316,7 +317,7 @@ export function FilterSheet({
 
   if (!isOpen && !isClosing) return null;
 
-  return (
+  const sheetContent = (
     <div
       className={`${styles.container} ${isClosing ? styles.containerClosing : ''}`}
       role="presentation"
@@ -391,4 +392,7 @@ export function FilterSheet({
       </div>
     </div>
   );
+
+  // Render sheet to body using portal to avoid z-index stacking issues
+  return createPortal(sheetContent, document.body);
 }
