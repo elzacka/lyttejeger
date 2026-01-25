@@ -128,7 +128,10 @@ export function QueueView({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Min kø</h2>
+        <h2 className={styles.title}>
+          Min kø
+          <span className={styles.badge}>{queue.length}</span>
+        </h2>
         <button
           className={styles.clearButton}
           onClick={() => setShowClearConfirm(true)}
@@ -149,10 +152,6 @@ export function QueueView({
         cancelText="Avbryt"
         variant="danger"
       />
-
-      <p className={styles.count}>
-        {queue.length} {queue.length === 1 ? 'episode' : 'episoder'}
-      </p>
 
       <ul className={styles.list} role="list">
         {queue.map((item, index) => {
