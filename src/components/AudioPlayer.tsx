@@ -11,7 +11,7 @@ import {
   ChevronDown,
   ChevronUp,
   Moon as MoonIcon,
-  ListMusic as ListMusicIcon,
+  List as ChapterListIcon,
   FileText as TranscriptIcon,
 } from 'lucide-react';
 import type { Episode, Chapter } from '../types/podcast';
@@ -172,6 +172,13 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     }
 
     // Reset chapter and transcript state for new episode
+    console.log('[AudioPlayer] Episode changed:', {
+      title: episode?.title,
+      hasTranscriptUrl: !!episode?.transcriptUrl,
+      transcriptUrl: episode?.transcriptUrl,
+      hasChaptersUrl: !!episode?.chaptersUrl,
+      chaptersUrl: episode?.chaptersUrl,
+    });
     setChapters([]);
     setShowChapters(false);
     setTranscript(null);
@@ -180,6 +187,12 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
 
   // Fetch chapters when episode has chaptersUrl
   useEffect(() => {
+    console.log('[AudioPlayer] Chapters effect:', {
+      featureEnabled: FEATURES.CHAPTERS,
+      hasChaptersUrl: !!episode?.chaptersUrl,
+      chaptersUrl: episode?.chaptersUrl,
+    });
+
     if (!FEATURES.CHAPTERS || !episode?.chaptersUrl) {
       setChapters([]);
       return;
@@ -187,7 +200,9 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
 
     let cancelled = false;
 
+    console.log('[AudioPlayer] Fetching chapters from:', episode.chaptersUrl);
     fetchChapters(episode.chaptersUrl).then((result) => {
+      console.log('[AudioPlayer] Chapters fetch result:', result);
       if (!cancelled) {
         setChapters(result);
       }
@@ -200,6 +215,12 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
 
   // Fetch transcript when episode has transcriptUrl
   useEffect(() => {
+    console.log('[AudioPlayer] Transcript effect:', {
+      featureEnabled: FEATURES.TRANSCRIPTS,
+      hasTranscriptUrl: !!episode?.transcriptUrl,
+      transcriptUrl: episode?.transcriptUrl,
+    });
+
     if (!FEATURES.TRANSCRIPTS || !episode?.transcriptUrl) {
       setTranscript(null);
       return;
@@ -207,7 +228,9 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
 
     let cancelled = false;
 
+    console.log('[AudioPlayer] Fetching transcript from:', episode.transcriptUrl);
     fetchTranscript(episode.transcriptUrl).then((result) => {
+      console.log('[AudioPlayer] Transcript fetch result:', result);
       if (!cancelled) {
         setTranscript(result);
       }
@@ -1013,7 +1036,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
                 aria-expanded={showChapters}
                 title="Kapitler"
               >
-                <ListMusicIcon size={20} aria-hidden="true" />
+                <ChapterListIcon size={20} aria-hidden="true" />
                 <span className={styles.chapterCount}>{chapters.length}</span>
               </button>
             )}
@@ -1048,6 +1071,16 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
             </button>
           </div>
 
+          {/* Error message */}
+          {audioError && (
+            <p className={styles.errorMessage} role="alert">
+              Kunne ikke laste av lydfilen
+            </p>
+          )}
+        </div>
+
+        {/* Content panels - chapters and transcript in separate dedicated area */}
+        <div className={styles.contentPanels}>
           {/* Chapter list - collapsible */}
           {FEATURES.CHAPTERS && showChapters && chapters.length > 0 && (
             <div className={styles.chapterList} role="list" aria-label="Kapitler">
@@ -1090,19 +1123,15 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
                       <span className={styles.transcriptTime}>
                         {formatTranscriptTime(segment.startTime)}
                       </span>
-                      <span className={styles.transcriptText}>{segment.text}</span>
+                      <span className={styles.transcriptText}>
+                        {segment.speaker && <strong>{segment.speaker}: </strong>}
+                        {segment.text}
+                      </span>
                     </button>
                   );
                 })}
               </div>
             )}
-
-          {/* Error message */}
-          {audioError && (
-            <p className={styles.errorMessage} role="alert">
-              Kunne ikke laste av lydfilen
-            </p>
-          )}
         </div>
       </div>
 

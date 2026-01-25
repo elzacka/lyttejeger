@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import corsProxy from './cors-proxy.cjs';
 
 export default defineConfig({
   base: '/lyttejeger/',
@@ -8,6 +9,7 @@ export default defineConfig({
     port: 5175,
   },
   plugins: [
+    corsProxy(),
     react({
       babel: {
         plugins: [

@@ -5,6 +5,8 @@
  * @see https://github.com/Podcastindex-org/podcast-namespace/blob/main/transcripts/transcripts.md
  */
 
+import { getCorsProxyUrl } from '../utils/corsProxy';
+
 export interface TranscriptSegment {
   startTime: number;
   endTime: number;
@@ -23,31 +25,100 @@ export interface Transcript {
  */
 export async function fetchTranscript(transcriptUrl: string): Promise<Transcript | null> {
   try {
-    const response = await fetch(transcriptUrl);
-    if (!response.ok) return null;
+    // Try common transcript file extensions first (.vtt, .srt, .json)
+    const urlsToTry = [
+      transcriptUrl + '.vtt',
+      transcriptUrl + '.srt',
+      transcriptUrl + '.json',
+      transcriptUrl, // Original URL last
+    ];
 
-    const contentType = response.headers.get('content-type') || '';
-    const text = await response.text();
+    for (const url of urlsToTry) {
+      console.log('[fetchTranscript] Trying URL:', url);
+      const proxiedUrl = getCorsProxyUrl(url);
 
-    // Detect format and parse accordingly
-    if (contentType.includes('json') || transcriptUrl.endsWith('.json')) {
-      return parseJsonTranscript(text);
-    } else if (transcriptUrl.endsWith('.vtt') || contentType.includes('vtt')) {
-      return parseVttTranscript(text);
-    } else if (transcriptUrl.endsWith('.srt') || contentType.includes('srt')) {
-      return parseSrtTranscript(text);
-    }
+      try {
+        const response = await fetch(proxiedUrl);
+        console.log('[fetchTranscript] Response status:', response.status, 'for', url);
 
-    // Default: try JSON first, then SRT/VTT
-    try {
-      return parseJsonTranscript(text);
-    } catch {
-      if (text.includes('WEBVTT')) {
-        return parseVttTranscript(text);
+        if (!response.ok) {
+          console.log('[fetchTranscript] Response not OK, trying next URL');
+          continue;
+        }
+
+        const contentType = response.headers.get('content-type') || '';
+        console.log('[fetchTranscript] Content-Type:', contentType);
+
+        const text = await response.text();
+        console.log('[fetchTranscript] Response text length:', text.length);
+        console.log('[fetchTranscript] Response text preview:', text.substring(0, 200));
+
+        // Try to parse HTML transcript as last resort
+        if (contentType.includes('html') || text.trim().startsWith('<!DOCTYPE')) {
+          console.log('[fetchTranscript] Detected HTML, trying HTML parser');
+          const result = parseHtmlTranscript(text);
+          if (result.segments.length > 0) {
+            console.log('[fetchTranscript] HTML parser found', result.segments.length, 'segments');
+            return result;
+          }
+          console.log('[fetchTranscript] HTML parser found no segments, skipping to next URL');
+          continue;
+        }
+
+        // Detect format and parse accordingly
+        if (contentType.includes('json') || url.endsWith('.json')) {
+          console.log('[fetchTranscript] Parsing as JSON');
+          const result = parseJsonTranscript(text);
+          if (result.segments.length > 0) return result;
+          console.log('[fetchTranscript] JSON parse returned no segments, trying next URL');
+          continue;
+        } else if (url.endsWith('.vtt') || contentType.includes('vtt') || text.includes('WEBVTT')) {
+          console.log('[fetchTranscript] Parsing as VTT');
+          const result = parseVttTranscript(text);
+          if (result.segments.length > 0) return result;
+          console.log('[fetchTranscript] VTT parse returned no segments, trying next URL');
+          continue;
+        } else if (url.endsWith('.srt') || contentType.includes('srt') || text.match(/\d+\n\d{2}:\d{2}:\d{2}/)) {
+          console.log('[fetchTranscript] Parsing as SRT');
+          const result = parseSrtTranscript(text);
+          if (result.segments.length > 0) return result;
+          console.log('[fetchTranscript] SRT parse returned no segments, trying next URL');
+          continue;
+        }
+
+        // Default: try JSON first, then SRT/VTT
+        try {
+          console.log('[fetchTranscript] Trying JSON parse (default)');
+          const result = parseJsonTranscript(text);
+          if (result.segments.length > 0) return result;
+          console.log('[fetchTranscript] JSON returned no segments');
+        } catch (e) {
+          console.log('[fetchTranscript] JSON parse failed:', e);
+        }
+
+        if (text.includes('WEBVTT')) {
+          console.log('[fetchTranscript] Detected WEBVTT, parsing as VTT');
+          const result = parseVttTranscript(text);
+          if (result.segments.length > 0) return result;
+          console.log('[fetchTranscript] VTT returned no segments');
+        }
+
+        console.log('[fetchTranscript] Trying SRT parse (fallback)');
+        const result = parseSrtTranscript(text);
+        console.log('[fetchTranscript] SRT parse result:', result);
+        if (result.segments.length > 0) return result;
+        console.log('[fetchTranscript] SRT returned no segments, trying next URL');
+      } catch (fetchError) {
+        console.log('[fetchTranscript] Fetch failed for', url, ':', fetchError);
+        continue;
       }
-      return parseSrtTranscript(text);
     }
-  } catch {
+
+    // All URLs failed
+    console.log('[fetchTranscript] All transcript URLs failed');
+    return null;
+  } catch (e) {
+    console.log('[fetchTranscript] Error:', e);
     return null;
   }
 }
@@ -222,6 +293,75 @@ function parseSrtTime(parts: [string, string, string, string]): number {
   const secs = parseInt(parts[2], 10);
   const ms = parseInt(parts[3], 10);
   return hours * 3600 + mins * 60 + secs + ms / 1000;
+}
+
+/**
+ * Parse HTML transcript (e.g., from changelog.com)
+ * Extracts speaker names and text from HTML paragraphs
+ * Note: HTML transcripts typically don't have timestamps
+ */
+function parseHtmlTranscript(html: string): Transcript {
+  const segments: TranscriptSegment[] = [];
+
+  // Create a temporary DOM element to parse HTML
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // Remove all links from the DOM to avoid URL text contamination
+  const links = doc.querySelectorAll('a');
+  links.forEach(link => {
+    // Replace link with its text content (if any)
+    const textNode = doc.createTextNode(link.textContent || '');
+    link.parentNode?.replaceChild(textNode, link);
+  });
+
+  // Try to find transcript content
+  // Common patterns: paragraphs with speaker names followed by text
+  const paragraphs = doc.querySelectorAll('p');
+
+  let currentTime = 0;
+  const estimatedSegmentDuration = 5; // Estimate 5 seconds per segment
+
+  for (const p of paragraphs) {
+    let text = p.textContent?.trim();
+    if (!text) continue;
+
+    // Clean up text: remove URLs that might still be in the text
+    text = text.replace(/https?:\/\/[^\s]+/g, '').trim();
+
+    // Skip if text is too short after cleaning
+    if (text.length < 10) continue;
+
+    // Try to extract speaker name (common pattern: "Speaker Name: text")
+    const speakerMatch = text.match(/^([^:]+):\s*(.+)/s);
+
+    if (speakerMatch) {
+      const speaker = speakerMatch[1].trim();
+      const content = speakerMatch[2].trim();
+
+      if (content.length > 10) { // Skip very short segments
+        segments.push({
+          startTime: currentTime,
+          endTime: currentTime + estimatedSegmentDuration,
+          text: content,
+          speaker: speaker,
+        });
+        currentTime += estimatedSegmentDuration;
+      }
+    } else if (text.length > 10) {
+      // No speaker pattern found, but we have text
+      segments.push({
+        startTime: currentTime,
+        endTime: currentTime + estimatedSegmentDuration,
+        text: text,
+      });
+      currentTime += estimatedSegmentDuration;
+    }
+  }
+
+  console.log('[parseHtmlTranscript] Extracted', segments.length, 'segments from HTML');
+
+  return { segments };
 }
 
 /**

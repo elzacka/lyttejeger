@@ -4,6 +4,7 @@
  */
 
 import type { Chapter } from '../types/podcast';
+import { getCorsProxyUrl } from '../utils/corsProxy';
 
 // Cache for chapter data
 const chapterCache = new Map<string, { chapters: Chapter[]; timestamp: number }>();
@@ -31,20 +32,31 @@ export async function fetchChapters(chaptersUrl: string): Promise<Chapter[]> {
   // Check cache
   const cached = chapterCache.get(chaptersUrl);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    console.log('[fetchChapters] Returning cached chapters:', cached.chapters);
     return cached.chapters;
   }
 
   try {
-    const response = await fetch(chaptersUrl);
+    console.log('[fetchChapters] Fetching from:', chaptersUrl);
+    const proxiedUrl = getCorsProxyUrl(chaptersUrl);
+    console.log('[fetchChapters] Using URL:', proxiedUrl);
+    const response = await fetch(proxiedUrl);
+    console.log('[fetchChapters] Response status:', response.status, response.statusText);
+
     if (!response.ok) {
+      console.log('[fetchChapters] Response not OK, returning empty array');
       return [];
     }
 
     const data: ChaptersResponse = await response.json();
+    console.log('[fetchChapters] Parsed JSON data:', data);
 
     if (!data.chapters || !Array.isArray(data.chapters)) {
+      console.log('[fetchChapters] No chapters array found in response');
       return [];
     }
+
+    console.log('[fetchChapters] Raw chapters count:', data.chapters.length);
 
     // Transform and filter chapters
     const chapters: Chapter[] = data.chapters
@@ -59,11 +71,15 @@ export async function fetchChapters(chaptersUrl: string): Promise<Chapter[]> {
       }))
       .sort((a, b) => a.startTime - b.startTime);
 
+    console.log('[fetchChapters] Filtered and transformed chapters count:', chapters.length);
+    console.log('[fetchChapters] Final chapters:', chapters);
+
     // Cache result
     chapterCache.set(chaptersUrl, { chapters, timestamp: Date.now() });
 
     return chapters;
-  } catch {
+  } catch (e) {
+    console.log('[fetchChapters] Error:', e);
     return [];
   }
 }

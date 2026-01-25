@@ -455,6 +455,16 @@
   font-weight: 500;
 }
 
+/* Content panels wrapper - dedicated area for chapters and transcript */
+.contentPanels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
 /* Chapter list */
 .chapterList {
   display: flex;
@@ -521,27 +531,53 @@
 .transcriptList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xs);
-  max-height: 300px;
+  gap: var(--space-3xs);
+  max-height: 250px;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: var(--space-xs);
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
+  width: 100%;
+  box-sizing: border-box;
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.transcriptList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.transcriptList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.transcriptList::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.transcriptList::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .transcriptItem {
   display: flex;
   align-items: flex-start;
   gap: var(--space-sm);
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-2xs) var(--space-xs);
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
   text-align: left;
   cursor: pointer;
   transition: background var(--transition-fast);
-  min-height: var(--touch-target, 44px);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .transcriptItem:hover {
@@ -564,17 +600,29 @@
 
 .transcriptTime {
   font-family: var(--font-mono);
-  font-size: var(--font-xs);
+  font-size: var(--font-2xs);
   color: var(--text-muted);
-  min-width: 48px;
+  min-width: 36px;
   flex-shrink: 0;
+  padding-top: 2px;
 }
 
 .transcriptText {
-  font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-family: var(--font-sans);
+  font-size: var(--font-xs);
   color: var(--text-primary);
-  line-height: var(--leading-normal);
+  line-height: var(--leading-relaxed);
+  /* Enable proper line wrapping */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  flex: 1;
+  min-width: 0;
+}
+
+.transcriptText strong {
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 /* Soundbite list */
@@ -731,8 +779,8 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
-    /* Add top padding to make room for close button */
-    padding: var(--space-xs) var(--space-sm) var(--space-sm);
+    /* Add top padding for close button */
+    padding: var(--space-md) var(--space-sm) var(--space-sm);
     position: relative;
   }
 

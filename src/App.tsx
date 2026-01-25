@@ -195,8 +195,8 @@ function App() {
       podcastTitle: item.podcastTitle,
       podcastImage: item.podcastImage,
       duration: item.duration ?? 0,
-      description: '',
-      publishedAt: '',
+      description: item.description || '',
+      publishedAt: item.publishedAt || '',
       transcriptUrl: item.transcriptUrl,
       chaptersUrl: item.chaptersUrl,
     });
