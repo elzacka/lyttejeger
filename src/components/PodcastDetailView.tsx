@@ -8,6 +8,7 @@ import { transformEpisodes } from '../services/podcastTransform';
 import { formatDateShort } from '../utils/search';
 import { FormattedText } from './FormattedText';
 import { translateCategory } from '../utils/categoryTranslations';
+import { toNorwegianLanguage } from '../data/languages';
 import { EpisodeCard } from './EpisodeCard';
 import styles from './PodcastDetailView.module.css';
 
@@ -203,7 +204,7 @@ export function PodcastDetailView({
           </div>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Språk</span>
-            <span className={styles.metaValue}>{podcast.language}</span>
+            <span className={styles.metaValue}>{toNorwegianLanguage(podcast.language)}</span>
           </div>
         </section>
 
