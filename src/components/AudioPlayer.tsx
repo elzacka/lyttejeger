@@ -1019,12 +1019,13 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
           {/* Speed, chapters, and sleep timer controls */}
           <div className={styles.secondaryControls}>
             <button
-              className={styles.secondaryButton}
+              className={styles.speedButton}
               onClick={cycleSpeed}
               aria-label={`Avspillingshastighet: ${playbackSpeed}x. Trykk for å endre.`}
               title="Endre hastighet"
             >
               <span className={styles.speedLabel}>{playbackSpeed}x</span>
+              <ChevronDown size={16} className={styles.speedDropdownIcon} aria-hidden="true" />
             </button>
 
             {/* Chapter toggle - only show if episode has chapters */}
@@ -1036,7 +1037,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
                 aria-expanded={showChapters}
                 title="Kapitler"
               >
-                <ChapterListIcon size={20} aria-hidden="true" />
+                <ChapterListIcon size={18} aria-hidden="true" />
                 <span className={styles.chapterCount}>{chapters.length}</span>
               </button>
             )}
@@ -1050,12 +1051,12 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
                 aria-expanded={showTranscript}
                 title="Transkripsjon"
               >
-                <TranscriptIcon size={20} aria-hidden="true" />
+                <TranscriptIcon size={18} aria-hidden="true" />
               </button>
             )}
 
             <button
-              className={`${styles.secondaryButton} ${sleepTimerMinutes !== 0 ? styles.active : ''}`}
+              className={`${styles.secondaryButton} ${styles.sleepButton} ${sleepTimerMinutes !== 0 ? styles.active : ''}`}
               onClick={cycleSleepTimer}
               aria-label={
                 sleepTimerMinutes === 0
@@ -1064,7 +1065,7 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               }
               title="Søvntimer"
             >
-              <MoonIcon size={20} aria-hidden="true" />
+              <MoonIcon size={18} aria-hidden="true" />
               {sleepTimerMinutes !== 0 && (
                 <span className={styles.timerLabel}>{formatSleepTimerRemaining()}</span>
               )}
@@ -1077,6 +1078,16 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               Kunne ikke laste av lydfilen
             </p>
           )}
+
+          {/* Mobile-only close button - centered below controls */}
+          <button
+            className={styles.closeButtonMobile}
+            onClick={onClose}
+            aria-label="Lukk avspiller"
+          >
+            <ChevronDown size={20} aria-hidden="true" />
+            Lukk
+          </button>
         </div>
 
         {/* Content panels - chapters and transcript in separate dedicated area */}
