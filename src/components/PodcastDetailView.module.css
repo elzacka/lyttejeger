@@ -121,8 +121,8 @@
   align-items: center;
   justify-content: center;
   align-self: flex-start;
-  width: calc(var(--button-height-lg) * 0.7);
-  height: calc(var(--button-height-lg) * 0.7);
+  width: 32px;
+  height: 32px;
   padding: 0;
   background: transparent;
   border: 2px solid var(--accent);
@@ -401,8 +401,8 @@
   /* Image size now handled by CSS variable --image-md (responsive) */
 
   .subscribeButton {
-    width: calc(var(--touch-target) * 0.7);
-    height: calc(var(--touch-target) * 0.7);
+    width: 32px;
+    height: 32px;
     aspect-ratio: 1 / 1; /* Ensure perfect circle on mobile */
   }
 
