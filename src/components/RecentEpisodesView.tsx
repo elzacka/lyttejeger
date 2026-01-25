@@ -44,7 +44,6 @@ export function RecentEpisodesView({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lastFetchTimeRef = useRef<number>(0);
-  const hasInitialLoadedRef = useRef<boolean>(false);
   const { getProgress } = usePlaybackProgress();
 
   const fetchRecentEpisodes = useCallback(async () => {
@@ -137,24 +136,14 @@ export function RecentEpisodesView({
   }, [subscriptions]);
 
   useEffect(() => {
-    // Only fetch on initial load if no data exists
-    if (hasInitialLoadedRef.current) {
-      return; // Already loaded, don't fetch again on re-mount
-    }
-
     const now = Date.now();
     const cacheAge = now - lastFetchTimeRef.current;
+    const CACHE_TTL = 300000; // 5 minutes cache
 
-    // Skip if we have episodes and cache is fresh (less than 10 minutes old)
-    if (episodes.length > 0 && cacheAge < 600000) {
-      hasInitialLoadedRef.current = true;
-      return;
+    // Fetch if no data or cache is stale
+    if (episodes.length === 0 || cacheAge > CACHE_TTL) {
+      fetchRecentEpisodes();
     }
-
-    // Fetch new episodes only on first load or if cache is stale
-    fetchRecentEpisodes();
-    lastFetchTimeRef.current = now;
-    hasInitialLoadedRef.current = true;
   }, [fetchRecentEpisodes, episodes.length]);
 
   const handlePlayEpisode = (episode: EpisodeWithSubscription) => {
