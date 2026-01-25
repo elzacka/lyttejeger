@@ -84,8 +84,10 @@ export function MyPodsView({
     <>
       <div className={styles.container}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Mine podder</h2>
-          <span className={styles.count}>{subscriptions.length}</span>
+          <h2 className={styles.title}>
+            Mine podder
+            <span className={styles.badge}>{subscriptions.length}</span>
+          </h2>
         </div>
 
         <div className={styles.grid}>
