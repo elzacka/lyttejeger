@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Check as CheckIcon,
   MoreVertical as MoreVerticalIcon,
@@ -164,6 +165,7 @@ export function EpisodeCard({
   const [menuOpen, setMenuOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -172,6 +174,29 @@ export function EpisodeCard({
 
   // Get podcast name
   const podcastName = podcastInfo?.title;
+
+  // Update menu position when opened or window resizes
+  useEffect(() => {
+    if (!menuOpen || !buttonRef.current) return;
+
+    const updatePosition = () => {
+      if (!buttonRef.current) return;
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + 4, // 4px gap below button
+        left: rect.right - 160, // Align right edge (160px = menu min-width)
+      });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [menuOpen]);
 
   // Close menu when clicking outside or pressing Escape
   useEffect(() => {
@@ -508,10 +533,15 @@ export function EpisodeCard({
               <MoreVerticalIcon size={20} />
             </button>
 
-            {menuOpen && (
+            {menuOpen && createPortal(
               <div
                 ref={menuRef}
                 className={styles.menuDropdown}
+                style={{
+                  position: 'fixed',
+                  top: `${menuPosition.top}px`,
+                  left: `${menuPosition.left}px`,
+                }}
                 role="menu"
                 onKeyDown={handleMenuKeyDown}
               >
@@ -533,7 +563,8 @@ export function EpisodeCard({
                     Legg til i kø
                   </button>
                 )}
-              </div>
+              </div>,
+              document.body
             )}
           </div>
         )}

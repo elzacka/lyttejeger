@@ -21,8 +21,8 @@
 }
 
 .card.menuOpen {
-  z-index: 1000; /* Ensure menu appears above all other cards in list */
-  overflow: visible; /* Ensure dropdown is not clipped */
+  /* Menu is now portaled to body, so no z-index needed on card */
+  overflow: visible; /* Ensure card content is not clipped */
 }
 
 /* Cover art with play overlay */
@@ -269,16 +269,14 @@
 }
 
 .menuDropdown {
-  position: absolute;
-  top: calc(100% + var(--space-1));
-  right: 0;
+  /* position: fixed and top/left set via inline styles from React Portal */
   min-width: 160px;
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: var(--space-1);
-  z-index: 1001; /* Above card z-index (1000) when menu is open */
+  z-index: 10000; /* Very high z-index since it's portaled to body */
   animation: slideDown var(--duration-fast) var(--ease-out);
 }
 
