@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+// @ts-expect-error - CJS module without type definitions
 import corsProxy from './cors-proxy.cjs';
 
 export default defineConfig({
