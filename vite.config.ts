@@ -29,8 +29,8 @@ export default defineConfig({
         'icon-512x512.png',
       ],
       manifest: {
-        name: 'Lyttejeger\u200B', // Zero-width space to prevent OS emoji injection
-        short_name: 'Lyttejeger\u200B',
+        name: 'Lyttejeger',
+        short_name: 'Lyttejeger',
         description: 'Finn og filtrer podcaster med verdens beste søkefunksjon',
         theme_color: '#F4F1EA',
         background_color: '#F4F1EA',
