@@ -293,7 +293,7 @@
 
 .menuItem {
   width: 100%;
-  padding: var(--space-1) var(--space-2); /* Minimal padding: 4px vertical, 8px horizontal */
+  padding: var(--space-1); /* Minimal padding: 4px all sides */
   background: none;
   border: none;
   border-radius: var(--radius-sm);
