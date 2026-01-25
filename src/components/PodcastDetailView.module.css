@@ -136,6 +136,7 @@
     transform var(--duration-fast);
   box-sizing: border-box;
   flex-shrink: 0;
+  aspect-ratio: 1 / 1; /* Ensure perfect circle */
 }
 
 .subscribeButton:hover {
@@ -402,6 +403,7 @@
   .subscribeButton {
     width: calc(var(--touch-target) * 0.7);
     height: calc(var(--touch-target) * 0.7);
+    aspect-ratio: 1 / 1; /* Ensure perfect circle on mobile */
   }
 
   .title {
