@@ -66,9 +66,9 @@
 .title {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-body);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
+  font-size: var(--font-xs);
+  font-weight: 400;
+  color: var(--text-muted);
 }
 
 .list {
