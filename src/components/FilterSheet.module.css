@@ -183,23 +183,28 @@
   transform: scale(0.98);
 }
 
-/* Search input - match HomeView SearchBar styling */
+/* Search input - match HomeView SearchBar styling exactly */
 .searchContainer {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+  height: 52px;
   padding: 0 var(--space-4);
   background: var(--bg-primary);
-  margin: 0 var(--space-md, 16px) var(--space-sm, 8px);
-  border-radius: 26px;
-  height: 52px;
   border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 26px;
+  box-sizing: border-box;
+  margin: 0 var(--space-md, 16px) var(--space-sm, 8px);
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.05),
     0 4px 12px rgba(0, 0, 0, 0.03);
   transition:
     border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+    box-shadow var(--transition-fast),
+    background var(--transition-fast),
+    transform var(--transition-fast);
   flex-shrink: 0;
 }
 
@@ -211,6 +216,7 @@
 }
 
 .searchContainer:focus-within {
+  background: var(--bg-primary);
   border-color: var(--accent);
   box-shadow:
     0 0 0 4px rgba(26, 95, 122, 0.12),
@@ -219,27 +225,20 @@
   transform: translateY(-1px);
 }
 
-.searchIcon {
-  color: var(--text-secondary, #666);
-  flex-shrink: 0;
-}
-
 .searchInput {
   flex: 1;
-  border: none;
-  background: transparent;
-  color: var(--text-primary, #1a1a1a);
-  font-family: var(--font-mono, monospace);
-  font-size: var(--font-body); /* Match HomeView SearchBar */
-  outline: none;
   min-width: 0;
-  /* iOS-spesifikke forbedringer */
-  -webkit-appearance: none;
-  appearance: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-body);
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  outline: none;
 }
 
 .searchInput::placeholder {
-  color: var(--text-tertiary, #999);
+  color: var(--text-muted);
 }
 
 /* Fjern iOS søk-styling */
@@ -256,12 +255,12 @@
   width: var(--icon-md);
   height: var(--icon-md);
   padding: 0;
-  border: none;
   background: none;
-  border-radius: var(--radius-sm);
+  border: none;
   color: var(--text-muted);
   cursor: pointer;
-  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  margin-left: var(--space-2);
   transition:
     color var(--transition-fast),
     background var(--transition-fast);
@@ -269,8 +268,8 @@
 }
 
 .clearSearch:hover {
-  background: var(--bg-hover);
   color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .content {
@@ -534,11 +533,6 @@
 .yearOptionSelected:focus-visible,
 .categoryOptionSelected:focus-visible {
   outline-color: var(--color-white, #fff);
-}
-
-.searchContainer:focus-within {
-  outline: 2px solid var(--accent, #0066cc);
-  outline-offset: 2px;
 }
 
 .clearSearch:focus-visible {

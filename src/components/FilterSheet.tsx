@@ -1,6 +1,6 @@
 import { useEffect, useRef, useId, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { Search as SearchIcon, X as CloseIcon } from 'lucide-react';
+import { X as CloseIcon } from 'lucide-react';
 import { useSheetContext } from '../hooks/useSheetContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import styles from './FilterSheet.module.css';
@@ -359,7 +359,6 @@ export function FilterSheet({
 
         {searchable && (
           <div className={styles.searchContainer}>
-            <SearchIcon size={18} className={styles.searchIcon} aria-hidden="true" />
             <input
               ref={searchInputRef}
               type="search"
@@ -380,7 +379,7 @@ export function FilterSheet({
                 onClick={() => onSearchChange?.('')}
                 aria-label="Tøm søk"
               >
-                <CloseIcon size={18} aria-hidden="true" />
+                <CloseIcon size={20} aria-hidden="true" />
               </button>
             )}
           </div>
