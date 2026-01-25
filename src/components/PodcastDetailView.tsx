@@ -166,7 +166,7 @@ export function PodcastDetailView({
               title={isSubscribed ? 'Slutt å følge' : 'Følg'}
             >
               <HeartIcon
-                size={20}
+                size={14}
                 fill={isSubscribed ? 'currentColor' : 'none'}
                 strokeWidth={isSubscribed ? 0 : 2}
               />
