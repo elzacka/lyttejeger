@@ -74,25 +74,65 @@ async function apiRequest<T>(
   await enforceRateLimit();
 
   const headers = await getAuthHeaders();
-  const response = await fetch(url, { headers });
 
-  // Handle rate limit exceeded (429) - retry with bounded attempts
-  if (response.status === 429) {
-    if (retryCount >= MAX_RETRIES) {
-      throw new Error('API rate limit exceeded - max retries reached');
+  try {
+    const response = await fetch(url, { headers });
+
+    // Handle rate limit exceeded (429) - retry with bounded attempts
+    if (response.status === 429) {
+      if (retryCount >= MAX_RETRIES) {
+        throw new Error('API rate limit exceeded - max retries reached');
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return apiRequest<T>(endpoint, params, retryCount + 1);
     }
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return apiRequest<T>(endpoint, params, retryCount + 1);
+
+    // Handle authentication errors
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('API authentication failed - check API key and secret');
+    }
+
+    // Handle not found
+    if (response.status === 404) {
+      throw new Error('API endpoint not found');
+    }
+
+    // Handle server errors with retry for transient failures
+    if (response.status >= 500) {
+      if (retryCount >= MAX_RETRIES) {
+        throw new Error(`API server error: ${response.status} ${response.statusText}`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1)));
+      return apiRequest<T>(endpoint, params, retryCount + 1);
+    }
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // Basic response validation
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid API response format');
+    }
+
+    // Check for API-level errors in response
+    if (data.status === 'false' || data.status === false) {
+      throw new Error(data.description || 'API request failed');
+    }
+
+    cache.set(cacheKey, { data, timestamp: Date.now() });
+
+    return data as T;
+  } catch (error) {
+    // Re-throw API errors
+    if (error instanceof Error) {
+      throw error;
+    }
+    // Handle network errors
+    throw new Error('Network error - check your internet connection');
   }
-
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  cache.set(cacheKey, { data, timestamp: Date.now() });
-
-  return data as T;
 }
 
 // API Response Types
@@ -199,6 +239,7 @@ export interface SearchOptions {
   notcat?: string;
   val?: 'any' | 'lightning' | 'hive' | 'webmonetization'; // Value4Value filter
   aponly?: boolean; // Only podcasts with iTunes ID (false = indie podcasts)
+  pretty?: boolean; // Return pretty-printed JSON (useful for debugging)
 }
 
 /**
@@ -219,6 +260,7 @@ export async function searchPodcastsByTitle(
   if (options.clean) params.clean = '';
   if (options.lang) params.lang = options.lang;
   if (options.val) params.val = options.val;
+  if (options.pretty) params.pretty = '';
 
   return apiRequest<SearchResponse>('/search/bytitle', params);
 }
@@ -242,6 +284,7 @@ export async function searchPodcasts(
   if (options.cat) params.cat = options.cat;
   if (options.notcat) params.notcat = options.notcat;
   if (options.val) params.val = options.val;
+  if (options.pretty) params.pretty = '';
   if (options.aponly === false) {
     // No direct param - handled by excluding results with itunesId
   }
@@ -252,6 +295,7 @@ export async function searchPodcasts(
 export interface EpisodesByFeedIdOptions {
   max?: number;
   since?: number; // Unix timestamp - only return episodes published since this time
+  fulltext?: boolean; // Request full descriptions instead of truncated (default: true)
 }
 
 export async function getEpisodesByFeedId(
@@ -261,8 +305,11 @@ export async function getEpisodesByFeedId(
   const params: Record<string, string> = {
     id: feedId.toString(),
     max: (options.max || 20).toString(),
-    fulltext: '', // Request full descriptions instead of truncated
   };
+
+  if (options.fulltext !== false) {
+    params.fulltext = ''; // Request full descriptions instead of truncated
+  }
 
   if (options.since) {
     params.since = options.since.toString();
@@ -274,6 +321,7 @@ export async function getEpisodesByFeedId(
 export interface EpisodesByFeedIdsOptions {
   max?: number;
   since?: number; // Unix timestamp - only return episodes published since this time
+  fulltext?: boolean; // Request full descriptions instead of truncated (default: true)
 }
 
 /**
@@ -294,8 +342,11 @@ export async function getEpisodesByFeedIds(
   const params: Record<string, string> = {
     id: limitedIds.join(','),
     max: (options.max || 100).toString(),
-    fulltext: '',
   };
+
+  if (options.fulltext !== false) {
+    params.fulltext = '';
+  }
 
   if (options.since) {
     params.since = options.since.toString();
@@ -528,4 +579,145 @@ export async function getLiveEpisodes(
   };
 
   return apiRequest<LiveEpisodesResponse>('/episodes/live', params);
+}
+
+// Recent Feeds API types and functions
+
+export interface RecentFeed {
+  id: number;
+  title: string;
+  url: string;
+  originalUrl: string;
+  link: string;
+  description: string;
+  author: string;
+  ownerName: string;
+  image: string;
+  artwork: string;
+  newestItemPubdate: number;
+  itunesId: number | null;
+  language: string;
+  categories: Record<string, string>;
+}
+
+export interface RecentFeedsResponse {
+  status: string;
+  feeds: RecentFeed[];
+  count: number;
+  max: number;
+  since: number;
+  description: string;
+}
+
+export interface RecentFeedsOptions {
+  max?: number;
+  since?: number; // Unix timestamp - return feeds updated since this time (default: 15 min ago)
+  lang?: string; // Language code filter (e.g., 'no', 'en', 'da')
+  cat?: string; // Category ID filter
+  notcat?: string; // Exclude category ID
+}
+
+/**
+ * Get most recent podcast feeds that have been updated
+ * Returns feeds in reverse chronological order based on newest item publish date
+ * Default: last 15 minutes, max 40 feeds
+ */
+export async function getRecentFeeds(
+  options: RecentFeedsOptions = {}
+): Promise<RecentFeedsResponse> {
+  const params: Record<string, string> = {
+    max: (options.max || 40).toString(),
+  };
+
+  if (options.since) params.since = options.since.toString();
+  if (options.lang) params.lang = options.lang;
+  if (options.cat) params.cat = options.cat;
+  if (options.notcat) params.notcat = options.notcat;
+
+  return apiRequest<RecentFeedsResponse>('/recent/feeds', params);
+}
+
+// New Data Feed API - combines feeds and episodes
+
+export interface RecentDataResponse {
+  status: string;
+  feeds: RecentFeed[];
+  items: PodcastIndexEpisode[];
+  count: number;
+  max: number;
+  since: number;
+  description: string;
+}
+
+export interface RecentDataOptions {
+  max?: number; // Max results (feeds + items combined), default: 1000, min: 1
+  since?: number; // Unix timestamp - return data since this time
+}
+
+/**
+ * Get most recent data - both feeds and episodes combined
+ * Returns up to [max] total results combining both feeds and episodes
+ */
+export async function getRecentData(
+  options: RecentDataOptions = {}
+): Promise<RecentDataResponse> {
+  const params: Record<string, string> = {
+    max: (options.max || 1000).toString(),
+  };
+
+  if (options.since) params.since = options.since.toString();
+
+  return apiRequest<RecentDataResponse>('/recent/data', params);
+}
+
+// Podcast lookup by alternative identifiers
+
+export interface PodcastByFeedUrlResponse {
+  status: string;
+  feed: PodcastIndexFeed;
+  description: string;
+}
+
+/**
+ * Get podcast by feed URL
+ * Useful for when you have a feed URL and need to get the podcast index data
+ */
+export async function getPodcastByFeedUrl(feedUrl: string): Promise<PodcastByFeedUrlResponse> {
+  return apiRequest<PodcastByFeedUrlResponse>('/podcasts/byfeedurl', {
+    url: feedUrl,
+  });
+}
+
+export interface PodcastByItunesIdResponse {
+  status: string;
+  feed: PodcastIndexFeed;
+  description: string;
+}
+
+/**
+ * Get podcast by iTunes ID
+ * Useful for migrating from iTunes/Apple Podcasts API
+ */
+export async function getPodcastByItunesId(
+  itunesId: number
+): Promise<PodcastByItunesIdResponse> {
+  return apiRequest<PodcastByItunesIdResponse>('/podcasts/byitunesid', {
+    id: itunesId.toString(),
+  });
+}
+
+export interface PodcastByGuidResponse {
+  status: string;
+  feed: PodcastIndexFeed;
+  description: string;
+}
+
+/**
+ * Get podcast by podcast GUID
+ * The GUID is the <podcast:guid> tag from the RSS feed
+ */
+export async function getPodcastByGuid(guid: string): Promise<PodcastByGuidResponse> {
+  return apiRequest<PodcastByGuidResponse>('/podcasts/byguid', {
+    guid: guid,
+  });
 }

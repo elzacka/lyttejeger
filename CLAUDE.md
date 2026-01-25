@@ -27,6 +27,9 @@ Podcast Index API → podcastIndex.ts → podcastTransform.ts → useSearch → 
 ### Key Files
 
 - **podcastIndex.ts**: API client (SHA-1 auth, 1 req/sec rate limit, 5-min cache). Requires `VITE_PODCASTINDEX_API_KEY` and `VITE_PODCASTINDEX_API_SECRET`.
+  - Full API coverage: Search, Episodes, Podcasts, Recent data, Trending, Live, Soundbites
+  - Enhanced error handling with retry logic for transient failures
+  - Response validation to catch malformed data early
 - **db.ts**: IndexedDB schema. QueueItem stores episode metadata (`publishedAt`, `season`, `episode`).
 - **constants.ts**: Shared constants (time intervals, UI values, sort options).
 - **curatedContent.ts**: Discovery mode configuration.
@@ -56,6 +59,59 @@ const response = await fetch(proxiedUrl);
 ```
 
 **Pattern**: Wrap all external fetches with `getCorsProxyUrl()`. Middleware automatically strips in production.
+
+### Podcast Index API Implementation
+
+**Complete endpoint coverage** in `podcastIndex.ts`:
+
+**Search Endpoints:**
+- `/search/bytitle` - Exact title matching (more precise)
+- `/search/byterm` - Fuzzy search across title, author, description
+- `/search/byperson` - Search episodes by person tags
+
+**Podcast Lookup:**
+- `/podcasts/byfeedid` - Get podcast by feed ID
+- `/podcasts/byfeedurl` - Get podcast by RSS feed URL
+- `/podcasts/byitunesid` - Get podcast by iTunes/Apple ID
+- `/podcasts/byguid` - Get podcast by podcast GUID
+- `/podcasts/trending` - Trending podcasts with filters
+
+**Episode Endpoints:**
+- `/episodes/byfeedid` - Episodes from one or multiple feeds (up to 200)
+- `/episodes/byid` - Get single episode by ID
+- `/episodes/byguid` - Get episode by GUID
+- `/episodes/live` - Currently live or upcoming episodes
+
+**Recent Data:**
+- `/recent/episodes` - Most recent episodes globally
+- `/recent/feeds` - Recently updated feeds
+- `/recent/data` - Combined recent feeds + episodes
+- `/recent/soundbites` - Recent podcast soundbites/clips
+
+**Other:**
+- `/categories/list` - Get all categories
+
+**Enhanced Features:**
+- Automatic retry with exponential backoff for 429 (rate limit) and 5xx errors
+- Authentication error detection (401/403)
+- Response validation to catch malformed API responses
+- 5-minute caching per API Terms of Service
+- Rate limiting enforcement (max 1 req/sec)
+- Support for all query parameters: `max`, `since`, `lang`, `cat`, `notcat`, `val`, `fulltext`, `pretty`
+
+**Error Handling Pattern:**
+```typescript
+try {
+  const result = await apiRequest<ResponseType>(endpoint, params);
+  // Handle successful response
+} catch (error) {
+  // Specific error messages:
+  // - "API authentication failed" for 401/403
+  // - "API rate limit exceeded" for 429 after retries
+  // - "API server error" for 5xx after retries
+  // - "Network error" for connection issues
+}
+```
 
 ### Navigation (App.tsx)
 
