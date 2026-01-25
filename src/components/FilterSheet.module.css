@@ -207,7 +207,7 @@
   background: transparent;
   color: var(--text-primary, #1a1a1a);
   font-family: var(--font-mono, monospace);
-  font-size: var(--text-lg); /* Alltid 16px - forhindrer iOS zoom */
+  font-size: var(--font-body); /* Match HomeView SearchBar */
   outline: none;
   min-width: 0;
   /* iOS-spesifikke forbedringer */
@@ -469,6 +469,11 @@
 
   .searchContainer {
     margin: 0 var(--space-sm, 8px) var(--space-sm, 8px);
+  }
+
+  .searchInput {
+    /* Use 16px font to prevent iOS zoom on focus */
+    font-size: var(--text-lg);
   }
 
   .content {
