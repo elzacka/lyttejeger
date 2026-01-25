@@ -509,10 +509,19 @@ GitHub Action syncs to standalone `elzacka/lyttejeger` repo on push to main (cop
 
 ## Maintenance Protocol
 
-**Before starting any task**:
+**MANDATORY: Before starting any task, follow the 5-step workflow in `dev_only/WORKFLOW.md`**:
+
+1. **Motta Oppgave**: Analyser oppgaven (5-10 min), identifiser hvem som tar hovedansvar
+2. **Utfør Oppgaven**: Implementer løsningen, handoff mellom eksperter ved behov
+3. **Lokal Testing**: Test grundig på dev server, TypeScript validation, functional + visual + UX testing
+4. **Gi Beskjed til Bruker**: Informer at testing er ferdig, vent på godkjenning
+5. **Commit og Push**: Kun når bruker godkjenner - dokumentasjon review, pre-commit checklist, commit med riktig format
+
+**Before starting implementation**:
 1. Read relevant sections of this file
 2. Check if patterns/rules apply to current work
 3. Follow established patterns (iOS audio, touch events, focus states, etc.)
+4. Identify which expert takes primary responsibility
 
 **CRITICAL - Code Modification Safeguards**:
 1. **Never remove existing functionality** when implementing new features unless explicitly requested
@@ -534,6 +543,12 @@ GitHub Action syncs to standalone `elzacka/lyttejeger` repo on push to main (cop
 2. Include code examples for clarity
 3. Mark critical items with **CRITICAL** or **PROTECTED**
 4. Keep examples concise but complete
+
+**Before commit**:
+1. Review documentation: Does CLAUDE.md, README.md, or PRIVACY.md need updates?
+2. Documentation must be: compressed to essentials, no emojis, no personal references
+3. Tech Lead verifies: TypeScript builds, no lint errors, tested on desktop + mobile
+4. Get user approval before commit and push
 
 **Keeping this file efficient**:
 - Remove outdated patterns when architecture changes
