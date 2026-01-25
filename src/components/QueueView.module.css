@@ -30,7 +30,7 @@
   align-items: center;
   justify-content: center;
   min-width: var(--badge-size);
-  height: var(--badge-size);
+  min-height: var(--badge-size);
   padding: 0 var(--space-xs);
   background: var(--accent);
   color: var(--color-white);
@@ -39,6 +39,7 @@
   font-weight: 500;
   line-height: var(--leading-none);
   border-radius: var(--radius-full);
+  aspect-ratio: 1 / 1;
 }
 
 .clearButton {
