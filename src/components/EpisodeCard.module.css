@@ -270,12 +270,15 @@
 
 .menuDropdown {
   /* position: fixed and top/left set via inline styles from React Portal */
+  display: flex;
+  flex-direction: column;
   width: max-content; /* Fit content width */
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: var(--space-xs); /* Minimal padding around menu items */
+  padding: var(--space-1); /* 4px padding around menu */
+  gap: var(--space-0-5); /* 2px gap between items */
   z-index: 10000; /* Very high z-index since it's portaled to body */
   animation: slideDown var(--duration-fast) var(--ease-out);
 }
@@ -292,8 +295,9 @@
 }
 
 .menuItem {
-  width: 100%;
-  padding: var(--space-1); /* Minimal padding: 4px all sides */
+  display: block;
+  width: auto; /* Fit content, not 100% */
+  padding: var(--space-1-5) var(--space-2); /* 6px vertical, 8px horizontal */
   background: none;
   border: none;
   border-radius: var(--radius-sm);
