@@ -248,10 +248,7 @@ export function RecentEpisodesView({
 
       {inProgressEpisodes.length > 0 && (
         <>
-          <h2 className={styles.title}>
-            Fortsett å lytte
-            <span className={styles.badge}>{inProgressEpisodes.length}</span>
-          </h2>
+          <h2 className={styles.title}>Fortsett å lytte</h2>
           <ul className={styles.list} role="list">
             {inProgressEpisodes.map((episode) =>
               renderEpisodeItem(episode, {
@@ -269,7 +266,6 @@ export function RecentEpisodesView({
             className={`${styles.title} ${inProgressEpisodes.length > 0 ? styles.sectionDivider : ''}`}
           >
             Siste 7 dager
-            <span className={styles.badge}>{episodes.length}</span>
           </h2>
           <ul className={styles.list} role="list">
             {episodes.map((episode) => renderEpisodeItem(episode))}
