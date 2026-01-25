@@ -270,7 +270,7 @@
 
 .menuDropdown {
   /* position: fixed and top/left set via inline styles from React Portal */
-  min-width: 160px;
+  width: max-content; /* Fit content width */
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -293,7 +293,7 @@
 
 .menuItem {
   width: 100%;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-2); /* Reduced horizontal padding */
   background: none;
   border: none;
   border-radius: var(--radius-sm);
@@ -304,6 +304,7 @@
   color: var(--text-primary);
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-out);
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 .menuItem:hover {

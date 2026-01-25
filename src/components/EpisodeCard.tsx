@@ -182,13 +182,22 @@ export function EpisodeCard({
     const updatePosition = () => {
       if (!buttonRef.current) return;
       const rect = buttonRef.current.getBoundingClientRect();
+
+      // Position menu below button, aligned to the right edge of button
+      // If menuRef is available, we can calculate exact width, otherwise estimate
+      const menuWidth = menuRef.current?.offsetWidth || 0;
+
       setMenuPosition({
         top: rect.bottom + 4, // 4px gap below button
-        left: rect.right - 160, // Align right edge (160px = menu min-width)
+        left: rect.right - menuWidth, // Align right edge with button right edge
       });
     };
 
+    // Initial position and after render (to get accurate menu width)
     updatePosition();
+    // Small delay to ensure menu is rendered and we can get its width
+    setTimeout(updatePosition, 0);
+
     window.addEventListener('resize', updatePosition);
     window.addEventListener('scroll', updatePosition, true);
 
