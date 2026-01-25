@@ -69,8 +69,7 @@ export function MyPodsView({
   if (subscriptions.length === 0) {
     return (
       <div className={styles.empty}>
-        <h3>Du følger ingen podcaster ennå</h3>
-        <p>Søk etter podcaster og trykk på hjertet for å følge dem</p>
+        <p className={styles.emptyText}>Du følger ingen podcaster ennå</p>
       </div>
     );
   }

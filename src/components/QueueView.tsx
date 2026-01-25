@@ -119,8 +119,7 @@ export function QueueView({
   if (queue.length === 0) {
     return (
       <div className={styles.empty}>
-        <h3>Køen er tom</h3>
-        <p>Legg til episoder fra søkeresultatene eller en podcast-side</p>
+        <p className={styles.emptyText}>Ingen episoder i køen</p>
       </div>
     );
   }
