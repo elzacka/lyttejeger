@@ -16,10 +16,10 @@
 .title {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-h2);
-  font-weight: 500;
-  line-height: var(--leading-tight);
-  color: var(--text-primary);
+  font-size: var(--font-xs);
+  font-weight: 400;
+  line-height: var(--leading-normal);
+  color: var(--text-muted);
 }
 
 .clearButton {
