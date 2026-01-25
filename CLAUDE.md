@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**MANDATORY**: Before any commit, review `dev_only/WORKFLOW.md` and complete `dev_only/PRE_COMMIT_CHECKLIST.md`. This ensures proper testing and documentation updates.
+
 ## Commands
 
 ```bash
@@ -500,6 +502,102 @@ Chapters and transcripts display in dedicated `.contentPanels` wrapper outside m
 ```
 
 **Pattern**: Keep chapters/transcript panels structurally separate from playback controls to avoid overlap with close button or other UI elements on mobile.
+
+### AudioPlayer Layout Patterns
+
+**Desktop Layout** uses CSS Grid for precise control distribution:
+
+```css
+.fullControls {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-xl);
+}
+
+.controls {
+  justify-self: start;  /* Primary controls (skip/play/skip) left */
+}
+
+.progress {
+  justify-self: center;  /* Timeline centered with flexible width */
+  max-width: 600px;
+  min-width: 300px;
+}
+
+.secondaryControls {
+  justify-self: end;  /* Speed/sleep/chapters/transcript right */
+  display: flex;
+  gap: var(--space-sm);
+}
+```
+
+**Mobile Expanded Layout** prioritizes touch ergonomics:
+
+```css
+/* Larger touch targets for primary controls */
+.player.expanded .playButton {
+  width: 64px;
+  height: 64px;
+}
+
+.skipButton {
+  min-width: 56px;  /* Increased from 44px */
+  min-height: 56px;
+}
+
+/* Increased spacing between controls for thumb zones */
+.player.expanded .controls {
+  gap: var(--space-lg);  /* Increased from var(--space-md) */
+}
+```
+
+**Secondary Controls Styling**:
+
+```css
+/* Speed button - prominent with accent styling */
+.speedButton {
+  background: var(--accent-subtle);
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  min-width: 80px;
+}
+
+/* Sleep timer - subtle with pulse animation when active */
+.sleepButton.active {
+  animation: pulse-sleep 2s ease-in-out infinite;
+}
+```
+
+**Mobile Close Button Pattern**:
+
+Desktop uses standard close button in top-right. Mobile expanded state uses centered close button below controls for better thumb reach:
+
+```tsx
+<button
+  className={styles.closeButtonMobile}
+  onClick={onClose}
+  aria-label="Lukk avspiller"
+>
+  <ChevronDown size={20} aria-hidden="true" />
+  Lukk
+</button>
+```
+
+**Visual Hierarchy Rules**:
+- Speed control most prominent (accent styling, dropdown chevron)
+- Sleep timer subtle until active (then pulsing)
+- Chapters/transcript icons reduced to 18px for balance
+- Primary controls always largest (64px play on mobile expanded)
+
+**Layout Constraints**:
+- Desktop container max-width: 1400px
+- Mobile expanded play button: 64x64px
+- Mobile expanded skip buttons: 56x56px
+- Minimum touch target: 44x44px
+- Control spacing on mobile expanded: var(--space-lg)
 
 ## Monorepo
 
