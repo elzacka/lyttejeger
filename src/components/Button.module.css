@@ -111,13 +111,15 @@
 /* Round button with icon only */
 .btnIcon {
   composes: btn;
-  width: var(--button-icon-size); /* 40px */
-  height: var(--button-icon-size);
+  width: 40px;
+  height: 40px;
   padding: 0;
   background: var(--accent);
   color: var(--color-white);
   border-radius: 50%;
   flex-shrink: 0;
+  aspect-ratio: 1;
+  box-sizing: border-box;
 }
 
 .btnIcon:hover:not(:disabled) {

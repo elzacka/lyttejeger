@@ -149,6 +149,9 @@
   opacity: 0;
   transition: opacity var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
   z-index: 2;
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .card:hover .desktopDeleteButton {

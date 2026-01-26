@@ -119,8 +119,8 @@
 }
 
 .selectButton {
-  width: var(--button-md);
-  height: var(--button-md);
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,6 +131,8 @@
   cursor: pointer;
   flex-shrink: 0;
   transition: all var(--transition-fast);
+  aspect-ratio: 1;
+  box-sizing: border-box;
 }
 
 .selectButton:hover {

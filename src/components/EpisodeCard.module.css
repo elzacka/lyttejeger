@@ -240,8 +240,8 @@
 }
 
 .menuButton {
-  width: var(--button-lg);
-  height: var(--button-lg);
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -251,6 +251,9 @@
   color: var(--text-muted);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .menuButton:hover {
