@@ -393,10 +393,6 @@
     color var(--transition-fast);
 }
 
-/* Mobile close button - hidden by default */
-.closeButtonMobile {
-  display: none;
-}
 
 .closeButton:hover {
   background: var(--bg-hover);
@@ -839,28 +835,14 @@
   }
 
   .player.expanded .closeButton {
-    display: none;
-  }
-
-  /* Add close button below secondary controls on mobile expanded */
-  .player.expanded .closeButtonMobile {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: var(--space-md) 0 var(--space-xs);
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-family: var(--font-mono);
-    font-size: var(--font-sm);
-    gap: var(--space-xs);
-    transition: color var(--transition-fast);
-  }
-
-  .player.expanded .closeButtonMobile:hover {
-    color: var(--text-primary);
+    /* Position at very top right, aligned with swipe handle area */
+    top: 2px;
+    right: var(--space-xs);
+    transform: none;
+    /* Smaller touch target to fit in handle area */
+    width: var(--button-sm);
+    height: var(--button-sm);
   }
 
   /* Expanded state */

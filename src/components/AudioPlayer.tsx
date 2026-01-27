@@ -1077,16 +1077,6 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
               Kunne ikke laste av lydfilen
             </p>
           )}
-
-          {/* Mobile-only close button - centered below controls */}
-          <button
-            className={styles.closeButtonMobile}
-            onClick={onClose}
-            aria-label="Lukk avspiller"
-          >
-            <ChevronDown size={20} aria-hidden="true" />
-            Lukk
-          </button>
         </div>
 
         {/* Content panels - chapters and transcript in separate dedicated area */}
