@@ -242,6 +242,10 @@
 .menuButton {
   width: 48px;
   height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  max-width: 48px;
+  max-height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
