@@ -294,71 +294,102 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
 
     const imageUrl = episode.imageUrl || episode.podcastImage;
 
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: episode.title,
-      artist: episode.podcastTitle || '',
-      album: episode.podcastTitle || 'Lyttejeger',
-      artwork: imageUrl
-        ? [
-            { src: imageUrl, sizes: '96x96', type: 'image/jpeg' },
-            { src: imageUrl, sizes: '128x128', type: 'image/jpeg' },
-            { src: imageUrl, sizes: '192x192', type: 'image/jpeg' },
-            { src: imageUrl, sizes: '256x256', type: 'image/jpeg' },
-            { src: imageUrl, sizes: '384x384', type: 'image/jpeg' },
-            { src: imageUrl, sizes: '512x512', type: 'image/jpeg' },
-          ]
-        : [],
-    });
+    // Set metadata with proper artwork sizes for iOS 18+
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: episode.title,
+        artist: episode.podcastTitle || '',
+        album: episode.podcastTitle || 'Lyttejeger',
+        artwork: imageUrl
+          ? [
+              { src: imageUrl, sizes: '96x96', type: 'image/jpeg' },
+              { src: imageUrl, sizes: '128x128', type: 'image/jpeg' },
+              { src: imageUrl, sizes: '192x192', type: 'image/jpeg' },
+              { src: imageUrl, sizes: '256x256', type: 'image/jpeg' },
+              { src: imageUrl, sizes: '384x384', type: 'image/jpeg' },
+              { src: imageUrl, sizes: '512x512', type: 'image/jpeg' },
+            ]
+          : [],
+      });
+    } catch (error) {
+      console.error('Failed to set media metadata:', error);
+    }
 
-    // Set up action handlers
+    // Set up action handlers with try-catch for compatibility
     // CRITICAL for iOS: play() must be called SYNCHRONOUSLY from user gesture
     // Any async operation (await, setTimeout, Promise) breaks the gesture chain
-    navigator.mediaSession.setActionHandler('play', () => {
-      if (!audioRef.current) return;
+    try {
+      navigator.mediaSession.setActionHandler('play', () => {
+        const audio = audioRef.current;
+        if (!audio) return;
 
-      // Call play() immediately - MUST be synchronous for iOS
-      audioRef.current.play().catch((error) => {
-        console.error('Media Session play failed:', error);
-        // If play fails, try to recover but don't block the synchronous chain
-        // Set a flag to attempt recovery on next user interaction
-        setAudioError(true);
-        navigator.mediaSession.playbackState = 'paused';
+        // MUST call play() synchronously - critical for iOS
+        const playPromise = audio.play();
+
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              // Playback started successfully
+              setIsPlaying(true);
+              if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'playing';
+              }
+            })
+            .catch((error) => {
+              console.error('Media Session play failed:', error);
+              setAudioError(true);
+              setIsPlaying(false);
+              if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'paused';
+              }
+            });
+        }
       });
 
-      // Update state immediately
-      setIsPlaying(true);
-      // CRITICAL for iOS: Update Media Session playback state
-      navigator.mediaSession.playbackState = 'playing';
-    });
-    navigator.mediaSession.setActionHandler('pause', () => {
-      if (!audioRef.current) return;
-      audioRef.current.pause();
-      // Update Media Session playback state
-      navigator.mediaSession.playbackState = 'paused';
-      setIsPlaying(false);
-    });
-    navigator.mediaSession.setActionHandler('seekbackward', () => {
-      if (audioRef.current) {
-        audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10);
-      }
-    });
-    navigator.mediaSession.setActionHandler('seekforward', () => {
-      if (audioRef.current) {
-        audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + 30);
-      }
-    });
-    navigator.mediaSession.setActionHandler('seekto', (details) => {
-      if (audioRef.current && details.seekTime !== undefined) {
-        audioRef.current.currentTime = details.seekTime;
-      }
-    });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        // Pause synchronously
+        audio.pause();
+        setIsPlaying(false);
+
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'paused';
+        }
+      });
+
+      navigator.mediaSession.setActionHandler('seekbackward', () => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        audio.currentTime = Math.max(0, audio.currentTime - 10);
+      });
+
+      navigator.mediaSession.setActionHandler('seekforward', () => {
+        const audio = audioRef.current;
+        if (!audio || !duration) return;
+        audio.currentTime = Math.min(duration, audio.currentTime + 30);
+      });
+
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        const audio = audioRef.current;
+        if (!audio || details.seekTime === undefined) return;
+        audio.currentTime = details.seekTime;
+      });
+    } catch (error) {
+      console.error('Failed to set media session action handlers:', error);
+    }
 
     return () => {
-      navigator.mediaSession.setActionHandler('play', null);
-      navigator.mediaSession.setActionHandler('pause', null);
-      navigator.mediaSession.setActionHandler('seekbackward', null);
-      navigator.mediaSession.setActionHandler('seekforward', null);
-      navigator.mediaSession.setActionHandler('seekto', null);
+      try {
+        navigator.mediaSession.setActionHandler('play', null);
+        navigator.mediaSession.setActionHandler('pause', null);
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekforward', null);
+        navigator.mediaSession.setActionHandler('seekto', null);
+      } catch (error) {
+        // Ignore cleanup errors
+      }
     };
   }, [episode, duration]);
 
