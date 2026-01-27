@@ -55,6 +55,7 @@ export function FilterSheet({
   const contentRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useFocusTrap(sheetRef, isOpen && !isClosing);
@@ -315,6 +316,17 @@ export function FilterSheet({
     }
   }, [isOpen, searchable]);
 
+  // Auto-scroll content to top when search value changes (to show results)
+  useEffect(() => {
+    if (searchable && searchValue && contentRef.current && isSearchFocused) {
+      // Small delay to ensure results are rendered
+      const timer = setTimeout(() => {
+        contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [searchValue, searchable, isSearchFocused]);
+
   if (!isOpen && !isClosing) return null;
 
   const sheetContent = (
@@ -361,15 +373,19 @@ export function FilterSheet({
           <div className={styles.searchContainer}>
             <input
               ref={searchInputRef}
-              type="search"
+              type="text"
               inputMode="search"
               autoComplete="off"
               autoCorrect="off"
+              autoCapitalize="off"
               spellCheck={false}
+              enterKeyHint="search"
               className={styles.searchInput}
               placeholder={searchPlaceholder}
               value={searchValue}
               onChange={(e) => onSearchChange?.(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
               aria-label={searchPlaceholder}
             />
             {searchValue && (
@@ -385,7 +401,10 @@ export function FilterSheet({
           </div>
         )}
 
-        <div ref={contentRef} className={styles.content}>
+        <div
+          ref={contentRef}
+          className={`${styles.content} ${isSearchFocused ? styles.contentKeyboardOpen : ''}`}
+        >
           {children}
         </div>
       </div>

@@ -6,8 +6,8 @@
   display: flex;
   flex-direction: row;
   gap: var(--space-3);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-md);
   overflow: visible; /* Allow dropdown menu to overflow */
   transition: all var(--duration-fast) var(--ease-out);
@@ -107,7 +107,6 @@
 }
 
 .header {
-  cursor: pointer;
   flex: 1;
 }
 
@@ -124,7 +123,40 @@
   text-overflow: ellipsis;
 }
 
-/* Episode title */
+/* Clickable podcast name button */
+.podcastNameButton {
+  margin: 0 0 var(--space-1) 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-caption);
+  font-weight: 500;
+  line-height: var(--leading-snug);
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  display: block;
+  width: 100%;
+  transition: color var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.podcastNameButton:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.podcastNameButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* Episode title - clickable to expand */
 .episodeTitle {
   margin: 0 0 var(--space-2) 0;
   font-family: var(--font-mono);
@@ -136,9 +168,16 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-/* Metadata */
+.episodeTitle:hover {
+  color: var(--accent);
+}
+
+/* Metadata - clickable to expand */
 .meta {
   display: flex;
   flex-wrap: wrap;
@@ -148,6 +187,9 @@
   font-family: var(--font-mono);
   font-size: var(--font-caption);
   line-height: var(--leading-normal);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
   color: var(--text-muted);
 }
 
@@ -172,7 +214,7 @@
   font-weight: 500;
 }
 
-/* Progress bar */
+/* Progress bar - clickable to expand */
 .progressBar {
   width: 100%;
   height: 3px;
@@ -180,6 +222,7 @@
   border-radius: var(--radius-full);
   overflow: hidden;
   margin-bottom: var(--space-2);
+  cursor: pointer;
 }
 
 .progressFill {
@@ -191,17 +234,21 @@
 /* Expandable description - uses full card width */
 .description {
   font-size: var(--font-body-sm);
-  line-height: var(--leading-normal);
+  line-height: var(--leading-relaxed);
   color: var(--text-secondary);
   max-height: 0;
   overflow: hidden;
   opacity: 0;
   transition: all var(--duration-normal) var(--ease-out);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .description.expanded {
-  max-height: 1000px;
+  max-height: 2000px;
   opacity: 1;
+  padding-bottom: var(--space-2);
 }
 
 /* Default variant: description with border on top, full width */
@@ -330,8 +377,8 @@
 /* ===== QUEUE VARIANT ===== */
 .queueItem {
   position: relative;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-md);
   overflow-x: hidden; /* Clip swipe action horizontally */
   overflow-y: visible; /* Allow expandable description to show vertically */
@@ -340,6 +387,7 @@
 
 .queueItem:hover {
   border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .queueItem.dragging {
@@ -386,7 +434,7 @@
   display: flex;
   flex-direction: column;
   padding: var(--space-3);
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   transition: transform var(--duration-fast) var(--ease-out);
   position: relative;
   z-index: 1;

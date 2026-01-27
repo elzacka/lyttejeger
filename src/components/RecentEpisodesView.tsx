@@ -18,6 +18,7 @@ interface RecentEpisodesViewProps {
   onAddToQueue: (episode: Episode, podcastTitle: string, podcastImage: string) => void;
   onPlayNext: (episode: Episode, podcastTitle: string, podcastImage: string) => void;
   isInQueue: (episodeId: string) => boolean;
+  onSelectPodcast?: (podcastId: string) => void;
   onNavigateToSearch?: () => void;
 }
 
@@ -37,6 +38,7 @@ export function RecentEpisodesView({
   onAddToQueue,
   onPlayNext,
   isInQueue,
+  onSelectPodcast,
   onNavigateToSearch,
 }: RecentEpisodesViewProps) {
   const [episodes, setEpisodes] = useState<EpisodeWithSubscription[]>([]);
@@ -237,6 +239,7 @@ export function RecentEpisodesView({
           onPlay={() => handlePlayEpisode(episode)}
           onAddToQueue={() => handleAddToQueue(episode)}
           onPlayNext={() => handlePlayNext(episode)}
+          onSelectPodcast={onSelectPodcast}
         />
       </li>
     );

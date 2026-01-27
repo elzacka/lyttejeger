@@ -1,14 +1,18 @@
+import { useMemo } from 'react';
+
 interface FormattedTextProps {
   text: string;
   className?: string;
 }
 
 /**
- * Renders text with clickable links
- * Links should be marked as [[link:url|text]] in the input
+ * Renders text with:
+ * - Decoded HTML entities
+ * - Clickable links (both custom [[link:]] format and auto-detected URLs)
+ * - Proper line breaks
  */
 export function FormattedText({ text, className }: FormattedTextProps) {
-  const parts = parseTextWithLinks(text);
+  const parts = useMemo(() => parseAndFormatText(text), [text]);
 
   return (
     <span className={className}>
@@ -20,9 +24,16 @@ export function FormattedText({ text, className }: FormattedTextProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
+            style={{
+              color: 'var(--accent)',
+              textDecoration: 'underline',
+              wordBreak: 'break-word'
+            }}
           >
             {part.text}
           </a>
+        ) : part.type === 'break' ? (
+          <br key={index} />
         ) : (
           <span key={index}>{part.text}</span>
         )
@@ -31,30 +42,75 @@ export function FormattedText({ text, className }: FormattedTextProps) {
   );
 }
 
-type TextPart = { type: 'text'; text: string } | { type: 'link'; url: string; text: string };
+type TextPart =
+  | { type: 'text'; text: string }
+  | { type: 'link'; url: string; text: string }
+  | { type: 'break' };
 
-function parseTextWithLinks(text: string): TextPart[] {
+/**
+ * Decode HTML entities
+ */
+function decodeHtmlEntities(text: string): string {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+}
+
+/**
+ * Parse text with custom link format and auto-detect URLs
+ */
+function parseAndFormatText(text: string): TextPart[] {
+  // First decode HTML entities
+  let decoded = decodeHtmlEntities(text);
+
+  // Remove excessive whitespace and normalize line breaks
+  decoded = decoded.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
   const parts: TextPart[] = [];
-  const linkRegex = /\[\[link:([^|]+)\|([^\]]*)\]\]/g;
+
+  // Regex to match:
+  // 1. Custom link format: [[link:url|text]]
+  // 2. URLs: http(s)://...
+  // 3. Timestamps with colons (e.g., "1:30", "12:00")
+  const combinedRegex = /(\[\[link:([^|]+)\|([^\]]*)\]\])|(https?:\/\/[^\s<>"{}|\\^`\[\]]+)|(\n)/g;
 
   let lastIndex = 0;
   let match;
 
-  while ((match = linkRegex.exec(text)) !== null) {
-    // Add text before the link
+  while ((match = combinedRegex.exec(decoded)) !== null) {
+    // Add text before the match
     if (match.index > lastIndex) {
-      parts.push({ type: 'text', text: text.slice(lastIndex, match.index) });
+      const textBefore = decoded.slice(lastIndex, match.index);
+      if (textBefore) {
+        parts.push({ type: 'text', text: textBefore });
+      }
     }
 
-    // Add the link
-    parts.push({ type: 'link', url: match[1], text: match[2] || match[1] });
+    if (match[1]) {
+      // Custom link format [[link:url|text]]
+      const url = match[2];
+      const linkText = match[3] || url;
+      parts.push({ type: 'link', url, text: linkText });
+    } else if (match[4]) {
+      // Auto-detected URL
+      const url = match[4];
+      // Shorten display text for long URLs
+      const displayText = url.length > 50 ? url.substring(0, 47) + '...' : url;
+      parts.push({ type: 'link', url, text: displayText });
+    } else if (match[5]) {
+      // Line break
+      parts.push({ type: 'break' });
+    }
 
     lastIndex = match.index + match[0].length;
   }
 
   // Add remaining text
-  if (lastIndex < text.length) {
-    parts.push({ type: 'text', text: text.slice(lastIndex) });
+  if (lastIndex < decoded.length) {
+    const remaining = decoded.slice(lastIndex);
+    if (remaining) {
+      parts.push({ type: 'text', text: remaining });
+    }
   }
 
   return parts;

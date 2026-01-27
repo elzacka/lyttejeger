@@ -51,8 +51,35 @@
   width: 100%;
   max-width: 800px;
   margin: 0 auto var(--space-6);
-  position: relative;
-  z-index: var(--z-popover);
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: var(--bg-primary);
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+  /* Subtle separator line at bottom - same style as card borders but more subtle */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* Extend background upward to fill gap between header and sticky element */
+.search-header::before {
+  content: '';
+  position: absolute;
+  top: -100vh;
+  left: -100vw;
+  right: -100vw;
+  height: 100vh;
+  background: var(--bg-primary);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Desktop: position below TopNav */
+@media (min-width: 769px) {
+  .search-header {
+    top: 60px; /* Height of TopNav on desktop */
+    z-index: 999;
+  }
 }
 
 /* Search section */
@@ -218,11 +245,11 @@
     );
   }
 
-  /* Sticky search header with scroll-to-hide on mobile */
+  /* Sticky search header on mobile */
   .search-header {
     position: sticky;
     top: 0;
-    z-index: var(--z-popover);
+    z-index: 1000;
     background: var(--bg-primary);
     /* Full width on mobile */
     max-width: none;
@@ -234,11 +261,7 @@
     margin: calc(-1 * var(--space-view-mobile)) calc(-1 * var(--space-view-mobile)) 0;
     padding-left: var(--space-view-mobile);
     padding-right: var(--space-view-mobile);
-    /* Smooth transition for hide/show */
-    transition:
-      transform var(--duration-normal) var(--ease-out),
-      opacity var(--duration-fast) var(--ease-out);
-    will-change: transform;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   }
 
   /* Search field and filters: full width on mobile */
@@ -246,12 +269,6 @@
   .search-header .filter-section {
     width: 100%;
     max-width: none;
-  }
-
-  .search-header--hidden {
-    transform: translateY(-100%);
-    opacity: 0;
-    pointer-events: none;
   }
 
   .results-section {

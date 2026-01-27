@@ -188,7 +188,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  flex: 1;
+  width: auto;
   min-width: 0;
   height: 52px;
   padding: 0 var(--space-4);
@@ -196,7 +196,7 @@
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 26px;
   box-sizing: border-box;
-  margin: 0 var(--space-md, 16px) var(--space-sm, 8px);
+  margin: var(--space-lg, 24px) var(--space-md, 16px) var(--space-md, 16px);
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.05),
     0 4px 12px rgba(0, 0, 0, 0.03);
@@ -284,6 +284,16 @@
   -webkit-overflow-scrolling: touch;
   /* Allow normal touch scrolling */
   touch-action: pan-y;
+  /* Smooth transition when keyboard opens/closes */
+  transition: padding-bottom 0.2s ease;
+}
+
+/* Extra padding when keyboard is open - mobile only */
+@media (max-width: 640px) {
+  .contentKeyboardOpen {
+    /* Add space for keyboard (~300px) + function bar (~44px) */
+    padding-bottom: 350px;
+  }
 }
 
 /* Option grid - multiselect chips */
@@ -493,7 +503,9 @@
   }
 
   .searchContainer {
-    margin: 0 var(--space-sm, 8px) var(--space-sm, 8px);
+    height: 44px;
+    padding: 0 var(--space-3);
+    margin: var(--space-lg, 24px) var(--space-sm, 8px) var(--space-md, 16px);
   }
 
   .searchInput {

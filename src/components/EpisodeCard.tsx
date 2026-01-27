@@ -67,6 +67,9 @@ export interface EpisodeCardProps {
   /** Callback when podcast name/link is clicked (navigate to podcast) */
   onSelectPodcast?: (podcastId: string) => void;
 
+  /** Whether to hide podcast name link (e.g., already in PodcastDetailsView) */
+  hidePodcastLink?: boolean;
+
   /** Callback when remove button is clicked (for queue items) */
   onRemove?: () => void;
 
@@ -141,7 +144,9 @@ export function EpisodeCard({
   onPlay,
   onAddToQueue,
   onPlayNext,
+  onSelectPodcast,
   onRemove,
+  hidePodcastLink = false,
   isDraggable = false,
   isDragging = false,
   isDragOver = false,
@@ -306,6 +311,13 @@ export function EpisodeCard({
     setImageError(true);
   };
 
+  const handlePodcastClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (podcastInfo?.id && onSelectPodcast) {
+      onSelectPodcast(podcastInfo.id);
+    }
+  };
+
   // Queue variant has different structure for swipe-to-delete and drag
   if (variant === 'queue') {
     return (
@@ -381,24 +393,48 @@ export function EpisodeCard({
               </div>
             </button>
 
-            {/* Episode info - clickable to expand */}
-            <div
-              className={styles.info}
-              onClick={handleToggleExpand}
-              onTouchStart={onInfoLongPressStart}
-              onTouchEnd={onInfoLongPressEnd}
-              onTouchCancel={onInfoLongPressEnd}
-              onMouseDown={onInfoLongPressStart}
-              onMouseUp={onInfoLongPressEnd}
-              onMouseLeave={onInfoLongPressEnd}
-            >
-            {showPodcastInfo && podcastName && (
-              <p className={styles.podcastName}>{podcastName}</p>
-            )}
-            <p className={styles.episodeTitle}>{episode.title}</p>
+            {/* Episode info */}
+            <div className={styles.info}>
+              {/* Podcast name - separate clickable area */}
+              {showPodcastInfo && podcastName && (
+                hidePodcastLink || !onSelectPodcast || !podcastInfo?.id ? (
+                  <p className={styles.podcastName}>{podcastName}</p>
+                ) : (
+                  <button
+                    className={styles.podcastNameButton}
+                    onClick={handlePodcastClick}
+                    type="button"
+                  >
+                    {podcastName}
+                  </button>
+                )
+              )}
 
-            {/* Metadata */}
-            <div className={styles.meta}>
+              {/* Episode title - clickable to expand */}
+              <p
+                className={styles.episodeTitle}
+                onClick={handleToggleExpand}
+                onTouchStart={onInfoLongPressStart}
+                onTouchEnd={onInfoLongPressEnd}
+                onTouchCancel={onInfoLongPressEnd}
+                onMouseDown={onInfoLongPressStart}
+                onMouseUp={onInfoLongPressEnd}
+                onMouseLeave={onInfoLongPressEnd}
+              >
+                {episode.title}
+              </p>
+
+              {/* Metadata - clickable to expand */}
+              <div
+                className={styles.meta}
+                onClick={handleToggleExpand}
+                onTouchStart={onInfoLongPressStart}
+                onTouchEnd={onInfoLongPressEnd}
+                onTouchCancel={onInfoLongPressEnd}
+                onMouseDown={onInfoLongPressStart}
+                onMouseUp={onInfoLongPressEnd}
+                onMouseLeave={onInfoLongPressEnd}
+              >
               {episode.publishedAt && <span>{formatDateLong(episode.publishedAt)}</span>}
               {formatDuration(episode.duration) && (
                 <span className={styles.duration}>{formatDuration(episode.duration)}</span>
@@ -422,17 +458,26 @@ export function EpisodeCard({
               />
             </div>
 
-            {/* Progress bar */}
-            {progress && !progress.completed && progress.progress > 1 && (
-              <div className={styles.progressBar}>
+              {/* Progress bar - clickable to expand */}
+              {progress && !progress.completed && progress.progress > 1 && (
                 <div
-                  className={styles.progressFill}
-                  style={{ width: `${progress.progress}%` }}
-                  aria-label={`${Math.round(progress.progress)}% avspilt`}
-                />
-              </div>
-            )}
-          </div>
+                  className={styles.progressBar}
+                  onClick={handleToggleExpand}
+                  onTouchStart={onInfoLongPressStart}
+                  onTouchEnd={onInfoLongPressEnd}
+                  onTouchCancel={onInfoLongPressEnd}
+                  onMouseDown={onInfoLongPressStart}
+                  onMouseUp={onInfoLongPressEnd}
+                  onMouseLeave={onInfoLongPressEnd}
+                >
+                  <div
+                    className={styles.progressFill}
+                    style={{ width: `${progress.progress}%` }}
+                    aria-label={`${Math.round(progress.progress)}% avspilt`}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Expandable description - full width */}
@@ -476,16 +521,31 @@ export function EpisodeCard({
         </div>
       </button>
 
-      {/* Episode info - clickable to expand */}
+      {/* Episode info */}
       <div className={styles.content}>
-        <div className={styles.header} onClick={handleToggleExpand}>
+        <div className={styles.header}>
+          {/* Podcast name - separate clickable area */}
           {showPodcastInfo && podcastName && (
-            <p className={styles.podcastName}>{podcastName}</p>
+            hidePodcastLink || !onSelectPodcast || !podcastInfo?.id ? (
+              <p className={styles.podcastName}>{podcastName}</p>
+            ) : (
+              <button
+                className={styles.podcastNameButton}
+                onClick={handlePodcastClick}
+                type="button"
+              >
+                {podcastName}
+              </button>
+            )
           )}
-          <h3 className={styles.episodeTitle}>{episode.title}</h3>
 
-          {/* Metadata */}
-          <div className={styles.meta}>
+          {/* Episode title - clickable to expand */}
+          <h3 className={styles.episodeTitle} onClick={handleToggleExpand}>
+            {episode.title}
+          </h3>
+
+          {/* Metadata - clickable to expand */}
+          <div className={styles.meta} onClick={handleToggleExpand}>
             {episode.publishedAt && <span>{formatDateLong(episode.publishedAt)}</span>}
             {formatDuration(episode.duration) && (
               <span className={styles.duration}>{formatDuration(episode.duration)}</span>
@@ -509,9 +569,9 @@ export function EpisodeCard({
             />
           </div>
 
-          {/* Progress bar */}
+          {/* Progress bar - clickable to expand */}
           {progress && !progress.completed && progress.progress > 1 && (
-            <div className={styles.progressBar}>
+            <div className={styles.progressBar} onClick={handleToggleExpand}>
               <div
                 className={styles.progressFill}
                 style={{ width: `${progress.progress}%` }}

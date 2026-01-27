@@ -807,6 +807,19 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
   }, []);
 
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+
+    const touch = e.touches[0];
+    const deltaY = touchStartRef.current.y - touch.clientY;
+    const deltaX = Math.abs(touchStartRef.current.x - touch.clientX);
+
+    // If vertical movement is dominant, prevent page scroll
+    if (Math.abs(deltaY) > Math.abs(deltaX)) {
+      e.preventDefault();
+    }
+  }, []);
+
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
       if (!touchStartRef.current) return;
@@ -834,9 +847,10 @@ export function AudioPlayer({ episode, onClose }: AudioPlayerProps) {
   const swipeHandlers = useMemo(
     () => ({
       onTouchStart: handleTouchStart,
+      onTouchMove: handleTouchMove,
       onTouchEnd: handleTouchEnd,
     }),
-    [handleTouchStart, handleTouchEnd]
+    [handleTouchStart, handleTouchMove, handleTouchEnd]
   );
 
   // Keyboard navigation for accessibility

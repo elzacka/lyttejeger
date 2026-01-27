@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import type { SearchFilters, FilterOption, DateFilter } from '../types/podcast';
 import type { TabType } from './TabBar';
 import { FilterSheet } from './FilterSheet';
+import { YearRangeSlider } from './YearRangeSlider';
 import styles from './FilterPanel.module.css';
 import sheetStyles from './FilterSheet.module.css';
 
@@ -58,28 +59,31 @@ export function FilterPanel({
   // Current year
   const currentYear = new Date().getFullYear();
 
-  // Generate year options (2005 to current year)
-  const years = Array.from({ length: currentYear - 2004 }, (_, i) => currentYear - i);
+  // Year range: 2010 to current year (2026)
+  const MIN_YEAR = 2010;
+  const MAX_YEAR = currentYear;
 
-  // Year filter handler - single year, sets both from and to
-  const toggleYear = (year: number) => {
-    const isSelected = filters.dateFrom?.year === year;
-    if (isSelected) {
-      onSetDateFrom(null);
-      onSetDateTo(null);
-    } else {
-      onSetDateFrom({ day: 1, month: 1, year });
-      onSetDateTo({ day: 31, month: 12, year });
-    }
+  // Year range handler - allows selecting from/to years
+  const handleYearRangeChange = (fromYear: number, toYear: number) => {
+    onSetDateFrom({ day: 1, month: 1, year: fromYear });
+    onSetDateTo({ day: 31, month: 12, year: toYear });
   };
 
-  // Get selected year
-  const selectedYear = filters.dateFrom?.year ?? null;
+  // Get selected year range
+  const selectedFromYear = filters.dateFrom?.year ?? null;
+  const selectedToYear = filters.dateTo?.year ?? null;
 
   // Count selected items for each filter
   const languageCount = filters.languages.length;
-  const yearCount = selectedYear ? 1 : 0;
+  const yearCount = selectedFromYear || selectedToYear ? 1 : 0;
   const categoryCount = filters.categories.length;
+
+  // Display text for year button
+  const yearButtonText = useMemo(() => {
+    if (!selectedFromYear && !selectedToYear) return 'År';
+    if (selectedFromYear === selectedToYear) return `${selectedFromYear}`;
+    return `${selectedFromYear}–${selectedToYear}`;
+  }, [selectedFromYear, selectedToYear]);
 
   return (
     <div className={styles.container}>
@@ -136,7 +140,7 @@ export function FilterPanel({
               type="button"
               style={{ minWidth: FILTER_CHIP_WIDTH }}
             >
-              {yearCount > 0 ? selectedYear : 'År'}
+              {yearButtonText}
             </button>
           )}
 
@@ -171,27 +175,20 @@ export function FilterPanel({
         </div>
       </FilterSheet>
 
-      {/* Year Sheet - full, many year options */}
+      {/* Year Sheet - vertical range slider */}
       <FilterSheet
         isOpen={openSheet === 'year'}
         onClose={handleCloseSheet}
         title="Velg år"
         size="full"
       >
-        <div className={sheetStyles.yearGrid}>
-          {years.map((year) => (
-            <button
-              key={year}
-              className={`${sheetStyles.yearOption} ${
-                selectedYear === year ? sheetStyles.yearOptionSelected : ''
-              }`}
-              onClick={() => toggleYear(year)}
-              type="button"
-            >
-              {year}
-            </button>
-          ))}
-        </div>
+        <YearRangeSlider
+          minYear={MIN_YEAR}
+          maxYear={MAX_YEAR}
+          fromYear={selectedFromYear}
+          toYear={selectedToYear}
+          onChange={handleYearRangeChange}
+        />
       </FilterSheet>
 
       {/* Category Sheet with search - full height for many categories */}

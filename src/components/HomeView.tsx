@@ -4,7 +4,6 @@ import { SearchBar } from './SearchBar';
 import { FilterPanel } from './FilterPanel';
 import { PodcastList } from './PodcastList';
 import { EpisodeList } from './EpisodeList';
-import { useScrollDirection } from '../hooks/useScrollDirection';
 import type {
   FilterOption,
   Podcast,
@@ -73,18 +72,12 @@ export function HomeView({
   onPlayNext,
   isInQueue,
 }: HomeViewProps) {
-  const scrollDirection = useScrollDirection();
-
   const showRecentEpisodes = !filters.query.trim() && activeFilterCount === 0 && !isPending;
 
   return (
     <>
-      {/* Sticky search header - hides on scroll down, shows on scroll up */}
-      <div className={`search-header ${scrollDirection === 'down' ? 'search-header--hidden' : ''}`}>
-        <section className="search-section">
-          <SearchBar value={filters.query} onChange={onSetQuery} isPending={isPending} />
-        </section>
-
+      {/* Sticky search header */}
+      <div className="search-header">
         <section className="filter-section">
           <FilterPanel
             filters={filters}
@@ -99,6 +92,10 @@ export function HomeView({
             onClearFilters={onClearFilters}
             activeFilterCount={activeFilterCount}
           />
+        </section>
+
+        <section className="search-section">
+          <SearchBar value={filters.query} onChange={onSetQuery} isPending={isPending} />
         </section>
       </div>
 
@@ -128,6 +125,7 @@ export function HomeView({
               onAddToQueue={onAddToQueue as any}
               onPlayNext={onPlayNext as any}
               isInQueue={isInQueue}
+              onSelectPodcast={onSelectPodcastById}
             />
           </Suspense>
         ) : activeTab === 'podcasts' ? (

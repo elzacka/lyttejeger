@@ -67,6 +67,10 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
+.radioLabel:focus-within {
+  outline: none;
+}
+
 .radioInput {
   position: absolute;
   opacity: 0;
@@ -84,11 +88,6 @@
   color: var(--color-white);
   font-weight: 600;
   border-color: transparent;
-
-  /* Enhanced shadow for selected state */
-  box-shadow:
-    0 4px 12px rgba(26, 95, 122, 0.25),
-    0 2px 4px rgba(26, 95, 122, 0.15);
 }
 
 /* Filter chips - inline buttons */
@@ -135,8 +134,7 @@
 }
 
 .filterChip:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: none;
 }
 
 .filterChipActive {
@@ -181,8 +179,7 @@
 }
 
 .clearChip:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: none;
 }
 
 /* Mobile - maintain 44px touch targets */

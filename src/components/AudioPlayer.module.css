@@ -24,6 +24,9 @@
   max-width: 100%;
   overflow: hidden;
 
+  /* Prevent page scroll when dragging player */
+  touch-action: pan-x;
+
   /* Smooth transitions */
   transition:
     height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
