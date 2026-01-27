@@ -48,12 +48,17 @@ type TextPart =
   | { type: 'break' };
 
 /**
- * Decode HTML entities
+ * Decode HTML entities and strip HTML tags
  */
 function decodeHtmlEntities(text: string): string {
-  const textarea = document.createElement('textarea');
-  textarea.innerHTML = text;
-  return textarea.value;
+  // Create a temporary div to parse HTML
+  const div = document.createElement('div');
+  div.innerHTML = text;
+
+  // Get text content (strips all HTML tags, keeps only text)
+  const textContent = div.textContent || div.innerText || '';
+
+  return textContent;
 }
 
 /**

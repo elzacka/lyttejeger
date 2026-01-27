@@ -18,6 +18,11 @@
   color: var(--text-muted);
 }
 
+/* Add extra spacing above second section */
+.titleWithSpacing {
+  margin-top: var(--space-sm);
+}
+
 .badge {
   display: flex;
   align-items: center;

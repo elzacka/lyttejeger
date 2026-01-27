@@ -50,7 +50,7 @@
   gap: var(--space-3);
   width: 100%;
   max-width: 800px;
-  margin: 0 auto var(--space-6);
+  margin: 0 auto var(--space-sm);
   position: sticky;
   top: 0;
   z-index: 999;

@@ -265,9 +265,7 @@ export function RecentEpisodesView({
 
       {episodes.length > 0 && (
         <>
-          <h2
-            className={`${styles.title} ${inProgressEpisodes.length > 0 ? styles.sectionDivider : ''}`}
-          >
+          <h2 className={`${styles.title} ${inProgressEpisodes.length > 0 ? styles.titleWithSpacing : ''}`}>
             Siste 7 dager
           </h2>
           <ul className={styles.list} role="list">
