@@ -33,8 +33,14 @@ Podcast Index API → podcastIndex.ts → podcastTransform.ts → useSearch → 
   - Enhanced error handling with retry logic for transient failures
   - Response validation to catch malformed data early
 - **db.ts**: IndexedDB schema. QueueItem stores episode metadata (`publishedAt`, `season`, `episode`).
-- **constants.ts**: Shared constants (time intervals, UI values, sort options).
+- **config/constants.ts**: Centralized magic numbers and configuration values (timing, cache, audio, UI).
 - **curatedContent.ts**: Discovery mode configuration.
+
+### Utilities
+
+- **utils/rateLimiter.ts**: Shared rate limiter with token bucket algorithm. Pre-configured for Podcast Index (1 req/sec) and Listen Notes (2 req/sec).
+- **utils/boundedCache.ts**: LRU cache with max size and TTL to prevent memory leaks in long sessions.
+- **utils/search.ts**: Search utilities including shared `formatTime()` function used by chapters and transcripts.
 
 ### Development Tools
 
@@ -179,13 +185,22 @@ Fetches and parses transcripts in multiple formats: SRT, VTT, JSON, and HTML.
 4. Fall back to HTML parsing for non-standard formats
 
 ```typescript
-import { fetchTranscript, getCurrentSegment, formatTranscriptTime } from '../services/transcripts';
+import {
+  fetchTranscript,
+  getCurrentSegment,
+  formatTranscriptTime,
+  searchTranscript,
+  findSegmentAtTime
+} from '../services/transcripts';
 
 // Fetch transcript (auto-detects format)
 const transcript = await fetchTranscript(episode.transcriptUrl);
 
 // Get current segment based on playback time
 const currentSegment = getCurrentSegment(transcript, currentTime);
+
+// Search within transcript
+const matches = searchTranscript(transcript.segments, 'keyword');
 ```
 
 **HTML Transcript Parsing**:
@@ -235,6 +250,46 @@ padding: var(--space-md) max(var(--space-md), calc((100% - 800px) / 2));
 **Ask before modifying**: App.css, TopNav.module.css, PodcastDetailView.module.css max-width/padding values.
 
 ## React Hooks
+
+### AudioPlayer Hooks
+
+Audio player logic is modularized into separate hooks for maintainability:
+
+- **useAudioPlayer.ts**: Core audio state management (play/pause, seek, speed, loading states)
+- **useSleepTimer.ts**: Sleep timer countdown logic with end-of-episode support
+- **useMediaSession.ts**: Media Session API for lock screen controls and metadata
+
+Sub-components in `components/audio/`:
+- **ChapterPanel.tsx**: Displays chapter list with current chapter highlighting
+- **TranscriptPanel.tsx**: Displays transcript with current segment highlighting
+- **AudioPlayerControls.tsx**: Play/pause and skip buttons
+
+### State Management Patterns
+
+**Optimistic Updates** (useSubscriptions.ts):
+```typescript
+// Subscribe with immediate UI update, rollback on error
+setSubscriptions((prev) => [...prev, optimisticSub]);
+try {
+  await dbSubscribe(optimisticSub);
+} catch (error) {
+  setSubscriptions((prev) => prev.filter((s) => s.podcastId !== id));
+  throw error;
+}
+```
+
+**Avoiding Circular Dependencies** (usePullToRefresh.ts):
+```typescript
+// Use ref for values needed in callbacks to break dependency cycles
+const pullDistanceRef = useRef(0);
+
+const handleTouchEnd = useCallback(async () => {
+  const currentPullDistance = pullDistanceRef.current; // Read from ref
+  // ... callback logic
+}, [threshold]); // pullDistance NOT in deps
+```
+
+### Hook Order Rule
 
 Hooks before conditional returns. This caused a production bug:
 
@@ -307,6 +362,40 @@ const handleTouchMove = (e: React.TouchEvent) => {
 
 ## Design System Consistency
 
+### Design Tokens (`standalone-tokens.css`)
+
+Centralized token system with semantic categories:
+
+**Colors**: `--color-background`, `--color-foreground`, `--color-muted`, `--color-accent`, etc.
+
+**Overlays & Alpha**:
+```css
+--color-overlay-light: rgba(0, 0, 0, 0.2);
+--color-overlay-medium: rgba(0, 0, 0, 0.4);
+--color-overlay-strong: rgba(0, 0, 0, 0.6);
+--color-black-alpha-5/8/10/15: rgba(0, 0, 0, 0.05-0.15);
+```
+
+**Shadows**:
+```css
+--shadow-xs/sm/md/lg/xl: Elevation scale
+--shadow-player: Bottom sheet player shadow
+--shadow-sheet: Modal/filter sheet shadow
+```
+
+**Glassmorphism**:
+```css
+--glass-background: rgba(245, 245, 240, 0.9);
+--glass-background-strong: rgba(245, 245, 240, 0.95);
+--glass-blur: 20px;
+```
+
+**Font Weights** (DM Mono only supports 300, 400, 500):
+```css
+--font-semibold: 500;  /* Maps to DM Mono max */
+--font-bold: 500;      /* Maps to DM Mono max */
+```
+
 ### Focus States
 All circular buttons (`border-radius: 50%`) must have circular focus outlines:
 
@@ -352,14 +441,18 @@ const position = {
 - Siblings with positioning can paint over each other regardless of z-index
 - Portal renders directly under `<body>`, bypassing all stacking contexts
 
-**Z-index tokens** (from `tokens.css`):
+**Z-index tokens** (from `standalone-tokens.css`):
 ```css
 --z-base: 0;
---z-dropdown: 100;
+--z-nav: 100;
 --z-sticky: 200;
+--z-fixed: 300;
+--z-modal-backdrop: 400;
 --z-modal: 500;
 --z-popover: 600;
 --z-tooltip: 700;
+--z-toast: 800;
+--z-dropdown: 1000;
 --z-max: 9999;
 ```
 
@@ -657,13 +750,35 @@ GitHub Action syncs to standalone `elzacka/lyttejeger` repo on push to main (cop
 ## Language & Localization
 
 - **Language**: Norwegian (Bokmål)
-- **Category translations**: `categoryTranslations.ts`
+- **Category translations**: `data/categories.ts` - `translateCategory()` with O(1) lookup
 - **Language display**: `languages.ts` - `toNorwegianLanguage()` converts API language names/codes to Norwegian
   - Supports both English names ("English" → "Engelsk") and ISO 639-1 codes ("en" → "Engelsk")
   - Used in PodcastDetailView to display podcast language in Norwegian
 
+## Error Boundaries
+
+Two error boundary patterns available in `components/ErrorBoundary.tsx`:
+
+**Standard ErrorBoundary** - for views with contextual error messages:
+```typescript
+<ErrorBoundary viewName="søkevisningen">
+  <HomeView ... />
+</ErrorBoundary>
+```
+
+**PortalErrorBoundary** - for portals that should fail silently:
+```typescript
+import { PortalErrorBoundary } from './ErrorBoundary';
+
+{menuOpen && createPortal(
+  <PortalErrorBoundary>
+    <MenuDropdown ... />
+  </PortalErrorBoundary>,
+  document.body
+)}
+```
+
 ## Other Notes
 
-- **ErrorBoundary**: Wrap new views with `viewName` prop for Norwegian error messages.
 - **CSP**: Update `public/_headers` when adding external resources.
 - **Screenshots**: Check `dev_only/` folder.

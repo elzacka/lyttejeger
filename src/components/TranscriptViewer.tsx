@@ -4,7 +4,7 @@ import {
   formatTranscriptTime,
   type Transcript,
   type TranscriptSegment,
-} from '../services/transcript';
+} from '../services/transcripts';
 import styles from './TranscriptViewer.module.css';
 
 interface TranscriptViewerProps {

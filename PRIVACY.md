@@ -1,6 +1,6 @@
 # Personvernerklæring for Lyttejeger
 
-_Sist oppdatert: 3. januar 2026_
+_Sist oppdatert: 28. januar 2026_
 
 ## Kort oppsummert
 

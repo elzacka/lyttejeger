@@ -15,6 +15,8 @@ export function usePullToRefresh({
   const [pullDistance, setPullDistance] = useState(0);
   const startY = useRef(0);
   const isPulling = useRef(false);
+  // Use ref for pullDistance in callbacks to avoid circular dependency
+  const pullDistanceRef = useRef(0);
 
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
@@ -32,6 +34,7 @@ export function usePullToRefresh({
       if (!isPulling.current || disabled || isRefreshing) return;
       if (window.scrollY > 0) {
         isPulling.current = false;
+        pullDistanceRef.current = 0;
         setPullDistance(0);
         return;
       }
@@ -42,6 +45,7 @@ export function usePullToRefresh({
       if (diff > 0) {
         // Apply resistance - the further you pull, the harder it gets
         const resistance = Math.min(diff * 0.4, threshold * 1.5);
+        pullDistanceRef.current = resistance;
         setPullDistance(resistance);
 
         if (diff > 10) {
@@ -52,11 +56,14 @@ export function usePullToRefresh({
     [disabled, isRefreshing, threshold]
   );
 
+  // Use ref-based pullDistance to avoid circular dependency
   const handleTouchEnd = useCallback(async () => {
     if (!isPulling.current || disabled) return;
     isPulling.current = false;
 
-    if (pullDistance >= threshold && !isRefreshing) {
+    const currentPullDistance = pullDistanceRef.current;
+
+    if (currentPullDistance >= threshold && !isRefreshing) {
       setIsRefreshing(true);
       setPullDistance(threshold); // Hold at threshold during refresh
 
@@ -64,12 +71,14 @@ export function usePullToRefresh({
         await onRefresh();
       } finally {
         setIsRefreshing(false);
+        pullDistanceRef.current = 0;
         setPullDistance(0);
       }
     } else {
+      pullDistanceRef.current = 0;
       setPullDistance(0);
     }
-  }, [disabled, isRefreshing, onRefresh, pullDistance, threshold]);
+  }, [disabled, isRefreshing, onRefresh, threshold]);
 
   useEffect(() => {
     if (disabled) return;

@@ -7,7 +7,7 @@ import { getEpisodesByFeedId } from '../services/podcastIndex';
 import { transformEpisodes } from '../services/podcastTransform';
 import { formatDateShort } from '../utils/search';
 import { FormattedText } from './FormattedText';
-import { translateCategory } from '../utils/categoryTranslations';
+import { translateCategory } from '../data/categories';
 import { toNorwegianLanguage } from '../data/languages';
 import { EpisodeCard } from './EpisodeCard';
 import styles from './PodcastDetailView.module.css';

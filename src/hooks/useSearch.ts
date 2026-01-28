@@ -345,10 +345,8 @@ export function useSearch() {
               };
             });
 
-            // Parse query to get positive search terms
-            const parsed = parseSearchQuery(query);
-
             // Only include episodes where search term appears in title or description
+            // Note: `parsed` from line 99 is still in scope
             for (const ep of podcastEpisodes) {
               if (existingIds.has(ep.id)) continue;
               const text = `${ep.title} ${ep.description}`.toLowerCase();

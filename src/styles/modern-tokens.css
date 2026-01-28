@@ -206,7 +206,7 @@
   }
 
   *::-webkit-scrollbar-thumb:hover {
-    background: var(--color-text-secondary);
+    background: var(--color-muted-foreground);
   }
 }
 

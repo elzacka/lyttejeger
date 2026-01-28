@@ -30,6 +30,14 @@ npm run build   # Bygg for produksjon
 
 React 19 | TypeScript | Vite | Podcast Index API | Dexie (IndexedDB) | PWA/Workbox
 
+## Arkitektur
+
+- **Modularisert lydspiller** - Separate hooks for audio, sleep timer, og media session
+- **Optimistiske oppdateringer** - Umiddelbar UI-respons med rollback ved feil
+- **Rate limiting** - Token bucket-algoritme for API-kall
+- **Bounded cache** - LRU-cache med maks storrelse for minne-sikkerhet
+- **Design tokens** - Sentralisert token-system for farger, skygger, glassmorfisme og z-index
+
 ## Personvern og sikkerhet
 
 - Ingen sporing eller analytics

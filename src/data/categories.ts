@@ -117,3 +117,24 @@ export const allCategories: FilterOption[] = [
   { value: 'Volleyball', label: 'Volleyball' },
   { value: 'Weather', label: 'Vær' },
 ];
+
+// Build lookup map for O(1) translation (lazily initialized)
+let categoryLookup: Map<string, string> | null = null;
+
+function getCategoryLookup(): Map<string, string> {
+  if (!categoryLookup) {
+    categoryLookup = new Map(allCategories.map((c) => [c.value, c.label]));
+    // Add common API variations that map to same Norwegian label
+    categoryLookup.set('Natural', 'Natur');
+    categoryLookup.set('Soccer', 'Fotball');
+  }
+  return categoryLookup;
+}
+
+/**
+ * Translate category name from English (API) to Norwegian
+ * Returns the original name if no translation exists
+ */
+export function translateCategory(name: string): string {
+  return getCategoryLookup().get(name) || name;
+}

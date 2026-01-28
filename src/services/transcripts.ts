@@ -6,6 +6,7 @@
  */
 
 import { getCorsProxyUrl } from '../utils/corsProxy';
+import { formatTime } from '../utils/search';
 
 export interface TranscriptSegment {
   startTime: number;
@@ -34,91 +35,65 @@ export async function fetchTranscript(transcriptUrl: string): Promise<Transcript
     ];
 
     for (const url of urlsToTry) {
-      console.log('[fetchTranscript] Trying URL:', url);
       const proxiedUrl = getCorsProxyUrl(url);
 
       try {
         const response = await fetch(proxiedUrl);
-        console.log('[fetchTranscript] Response status:', response.status, 'for', url);
 
         if (!response.ok) {
-          console.log('[fetchTranscript] Response not OK, trying next URL');
           continue;
         }
 
         const contentType = response.headers.get('content-type') || '';
-        console.log('[fetchTranscript] Content-Type:', contentType);
-
         const text = await response.text();
-        console.log('[fetchTranscript] Response text length:', text.length);
-        console.log('[fetchTranscript] Response text preview:', text.substring(0, 200));
 
         // Try to parse HTML transcript as last resort
         if (contentType.includes('html') || text.trim().startsWith('<!DOCTYPE')) {
-          console.log('[fetchTranscript] Detected HTML, trying HTML parser');
           const result = parseHtmlTranscript(text);
           if (result.segments.length > 0) {
-            console.log('[fetchTranscript] HTML parser found', result.segments.length, 'segments');
             return result;
           }
-          console.log('[fetchTranscript] HTML parser found no segments, skipping to next URL');
           continue;
         }
 
         // Detect format and parse accordingly
         if (contentType.includes('json') || url.endsWith('.json')) {
-          console.log('[fetchTranscript] Parsing as JSON');
           const result = parseJsonTranscript(text);
           if (result.segments.length > 0) return result;
-          console.log('[fetchTranscript] JSON parse returned no segments, trying next URL');
           continue;
         } else if (url.endsWith('.vtt') || contentType.includes('vtt') || text.includes('WEBVTT')) {
-          console.log('[fetchTranscript] Parsing as VTT');
           const result = parseVttTranscript(text);
           if (result.segments.length > 0) return result;
-          console.log('[fetchTranscript] VTT parse returned no segments, trying next URL');
           continue;
         } else if (url.endsWith('.srt') || contentType.includes('srt') || text.match(/\d+\n\d{2}:\d{2}:\d{2}/)) {
-          console.log('[fetchTranscript] Parsing as SRT');
           const result = parseSrtTranscript(text);
           if (result.segments.length > 0) return result;
-          console.log('[fetchTranscript] SRT parse returned no segments, trying next URL');
           continue;
         }
 
         // Default: try JSON first, then SRT/VTT
         try {
-          console.log('[fetchTranscript] Trying JSON parse (default)');
           const result = parseJsonTranscript(text);
           if (result.segments.length > 0) return result;
-          console.log('[fetchTranscript] JSON returned no segments');
-        } catch (e) {
-          console.log('[fetchTranscript] JSON parse failed:', e);
+        } catch {
+          // JSON parse failed, try other formats
         }
 
         if (text.includes('WEBVTT')) {
-          console.log('[fetchTranscript] Detected WEBVTT, parsing as VTT');
           const result = parseVttTranscript(text);
           if (result.segments.length > 0) return result;
-          console.log('[fetchTranscript] VTT returned no segments');
         }
 
-        console.log('[fetchTranscript] Trying SRT parse (fallback)');
         const result = parseSrtTranscript(text);
-        console.log('[fetchTranscript] SRT parse result:', result);
         if (result.segments.length > 0) return result;
-        console.log('[fetchTranscript] SRT returned no segments, trying next URL');
-      } catch (fetchError) {
-        console.log('[fetchTranscript] Fetch failed for', url, ':', fetchError);
+      } catch {
         continue;
       }
     }
 
     // All URLs failed
-    console.log('[fetchTranscript] All transcript URLs failed');
     return null;
-  } catch (e) {
-    console.log('[fetchTranscript] Error:', e);
+  } catch {
     return null;
   }
 }
@@ -359,8 +334,6 @@ function parseHtmlTranscript(html: string): Transcript {
     }
   }
 
-  console.log('[parseHtmlTranscript] Extracted', segments.length, 'segments from HTML');
-
   return { segments };
 }
 
@@ -381,14 +354,28 @@ export function getCurrentSegment(
 
 /**
  * Format time for display (same format as chapters)
+ * Re-exported from utils/search for backwards compatibility
  */
-export function formatTranscriptTime(seconds: number): string {
-  const hrs = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  const secs = Math.floor(seconds % 60);
+export const formatTranscriptTime = formatTime;
 
-  if (hrs > 0) {
-    return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+/**
+ * Search within transcript for matching segments
+ */
+export function searchTranscript(
+  segments: TranscriptSegment[],
+  query: string
+): TranscriptSegment[] {
+  const lowerQuery = query.toLowerCase();
+  return segments.filter((seg) => seg.text.toLowerCase().includes(lowerQuery));
+}
+
+/**
+ * Find segment at a specific time
+ * Alias for getCurrentSegment for backwards compatibility
+ */
+export function findSegmentAtTime(
+  segments: TranscriptSegment[],
+  time: number
+): TranscriptSegment | null {
+  return segments.find((seg) => time >= seg.startTime && time <= seg.endTime) || null;
 }
